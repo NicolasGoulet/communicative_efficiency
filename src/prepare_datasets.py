@@ -883,19 +883,19 @@ def process_dataset(dataset: str, base_override: Optional[str], output_override:
                 child_id = f"{stem}_{group}_{ith}"
 
             print(f"  -> {child_id}  [source_group={group}, original_child_id={stem}]")
-                payload, missing_ages = collect_child(
-                    base_dir=base_dir,
-                    child_dir=group_dir,
-                    emit_session_counts=emit_session_counts,
-                    child_id_override=child_id,
-                    cha_files_override=[cha_file],
-                    source_group=group,
-                )
-                per_child[child_id] = payload
-                missing_age_map[child_id] = missing_ages
-                write_child_outputs(output_dir / child_id, child_id, payload, emit_session_counts=emit_session_counts)
-                if missing_ages:
-                    print(f"     [WARN] {child_id}: {len(missing_ages)} session(s) with missing/derived CHI age")
+            payload, missing_ages = collect_child(
+                base_dir=base_dir,
+                child_dir=group_dir,
+                emit_session_counts=emit_session_counts,
+                child_id_override=child_id,
+                cha_files_override=[cha_file],
+                source_group=group,
+            )
+            per_child[child_id] = payload
+            missing_age_map[child_id] = missing_ages
+            write_child_outputs(output_dir / child_id, child_id, payload, emit_session_counts=emit_session_counts)
+            if missing_ages:
+                print(f"     [WARN] {child_id}: {len(missing_ages)} session(s) with missing/derived CHI age")
     else:
         # Original layout:
         #   DATASET_ROOT/child_id/*.cha
@@ -942,4 +942,3 @@ def main(argv: List[str] | None = None) -> None:
 
 if __name__ == "__main__":
     main()
-
