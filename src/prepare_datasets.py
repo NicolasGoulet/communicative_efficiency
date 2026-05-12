@@ -585,7 +585,6 @@ CSV_CLEANED_EXPORT_COLUMNS = [
     "age_raw",
     "age_months",
     "utt_id",
-    "utt_id_role",
     "utterance",
     "utterance_clean",
     "word_count",
@@ -599,6 +598,23 @@ CSV_CLEANED_EXPORT_COLUMNS = [
     "line_no",
 ]
 
+CSV_CLEANED_CARETAKER_EXPORT_COLUMNS = [
+    *CSV_CLEANED_EXPORT_COLUMNS[:9],
+    "utt_id_role",
+    *CSV_CLEANED_EXPORT_COLUMNS[9:],
+]
+
+
+def _columns_for_source_group(columns: List[str], include_source_group: bool) -> List[str]:
+    """
+    `source_group` is only meaningful for corpora such as Hall that expose a
+    subgroup folder. Keep the schema compact for corpora where it would be an
+    all-empty placeholder column.
+    """
+    if include_source_group:
+        return list(columns)
+    return [column for column in columns if column != "source_group"]
+
 
 def _impute_missing_morph_counts_as_zero(rows: List[Dict]) -> None:
     for r in rows:
@@ -609,7 +625,10 @@ def _impute_missing_morph_counts_as_zero(rows: List[Dict]) -> None:
 def write_csv(path: Path, columns: List[str], rows: List[Dict]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     with path.open("w", newline="", encoding="utf-8") as fh:
-        w = csv.DictWriter(fh, fieldnames=columns)
+        # Quote textual fields so values such as CHILDES ages ("1;04.27")
+        # remain single cells even in spreadsheet importers that also enable
+        # semicolons as separators.
+        w = csv.DictWriter(fh, fieldnames=columns, quoting=csv.QUOTE_NONNUMERIC)
         w.writeheader()
         for r in rows:
             sanitized = {k: ("" if r.get(k) is None else r.get(k)) for k in columns}
@@ -798,13 +817,18 @@ def write_child_outputs(child_dir: Path,
     for spk in ("CHI", "MOT", "FAT"):
         _impute_missing_morph_counts_as_zero(payload["utts"][spk])
 
-    write_csv(child_dir / "child_utts.csv", CSV_UTT_COLUMNS, payload["utts"]["CHI"])
-    write_csv(child_dir / "mot_utts.csv",   CSV_UTT_COLUMNS, payload["utts"]["MOT"])
-    write_csv(child_dir / "fat_utts.csv",   CSV_UTT_COLUMNS, payload["utts"]["FAT"])
+    include_source_group = bool(payload.get("source_group"))
+    utt_columns = _columns_for_source_group(CSV_UTT_COLUMNS, include_source_group)
+    caretaker_columns = _columns_for_source_group(CSV_CARETAKER_COLUMNS, include_source_group)
+    meta_columns = _columns_for_source_group(CSV_META_COLUMNS, include_source_group)
+
+    write_csv(child_dir / "child_utts.csv", utt_columns, payload["utts"]["CHI"])
+    write_csv(child_dir / "mot_utts.csv",   utt_columns, payload["utts"]["MOT"])
+    write_csv(child_dir / "fat_utts.csv",   utt_columns, payload["utts"]["FAT"])
 
     caretakers_rows = _build_caretakers_rows(payload)
     _impute_missing_morph_counts_as_zero(caretakers_rows)
-    write_csv(child_dir / "caretakers_utts.csv", CSV_CARETAKER_COLUMNS, caretakers_rows)
+    write_csv(child_dir / "caretakers_utts.csv", caretaker_columns, caretakers_rows)
 
     session_ids = [s["id"] for s in payload["sessions"]]
     session_ages = [s["age"] for s in payload["sessions"]]
@@ -821,7 +845,7 @@ def write_child_outputs(child_dir: Path,
         "session_paths":          json.dumps(session_paths, ensure_ascii=False),
         "n_sessions":             len(payload["sessions"]),
     }
-    write_csv(child_dir / "child_meta.csv", CSV_META_COLUMNS, [meta_row])
+    write_csv(child_dir / "child_meta.csv", meta_columns, [meta_row])
 
     if emit_session_counts and payload.get("_session_index_rows"):
         write_csv(child_dir / "session_index.csv", CSV_SESSION_IDX_COLUMNS, payload["_session_index_rows"])
@@ -883,8 +907,18 @@ def build_cleaned_export_rows(dataset: str, per_child: Dict[str, Dict]) -> Dict[
 def write_cleaned_utterance_exports(dataset: str, output_root: Path, per_child: Dict[str, Dict]) -> None:
     dataset_dir = output_root / dataset
     export_rows = build_cleaned_export_rows(dataset, per_child)
+    include_source_group = any(bool(payload.get("source_group")) for payload in per_child.values())
     for export_name, rows in export_rows.items():
-        write_csv(dataset_dir / f"{export_name}.csv", CSV_CLEANED_EXPORT_COLUMNS, rows)
+        columns = (
+            CSV_CLEANED_CARETAKER_EXPORT_COLUMNS
+            if export_name == "caretakers"
+            else CSV_CLEANED_EXPORT_COLUMNS
+        )
+        write_csv(
+            dataset_dir / f"{export_name}.csv",
+            _columns_for_source_group(columns, include_source_group),
+            rows,
+        )
 
 
 def build_summary_lines(dataset: str, base_dir: Path, per_child: Dict[str, Dict], missing_age_map: Dict[str, List[str]]) -> List[str]:

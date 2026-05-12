@@ -19,6 +19,7 @@ from prepare_datasets import (
     syllables_le,
     syllables_lenient,
     syllables_strict_y,
+    write_child_outputs,
     write_cleaned_utterance_exports,
 )
 
@@ -282,19 +283,126 @@ class TestUtterancePreprocessing(unittest.TestCase):
             output_root = Path(tmp)
             write_cleaned_utterance_exports("ToyDataset", output_root, {"ToyChild": payload})
 
+            mot_text = (output_root / "ToyDataset" / "mot.csv").read_text(encoding="utf-8")
+
             dataset_dir = output_root / "ToyDataset"
             self.assertTrue((dataset_dir / "chi.csv").exists())
             self.assertTrue((dataset_dir / "mot.csv").exists())
             self.assertTrue((dataset_dir / "fat.csv").exists())
             self.assertTrue((dataset_dir / "caretakers.csv").exists())
 
-            with (dataset_dir / "caretakers.csv").open(newline="", encoding="utf-8") as fh:
-                rows = list(csv.DictReader(fh))
+            with (dataset_dir / "mot.csv").open(newline="", encoding="utf-8") as fh:
+                mot_reader = csv.DictReader(fh)
+                mot_rows = list(mot_reader)
+                mot_headers = mot_reader.fieldnames
 
+            with (dataset_dir / "caretakers.csv").open(newline="", encoding="utf-8") as fh:
+                caretaker_reader = csv.DictReader(fh)
+                rows = list(caretaker_reader)
+                caretaker_headers = caretaker_reader.fieldnames
+
+        self.assertNotIn("utt_id_role", mot_headers)
+        self.assertNotIn("source_group", mot_headers)
+        self.assertIn('"2;03.15"', mot_text)
+        self.assertEqual(mot_rows[0]["utterance"], "&-um hi .")
+        self.assertEqual(mot_rows[0]["utterance_clean"], "um hi.")
         self.assertEqual(len(rows), 1)
+        self.assertIn("utt_id_role", caretaker_headers)
+        self.assertNotIn("source_group", caretaker_headers)
         self.assertEqual(rows[0]["speaker"], "MOT")
         self.assertEqual(rows[0]["utt_id_role"], "1")
         self.assertEqual(rows[0]["utterance_clean"], "um hi.")
+
+    def test_write_cleaned_utterance_exports_keeps_source_group_when_present(self):
+        payload = {
+            "sex": "female",
+            "source_group": "ToyGroup",
+            "sessions": [{"id": 1, "age": "2;03.15", "age_m": 27.5, "path": "Toy/session1.cha"}],
+            "utts": {
+                "CHI": [
+                    {
+                        "utt_id": 1,
+                        "child_id": "ToyChild",
+                        "session_id": 1,
+                        "utterance": "hi .",
+                        "utterance_clean": "hi.",
+                        "word_count": 1,
+                        "morph_count": 1,
+                        "utt_syllables_basic": 1,
+                        "utt_syllables_lenient": 1,
+                        "utt_syllables_strictY": 1,
+                        "utt_syllables_le": 1,
+                        "n_alpha_words": 1,
+                        "source_group": "ToyGroup",
+                        "file": "Toy/session1.cha",
+                        "line_no": 10,
+                    }
+                ],
+                "MOT": [],
+                "FAT": [],
+            },
+        }
+
+        with tempfile.TemporaryDirectory() as tmp:
+            output_root = Path(tmp)
+            write_cleaned_utterance_exports("ToyDataset", output_root, {"ToyChild": payload})
+
+            with (output_root / "ToyDataset" / "chi.csv").open(newline="", encoding="utf-8") as fh:
+                reader = csv.DictReader(fh)
+                rows = list(reader)
+                headers = reader.fieldnames
+
+        self.assertIn("source_group", headers)
+        self.assertEqual(rows[0]["source_group"], "ToyGroup")
+
+    def test_write_child_outputs_omits_empty_source_group_columns(self):
+        payload = {
+            "sex": "female",
+            "source_group": "",
+            "sessions": [{"id": 1, "age": "2;03.15", "age_m": 27.5, "path": "Toy/session1.cha"}],
+            "utts": {
+                "CHI": [
+                    {
+                        "utt_id": 1,
+                        "child_id": "ToyChild",
+                        "session_id": 1,
+                        "utterance": "hi .",
+                        "utterance_clean": "hi.",
+                        "word_count": 1,
+                        "morph_count": 1,
+                        "utt_syllables_basic": 1,
+                        "utt_syllables_lenient": 1,
+                        "utt_syllables_strictY": 1,
+                        "utt_syllables_le": 1,
+                        "n_alpha_words": 1,
+                        "source_group": "",
+                        "file": "Toy/session1.cha",
+                        "line_no": 10,
+                    }
+                ],
+                "MOT": [],
+                "FAT": [],
+            },
+        }
+
+        with tempfile.TemporaryDirectory() as tmp:
+            child_dir = Path(tmp) / "ToyChild"
+            write_child_outputs(child_dir, "ToyChild", payload, emit_session_counts=False)
+
+            with (child_dir / "child_utts.csv").open(newline="", encoding="utf-8") as fh:
+                child_reader = csv.DictReader(fh)
+                child_rows = list(child_reader)
+                child_headers = child_reader.fieldnames
+
+            with (child_dir / "child_meta.csv").open(newline="", encoding="utf-8") as fh:
+                meta_reader = csv.DictReader(fh)
+                meta_rows = list(meta_reader)
+                meta_headers = meta_reader.fieldnames
+
+        self.assertNotIn("source_group", child_headers)
+        self.assertNotIn("source_group", meta_headers)
+        self.assertEqual(child_rows[0]["utterance_clean"], "hi.")
+        self.assertEqual(meta_rows[0]["child_id"], "ToyChild")
 
 
 if __name__ == "__main__":

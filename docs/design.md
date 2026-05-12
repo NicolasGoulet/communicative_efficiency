@@ -68,6 +68,14 @@ Current output families:
 - combined caretaker utterances
 - child/session metadata
 
+`source_group` is emitted only for corpora that expose an actual subgroup
+dimension, such as Hall. Corpora without subgroup provenance omit that column
+instead of writing an all-empty placeholder field.
+
+CSV text fields are quoted on write so CHILDES age strings such as `1;04.27`
+do not get split into extra spreadsheet columns by importers that also enable
+semicolon separators.
+
 ### Handling the CHAT format
 
 The preprocessing keeps two versions of each utterance:
