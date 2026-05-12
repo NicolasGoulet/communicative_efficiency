@@ -153,16 +153,33 @@ _UNTRANS_RE  = re.compile(r"\b(?:xxx|yyy|www)\b", re.IGNORECASE)
 # CHAT + fragments (token-level markers)
 _PLUS_MARKER_RE = re.compile(r"(?:(?<=\s)|^)\+(?:[/\.\-]+|\S+)")
 
+# Standard CHAT planning fillers should remain available for scoring/counting.
+# Canonicalize the CHAT spelling to a plain lexical stem:
+#   &-uh -> uh, &-um -> um, &-er -> er, &-eh -> eh
+# Hall also contains elongated variants such as &-er:r and &-um:, which are
+# normalized to the same base filler when they end as a whitespace token.
+_FILLER_MARKER_RE = re.compile(
+    r"(?:(?<=\s)|^)&-(uh|um|er|eh)(?::[A-Za-z]*)?(?=[\s,.;!?]|$)",
+    re.IGNORECASE,
+)
+
 # Standalone @markers (token begins with @)
 _AT_MARKER_RE = re.compile(r"(?:(?<=\s)|^)@[^\s]+")
 
-# Any token starting with & (covers &=event and &-uh etc.)
+# Other tokens starting with & are CHAT artifacts to remove.
 _AMP_MARKER_RE = re.compile(r"(?:(?<=\s)|^)&[^\s]+")
 
 # Omission tokens like 0word, 0, 0xxx
 _ZERO_MARKER_RE = re.compile(r"(?:(?<=\s)|^)0[^\s]*")
 
 _SPACES_RE = re.compile(r"\s+")
+
+# Preserve an utterance-final sentence mark even when the CHAT syntax carrying
+# it is removed, e.g. "two +//. 2965221_2967008" -> "two."
+_TRAILING_TRANSCRIPT_TIME_RE = re.compile(
+    r"(?:\s*(?:\x15\s*\d+(?:[_:]\d+)?\s*\x15|\d+(?:[_:]\d+)))+\s*$"
+)
+_TERMINAL_SENTENCE_PUNCT_RE = re.compile(r"([.!?])\s*$")
 
 # STRICT @ rule: allow only base@c|b|o (case-insensitive) at whitespace-token level
 _ALLOWED_AT_TOKEN_RE = re.compile(r"^([^@\s]+)@([cbo])$", re.IGNORECASE)
@@ -204,6 +221,23 @@ def _apply_strict_at_policy_whitespace_tokens(s: str) -> str:
     return " ".join(out)
 
 
+def _terminal_sentence_punctuation(text: str) -> str:
+    """
+    Return a meaningful final ".", "!", or "?" from a raw utterance.
+
+    Some CHAT rows carry timing spans after the final sentence mark, including
+    plain transcript ids such as ``2965221_2967008``. Strip those suffixes only
+    for punctuation detection; the main cleaning pass handles the full text.
+    """
+    s = "" if text is None else str(text).strip()
+    if not s:
+        return ""
+
+    s = _TRAILING_TRANSCRIPT_TIME_RE.sub("", s).rstrip()
+    match = _TERMINAL_SENTENCE_PUNCT_RE.search(s)
+    return match.group(1) if match else ""
+
+
 def clean_chat_for_counts(text: str) -> str:
     """
     Canonical cleaning used for:
@@ -214,11 +248,14 @@ def clean_chat_for_counts(text: str) -> str:
     Policy:
       - Keep lexical material inside <...> (overlap spans) by unwrapping them.
       - Remove bracketed annotations [...] and parenthetical spans (...).
-      - Remove CHAT markers (@..., +..., &..., 0...).
+      - Preserve standard planning fillers &-uh/&-um/&-er/&-eh as plain stems.
+      - Remove other CHAT markers (@..., +..., remaining &..., 0...).
+      - Preserve an utterance-final ., !, or ? when lexical material remains.
       - Enforce strict @ policy on remaining whitespace tokens:
           keep base@{c|b|o} -> base; drop all other @ tokens
     """
     s = "" if text is None else str(text)
+    terminal_punct = _terminal_sentence_punctuation(s)
 
     s = _TIMECODE_RE.sub(" ", s)
     s = _BRACKETS_RE.sub(" ", s)
@@ -229,6 +266,7 @@ def clean_chat_for_counts(text: str) -> str:
 
     s = _UNTRANS_RE.sub(" ", s)
 
+    s = _FILLER_MARKER_RE.sub(lambda m: f" {m.group(1).lower()} ", s)
     s = _AT_MARKER_RE.sub(" ", s)
     s = _PLUS_MARKER_RE.sub(" ", s)
     s = _AMP_MARKER_RE.sub(" ", s)
@@ -240,6 +278,8 @@ def clean_chat_for_counts(text: str) -> str:
     s = _apply_strict_at_policy_whitespace_tokens(s)
 
     s = _SPACES_RE.sub(" ", s).strip()
+    if s and terminal_punct:
+        s = f"{s}{terminal_punct}"
     return s
 
 
@@ -535,6 +575,30 @@ CSV_SESSION_IDX_COLUMNS = [
     "utts_FAT", "m0_FAT", "words_FAT", "morphs_FAT",
 ]
 
+CSV_CLEANED_EXPORT_COLUMNS = [
+    "dataset",
+    "speaker",
+    "child_id",
+    "sex",
+    "source_group",
+    "session_id",
+    "age_raw",
+    "age_months",
+    "utt_id",
+    "utt_id_role",
+    "utterance",
+    "utterance_clean",
+    "word_count",
+    "morph_count",
+    "utt_syllables_basic",
+    "utt_syllables_lenient",
+    "utt_syllables_strictY",
+    "utt_syllables_le",
+    "n_alpha_words",
+    "file",
+    "line_no",
+]
+
 
 def _impute_missing_morph_counts_as_zero(rows: List[Dict]) -> None:
     for r in rows:
@@ -635,13 +699,22 @@ def collect_child(base_dir: Path, child_dir: Path,
                     continue
                 speaker, utter = s.split(":", 1)
                 speaker = speaker[1:].strip().upper()
-                utter = utter.rstrip()
+                # CHAT main tiers are commonly tab-indented after "*SPK:".
+                # That whitespace is layout, not utterance content, and can
+                # make downstream CSV viewers appear column-shifted.
+                utter = utter.strip()
                 if speaker not in ("CHI", "MOT", "FAT"):
                     current_row_ref = None
                     continue
 
                 utter_raw = utter
                 utter_clean, wc, _n_words = clean_and_count_words(utter_raw)
+                if wc == 0:
+                    # Do not carry punctuation-only or marker-only rows into
+                    # scoring inputs; their following %mor tier belongs to a
+                    # row we intentionally excluded.
+                    current_row_ref = None
+                    continue
                 syls = count_utt_syllables(utter_clean)
 
                 utt_id = payload["_next_utt_id"][speaker]
@@ -754,6 +827,66 @@ def write_child_outputs(child_dir: Path,
         write_csv(child_dir / "session_index.csv", CSV_SESSION_IDX_COLUMNS, payload["_session_index_rows"])
 
 
+def _session_lookup(payload: Dict) -> Dict[int, Dict]:
+    return {int(s["id"]): s for s in payload.get("sessions", [])}
+
+
+def _cleaned_export_row(dataset: str, payload: Dict, speaker: str, row: Dict) -> Dict:
+    session = _session_lookup(payload).get(int(row.get("session_id") or 0), {})
+    exported = {
+        "dataset": dataset,
+        "speaker": speaker,
+        "child_id": row.get("child_id", ""),
+        "sex": payload.get("sex", ""),
+        "source_group": row.get("source_group", payload.get("source_group", "")),
+        "session_id": row.get("session_id", ""),
+        "age_raw": session.get("age", ""),
+        "age_months": session.get("age_m", ""),
+        "utt_id": row.get("utt_id", ""),
+        "utt_id_role": row.get("utt_id_role", ""),
+        "utterance": row.get("utterance", ""),
+        "utterance_clean": row.get("utterance_clean", ""),
+        "word_count": row.get("word_count", ""),
+        "morph_count": row.get("morph_count", ""),
+        "utt_syllables_basic": row.get("utt_syllables_basic", ""),
+        "utt_syllables_lenient": row.get("utt_syllables_lenient", ""),
+        "utt_syllables_strictY": row.get("utt_syllables_strictY", ""),
+        "utt_syllables_le": row.get("utt_syllables_le", ""),
+        "n_alpha_words": row.get("n_alpha_words", ""),
+        "file": row.get("file", ""),
+        "line_no": row.get("line_no", ""),
+    }
+    return exported
+
+
+def build_cleaned_export_rows(dataset: str, per_child: Dict[str, Dict]) -> Dict[str, List[Dict]]:
+    rows = {"chi": [], "mot": [], "fat": [], "caretakers": []}
+    for child_id in sorted(per_child):
+        payload = per_child[child_id]
+
+        for speaker, output_name in (("CHI", "chi"), ("MOT", "mot"), ("FAT", "fat")):
+            role_rows = payload["utts"][speaker]
+            _impute_missing_morph_counts_as_zero(role_rows)
+            for row in role_rows:
+                rows[output_name].append(_cleaned_export_row(dataset, payload, speaker, row))
+
+        caretaker_rows = _build_caretakers_rows(payload)
+        _impute_missing_morph_counts_as_zero(caretaker_rows)
+        for row in caretaker_rows:
+            rows["caretakers"].append(
+                _cleaned_export_row(dataset, payload, str(row.get("speaker") or ""), row)
+            )
+
+    return rows
+
+
+def write_cleaned_utterance_exports(dataset: str, output_root: Path, per_child: Dict[str, Dict]) -> None:
+    dataset_dir = output_root / dataset
+    export_rows = build_cleaned_export_rows(dataset, per_child)
+    for export_name, rows in export_rows.items():
+        write_csv(dataset_dir / f"{export_name}.csv", CSV_CLEANED_EXPORT_COLUMNS, rows)
+
+
 def build_summary_lines(dataset: str, base_dir: Path, per_child: Dict[str, Dict], missing_age_map: Dict[str, List[str]]) -> List[str]:
     lines: List[str] = []
     lines.append(f"SUMMARY — {dataset} corpus")
@@ -815,7 +948,11 @@ def write_summary_files(dataset: str, base_dir: Path,
 # Orchestration
 # ────────────────────────────────────────────────────────────────
 
-def process_dataset(dataset: str, base_override: Optional[str], output_override: Optional[str], emit_session_counts: bool) -> None:
+def process_dataset(dataset: str,
+                    base_override: Optional[str],
+                    output_override: Optional[str],
+                    emit_session_counts: bool,
+                    cleaned_output_override: Optional[str] = None) -> None:
     base_dir, tried = resolve_base_dir(dataset, base_override)
     if not base_dir.exists():
         msg = [f"[ERROR] Base directory not found for {dataset}: {base_dir}"]
@@ -914,6 +1051,10 @@ def process_dataset(dataset: str, base_override: Optional[str], output_override:
     write_summary_files(dataset, output_dir, per_child, missing_age_map)
     print(f"✔ Wrote summary to {output_dir / SUMMARY_FILENAMES[dataset]}")
     print(f"✔ Wrote missing-age report to {output_dir / MISSING_AGE_REPORT}")
+    if cleaned_output_override:
+        cleaned_output_dir = Path(cleaned_output_override).expanduser().resolve()
+        write_cleaned_utterance_exports(dataset, cleaned_output_dir, per_child)
+        print(f"✔ Wrote cleaned utterance exports to {cleaned_output_dir / dataset}")
 
 
 def build_cli() -> argparse.ArgumentParser:
@@ -928,6 +1069,9 @@ def build_cli() -> argparse.ArgumentParser:
                    help="Override output directory for processed CSVs. Ignored if --dataset=all.")
     p.add_argument("--emit-session-counts", action="store_true",
                    help="Also write session_index.csv with per-session counts per role.")
+    p.add_argument("--cleaned-output-dir", nargs="?", const="data/cleaned_utterances", default=None,
+                   help="Also write consolidated cleaned utterance CSVs under this directory. "
+                        "Passing the flag without a value uses data/cleaned_utterances.")
     return p
 
 
@@ -935,9 +1079,21 @@ def main(argv: List[str] | None = None) -> None:
     args = build_cli().parse_args(argv)
     if args.dataset == "all":
         for ds in ["Providence", "Manchester", "Brown", "Hall"]:
-            process_dataset(ds, base_override=None, output_override=None, emit_session_counts=args.emit_session_counts)
+            process_dataset(
+                ds,
+                base_override=None,
+                output_override=None,
+                emit_session_counts=args.emit_session_counts,
+                cleaned_output_override=args.cleaned_output_dir,
+            )
     else:
-        process_dataset(args.dataset, base_override=args.base_dir, output_override=args.output_dir, emit_session_counts=args.emit_session_counts)
+        process_dataset(
+            args.dataset,
+            base_override=args.base_dir,
+            output_override=args.output_dir,
+            emit_session_counts=args.emit_session_counts,
+            cleaned_output_override=args.cleaned_output_dir,
+        )
 
 
 if __name__ == "__main__":

@@ -1,0 +1,287 @@
+utt_id,child_id,session_id,utterance,utterance_clean,word_count,morph_count,utt_syllables_basic,utt_syllables_lenient,utt_syllables_strictY,utt_syllables_le,n_alpha_words,source_group,file,line_no
+1,Alex,3,hi . 1888591_1899638,hi.,1,1,1,1,1,1,1,,Alex/010526.cha,1531
+2,Alex,3,yeah .,yeah.,1,1,1,1,1,1,1,,Alex/010526.cha,1540
+3,Alex,3,you gonna rake ? 1909791_1911528,you gonna rake?,3,4,4,5,4,4,3,,Alex/010526.cha,1543
+4,Alex,5,where's your other sock ?,where's your other sock?,4,5,6,6,6,6,4,,Alex/010707.cha,1509
+5,Alex,5,ah .,ah.,1,1,1,1,1,1,1,,Alex/010707.cha,1585
+6,Alex,6,shh: . 3025396_3026876,shh.,1,1,1,1,1,1,1,,Alex/010726.cha,2875
+7,Alex,6,what's that ? 3050800_3051800,what's that?,2,3,2,2,2,2,2,,Alex/010726.cha,2926
+8,Alex,6,is that a star ?,is that a star?,4,4,4,4,4,4,4,,Alex/010726.cha,2932
+9,Alex,6,where's his nose ?,where's his nose?,3,4,4,5,4,4,3,,Alex/010726.cha,2943
+10,Alex,6,where's his nose ?,where's his nose?,3,4,4,5,4,4,3,,Alex/010726.cha,2946
+11,Alex,6,"Alex , where's his nose ? 3061990_3064366",Alex where's his nose?,4,6,6,7,6,6,4,,Alex/010726.cha,2954
+12,Alex,6,wow .,wow.,1,1,1,1,1,1,1,,Alex/010726.cha,2965
+13,Alex,6,is that a butterfly ? 3073566_3076181,is that a butterfly?,4,4,6,6,6,6,4,,Alex/010726.cha,2971
+14,Alex,6,what's that ?,what's that?,2,3,2,2,2,2,2,,Alex/010726.cha,2982
+15,Alex,6,"yeah , I bet .",yeah I bet.,3,4,3,3,3,3,3,,Alex/010726.cha,2996
+16,Alex,6,you see the little top ?,you see the little top?,5,5,5,6,5,6,5,,Alex/010726.cha,3006
+17,Alex,6,wow .,wow.,1,1,1,1,1,1,1,,Alex/010726.cha,3025
+18,Alex,6,wow .,wow.,1,1,1,1,1,1,1,,Alex/010726.cha,3044
+19,Alex,6,want a drink ?,want a drink?,3,3,3,3,3,3,3,,Alex/010726.cha,3053
+20,Alex,6,wow .,wow.,1,1,1,1,1,1,1,,Alex/010726.cha,3061
+21,Alex,6,hm: .,hm.,1,1,1,1,1,1,1,,Alex/010726.cha,3070
+22,Alex,6,is that a top ?,is that a top?,4,4,4,4,4,4,4,,Alex/010726.cha,3079
+23,Alex,6,press the button . 3169185_3170505,press the button.,3,3,4,4,4,4,3,,Alex/010726.cha,3109
+24,Alex,6,press the button . 3175700_3176705,press the button.,3,3,4,4,4,4,3,,Alex/010726.cha,3116
+25,Alex,6,who's that ? 3260130_3261626,who's that?,2,3,2,2,2,2,2,,Alex/010726.cha,3187
+26,Alex,6,Elmo .,Elmo.,1,1,2,2,2,2,1,,Alex/010726.cha,3193
+27,Alex,6,"you think it's funny , oh . 3296610_3299970",you think it's funny oh.,5,7,6,6,6,6,5,,Alex/010726.cha,3211
+28,Alex,6,hurricane Alice came through today . 3409963_3413451,hurricane Alice came through today.,5,6,9,12,10,9,5,,Alex/010726.cha,3400
+29,Alex,6,I was down Benefit street .,I was down Benefit street.,5,6,7,7,7,7,5,,Alex/010726.cha,3588
+30,Alex,6,the bank . 3553766_3555341,the bank.,2,2,2,2,2,2,2,,Alex/010726.cha,3600
+31,Alex,6,no .,no.,1,1,1,1,1,1,1,,Alex/010726.cha,3621
+32,Alex,6,"they were delicious , hon .",they were delicious hon.,4,6,6,7,7,6,4,,Alex/010726.cha,3637
+33,Alex,6,boy I could go for pepperoni bread right now . 3647873_3654815,boy I could go for pepperoni bread right now.,9,9,12,12,12,12,9,,Alex/010726.cha,3790
+34,Alex,6,you want me to go get the dough ?,you want me to go get the dough?,8,8,8,8,8,8,8,,Alex/010726.cha,3811
+35,Alex,6,thirty one ? 3676945_3679368,thirty one?,2,2,3,3,3,3,2,,Alex/010726.cha,3826
+36,Alex,6,do you want me to go get the dough from xxx ? 3683433_3686921,do you want me to go get the dough from?,10,10,10,10,10,10,10,,Alex/010726.cha,3838
+37,Alex,6,anything else ? 3694610_3697541,anything else?,2,2,4,5,3,4,2,,Alex/010726.cha,3851
+38,Alex,7,"yeah , but it took me a few minutes . 479945_482385",yeah but it took me a few minutes.,8,10,10,10,10,10,8,,Alex/010811.cha,636
+39,Alex,7,I'll talk to you after . 490220_494518,I'll talk to you after.,5,6,6,6,6,6,5,,Alex/010811.cha,654
+40,Alex,7,what're you doin [: doing] ? 3486621_3487795,what're you doin?,3,4,3,4,3,3,3,,Alex/010811.cha,3225
+41,Alex,7,playin [: playing] with Mommy ? 3488850_3490513,playin with Mommy?,3,3,4,4,5,4,3,,Alex/010811.cha,3233
+42,Alex,7,"what's that , Alex ? 3498171_3499815",what's that Alex?,3,5,4,4,4,4,3,,Alex/010811.cha,3245
+43,Alex,8,who's that ? 2077094_2078591,who's that?,2,3,2,2,2,2,2,,Alex/010825.cha,2522
+44,Alex,8,who's that ? 2111703_2113823,who's that?,2,3,2,2,2,2,2,,Alex/010825.cha,2542
+45,Alex,8,come here .,come here.,2,2,2,4,2,2,2,,Alex/010825.cha,2545
+46,Alex,8,hello . 2125406_2126586,hello.,1,1,2,2,2,2,1,,Alex/010825.cha,2560
+47,Alex,8,shh: . 2133825_2135873,shh.,1,1,1,1,1,1,1,,Alex/010825.cha,2568
+48,Alex,8,shh .,shh.,1,1,1,1,1,1,1,,Alex/010825.cha,2577
+49,Alex,8,shh . 2139477_2143543,shh.,1,1,1,1,1,1,1,,Alex/010825.cha,2580
+50,Alex,8,be careful . 2148535_2154407,be careful.,2,2,4,4,4,4,2,,Alex/010825.cha,2585
+51,Alex,8,watch where you're running . 2154407_2156737,watch where you're running.,4,5,5,7,5,5,4,,Alex/010825.cha,2588
+52,Alex,8,"here , you can have this .",here you can have this.,5,6,5,7,5,5,5,,Alex/010825.cha,2598
+53,Alex,8,xxx awesome xxx . 2215673_2218600,awesome.,1,1,3,4,3,3,1,,Alex/010825.cha,2643
+54,Alex,8,Alex .,Alex.,1,1,2,2,2,2,1,,Alex/010825.cha,2679
+55,Alex,8,get out_of there . 2282820_2284535,get out_of there.,4,3,4,5,4,4,4,,Alex/010825.cha,2682
+56,Alex,8,Alex . 2284535_2287130,Alex.,1,1,2,2,2,2,1,,Alex/010825.cha,2685
+57,Alex,8,out . 2287130_2291607,out.,1,1,1,1,1,1,1,,Alex/010825.cha,2688
+58,Alex,8,get out . 2291607_2292388,get out.,2,2,2,2,2,2,2,,Alex/010825.cha,2691
+59,Alex,8,it's on his shoulder . 2396437_2397777,it's on his shoulder.,4,5,5,5,5,5,4,,Alex/010825.cha,2863
+60,Alex,8,mm . 2677577_2688150,mm.,1,1,1,1,1,1,1,,Alex/010825.cha,3128
+61,Alex,8,you want a bite ? 2764707_2766680,you want a bite?,4,4,4,5,4,4,4,,Alex/010825.cha,3211
+62,Alex,8,wait a minute . 2767398_2768537,wait a minute.,3,3,4,5,4,4,3,,Alex/010825.cha,3217
+63,Alex,11,huh ?,huh?,1,1,1,1,1,1,1,,Alex/011006.cha,3456
+64,Alex,11,ooh !,ooh!,1,1,1,1,1,1,1,,Alex/011006.cha,3459
+65,Alex,11,sorry . 2518958_2522771,sorry.,1,1,2,2,2,2,1,,Alex/011006.cha,3462
+66,Alex,11,couldn't find what he was talkin' [: talking] about .,couldn't find what he was talkin' about.,7,9,9,9,9,9,7,,Alex/011006.cha,3490
+67,Alex,11,mhm .,mhm.,1,1,1,1,1,1,1,,Alex/011006.cha,3536
+68,Alex,11,"ah , cheese .",ah cheese.,2,3,2,3,2,2,2,,Alex/011006.cha,3545
+69,Alex,11,a c_d .,a c_d.,3,2,3,3,3,3,3,,Alex/011006.cha,3559
+70,Alex,11,music .,music.,1,1,2,2,2,2,1,,Alex/011006.cha,3565
+71,Alex,11,Elvis .,Elvis.,1,1,2,2,2,2,1,,Alex/011006.cha,3571
+72,Alex,11,"I saw , &-uh +...",I saw uh.,3,5,3,3,3,3,3,,Alex/011006.cha,3591
+73,Alex,11,I was xxx .,I was.,2,3,2,2,2,2,2,,Alex/011006.cha,3606
+74,Alex,11,it's that I think it's too low . 2647300_2650395,it's that I think it's too low.,7,9,7,7,7,7,7,,Alex/011006.cha,3723
+75,Alex,11,xxx it's low .,it's low.,2,3,2,2,2,2,2,,Alex/011006.cha,3746
+76,Alex,11,that's the only thing that xxx +/.,that's the only thing that.,5,8,6,6,6,6,5,,Alex/011006.cha,3754
+77,Alex,11,I mean you probably could fix it .,I mean you probably could fix it.,7,7,9,9,9,9,7,,Alex/011006.cha,3760
+78,Alex,11,"I mean , not me but +/.",I mean not me but.,5,7,5,5,5,5,5,,Alex/011006.cha,3766
+79,Alex,11,"that's the only thing , I think +... 2667983_2671490",that's the only thing I think.,6,10,7,7,7,7,6,,Alex/011006.cha,3772
+80,Alex,11,I went in front of the camera again . 2672590_2675950,I went in front of the camera again.,8,9,11,11,11,11,8,,Alex/011006.cha,3778
+81,Alex,11,xxx I love the light .,I love the light.,4,4,4,5,4,4,4,,Alex/011006.cha,3806
+82,Alex,11,"that's fine , then you bought it xxx .",that's fine then you bought it.,6,9,6,7,6,6,6,,Alex/011006.cha,3828
+83,Alex,11,"hi , Alex .",hi Alex.,2,3,3,3,3,3,2,,Alex/011006.cha,3839
+84,Alex,11,go finish your book .,go finish your book.,4,4,5,5,5,5,4,,Alex/011006.cha,3867
+85,Alex,11,xxx had a movie for you yesterday . 2809463_2811113,had a movie for you yesterday.,6,7,8,9,9,8,6,,Alex/011006.cha,4066
+86,Alex,11,&-um . 2811965_2812661,um.,1,0,1,1,1,1,1,,Alex/011006.cha,4072
+87,Alex,11,it was called Enough .,it was called Enough.,4,6,6,6,6,6,4,,Alex/011006.cha,4079
+88,Alex,11,J_Lo . 2818088_2819263,J_Lo.,2,1,2,2,2,2,2,,Alex/011006.cha,4085
+89,Alex,11,I'll watch it with you tonight .,I'll watch it with you tonight.,6,7,7,7,7,7,6,,Alex/011006.cha,4118
+90,Alex,11,"I know what you're talkin' [: talking] about , xxx .",I know what you're talkin' about.,6,8,8,9,8,8,6,,Alex/011006.cha,4504
+91,Alex,11,xxx ready to say it .,ready to say it.,4,4,5,5,5,5,4,,Alex/011006.cha,4918
+92,Alex,11,he put an apple in the plant . 3194593_3196915,he put an apple in the plant.,7,8,7,8,7,8,7,,Alex/011006.cha,5133
+93,Alex,12,I've got somethin' [: something] in my mouth . 2889710_2892376,I've got somethin' in my mouth.,6,8,8,9,8,8,6,,Alex/011024.cha,5300
+94,Alex,12,I looked upstairs . 2904638_2906905,I looked upstairs.,3,4,5,5,5,5,3,,Alex/011024.cha,5315
+95,Alex,12,there wasn't any .,there wasn't any.,3,5,3,4,3,3,3,,Alex/011024.cha,5318
+96,Alex,12,"Alex , how come you have one slipper on and one slipper off ? 2909775_2913791",Alex how come you have one slipper on and one slipper off?,12,13,15,17,15,15,12,,Alex/011024.cha,5324
+97,Alex,12,he has one slipper on and one slipper off .,he has one slipper on and one slipper off.,9,9,11,11,11,11,9,,Alex/011024.cha,5337
+98,Alex,12,I don't want sandwiches . 2925520_2926638,I don't want sandwiches.,4,5,6,6,6,6,4,,Alex/011024.cha,5346
+99,Alex,12,yeah .,yeah.,1,1,1,1,1,1,1,,Alex/011024.cha,5352
+100,Alex,12,that's fine . 2931590_2936101,that's fine.,2,3,2,3,2,2,2,,Alex/011024.cha,5358
+101,Alex,12,"Alex , what's Mommy doin' [: doing] ?",Alex what's Mommy doin'?,4,6,6,6,6,6,4,,Alex/011024.cha,5367
+102,Alex,12,commere [: come here] . 2945015_2945975,commere.,1,2,2,3,2,2,1,,Alex/011024.cha,5380
+103,Alex,12,"here , put your rear up to Daddy . 2952838_2956676",here put your rear up to Daddy.,7,8,8,9,8,8,7,,Alex/011024.cha,5396
+104,Alex,12,re ya [: you] ready ? 2956676_2958056,re ya ready?,3,3,4,4,4,4,3,,Alex/011024.cha,5399
+105,Alex,12,"there ya [: you] go , good boy: . 2958056_2964375",there ya go good boy.,5,6,5,6,5,5,5,,Alex/011024.cha,5402
+106,Alex,12,good boy: .,good boy.,2,2,2,2,2,2,2,,Alex/011024.cha,5405
+107,Alex,12,huh ?,huh?,1,1,1,1,1,1,1,,Alex/011024.cha,5478
+108,Alex,12,xxx potatoes ? 3014245_3019378,potatoes?,1,1,3,3,3,3,1,,Alex/011024.cha,5487
+109,Alex,12,mhm . 3051240_3054116,mhm.,1,1,1,1,1,1,1,,Alex/011024.cha,5518
+110,Alex,12,"oh , it's out in the car .",oh it's out in the car.,6,8,6,6,6,6,6,,Alex/011024.cha,5521
+111,Alex,12,xxx gonna use it tonight ?,gonna use it tonight?,4,5,6,6,6,6,4,,Alex/011024.cha,5528
+112,Alex,12,"just , if you want , I'll go get it .",just if you want I'll go get it.,8,11,8,8,8,8,8,,Alex/011024.cha,5535
+113,Alex,12,stop it .,stop it.,2,2,2,2,2,2,2,,Alex/011024.cha,5558
+114,Alex,12,oh_no . 3131178_3132346,oh_no.,2,1,2,2,2,2,2,,Alex/011024.cha,5635
+115,Alex,12,xxx slipper .,slipper.,1,1,2,2,2,2,1,,Alex/011024.cha,5646
+116,Alex,12,go get it . 3146141_3147323,go get it.,3,3,3,3,3,3,3,,Alex/011024.cha,5652
+117,Alex,12,lemmee [: let me] see .,lemmee see.,2,3,2,3,2,2,2,,Alex/011024.cha,5703
+118,Alex,12,"Alex , let me see it .",Alex let me see it.,5,6,6,6,6,6,5,,Alex/011024.cha,5711
+119,Alex,12,"commere [: come here] , let me see it .",commere let me see it.,5,7,6,7,6,6,5,,Alex/011024.cha,5724
+120,Alex,12,sit down .,sit down.,2,2,2,2,2,2,2,,Alex/011024.cha,5731
+121,Alex,12,no: .,no.,1,1,1,1,1,1,1,,Alex/011024.cha,5760
+122,Alex,12,don't do that please .,don't do that please.,4,5,4,5,4,4,4,,Alex/011024.cha,5769
+123,Alex,12,come o:n .,come o:n.,3,2,3,4,3,3,3,,Alex/011024.cha,5775
+124,Alex,12,what ?,what?,1,1,1,1,1,1,1,,Alex/011024.cha,5867
+125,Alex,12,xxx it .,it.,1,1,1,1,1,1,1,,Alex/011024.cha,5957
+126,Alex,12,I dunno [: don't know] . 3298713_3299521,I dunno.,2,4,3,3,3,3,2,,Alex/011024.cha,5980
+127,Alex,12,sometimes they just made a xxx .,sometimes they just made a.,5,6,8,9,9,8,5,,Alex/011024.cha,5986
+128,Alex,12,your mother maybe .,your mother maybe.,3,3,4,5,4,4,3,,Alex/011024.cha,5995
+129,Alex,12,"maybe she couldn't , she couldn't eat the whole thing .",maybe she couldn't she couldn't eat the whole thing.,9,13,9,11,9,9,9,,Alex/011024.cha,6000
+130,Alex,12,or that . 3309110_3313103,or that.,2,2,2,2,2,2,2,,Alex/011024.cha,6009
+131,Alex,12,peekin' [: peeking] . 3349560_3351508,peekin'.,1,1,2,2,2,2,1,,Alex/011024.cha,6069
+132,Alex,16,holy moly . 3110915_3112451,holy moly.,2,2,4,4,4,4,2,,Alex/020012.cha,3523
+133,Alex,16,you can't see it . 3136371_3137330,you can't see it.,4,5,4,4,4,4,4,,Alex/020012.cha,3562
+134,Alex,16,you can't see it from this window .,you can't see it from this window.,7,8,8,8,8,8,7,,Alex/020012.cha,3586
+135,Alex,16,"here hon , lookit [: look] . 3164375_3170375",here hon lookit.,3,4,4,5,4,4,3,,Alex/020012.cha,3630
+136,Alex,16,stand right there . 3172243_3173378,stand right there.,3,3,3,4,3,3,3,,Alex/020012.cha,3636
+137,Alex,16,you can peek right in front of the house . 3173378_3177545,you can peek right in front of the house.,9,9,9,10,9,9,9,,Alex/020012.cha,3639
+138,Alex,16,what +... 3177545_3178773,what.,1,2,1,1,1,1,1,,Alex/020012.cha,3642
+139,Alex,16,no .,no.,1,1,1,1,1,1,1,,Alex/020012.cha,3704
+140,Alex,16,he puts his feet in here .,he puts his feet in here.,6,6,6,7,6,6,6,,Alex/020012.cha,3827
+141,Alex,16,yeah .,yeah.,1,1,1,1,1,1,1,,Alex/020012.cha,3836
+142,Alex,16,it's gonna be a little wet .,it's gonna be a little wet.,6,8,7,8,7,8,6,,Alex/020012.cha,3850
+143,Alex,16,he'll fit .,he'll fit.,2,3,2,2,2,2,2,,Alex/020012.cha,3887
+144,Alex,16,he's not even all the way back . 3331238_3333945,he's not even all the way back.,7,8,8,8,8,8,7,,Alex/020012.cha,3928
+145,Alex,16,"here , sit all the way back Alex . 3333945_3338901",here sit all the way back Alex.,7,8,8,9,8,8,7,,Alex/020012.cha,3932
+146,Alex,16,what ?,what?,1,1,1,1,1,1,1,,Alex/020012.cha,3965
+147,Alex,16,cuz [: because] his feet were hanging off the other one xxx +...,cuz his feet were hanging off the other one.,9,11,11,12,11,11,9,,Alex/020012.cha,3985
+148,Alex,16,"no , it's on the ground .",no it's on the ground.,5,7,5,5,5,5,5,,Alex/020012.cha,4028
+149,Alex,16,"it's nice , yeah .",it's nice yeah.,3,5,3,4,3,3,3,,Alex/020012.cha,4037
+150,Alex,16,he's gotta [: needs to] be a little bit bigger for that .,he's gotta be a little bit bigger for that.,9,11,11,12,11,12,9,,Alex/020012.cha,4046
+151,Alex,16,he won't even be able to reach the pedals .,he won't even be able to reach the pedals.,9,10,11,12,11,12,9,,Alex/020012.cha,4058
+152,Alex,16,of pedaling with his feet and steering .,of pedaling with his feet and steering.,7,9,10,10,10,10,7,,Alex/020012.cha,4073
+153,Alex,16,yeah .,yeah.,1,1,1,1,1,1,1,,Alex/020012.cha,4085
+154,Alex,16,yeah .,yeah.,1,1,1,1,1,1,1,,Alex/020012.cha,4091
+155,Alex,16,yeah next year he should be fine with that . 3421578_3423748,yeah next year he should be fine with that.,9,9,9,10,9,9,9,,Alex/020012.cha,4112
+156,Alex,16,yeah .,yeah.,1,1,1,1,1,1,1,,Alex/020012.cha,4121
+157,Alex,16,what ?,what?,1,1,1,1,1,1,1,,Alex/020012.cha,4166
+158,Alex,16,yeah .,yeah.,1,1,1,1,1,1,1,,Alex/020012.cha,4172
+159,Alex,16,was it new ? 3454350_3456916,was it new?,3,4,3,3,3,3,3,,Alex/020012.cha,4181
+160,Alex,17,hi .,hi.,1,1,1,1,1,1,1,,Alex/020102.cha,4172
+161,Alex,17,good and you ? 3242773_3243388,good and you?,3,3,3,3,3,3,3,,Alex/020102.cha,4178
+162,Alex,18,hi .,hi.,1,1,1,1,1,1,1,,Alex/020117.cha,2497
+163,Alex,18,you've gotta go put the train set together Alex .,you've gotta go put the train set together Alex.,9,13,13,14,13,13,9,,Alex/020117.cha,2637
+164,Alex,18,don't you throw that . 2278690_2280256,don't you throw that.,4,5,4,4,4,4,4,,Alex/020117.cha,2646
+165,Alex,22,what are you doin [: doing] ? 1308643_1310221,what are you doin?,4,4,4,4,4,4,4,,Alex/020314.cha,2183
+166,Alex,22,beans ? 1314523_1316315,beans?,1,1,1,1,1,1,1,,Alex/020314.cha,2199
+167,Alex,22,how many ? 1316315_1318876,how many?,2,2,3,3,3,3,2,,Alex/020314.cha,2202
+168,Alex,22,Alex can you count em [: them] ? 1318876_1323596,Alex can you count em?,5,5,6,6,6,6,5,,Alex/020314.cha,2205
+169,Alex,22,"one , two , three . 1323596_1325305",one two three.,3,5,3,3,3,3,3,,Alex/020314.cha,2211
+170,Alex,28,give me a hand .,give me a hand.,4,4,4,5,4,4,4,,Alex/020606.cha,3902
+171,Alex,28,I have eight dollars to my name .,I have eight dollars to my name.,7,7,8,10,8,8,7,,Alex/020606.cha,4047
+172,Alex,28,I don't get paid this week either .,I don't get paid this week either.,7,9,8,8,8,8,7,,Alex/020606.cha,4055
+173,Alex,28,I haven't found out where to take the money tonight .,I haven't found out where to take the money tonight.,10,12,13,15,14,13,10,,Alex/020606.cha,4084
+174,Alex,28,what ?,what?,1,1,1,1,1,1,1,,Alex/020606.cha,4113
+175,Alex,28,after . 1933541_1934773,after.,1,1,2,2,2,2,1,,Alex/020606.cha,4121
+176,Alex,28,hi . 1968461_1971610,hi.,1,1,1,1,1,1,1,,Alex/020606.cha,4186
+177,Alex,28,good and you ? 1971610_1972641,good and you?,3,3,3,3,3,3,3,,Alex/020606.cha,4192
+178,Alex,28,"you want me to get you something at Blockbuster , hm: ? 2017931_2022718",you want me to get you something at Blockbuster hm?,10,11,14,14,14,14,10,,Alex/020606.cha,4237
+179,Alex,28,"Blockbuster , xxx . 2031278_2032540",Blockbuster.,1,2,3,3,3,3,1,,Alex/020606.cha,4254
+180,Alex,28,that's what you said . 2032540_2033663,that's what you said.,4,6,4,4,4,4,4,,Alex/020606.cha,4260
+181,Alex,28,as far as I know . 2036478_2037996,as far as I know.,5,5,5,5,5,5,5,,Alex/020606.cha,4272
+182,Alex,28,but it's free Tuesdays anyways . 2037996_2041038,but it's free Tuesdays anyways.,5,6,8,8,7,8,5,,Alex/020606.cha,4275
+183,Alex,28,so save this for a day I can't get any free ones . 2041038_2043911,so save this for a day I can't get any free ones.,12,13,13,14,13,13,12,,Alex/020606.cha,4278
+184,Alex,28,buy one get one free . 2045710_2047043,buy one get one free.,5,5,5,5,5,5,5,,Alex/020606.cha,4284
+185,Alex,28,on Tuesdays .,on Tuesdays.,2,2,3,3,3,3,2,,Alex/020606.cha,4290
+186,Alex,28,"Monday , on Monday , Tuesdays , and Wednesdays .",Monday on Monday Tuesdays and Wednesdays.,6,9,11,11,13,11,6,,Alex/020606.cha,4296
+187,Alex,28,you're asking him ? 2071368_2074931,you're asking him?,3,4,4,5,4,4,3,,Alex/020606.cha,4341
+188,Alex,28,which one ? 2108515_2112926,which one?,2,2,2,2,2,2,2,,Alex/020606.cha,4350
+189,Alex,28,why won't the xxx . 2119686_2126215,why won't the.,3,4,3,3,3,3,3,,Alex/020606.cha,4356
+190,Alex,28,"he didn't watch it up in the den , did he ? 2134061_2136373",he didn't watch it up in the den did he?,10,14,10,10,10,10,10,,Alex/020606.cha,4377
+191,Alex,28,how bout [: about] your mother's tv ? 2137080_2138720,how bout your mother's tv?,5,6,6,6,6,6,5,,Alex/020606.cha,4383
+192,Alex,28,"fall on the mat , fall on the blanket . 2171273_2173550",fall on the mat fall on the blanket.,8,9,9,9,9,9,8,,Alex/020606.cha,4395
+193,Alex,28,what movie do you want ?,what movie do you want?,5,5,5,6,5,5,5,,Alex/020606.cha,4417
+194,Alex,28,what's that ? 2208043_2210246,what's that?,2,3,2,2,2,2,2,,Alex/020606.cha,4423
+195,Alex,28,closing Thursday night . 2229710_2230913,closing Thursday night.,3,3,5,5,6,5,3,,Alex/020606.cha,4462
+196,Alex,28,do you have any money to give me ? 2250015_2252505,do you have any money to give me?,8,8,9,11,10,9,8,,Alex/020606.cha,4496
+197,Alex,28,cause [: because] I (.) I'm (.) I gotta pay a ten dollar late fee too . 2252505_2256876,cause I I'm I gotta pay a ten dollar late fee too.,12,15,14,16,14,14,12,,Alex/020606.cha,4499
+198,Alex,28,all my money will be gone . 2256876_2258508,all my money will be gone.,6,6,7,8,8,7,6,,Alex/020606.cha,4502
+199,Alex,28,I think it's gonna help . 2262186_2264778,I think it's gonna help.,5,7,6,6,6,6,5,,Alex/020606.cha,4508
+200,Alex,28,four fifty !,four fifty!,2,2,3,3,3,3,2,,Alex/020606.cha,4517
+201,Alex,28,for each movie . 2271848_2272573,for each movie.,3,3,3,4,3,3,3,,Alex/020606.cha,4523
+202,Alex,28,you just go in there and what ? 2278875_2280380,you just go in there and what?,7,7,7,8,7,7,7,,Alex/020606.cha,4538
+203,Alex,28,they could xxx off of ya [: you] .,they could off of ya.,5,5,5,5,6,5,5,,Alex/020606.cha,4551
+204,Alex,28,what ? 2304198_2305178,what?,1,1,1,1,1,1,1,,Alex/020606.cha,4579
+205,Alex,28,Daddy will be right back . 2305810_2306701,Daddy will be right back.,5,5,6,6,6,6,5,,Alex/020606.cha,4587
+206,Alex,28,"I know , I heard him . 2310311_2313646",I know I heard him.,5,7,5,5,5,5,5,,Alex/020606.cha,4601
+207,Alex,28,I heard him .,I heard him.,3,4,3,3,3,3,3,,Alex/020606.cha,4607
+208,Alex,28,gimme [: give me] kiss . 2313646_2314815,gimme kiss.,2,3,2,3,2,2,2,,Alex/020606.cha,4613
+209,Alex,28,give Daddy kiss . 2314815_2316850,give Daddy kiss.,3,3,4,5,4,4,3,,Alex/020606.cha,4616
+210,Alex,28,maybe . 2327903_2329276,maybe.,1,1,1,2,1,1,1,,Alex/020606.cha,4642
+211,Alex,28,bye .,bye.,1,1,1,1,1,1,1,,Alex/020606.cha,4650
+212,Alex,29,oh yeah ? 1623321_1624346,oh yeah?,2,2,2,2,2,2,2,,Alex/020620.cha,2739
+213,Alex,29,yup [: yes] .,yup.,1,1,1,1,1,1,1,,Alex/020620.cha,2778
+214,Alex,29,Daddy's [: Daddy is] gonna get something for breakfast .,Daddy's gonna get something for breakfast.,6,8,11,11,10,11,6,,Alex/020620.cha,2786
+215,Alex,29,hello ?,hello?,1,1,2,2,2,2,1,,Alex/020620.cha,3265
+216,Alex,29,hi . 1982793_1985243,hi.,1,1,1,1,1,1,1,,Alex/020620.cha,3268
+217,Alex,29,yup [: yes] .,yup.,1,1,1,1,1,1,1,,Alex/020620.cha,3326
+218,Alex,29,hi .,hi.,1,1,1,1,1,1,1,,Alex/020620.cha,3401
+219,Alex,29,mhm .,mhm.,1,1,1,1,1,1,1,,Alex/020620.cha,3566
+220,Alex,29,you were out early last night .,you were out early last night.,6,7,7,8,7,7,6,,Alex/020620.cha,3579
+221,Alex,29,xxx outside .,outside.,1,1,2,3,2,2,1,,Alex/020620.cha,3614
+222,Alex,29,xxx outside .,outside.,1,1,2,3,2,2,1,,Alex/020620.cha,3632
+223,Alex,32,oh yeah .,oh yeah.,2,2,2,2,2,2,2,,Alex/020810.cha,1794
+224,Alex,32,what ?,what?,1,1,1,1,1,1,1,,Alex/020810.cha,1820
+225,Alex,32,xxx over the bridge ?,over the bridge?,3,3,4,5,4,4,3,,Alex/020810.cha,1852
+226,Alex,32,those won't fit on the other one ?,those won't fit on the other one?,7,8,8,9,8,8,7,,Alex/020810.cha,1855
+227,Alex,32,xxx upstairs xxx .,upstairs.,1,1,2,2,2,2,1,,Alex/020810.cha,1967
+228,Alex,32,yeah xxx . 1298246_1304695,yeah.,1,1,1,1,1,1,1,,Alex/020810.cha,1974
+229,Alex,32,you want it now ?,you want it now?,4,4,4,4,4,4,4,,Alex/020810.cha,1980
+230,Alex,35,he's peeking .,he's peeking.,2,3,3,3,3,3,2,,Alex/020913.cha,5784
+231,Alex,35,he's peeking . 3355500_3356441,he's peeking.,2,3,3,3,3,3,2,,Alex/020913.cha,5794
+232,Alex,37,what'd [: what did] you say ? 1453918_1455036,what'd you say?,3,5,3,3,3,3,3,,Alex/021011.cha,1908
+233,Alex,37,Daddy is go get another one . 1475075_1483848,Daddy is go get another one.,6,6,9,9,9,9,6,,Alex/021011.cha,1940
+234,Alex,37,Daddy will go get it .,Daddy will go get it.,5,5,6,6,6,6,5,,Alex/021011.cha,1948
+235,Alex,37,okay .,okay.,1,1,2,2,3,2,1,,Alex/021011.cha,1966
+236,Alex,37,xxx go play I'll go get it .,go play I'll go get it.,6,7,6,6,7,6,6,,Alex/021011.cha,1987
+237,Alex,37,let me see .,let me see.,3,3,3,3,3,3,3,,Alex/021011.cha,2129
+238,Alex,37,hello . 1593633_1600315,hello.,1,1,2,2,2,2,1,,Alex/021011.cha,2135
+239,Alex,37,good and you ? 1600315_1604546,good and you?,3,3,3,3,3,3,3,,Alex/021011.cha,2138
+240,Alex,37,need green screwdriver .,need green screwdriver.,3,3,5,5,5,5,3,,Alex/021011.cha,2152
+241,Alex,37,all set . 1614283_1618155,all set.,2,2,2,2,2,2,2,,Alex/021011.cha,2161
+242,Alex,37,xxx for ? 1685193_1689143,for?,1,1,1,1,1,1,1,,Alex/021011.cha,2241
+243,Alex,37,there ya [: you] go .,there ya go.,3,3,3,4,3,3,3,,Alex/021011.cha,2288
+244,Alex,37,move your pants .,move your pants.,3,3,3,4,3,3,3,,Alex/021011.cha,2299
+245,Alex,37,it's gonna go in the tunnel .,it's gonna go in the tunnel.,6,8,8,8,8,8,6,,Alex/021011.cha,2307
+246,Alex,37,gonna go up the hill . 1721383_1723546,gonna go up the hill.,5,6,6,6,6,6,5,,Alex/021011.cha,2310
+247,Alex,37,what's the matter hon(ey) ? 1730641_1736113,what's the matter hon?,4,5,5,5,5,5,4,,Alex/021011.cha,2323
+248,Alex,37,go like this . 1747881_1749280,go like this.,3,3,3,4,3,3,3,,Alex/021011.cha,2355
+249,Alex,37,wait a minute leave it alone . 1754128_1755746,wait a minute leave it alone.,6,6,8,11,8,8,6,,Alex/021011.cha,2368
+250,Alex,37,xxx what time but I'll be xxx .,what time but I'll be.,5,6,5,6,5,5,5,,Alex/021011.cha,2464
+251,Alex,37,xxx I'll be able to go right to his office .,I'll be able to go right to his office.,9,10,10,12,10,11,9,,Alex/021011.cha,2481
+252,Alex,37,we'll see .,we'll see.,2,3,2,2,2,2,2,,Alex/021011.cha,2490
+253,Alex,37,Alex I'll see ya [: you] later .,Alex I'll see ya later.,5,6,7,7,7,7,5,,Alex/021011.cha,2536
+254,Alex,46,xxx go upstairs ?,go upstairs?,2,2,3,3,3,3,2,,Alex/030301.cha,434
+255,Alex,51,xxx you found me !,you found me!,3,4,3,3,3,3,3,,Alex/030516.cha,3622
+256,Alex,51,you found me ! 1961692_1964967,you found me!,3,4,3,3,3,3,3,,Alex/030516.cha,3630
+257,Alex,51,hi honey . 1997549_1998503,hi honey.,2,2,3,3,4,3,2,,Alex/030516.cha,3682
+258,Alex,51,love you too .,love you too.,3,3,3,4,3,3,3,,Alex/030516.cha,3690
+259,Alex,51,boy am I gonna miss this tree [?] . 2027233_2029995,boy am I gonna miss this tree.,7,8,8,8,8,8,7,,Alex/030516.cha,3741
+260,Alex,51,xxx Daddy .,Daddy.,1,1,2,2,2,2,1,,Alex/030516.cha,3761
+261,Alex,51,xxx let me see xxx the ball . 2078180_2080802,let me see the ball.,5,5,5,5,5,5,5,,Alex/030516.cha,3841
+262,Alex,51,Daddy's gonna go change Hon .,Daddy's gonna go change Hon.,5,7,7,8,6,7,5,,Alex/030516.cha,3852
+263,Alex,51,come on . 2088575_2091425,come on.,2,2,2,3,2,2,2,,Alex/030516.cha,3858
+264,Alex,51,(be)cause he's not watching . 2095087_2096693,cause he's not watching.,4,5,5,6,5,5,4,,Alex/030516.cha,3864
+265,Alex,51,watch the ball Alex . 2096693_2098968,watch the ball Alex.,4,4,5,5,5,5,4,,Alex/030516.cha,3870
+266,Alex,51,keep your eye on the ball .,keep your eye on the ball.,6,6,6,6,6,6,6,,Alex/030516.cha,3876
+267,Alex,51,"go (a)head , swing . 2102013_2104345",go head swing.,3,4,3,3,3,3,3,,Alex/030516.cha,3885
+268,Alex,51,keep your eye on the ball . 2104345_2106338,keep your eye on the ball.,6,6,6,6,6,6,6,,Alex/030516.cha,3888
+269,Alex,51,Alex . 2369191_2371245,Alex.,1,1,2,2,2,2,1,,Alex/030516.cha,4399
+270,Alex,51,Daddy's gonna take a shower . 2384146_2385816,Daddy's gonna take a shower.,5,7,8,9,7,8,5,,Alex/030516.cha,4425
+271,Alex,51,look [?] at [?] this . 2393523_2394148,look at this.,3,3,3,3,3,3,3,,Alex/030516.cha,4441
+272,Alex,51,this tree xxx the whole yard . 2394148_2395716,this tree the whole yard.,5,5,5,6,5,5,5,,Alex/030516.cha,4444
+273,Alex,51,what ? 2400128_2400755,what?,1,1,1,1,1,1,1,,Alex/030516.cha,4456
+274,Alex,51,the metal rake ? 2405641_2406751,the metal rake?,3,3,4,5,4,4,3,,Alex/030516.cha,4465
+275,Alex,51,he plastic one ? 2410965_2412155,he plastic one?,3,3,4,4,4,4,3,,Alex/030516.cha,4480
+276,Alex,51,&~aw that's been broke(n) for a long time . 2412155_2414228,that's been broke for a long time.,7,10,7,9,7,7,7,,Alex/030516.cha,4483
+277,Alex,51,no you go buy a handle . 2417570_2419233,no you go buy a handle.,6,6,6,7,6,7,6,,Alex/030516.cha,4489
+278,Alex,51,"I'll hafta look , I don't know . 2425016_2427666",I'll hafta look I don't know.,6,9,7,7,7,7,6,,Alex/030516.cha,4498
+279,Alex,51,wait xxx xxx put my shoes on . 3872036_3873620,wait put my shoes on.,5,5,5,5,5,5,5,,Alex/030516.cha,7420
+280,Alex,51,no come on . 3896726_3897426,no come on.,3,3,3,4,3,3,3,,Alex/030516.cha,7489
+281,Alex,51,Daddy's a little tired . 3897426_3898375,Daddy's a little tired.,4,5,6,7,5,7,4,,Alex/030516.cha,7492
+282,Alex,51,no Daddy ill kick it to you . 3900053_3901405,no Daddy ill kick it to you.,7,8,8,8,8,8,7,,Alex/030516.cha,7500
+283,Alex,51,you xxx the branches .,you the branches.,3,3,4,4,4,4,3,,Alex/030516.cha,7508
+284,Alex,51,xxx here we go . 3908198_3910898,here we go.,3,3,3,4,3,3,3,,Alex/030516.cha,7528
+285,Alex,51,it almost hitcha [: hit you] in the head . 3924273_3925675,it almost hitcha in the head.,6,8,8,8,8,8,6,,Alex/030516.cha,7560
+286,Alex,51,go give it to Mommy .,go give it to Mommy.,5,5,6,7,6,6,5,,Alex/030516.cha,7630
