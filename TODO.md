@@ -16,7 +16,7 @@ When a task is completed, move any useful result or decision into
 
 ## Current Focus
 
-- TODO: Add a new option to the prepare_datasets.py that will output the cleaned utterances but only to csv files in cleaned_utterances. These will contain also the counts of words, morphemes and our various syllable strategies. It willalso contain all the erlvant info like the stuff in preprocesseddata (line_no, age, namne of child, session id, line id utt id etc etc)
+- TODO: Run or modify the LSTM baseline generation pipeline on the local GPU PC, using `docs/lstm_pc_handoff.md`, `docs/lstm-baseline-pipeline.md`, and the JSON configs in `configs/`. Do not run LSTM training on the laptop. After any PC run, record the exact command, config, generated row counts, output paths, and training/generation summaries here and in `docs/notes.md`.
 
 
 ## List of next possible focus
@@ -90,3 +90,4 @@ Use this for short notes after finishing tasks.
 - 2026-05-26 - Added `src/create_pbm_early_baseline_rescoring_bundle.py` and tests; generated the PBM-only `006-023` generated-baseline rescoring shards at `results/rescoring_subsets/pbm_006_023_merged_early_baselines/` plus tarball `results/scoring_bundles/pbm_006_023_merged_early_baselines_rescoring_2026-05-26.tar.gz`. Verified 251,264 scorer rows across random/unigram/bigram/trigram, all floor-age 006-023, with 0 CSV issues.
 - 2026-05-27 - Added `MERGE_BACK_GUIDE.md` and `replacement_keys.csv` to the PBM early rescoring bundle; created handoff tarball `results/scoring_bundles/pbm_006_023_merged_early_baselines_rescoring_handoff_2026-05-27.tar.gz` with scorer shards plus explicit replacement keys. Verified 18 CSVs in the bundle with 0 blank-header or row-width issues.
 - 2026-05-28 - Updated the LSTM baseline pipeline to default to `default_naturalistic_merged_006_023`, added JSON config loading, editable configured generation variants, 16GB-GPU default/smoke configs, and a supervisor-facing LSTM pipeline document. Verified with `tests.test_lstm_baseline_pipeline`, `tests.test_lstm_generation`, and the full suite: 145 tests passing. No LSTM training or generation was run on the laptop.
+- 2026-05-28 - Updated `AGENTS.md` and added `docs/lstm_pc_handoff.md` so a new agent on the PC can pick up the LSTM generation work from Markdown. The handoff records the current bundle, rsync path, model description, PC commands, expected artifacts, and what to document after running.
