@@ -1,0 +1,56 @@
+{
+  "description": "Default GPU run for the strict naturalistic merged-early bundle. Trains a word-level encoder-decoder LSTM that encodes bounded caretaker context and decodes child-like utterances.",
+  "manifest": "data/big_cleaned_dataset/default_naturalistic_merged_006_023/manifest.csv",
+  "data_dir": "data/big_cleaned_dataset/default_naturalistic_merged_006_023/preprocessed_data",
+  "output_dir": "results/lstm_baselines/default_naturalistic_merged_006_023_seq2seq_ctx3",
+  "datasets": [],
+  "variants": [
+    {
+      "name": "same_length",
+      "output_column": "lstm_same_length_utterance",
+      "generation_length_mode": "same_as_child",
+      "max_generated_tokens": 50,
+      "min_generated_tokens": 1
+    },
+    {
+      "name": "free_length",
+      "output_column": "lstm_free_length_utterance",
+      "generation_length_mode": "free_until_eos",
+      "max_generated_tokens": 30,
+      "min_generated_tokens": 1
+    }
+  ],
+  "context_filename": "chi.shared_caretaker_contexts.csv",
+  "generated_filename": "chi.lstm_generated.csv",
+  "context_output_filename": "chi.shared_caretaker_contexts.with_lstm.csv",
+  "scoring_output_filename": "chi.surprisal_scoring_with_lstm.csv",
+  "dry_run": false,
+  "model": {
+    "architecture": "seq2seq_lstm",
+    "context_utterances": 3,
+    "max_context_tokens": 60,
+    "min_age_months": 6.0,
+    "max_age_months": 65.999,
+    "min_token_len": 1,
+    "lowercase": true,
+    "max_train_examples": null,
+    "max_generate_rows_per_child": null,
+    "min_freq": 1,
+    "max_vocab_size": 30000,
+    "embedding_dim": 128,
+    "hidden_dim": 256,
+    "num_layers": 1,
+    "dropout": 0.0,
+    "epochs": 5,
+    "batch_size": 128,
+    "learning_rate": 0.001,
+    "grad_clip": 1.0,
+    "seed": 123,
+    "temperature": 0.9,
+    "top_k": 50,
+    "generation_length_mode": "same_as_child",
+    "max_generated_tokens": 30,
+    "min_generated_tokens": 1,
+    "device": "cuda"
+  }
+}

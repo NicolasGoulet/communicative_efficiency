@@ -1,2 +1,43 @@
-./data
-./figs
+# Local environments and caches
+.venv/
+.uv-cache/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+__pycache__/
+*.py[cod]
+*$py.class
+
+# OS/editor noise
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*.tmp
+*.bak
+.~lock.*
+
+# Large or reproducible research data.
+# Transfer these with rsync/Globus, not Git.
+data/
+results/
+figs/
+
+# Generated reports/assets; keep Markdown docs in Git.
+docs/**/*.pdf
+docs/figs_docs/
+
+# Model checkpoints and generated model artifacts
+*.pt
+*.pth
+*.ckpt
+*.safetensors
+
+# Archives/bundles are handoff artifacts, not source.
+*.tar
+*.tar.gz
+*.tgz
+*.zip
+
+# Logs
+*.log

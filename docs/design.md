@@ -62,15 +62,27 @@ Authoritative preprocessing script:
 
 Current output families:
 
-- child utterances
-- mother utterances
-- father utterances
-- combined caretaker utterances
-- child/session metadata
+- `chi.csv`: child utterances.
+- `caretakers.csv`: mother and father utterances merged in CHAT order.
+- `testing.csv`: optional combined CHI/MOT/FAT inspection file written only
+  when `prepare_datasets.py --testing` is used.
 
-`source_group` is emitted only for corpora that expose an actual subgroup
-dimension, such as Hall. Corpora without subgroup provenance omit that column
-instead of writing an all-empty placeholder field.
+Current preprocessing split:
+
+- `src/cleaning.py` owns the CHAT utterance cleaning policy.
+- `src/prepare_datasets.py` owns corpus/file discovery and CSV writing, and
+  calls `cleaning.py` for raw-to-cleaned utterance conversion.
+- `prepare_datasets.py` does not compute word counts, syllable counts,
+  morpheme counts, contexts, generated utterances, or scoring inputs.
+- Current CSV columns are: `dataset`, `child_id`, `source_group`,
+  `session_id`, `age_raw`, `age_months`, `sex`, `file`, `line_no`,
+  `reference_line`, `utt_id`, `utt_id_role`, `speaker`, `utterance`,
+  `utterance_clean`, `cleaned_is_empty`.
+- `reference_line` is formatted as `<file>:<line_no>` and is included in the
+  split files and the combined `testing.csv` so row provenance can be audited.
+- All CHI/MOT/FAT main-tier rows are kept in preprocessing output. Rows whose
+  cleaned utterance is empty keep an empty `utterance_clean` value and are
+  marked with `cleaned_is_empty` instead of being silently dropped.
 
 CSV text fields are quoted on write so CHILDES age strings such as `1;04.27`
 do not get split into extra spreadsheet columns by importers that also enable
@@ -81,9 +93,13 @@ semicolon separators.
 The preprocessing keeps two versions of each utterance:
 
 - `utterance`: the original CHAT main-tier text.
-- `utterance_clean`: a cleaned version used for word counts, syllable counts, and later scoring.
+- `utterance_clean`: a cleaned version for later scoring and downstream
+  preprocessing.
 
 The goal is to remove CHAT transcription markers without losing actual spoken words.
+A scorable utterance is one whose cleaned form contains at least one word token;
+utterances that clean to empty text or punctuation-only text are not treated as
+normal scoring targets.
 
 Current rules:
 
@@ -91,13 +107,52 @@ Current rules:
 - Merge `MOT` and `FAT` into a combined caretaker file.
 - Remove timecodes, bracketed annotations, parenthetical comments, and untranscribed forms like `xxx`, `yyy`, and `www`.
 - Keep the words inside `<...>` but remove the angle brackets.
-- Remove CHAT marker tokens starting with `+`, `@`, `&`, or `0`.
+- Remove unsupported CHAT marker tokens starting with `+`, `@`, `&`, or `0`.
 - Use a strict `@` policy:
-  - keep `word@c`, `word@b`, and `word@o` as `word`;
+  - keep the lexical base of word-like special forms marked with `@b`, `@c`,
+    `@d`, `@f`, `@i`, `@n`, `@o`, `@p`, and `@wp`;
+  - keep letter forms marked with `@k`, `@l`, and `@ls` as their lexical base,
+    since letters are valid discourse in games, spelling talk, and similar
+    contexts;
   - drop other `@` forms.
-- Compute word and syllable counts from `utterance_clean`, not from the raw utterance.
-- Use `%mor:` tiers to compute `morph_count` when available.
 - Preserve provenance columns such as `child_id`, `session_id`, `file`, and `line_no`.
+
+### Special-form diagnostics
+
+`src/special_forms_per_utterance.py` is the current diagnostic script for
+checking how often CHAT special `@` forms occur in utterances that would be
+used downstream. It reads raw CHAT files through the same discovery and
+cleaning path as `prepare_datasets.py`, excludes empty-cleaned utterances by
+default, requires at least one cleaned word by default, and writes derived CSV
+reports under `results/special_forms/`.
+
+The default target markers are `@b`, `@c`, `@d`, `@f`, `@i`, `@k`, `@l`,
+`@ls`, `@n`, `@o`, `@p`, and `@wp`. The script also records other observed
+full `@` codes in `special_forms_by_full_code.csv` so unsupported or unexpected
+forms can be audited separately from the target marker set.
+
+Reports include both individual speaker tiers and the project-level
+`speaker_group` split: `CHILD` for `CHI`, and `CARETAKERS` for `MOT`/`FAT`.
+
+`src/fillers_and_shortenings_per_utterance.py` performs the same style of
+diagnostic for filler-like tokens and parenthetical shortenings such as
+`y(ou)`, `an(d)`, and `(be)cause`. It writes per-utterance counts, child versus
+caretaker summaries, age-bin summaries, and capped examples under
+`results/fillers_shortenings/`.
+
+`src/build_preprocessing_variant_probe.py` builds a small real-data probe set
+for surprisal sensitivity checks. It selects compact utterances from raw CHAT
+data and writes multiple scoring variants for each example, including current
+cleaning, raw CHAT text, expanded parenthetical shortenings, filler removal,
+preserved `@` suffixes, and dropped special-form tokens. The long-form CSV uses
+`utterance_for_scoring` as the text column and includes `word_count` and
+`morph_count` only so the current scoring script can apply its normal
+eligibility checks.
+
+`src/plot_diagnostic_analyses.py` turns the diagnostic CSVs into PNG/PDF
+figures under `figs/diagnostic_analyses/`, including overview child-versus-
+caretaker rates, dataset comparisons, marker/type breakdowns, age trajectories,
+and preprocessing-probe summaries.
 
 ## Scoring Protocol
 
@@ -121,10 +176,26 @@ Current baseline families represented in source code:
 - random utterance generation
 - unigram utterance generation
 - bigram utterance generation
+- trigram utterance generation
+- LSTM utterance generation
 
-But soon we will add : 
+The age-binned n-gram dictionaries are additive: each written bin contains the
+current age window plus all earlier age windows in the same scope. Bigram and
+trigram counts for child utterances use the latest prior caretaker utterance in
+the same session as left context for utterance-initial child words.
 
-- LLM model generation : for each existing dataset, we train a simple LLM (most probably an architecture from the BabyLM challenge). We then train it on every data BUT the currently considered dataset. We then generate for each utterance an utterance of the same length but generated with the trained LLM. It remains to be determined what will be the logic for determining the used vocabulary of the output head.
+The LSTM baseline in `src/generate_lstm_utterances.py` is a small neural
+generation baseline. Its default architecture is `seq2seq_lstm`: an encoder
+reads a configurable amount of previous caretaker context, and a decoder
+generates the child utterance. The previous prefix-style version remains
+available as `causal_lstm`; in that architecture, context tokens are included
+before `<bos>` and masked out of the training loss. Both architectures generate
+same-length child utterances. This script is meant to be easier to revise than
+the final BabyLM-style generator.
+
+Still planned:
+
+- LLM model generation: for each existing dataset, we train a simple LLM (most probably an architecture from the BabyLM challenge). We then train it on every data BUT the currently considered dataset. We then generate for each utterance an utterance of the same length but generated with the trained LLM. It remains to be determined what will be the logic for determining the used vocabulary of the output head.
 
 ## Planned Analyses
 

@@ -17,6 +17,7 @@ DEFAULT_INPUT_ROOT = PROJECT_ROOT / "new_clean_slurm"
 DEFAULT_OUTPUT_ROOT = PROJECT_ROOT / "parallel_dataset_new"
 VALID_DATASETS = ("Brown", "Manchester", "Providence")
 VALID_BINS = (3, 6, 12)
+GENERATED_CHI_FILES = ("chi.ngram_generated.csv", "chi.lstm_generated.csv")
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -106,6 +107,47 @@ def read_csv(path: Path) -> pd.DataFrame:
     if not path.exists():
         raise FileNotFoundError(f"Missing input file: {path}")
     return pd.read_csv(path)
+
+
+def is_generated_variant_column(column: str) -> bool:
+    """Return true for generated utterance columns that should be exported."""
+    return (
+        column == "lstm_model_utterance"
+        or column.startswith("random_model_utterance_bin")
+        or column.startswith("unigram_model_utterance_bin")
+        or column.startswith("bigram_model_utterance_bin")
+        or column.startswith("trigram_model_utterance_bin")
+    )
+
+
+def load_chi_with_generated_variants(child_dir: Path) -> Tuple[pd.DataFrame, Dict[str, str]]:
+    """
+    Load chi.csv and merge generated sibling columns when present.
+
+    This lets n-gram and LSTM generated files coexist without forcing us to
+    overwrite chi.csv or choose only one generated sibling as the source.
+    """
+    base_path = child_dir / "chi.csv"
+    base = read_csv(base_path)
+    source_by_column = {column: base_path.name for column in base.columns}
+
+    for filename in GENERATED_CHI_FILES:
+        generated_path = child_dir / filename
+        if not generated_path.exists():
+            continue
+        generated = read_csv(generated_path)
+        if len(generated) != len(base):
+            raise ValueError(
+                f"Cannot merge {generated_path}: row count {len(generated)} "
+                f"does not match chi.csv row count {len(base)}."
+            )
+        for column in generated.columns:
+            if not is_generated_variant_column(column):
+                continue
+            base[column] = generated[column]
+            source_by_column[column] = filename
+
+    return base, source_by_column
 
 
 def ensure_cols(df: pd.DataFrame, cols: Sequence[str], where: str) -> None:
@@ -333,20 +375,20 @@ def main(argv: Optional[Sequence[str]] = None) -> None:
 
     for dataset, child_dir in child_dirs:
         child_id = child_dir.name
-        chi_path = child_dir / "chi.csv"
         care_path = child_dir / "caretakers.csv"
 
-        if not chi_path.exists() or not care_path.exists():
+        if not (child_dir / "chi.csv").exists() or not care_path.exists():
             print(f"[WARN] Skipping {dataset}/{child_id}: missing chi.csv or caretakers.csv")
             continue
 
-        chi_df = stable_sort(read_csv(chi_path))
+        chi_df, chi_source_by_col = load_chi_with_generated_variants(child_dir)
+        chi_df = stable_sort(chi_df)
         care_df = stable_sort(read_csv(care_path))
 
         ensure_cols(
             chi_df,
             ["session_id", "file", "line_no", "utt_id", "age_months", "context_k1", "context_k2", "context_k3"],
-            str(chi_path),
+            str(child_dir / "chi.csv"),
         )
         ensure_cols(
             care_df,
@@ -391,6 +433,7 @@ def main(argv: Optional[Sequence[str]] = None) -> None:
                 ("random_chi", f"random_model_utterance_bin{b}"),
                 ("unigram_chi", f"unigram_model_utterance_bin{b}"),
                 ("bigram_chi", f"bigram_model_utterance_bin{b}"),
+                ("trigram_chi", f"trigram_model_utterance_bin{b}"),
             ]:
                 if col not in chi_df.columns:
                     print(f"[WARN] {dataset}/{child_id}: missing column '{col}' -> skipping {prefix}/bin{b}")
@@ -404,12 +447,32 @@ def main(argv: Optional[Sequence[str]] = None) -> None:
                             df=chi_df,
                             subset=f"{prefix}/bin{b}",
                             variant_col=col,
-                            source_csv="chi.csv",
+                            source_csv=chi_source_by_col.get(col, "chi.csv"),
                         ),
-                        "chi.csv",
+                        chi_source_by_col.get(col, "chi.csv"),
                         col,
                     )
                 )
+
+        lstm_col = "lstm_model_utterance"
+        if lstm_col in chi_df.columns:
+            subsets.append(
+                (
+                    "lstm_chi",
+                    build_variant_subset(
+                        dataset=dataset,
+                        child_id=child_id,
+                        df=chi_df,
+                        subset="lstm_chi",
+                        variant_col=lstm_col,
+                        source_csv=chi_source_by_col.get(lstm_col, "chi.csv"),
+                    ),
+                    chi_source_by_col.get(lstm_col, "chi.csv"),
+                    lstm_col,
+                )
+            )
+        else:
+            print(f"[WARN] {dataset}/{child_id}: missing column '{lstm_col}' -> skipping lstm_chi")
 
         print(f"\n==> {dataset}/{child_id}")
         for subset_path, rows, source_file, variant_col in subsets:

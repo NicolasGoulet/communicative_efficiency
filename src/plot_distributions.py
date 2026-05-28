@@ -49,7 +49,32 @@ import pandas as pd
 # Defaults
 # ---------------------------------------------------------------------
 
-DEFAULT_DATASETS = ["Brown", "Manchester", "Providence"]
+STRICT_NATURALISTIC_PARENT_CHILD_DATASETS = [
+    "Brown",
+    "Manchester",
+    "Providence",
+    "MPI-EVA-Manchester",
+    "Belfast",
+    "Wells",
+    "Lara",
+    "Sachs",
+    "Weist",
+    "Kuczaj",
+    "Post",
+    "Demetras1",
+    "Forrester",
+]
+
+STRUCTURED_OBSERVATIONAL_CAREGIVER_CHILD_DATASETS = [
+    "Champaign",
+    "EHS",
+]
+
+NATURALISTIC_CAREGIVER_CHILD_DATASETS = STRICT_NATURALISTIC_PARENT_CHILD_DATASETS
+
+CLINICAL_PROBE_DATASETS = ["Cummings"]
+
+DEFAULT_DATASETS = STRICT_NATURALISTIC_PARENT_CHILD_DATASETS
 
 DEFAULT_METRICS = [
     "word_count",
@@ -437,6 +462,39 @@ def mean_metric_by_age_bin(
     return out
 
 
+def utterance_counts_by_age_bin(df: pd.DataFrame, age_bin_col: str, group_col: str) -> pd.DataFrame:
+    """Count cleaned utterances by age bin and optional grouping column."""
+    if age_bin_col not in df.columns:
+        return pd.DataFrame(columns=[age_bin_col, "all_utterances"])
+
+    tmp_cols = [age_bin_col]
+    if group_col in df.columns:
+        tmp_cols.append(group_col)
+    tmp = df[tmp_cols].copy()
+    tmp = tmp[tmp[age_bin_col].notna()].copy()
+    if tmp.empty:
+        return pd.DataFrame(columns=[age_bin_col, "all_utterances"])
+
+    out = (
+        tmp.groupby(age_bin_col)
+        .size()
+        .rename("all_utterances")
+        .reset_index()
+        .sort_values(age_bin_col)
+    )
+
+    if group_col in tmp.columns:
+        group_counts = (
+            tmp.groupby([age_bin_col, group_col])
+            .size()
+            .unstack(group_col, fill_value=0)
+            .reset_index()
+        )
+        out = out.merge(group_counts, on=age_bin_col, how="left")
+
+    return out
+
+
 # ---------------------------------------------------------------------
 # Plotting
 # ---------------------------------------------------------------------
@@ -577,6 +635,22 @@ def plot_mean_metric_by_age(
     plt.close()
 
 
+def plot_utterance_counts_by_age(summary_df: pd.DataFrame, title: str, age_bin_col: str, out_path: Path) -> None:
+    """Plot total cleaned utterance counts by age bin."""
+    if summary_df.empty or "all_utterances" not in summary_df.columns:
+        return
+
+    plt.figure(figsize=(11, 5))
+    plt.bar(summary_df[age_bin_col], summary_df["all_utterances"])
+    plt.title(title)
+    plt.xlabel("Age bin")
+    plt.ylabel("Number of cleaned utterances")
+    plt.xticks(rotation=45, ha="right")
+    plt.tight_layout()
+    plt.savefig(out_path, dpi=300)
+    plt.close()
+
+
 # ---------------------------------------------------------------------
 # Processing
 # ---------------------------------------------------------------------
@@ -617,6 +691,18 @@ def process_collection(
     df = add_age_bins(df, age_bin_months)
     age_bin_col = f"age_bin_{age_bin_months}m"
     has_age_bins = "age_months" in df.columns and age_bin_col in df.columns
+
+    if has_age_bins:
+        age_utterance_counts = utterance_counts_by_age_bin(df, age_bin_col, group_col=group_col)
+        age_utterance_counts_path = collection_dir / f"utterance_counts_by_age_bin_{age_bin_months}m.csv"
+        age_utterance_counts.to_csv(age_utterance_counts_path, index=False)
+        plot_utterance_counts_by_age(
+            age_utterance_counts,
+            title=f"{collection_name}: cleaned utterances by {age_bin_months}-month age bins",
+            age_bin_col=age_bin_col,
+            out_path=collection_dir / f"utterance_counts_by_age_bin_{age_bin_months}m.png",
+        )
+        print(f"[OK] {collection_name}: wrote utterance counts by age bin")
 
     for metric in metrics:
         if metric not in df.columns:

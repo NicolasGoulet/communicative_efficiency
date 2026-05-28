@@ -1,244 +1,145 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-
 """
-add_random_unigram_bigram_utts.py
-================================
+Generate random, unigram, bigram, and trigram baseline utterances.
 
-Add random (uniform), unigram (frequency-weighted), and bigram (conditional) LM utterance
-columns to each child_utts.csv, for multiple age binning schemes.
+The script consumes the additive dictionaries produced by
+build_age_word_dicts.py and writes same-length generated utterance columns for
+each row in prepared chi.csv files.
 
-Creates columns like:
-  random_model_utterance_bin3
-  unigram_model_utterance_bin3
-  bigram_model_utterance_bin3
-(and similarly for bin6, bin12, ...)
+Bigram/trigram generation uses the same caretaker-to-child boundary logic as
+dictionary building:
 
-Length preservation (unchanged):
-- For each row, we generate exactly L tokens where:
-    L = word_count if available else estimate_word_len_from_utterance(utterance)
-- Optionally append trailing punctuation-only tokens from the original utterance.
+  bigram first word:  P(c1 | p1)
+  trigram first word: P(c1 | p2, p1)
+  trigram second word: P(c2 | p1, c1)
 
-Models:
-- Random LM: sample uniformly from vocab.txt (or unigram_counts keys as fallback)
-- Unigram LM: sample weighted by unigram_counts.json
-- Bigram LM: generate a sequence of length L using bigram_probs.json:
-    * start from [PAD] as previous token
-    * sample next token from P(w2 | prev)
-    * if prev has no outgoing distribution, backoff to unigram
-    * if bigram file missing, backoff to unigram
-
-Expected dictionary layout (per bin label):
-  <DICT_ROOT>/bin_006-011/vocab.txt
-  <DICT_ROOT>/bin_006-011/unigram_counts.json
-  <DICT_ROOT>/bin_006-011/bigram_probs.json
-
-Output:
-  - sibling mode (default): <child_dir>/child_utts.random_unigram_bigram.csv
-  - inplace mode: overwrites child_utts.csv (backs up once)
-
-Usage:
-  python3 src/add_random_unigram_bigram_utts.py \
-    --datasets Brown Manchester Providence \
-    --models 3:results/age_word_dicts/bin3 6:results/age_word_dicts/bin6 12:results/age_word_dicts/bin12
+where p2/p1 are the last two tokens from the most recent prior caretaker
+utterance in the same session. Missing n-gram contexts back off to lower-order
+models.
 """
 
 from __future__ import annotations
 
 import argparse
 import bisect
+import csv
 import json
 import math
 import random
 import re
-from dataclasses import dataclass
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Optional, Sequence, Tuple
 
 import pandas as pd
 
+from build_age_word_dicts import (
+    ChildUnit,
+    bin_label,
+    bin_start,
+    iter_child_units,
+    load_child_utterance_contexts,
+)
+from custom_age_bins import AgeBin, find_age_bin, load_age_bins_config
 
-# -------------------------
-# Age parsing (kept as-is from your old script)
-# -------------------------
 
-AGE_CANDIDATE_COLS = [
-    "age_months", "age_mo", "age_in_months", "child_age_months",
-    "age", "child_age", "target_child_age",
-    "age_days", "age_in_days",
-    "age_weeks", "age_in_weeks",
-    "age_years", "age_in_years",
-]
-AGE_STRING_RE = re.compile(r"^\s*(\d+)\s*;\s*(\d+)(?:\.(\d+))?\s*$")  # 2;03.12
 PUNCT_ONLY_RE = re.compile(r"^\W+$", re.UNICODE)
+TERMINAL_PUNCT_RE = re.compile(r"([.!?])\s*$")
+CONTEXT_P2_COL = "caretaker_context_p2"
+CONTEXT_P1_COL = "caretaker_context_p1"
+CONTEXT_LAST_TWO_COL = "caretaker_context_last_two"
+METADATA_FALLBACK_COLUMNS = ("dataset", "child_id", "source_group", "speaker")
+BASE_OUTPUT_COLUMNS = [
+    "dataset",
+    "child_id",
+    "source_group",
+    "session_id",
+    "age_raw",
+    "age_months",
+    "sex",
+    "file",
+    "line_no",
+    "reference_line",
+    "utt_id",
+    "speaker",
+    "utterance",
+    "utterance_clean",
+    "cleaned_is_empty",
+]
+CONTEXT_OUTPUT_COLUMNS = [CONTEXT_P2_COL, CONTEXT_P1_COL, CONTEXT_LAST_TWO_COL]
 
-PAD_TOKEN = "[PAD]"
-
-
-def parse_age_to_months(x) -> Optional[float]:
-    if x is None or (isinstance(x, float) and math.isnan(x)):
-        return None
-    if isinstance(x, (int, float)) and not isinstance(x, bool):
-        return float(x)
-
-    s = str(x).strip()
-    if not s:
-        return None
-
-    m = AGE_STRING_RE.match(s)
-    if m:
-        years = int(m.group(1))
-        months = int(m.group(2))
-        days = int(m.group(3)) if m.group(3) is not None else 0
-        return years * 12.0 + months + (days / 30.4375)
-
-    try:
-        return float(s)
-    except ValueError:
-        return None
-
-
-def find_age_column(df: pd.DataFrame) -> Optional[str]:
-    cols_lower = {c.lower(): c for c in df.columns}
-    for cand in AGE_CANDIDATE_COLS:
-        if cand in cols_lower:
-            return cols_lower[cand]
-    for c in df.columns:
-        cl = c.lower()
-        if "age" in cl and ("month" in cl or "mo" in cl):
-            return c
-    for c in df.columns:
-        if "age" in c.lower():
-            return c
-    return None
-
-
-def normalize_age_months(df: pd.DataFrame, age_col: str) -> pd.Series:
-    col_lower = age_col.lower()
-    s = df[age_col].apply(parse_age_to_months)
-
-    if "day" in col_lower:
-        return s.apply(lambda v: None if v is None else float(v) / 30.4375)
-    if "week" in col_lower:
-        return s.apply(lambda v: None if v is None else float(v) * 7.0 / 30.4375)
-    if "year" in col_lower:
-        return s.apply(lambda v: None if v is None else float(v) * 12.0)
-
-    return s
-
-
-# -------------------------
-# Binning
-# -------------------------
-
-def bin_start(age_months: float, bin_months: int, min_age: float) -> int:
-    if age_months < min_age:
-        return int(min_age)
-    k = int((age_months - min_age) // bin_months)
-    return int(min_age + k * bin_months)
-
-
-def bin_label(start: int, bin_months: int) -> str:
-    end = start + bin_months - 1
-    return f"{start:03d}-{end:03d}"
-
-
-def trailing_punct_tokens(utt: str) -> List[str]:
-    """Keep trailing punctuation-only tokens from the original tokenization (e.g. '.' at end)."""
-    if utt is None:
-        return []
-    toks = str(utt).strip().split()
-    out = []
-    i = len(toks) - 1
-    while i >= 0 and PUNCT_ONLY_RE.match(toks[i]):
-        out.append(toks[i])
-        i -= 1
-    out.reverse()
-    return out
-
-
-def estimate_word_len_from_utterance(utt: str) -> int:
-    """Fallback if word_count missing: count non-punct tokens."""
-    toks = str(utt).strip().split()
-    toks = [t for t in toks if t and not PUNCT_ONLY_RE.match(t)]
-    return len(toks)
-
-
-# -------------------------
-# CHAT-aware token filtering / normalization (kept as-is)
-# -------------------------
-
-_ALLOWED_AT_TAGS_DEFAULT = {"b", "c", "o"}  # strict set
-_AT_SPLIT_RE = re.compile(r"^(?P<stem>.+?)@(?P<tag>[A-Za-z][A-Za-z0-9:._-]*)$")
+_ALLOWED_AT_TAGS_DEFAULT = {
+    "b",
+    "c",
+    "d",
+    "f",
+    "i",
+    "k",
+    "l",
+    "ls",
+    "n",
+    "o",
+    "p",
+    "wp",
+}
+_AT_SPLIT_RE = re.compile(r"^(?P<stem>.+?)@(?P<tag>[A-Za-z][A-Za-z0-9:._-]*)(?:\$[A-Za-z]+)?$")
 
 
 def normalize_vocab_token(
-    tok: str,
+    tok: object,
     allowed_at_tags: set[str],
     drop_chat_markers: bool = True,
     drop_angle_artifacts: bool = True,
 ) -> Optional[str]:
-    if tok is None:
+    """Normalize a dictionary token or return None when it should be dropped."""
+    if tok is None or (isinstance(tok, float) and math.isnan(tok)):
         return None
-    t = str(tok).strip()
-    if not t:
+    token = str(tok).strip()
+    if not token:
         return None
 
-    if drop_angle_artifacts and ("<" in t or ">" in t):
+    if drop_angle_artifacts and ("<" in token or ">" in token):
         return None
 
     if drop_chat_markers:
-        if t == "0" or t.startswith("0"):
+        lowered = token.lower()
+        if token == "0" or token.startswith("0"):
             return None
-        if t.startswith("&"):
+        if token.startswith("&"):
             return None
-        if t.lower() in {"xxx", "yyy", "www"}:
+        if lowered in {"xxx", "yyy", "www"}:
             return None
 
-    m = _AT_SPLIT_RE.match(t)
-    if m:
-        stem = m.group("stem")
-        tag = m.group("tag")
-
+    match = _AT_SPLIT_RE.match(token)
+    if match:
+        stem = match.group("stem").strip()
+        tag = match.group("tag").split(":", 1)[0]
         if tag not in allowed_at_tags:
             return None
+        token = stem
 
-        t = stem.strip()
-        if not t:
-            return None
-
-        if drop_angle_artifacts and ("<" in t or ">" in t):
-            return None
-
-        if drop_chat_markers:
-            if t == "0" or t.startswith("0") or t.startswith("&"):
-                return None
-            if t.lower() in {"xxx", "yyy", "www"}:
-                return None
-
-    return t
+    return token or None
 
 
 def normalize_vocab_list(
-    toks: List[str],
+    toks: Sequence[object],
     allowed_at_tags: set[str],
     drop_chat_markers: bool = True,
     drop_angle_artifacts: bool = True,
 ) -> List[str]:
+    """Normalize and deduplicate vocabulary items while preserving order."""
     out: List[str] = []
     seen = set()
-    for w in toks:
-        nw = normalize_vocab_token(
-            w,
+    for token in toks:
+        normalized = normalize_vocab_token(
+            token,
             allowed_at_tags=allowed_at_tags,
             drop_chat_markers=drop_chat_markers,
             drop_angle_artifacts=drop_angle_artifacts,
         )
-        if nw is None:
+        if normalized is None or normalized in seen:
             continue
-        if nw not in seen:
-            seen.add(nw)
-            out.append(nw)
+        seen.add(normalized)
+        out.append(normalized)
     return out
 
 
@@ -248,118 +149,149 @@ def normalize_counts(
     drop_chat_markers: bool = True,
     drop_angle_artifacts: bool = True,
 ) -> Dict[str, int]:
-    agg: Dict[str, int] = {}
-    for k, v in counts.items():
-        nk = normalize_vocab_token(
-            k,
+    """Normalize count keys and aggregate entries with the same stem."""
+    out: Dict[str, int] = {}
+    for raw_key, raw_count in counts.items():
+        normalized = normalize_vocab_token(
+            raw_key,
             allowed_at_tags=allowed_at_tags,
             drop_chat_markers=drop_chat_markers,
             drop_angle_artifacts=drop_angle_artifacts,
         )
-        if nk is None:
+        if normalized is None:
             continue
-        iv = int(v)
-        if iv <= 0:
+        count = int(raw_count)
+        if count <= 0:
             continue
-        agg[nk] = agg.get(nk, 0) + iv
-    return agg
+        out[normalized] = out.get(normalized, 0) + count
+    return out
 
 
-def counts_from_vocab_uniform(vocab: List[str]) -> Dict[str, int]:
-    return {w: 1 for w in vocab if w}
+def counts_from_vocab_uniform(vocab: Sequence[str]) -> Dict[str, int]:
+    """Build a one-count fallback distribution from a vocabulary."""
+    return {word: 1 for word in vocab if word}
 
 
-# -------------------------
-# Discovery
-# -------------------------
-
-@dataclass
-class ChildUnit:
-    dataset: str
-    child: str
-    folder: Path
-    child_utts_csv: Path
-    session_index_csv: Path
+def terminal_punctuation(text: object) -> str:
+    """Return final sentence punctuation, if present."""
+    if text is None or (isinstance(text, float) and math.isnan(text)):
+        return ""
+    match = TERMINAL_PUNCT_RE.search(str(text).strip())
+    return match.group(1) if match else ""
 
 
-def discover_child_units(data_dir: Path, datasets: List[str]) -> List[ChildUnit]:
-    ds = set(datasets)
-    units: List[ChildUnit] = []
-    for p in data_dir.rglob("child_utts.csv"):
-        try:
-            rel = p.relative_to(data_dir)
-        except ValueError:
-            continue
-        if len(rel.parts) < 2:
-            continue
-        dataset = rel.parts[0]
-        if dataset not in ds:
-            continue
-        folder = p.parent
-        sess = folder / "session_index.csv"
-        if not sess.exists():
-            sess = Path("")
-        units.append(ChildUnit(dataset=dataset, child=folder.name, folder=folder,
-                               child_utts_csv=p, session_index_csv=sess))
-    units.sort(key=lambda u: (u.dataset, u.child, str(u.folder)))
-    return units
+def with_terminal_punctuation(words: Sequence[str], punctuation: str) -> str:
+    """Join generated words and optionally attach terminal punctuation."""
+    if not words:
+        return ""
+    out = list(words)
+    if punctuation:
+        out[-1] = f"{out[-1]}{punctuation}"
+    return " ".join(out)
 
 
-def load_utts_with_age(unit: ChildUnit) -> pd.DataFrame:
-    utts = pd.read_csv(unit.child_utts_csv)
-
-    age_col_utts = find_age_column(utts)
-    if age_col_utts is not None:
-        utts["age_months"] = normalize_age_months(utts, age_col_utts)
-        return utts
-
-    if unit.session_index_csv and unit.session_index_csv.exists():
-        sess = pd.read_csv(unit.session_index_csv)
-        age_col_sess = find_age_column(sess)
-        if age_col_sess is None:
-            raise RuntimeError(f"No age-like column in session_index.csv for {unit.folder}")
-        sess_age = sess[["session_id", age_col_sess]].copy()
-        sess_age["age_months"] = normalize_age_months(sess_age, age_col_sess)
-        merged = utts.merge(sess_age[["session_id", "age_months"]], on="session_id", how="left")
-        return merged
-
-    raise RuntimeError(f"No age in child_utts.csv and missing session_index.csv for {unit.folder}")
+def caretaker_context_debug_values(previous_caretaker_tokens: Sequence[str]) -> Dict[str, str]:
+    """Return the p2/p1 caretaker boundary words used by bigram/trigram generation."""
+    p2 = previous_caretaker_tokens[-2] if len(previous_caretaker_tokens) >= 2 else ""
+    p1 = previous_caretaker_tokens[-1] if len(previous_caretaker_tokens) >= 1 else ""
+    return {
+        CONTEXT_P2_COL: p2,
+        CONTEXT_P1_COL: p1,
+        CONTEXT_LAST_TWO_COL: " ".join(token for token in (p2, p1) if token),
+    }
 
 
-# -------------------------
-# Samplers
-# -------------------------
+def normalize_generated_metadata(df: pd.DataFrame, unit: ChildUnit) -> pd.DataFrame:
+    """
+    Fill metadata columns that make generated sibling CSVs auditable.
+
+    Some existing prepared files have an empty `source_group` column for corpora
+    without subgroups. The generated outputs should still show a meaningful
+    provenance value, so those blanks are filled with the dataset name.
+    """
+    out = df.copy()
+    for column in list(out.columns):
+        column_name = str(column).strip()
+        if not column_name or column_name.startswith("Unnamed:"):
+            out = out.drop(columns=[column])
+
+    fallback_values = {
+        "dataset": unit.dataset,
+        "child_id": unit.child,
+        "source_group": unit.dataset,
+        "speaker": "CHI",
+    }
+    for column in METADATA_FALLBACK_COLUMNS:
+        if column not in out.columns:
+            out[column] = fallback_values[column]
+        else:
+            values = out[column].astype("string").fillna("").str.strip()
+            out[column] = values.mask(values.eq(""), fallback_values[column])
+    return out
+
+
+def generated_model_columns(model_specs: Sequence[Tuple[int, Path]], which: str) -> List[str]:
+    """Return generated utterance columns in stable output order."""
+    columns: List[str] = []
+    for bin_months, _root in model_specs:
+        if which in {"random", "all"}:
+            columns.append(f"random_model_utterance_bin{bin_months}")
+        if which in {"unigram", "all"}:
+            columns.append(f"unigram_model_utterance_bin{bin_months}")
+        if which in {"bigram", "all"}:
+            columns.append(f"bigram_model_utterance_bin{bin_months}")
+        if which in {"trigram", "all"}:
+            columns.append(f"trigram_model_utterance_bin{bin_months}")
+    return columns
+
+
+def enforce_generated_output_schema(
+    df: pd.DataFrame,
+    model_specs: Sequence[Tuple[int, Path]],
+    which: str,
+) -> pd.DataFrame:
+    """Return generated output with no blank headers and no `utt_id_role` column."""
+    out = df.copy()
+    for column in BASE_OUTPUT_COLUMNS + CONTEXT_OUTPUT_COLUMNS + generated_model_columns(model_specs, which):
+        if column not in out.columns:
+            out[column] = ""
+    output_columns = BASE_OUTPUT_COLUMNS + CONTEXT_OUTPUT_COLUMNS + generated_model_columns(model_specs, which)
+    return out.loc[:, output_columns]
+
 
 class UniformSampler:
-    def __init__(self, vocab: List[str]):
-        self.vocab = [w for w in vocab if w]
-        self.m = len(self.vocab)
+    """Uniform sampler over a vocabulary."""
+
+    def __init__(self, vocab: Sequence[str]):
+        self.vocab = [word for word in vocab if word]
+        self.size = len(self.vocab)
 
     def sample_n(self, rng: random.Random, n: int) -> List[str]:
-        if n <= 0 or self.m == 0:
+        if n <= 0 or self.size == 0:
             return []
-        return [self.vocab[rng.randrange(self.m)] for _ in range(n)]
+        return [self.vocab[rng.randrange(self.size)] for _ in range(n)]
 
 
 class WeightedSampler:
-    """Weighted sampling using cumulative integer counts + bisect."""
-    def __init__(self, counts: Dict[str, int]):
-        items = [(w, int(c)) for w, c in counts.items() if w and int(c) > 0]
-        items.sort(key=lambda x: x[0])  # deterministic
+    """Weighted sampler backed by integer counts."""
 
-        self.words = [w for w, _ in items]
-        cum = []
+    def __init__(self, counts: Dict[str, int]):
+        items = [(str(word), int(count)) for word, count in counts.items() if word and int(count) > 0]
+        items.sort(key=lambda item: item[0])
+        self.words = [word for word, _count in items]
+        self.cumulative: List[int] = []
         total = 0
-        for _w, c in items:
-            total += c
-            cum.append(total)
-        self.cum = cum
+        for _word, count in items:
+            total += count
+            self.cumulative.append(total)
         self.total = total
 
     def sample_one(self, rng: random.Random) -> str:
-        r = rng.randrange(1, self.total + 1)
-        i = bisect.bisect_left(self.cum, r)
-        return self.words[i]
+        if self.total <= 0:
+            return ""
+        draw = rng.randrange(1, self.total + 1)
+        index = bisect.bisect_left(self.cumulative, draw)
+        return self.words[index]
 
     def sample_n(self, rng: random.Random, n: int) -> List[str]:
         if n <= 0 or self.total <= 0:
@@ -367,67 +299,144 @@ class WeightedSampler:
         return [self.sample_one(rng) for _ in range(n)]
 
 
+class ConditionalSampler:
+    """Sampler for one conditional next-word distribution."""
+
+    def __init__(self, probs: Dict[str, float]):
+        items = [(str(word), float(prob)) for word, prob in probs.items() if float(prob) > 0]
+        items.sort(key=lambda item: item[0])
+        self.words = [word for word, _prob in items]
+        self.cumulative: List[float] = []
+        total = 0.0
+        for _word, prob in items:
+            total += prob
+            self.cumulative.append(total)
+        if total > 0:
+            self.cumulative = [value / total for value in self.cumulative]
+
+    def sample_one(self, rng: random.Random) -> str:
+        if not self.words:
+            return ""
+        draw = rng.random()
+        index = bisect.bisect_left(self.cumulative, draw)
+        if index >= len(self.words):
+            index = len(self.words) - 1
+        return self.words[index]
+
+
 class BigramSampler:
     """
-    Samples sequences from bigram conditional distributions:
-      P(w2 | w1)
-    Stored as nested dict: probs[w1][w2] = float
-    Uses cumulative distributions per context for O(log deg) sampling.
+    Bigram generator with unigram backoff.
 
-    Backoff:
-      - if w1 not present or empty: sample from unigram sampler
+    The first generated word can condition on the final token of the most
+    recent prior caretaker utterance.
     """
+
     def __init__(self, bigram_probs: Dict[str, Dict[str, float]], unigram_backoff: WeightedSampler):
         self.backoff = unigram_backoff
-        self._contexts: Dict[str, Tuple[List[str], List[float]]] = {}
+        self.contexts = {
+            str(previous): ConditionalSampler(next_words)
+            for previous, next_words in bigram_probs.items()
+            if isinstance(next_words, dict) and next_words
+        }
 
-        # prebuild cumulative per context
-        for w1, d in bigram_probs.items():
-            if not isinstance(d, dict) or not d:
-                continue
-            items = [(str(w2), float(p)) for w2, p in d.items() if float(p) > 0.0]
-            if not items:
-                continue
-            # deterministic order
-            items.sort(key=lambda x: x[0])
-            words = [w for w, _ in items]
-            cum = []
-            s = 0.0
-            for _w, p in items:
-                s += p
-                cum.append(s)
-            if s <= 0.0:
-                continue
-            # normalize cumulative to 1.0 (defensive against tiny fp drift)
-            cum = [x / s for x in cum]
-            self._contexts[str(w1)] = (words, cum)
+    def sample_next(self, rng: random.Random, previous_word: Optional[str]) -> str:
+        if previous_word is not None:
+            sampler = self.contexts.get(previous_word)
+            if sampler is not None:
+                sampled = sampler.sample_one(rng)
+                if sampled:
+                    return sampled
+        return self.backoff.sample_one(rng)
 
-    def sample_next(self, rng: random.Random, prev: str) -> str:
-        ctx = self._contexts.get(prev)
-        if ctx is None:
-            return self.backoff.sample_one(rng)
-        words, cum = ctx
-        r = rng.random()
-        i = bisect.bisect_left(cum, r)
-        if i >= len(words):
-            i = len(words) - 1
-        return words[i]
-
-    def sample_sequence(self, rng: random.Random, n: int, start_prev: str = PAD_TOKEN) -> List[str]:
+    def sample_sequence(
+        self,
+        rng: random.Random,
+        n: int,
+        previous_caretaker_tokens: Sequence[str] = (),
+    ) -> List[str]:
         if n <= 0:
             return []
+        previous_word = previous_caretaker_tokens[-1] if previous_caretaker_tokens else None
         out: List[str] = []
-        prev = start_prev
         for _ in range(n):
-            w = self.sample_next(rng, prev)
-            out.append(w)
-            prev = w
+            word = self.sample_next(rng, previous_word)
+            if not word:
+                break
+            out.append(word)
+            previous_word = word
         return out
 
 
-# -------------------------
-# Dict loading (UPDATED for new filenames + bigrams)
-# -------------------------
+class TrigramSampler:
+    """
+    Trigram generator with bigram and unigram backoff.
+
+    The first generated word can condition on p2,p1 from the latest prior
+    caretaker utterance; after generation starts, generated words become the
+    running context.
+    """
+
+    def __init__(
+        self,
+        trigram_probs: Dict[str, Dict[str, Dict[str, float]]],
+        bigram_backoff: BigramSampler,
+        unigram_backoff: WeightedSampler,
+    ):
+        self.bigram_backoff = bigram_backoff
+        self.unigram_backoff = unigram_backoff
+        self.contexts: Dict[Tuple[str, str], ConditionalSampler] = {}
+        for first, second_level in trigram_probs.items():
+            if not isinstance(second_level, dict):
+                continue
+            for second, next_words in second_level.items():
+                if isinstance(next_words, dict) and next_words:
+                    self.contexts[(str(first), str(second))] = ConditionalSampler(next_words)
+
+    def sample_next(
+        self,
+        rng: random.Random,
+        previous_two_words: Sequence[str],
+    ) -> str:
+        if len(previous_two_words) >= 2:
+            key = (previous_two_words[-2], previous_two_words[-1])
+            sampler = self.contexts.get(key)
+            if sampler is not None:
+                sampled = sampler.sample_one(rng)
+                if sampled:
+                    return sampled
+
+        if previous_two_words:
+            return self.bigram_backoff.sample_next(rng, previous_two_words[-1])
+
+        return self.unigram_backoff.sample_one(rng)
+
+    def sample_sequence(
+        self,
+        rng: random.Random,
+        n: int,
+        previous_caretaker_tokens: Sequence[str] = (),
+    ) -> List[str]:
+        if n <= 0:
+            return []
+        history = list(previous_caretaker_tokens[-2:])
+        out: List[str] = []
+        for _ in range(n):
+            word = self.sample_next(rng, history)
+            if not word:
+                break
+            out.append(word)
+            history.append(word)
+            history = history[-2:]
+        return out
+
+
+def _load_json(path: Path) -> object:
+    if not path.exists():
+        return {}
+    with path.open("r", encoding="utf-8") as handle:
+        return json.load(handle)
+
 
 def load_vocab(
     dict_root: Path,
@@ -436,11 +445,10 @@ def load_vocab(
     drop_chat_markers: bool,
     drop_angle_artifacts: bool,
 ) -> List[str]:
-    p = dict_root / f"bin_{blabel}" / "vocab.txt"
-    if not p.exists():
+    path = dict_root / f"bin_{blabel}" / "vocab.txt"
+    if not path.exists():
         return []
-    with p.open("r", encoding="utf-8") as f:
-        raw = [line.strip() for line in f if line.strip()]
+    raw = [line.strip() for line in path.read_text(encoding="utf-8").splitlines() if line.strip()]
     return normalize_vocab_list(
         raw,
         allowed_at_tags=allowed_at_tags,
@@ -456,12 +464,14 @@ def load_unigram_counts(
     drop_chat_markers: bool,
     drop_angle_artifacts: bool,
 ) -> Dict[str, int]:
-    p = dict_root / f"bin_{blabel}" / "unigram_counts.json"
-    if not p.exists():
+    bin_dir = dict_root / f"bin_{blabel}"
+    path = bin_dir / "unigram_counts.json"
+    if not path.exists():
+        path = bin_dir / "counts.json"
+    obj = _load_json(path)
+    if not isinstance(obj, dict):
         return {}
-    with p.open("r", encoding="utf-8") as f:
-        obj = json.load(f)
-    raw = {str(k): int(v) for k, v in obj.items()}
+    raw = {str(key): int(value) for key, value in obj.items()}
     return normalize_counts(
         raw,
         allowed_at_tags=allowed_at_tags,
@@ -470,24 +480,31 @@ def load_unigram_counts(
     )
 
 
-def load_bigram_probs(
-    dict_root: Path,
-    blabel: str,
-) -> Dict[str, Dict[str, float]]:
-    p = dict_root / f"bin_{blabel}" / "bigram_probs.json"
-    if not p.exists():
-        return {}
-    with p.open("r", encoding="utf-8") as f:
-        obj = json.load(f)
-
-    # ensure str->(str->float)
-    out: Dict[str, Dict[str, float]] = {}
+def load_bigram_probs(dict_root: Path, blabel: str) -> Dict[str, Dict[str, float]]:
+    obj = _load_json(dict_root / f"bin_{blabel}" / "bigram_probs.json")
     if not isinstance(obj, dict):
-        return out
-    for w1, d in obj.items():
-        if not isinstance(d, dict):
+        return {}
+    out: Dict[str, Dict[str, float]] = {}
+    for previous, next_words in obj.items():
+        if isinstance(next_words, dict):
+            out[str(previous)] = {str(word): float(prob) for word, prob in next_words.items()}
+    return out
+
+
+def load_trigram_probs(dict_root: Path, blabel: str) -> Dict[str, Dict[str, Dict[str, float]]]:
+    obj = _load_json(dict_root / f"bin_{blabel}" / "trigram_probs.json")
+    if not isinstance(obj, dict):
+        return {}
+    out: Dict[str, Dict[str, Dict[str, float]]] = {}
+    for first, second_level in obj.items():
+        if not isinstance(second_level, dict):
             continue
-        out[str(w1)] = {str(w2): float(p) for w2, p in d.items()}
+        out[str(first)] = {}
+        for second, next_words in second_level.items():
+            if isinstance(next_words, dict):
+                out[str(first)][str(second)] = {
+                    str(word): float(prob) for word, prob in next_words.items()
+                }
     return out
 
 
@@ -497,12 +514,11 @@ def build_global_fallback_vocab(
     drop_chat_markers: bool,
     drop_angle_artifacts: bool,
 ) -> List[str]:
-    all_vocab: List[str] = []
-    for vp in dict_root.glob("bin_*/vocab.txt"):
-        with vp.open("r", encoding="utf-8") as f:
-            all_vocab.extend([line.strip() for line in f if line.strip()])
+    vocab: List[str] = []
+    for path in sorted(dict_root.glob("bin_*/vocab.txt")):
+        vocab.extend([line.strip() for line in path.read_text(encoding="utf-8").splitlines() if line.strip()])
     return normalize_vocab_list(
-        all_vocab,
+        vocab,
         allowed_at_tags=allowed_at_tags,
         drop_chat_markers=drop_chat_markers,
         drop_angle_artifacts=drop_angle_artifacts,
@@ -515,302 +531,270 @@ def build_global_fallback_unigram_counts(
     drop_chat_markers: bool,
     drop_angle_artifacts: bool,
 ) -> Dict[str, int]:
-    agg: Dict[str, int] = {}
-    for cp in dict_root.glob("bin_*/unigram_counts.json"):
-        with cp.open("r", encoding="utf-8") as f:
-            obj = json.load(f)
-        raw = {str(k): int(v) for k, v in obj.items()}
-        norm = normalize_counts(
-            raw,
+    counts: Dict[str, int] = {}
+    for path in sorted(dict_root.glob("bin_*/unigram_counts.json")):
+        obj = _load_json(path)
+        if not isinstance(obj, dict):
+            continue
+        normalized = normalize_counts(
+            {str(key): int(value) for key, value in obj.items()},
             allowed_at_tags=allowed_at_tags,
             drop_chat_markers=drop_chat_markers,
             drop_angle_artifacts=drop_angle_artifacts,
         )
-        for k, v in norm.items():
-            agg[k] = agg.get(k, 0) + int(v)
-    return agg
+        for word, count in normalized.items():
+            counts[word] = counts.get(word, 0) + count
+    return counts
 
 
-# -------------------------
-# Main processing (UPDATED: adds bigram)
-# -------------------------
+def parse_model_specs(args_models: Sequence[str]) -> List[Tuple[int, Path]]:
+    """Parse --models entries like 6:results/age_ngram_dicts/bin6."""
+    out: List[Tuple[int, Path]] = []
+    for item in args_models:
+        if ":" not in item:
+            raise ValueError(f"Bad --models entry, expected BIN:PATH: {item}")
+        left, right = item.split(":", 1)
+        bin_months = int(left)
+        if bin_months <= 0:
+            raise ValueError(f"Bin months must be positive: {item}")
+        root = Path(right)
+        if not root.exists():
+            raise ValueError(f"Dictionary root does not exist: {root}")
+        out.append((bin_months, root))
+    return sorted(out, key=lambda spec: spec[0])
+
 
 def process(
-    units: List[ChildUnit],
-    model_specs: List[Tuple[int, Path]],   # (bin_months, dict_root)
-    which: str,                            # "random", "unigram", "bigram", "all"
-    out_mode: str,
-    seed: int,
-    min_age_months: float,
-    max_age_months: float,
-    preserve_trailing_punct: bool,
-    allowed_at_tags: set[str],
-    drop_chat_markers: bool,
-    drop_angle_artifacts: bool,
+    units: Sequence[ChildUnit],
+    model_specs: Sequence[Tuple[int, Path]],
+    which: str = "all",
+    out_mode: str = "sibling",
+    seed: int = 123,
+    min_age_months: float = 0.0,
+    max_age_months: float = 120.0,
+    preserve_terminal_punct: bool = True,
+    allowed_at_tags: Optional[set[str]] = None,
+    drop_chat_markers: bool = True,
+    drop_angle_artifacts: bool = True,
+    text_col: str = "utterance_clean",
+    lowercase: bool = True,
+    min_token_len: int = 1,
 ) -> None:
+    """Add generated utterance columns to each prepared child file."""
+    allowed = allowed_at_tags or set(_ALLOWED_AT_TAGS_DEFAULT)
     rng = random.Random(seed)
 
-    # caches keyed by (bin_m, root_str, blabel)
     uniform_cache: Dict[Tuple[int, str, str], UniformSampler] = {}
     unigram_cache: Dict[Tuple[int, str, str], WeightedSampler] = {}
     bigram_cache: Dict[Tuple[int, str, str], BigramSampler] = {}
+    trigram_cache: Dict[Tuple[int, str, str], TrigramSampler] = {}
 
     fallback_uniform: Dict[Tuple[int, str], UniformSampler] = {}
     fallback_unigram: Dict[Tuple[int, str], WeightedSampler] = {}
+    custom_bins_cache: Dict[str, List[AgeBin]] = {}
 
-    def get_uniform(bin_m: int, root: Path, blabel: str) -> UniformSampler:
-        key = (bin_m, str(root), blabel)
+    def label_for_age(bin_months: int, root: Path, age_months: float) -> Optional[str]:
+        custom_bins = custom_bins_cache.setdefault(str(root), load_age_bins_config(root / "age_bins.json"))
+        if custom_bins:
+            age_bin = find_age_bin(age_months, custom_bins)
+            return age_bin.label if age_bin is not None else None
+        return bin_label(bin_start(age_months, bin_months, min_age_months), bin_months)
+
+    def get_uniform(bin_months: int, root: Path, label: str) -> UniformSampler:
+        key = (bin_months, str(root), label)
         if key in uniform_cache:
             return uniform_cache[key]
 
-        vocab = load_vocab(
-            root, blabel,
-            allowed_at_tags=allowed_at_tags,
-            drop_chat_markers=drop_chat_markers,
-            drop_angle_artifacts=drop_angle_artifacts,
-        )
-
+        vocab = load_vocab(root, label, allowed, drop_chat_markers, drop_angle_artifacts)
         if not vocab:
-            fb_key = (bin_m, str(root))
-            if fb_key not in fallback_uniform:
-                fb_vocab = build_global_fallback_vocab(
-                    root,
-                    allowed_at_tags=allowed_at_tags,
-                    drop_chat_markers=drop_chat_markers,
-                    drop_angle_artifacts=drop_angle_artifacts,
+            fallback_key = (bin_months, str(root))
+            if fallback_key not in fallback_uniform:
+                fallback_uniform[fallback_key] = UniformSampler(
+                    build_global_fallback_vocab(root, allowed, drop_chat_markers, drop_angle_artifacts)
                 )
-                fallback_uniform[fb_key] = UniformSampler(fb_vocab)
-            return fallback_uniform[fb_key]
+            return fallback_uniform[fallback_key]
 
         sampler = UniformSampler(vocab)
         uniform_cache[key] = sampler
         return sampler
 
-    def get_unigram(bin_m: int, root: Path, blabel: str) -> WeightedSampler:
-        key = (bin_m, str(root), blabel)
+    def get_unigram(bin_months: int, root: Path, label: str) -> WeightedSampler:
+        key = (bin_months, str(root), label)
         if key in unigram_cache:
             return unigram_cache[key]
 
-        counts = load_unigram_counts(
-            root, blabel,
-            allowed_at_tags=allowed_at_tags,
-            drop_chat_markers=drop_chat_markers,
-            drop_angle_artifacts=drop_angle_artifacts,
-        )
-
+        counts = load_unigram_counts(root, label, allowed, drop_chat_markers, drop_angle_artifacts)
         if not counts:
-            fb_key = (bin_m, str(root))
-            if fb_key not in fallback_unigram:
-                fb_counts = build_global_fallback_unigram_counts(
-                    root,
-                    allowed_at_tags=allowed_at_tags,
-                    drop_chat_markers=drop_chat_markers,
-                    drop_angle_artifacts=drop_angle_artifacts,
+            fallback_key = (bin_months, str(root))
+            if fallback_key not in fallback_unigram:
+                fallback_counts = build_global_fallback_unigram_counts(
+                    root, allowed, drop_chat_markers, drop_angle_artifacts
                 )
-                if not fb_counts:
-                    fb_vocab = build_global_fallback_vocab(
-                        root,
-                        allowed_at_tags=allowed_at_tags,
-                        drop_chat_markers=drop_chat_markers,
-                        drop_angle_artifacts=drop_angle_artifacts,
+                if not fallback_counts:
+                    fallback_counts = counts_from_vocab_uniform(
+                        build_global_fallback_vocab(root, allowed, drop_chat_markers, drop_angle_artifacts)
                     )
-                    fb_counts = counts_from_vocab_uniform(fb_vocab)
-                fallback_unigram[fb_key] = WeightedSampler(fb_counts)
-            return fallback_unigram[fb_key]
+                fallback_unigram[fallback_key] = WeightedSampler(fallback_counts)
+            return fallback_unigram[fallback_key]
 
         sampler = WeightedSampler(counts)
         unigram_cache[key] = sampler
         return sampler
 
-    def get_bigram(bin_m: int, root: Path, blabel: str) -> BigramSampler:
-        key = (bin_m, str(root), blabel)
+    def get_bigram(bin_months: int, root: Path, label: str) -> BigramSampler:
+        key = (bin_months, str(root), label)
         if key in bigram_cache:
             return bigram_cache[key]
 
-        # bigram probs are stored already as conditional floats
-        bi_probs = load_bigram_probs(root, blabel)
-
-        # backoff always exists (falls back to global if needed)
-        backoff_uni = get_unigram(bin_m, root, blabel)
-
-        sampler = BigramSampler(bi_probs, unigram_backoff=backoff_uni)
+        sampler = BigramSampler(load_bigram_probs(root, label), get_unigram(bin_months, root, label))
         bigram_cache[key] = sampler
         return sampler
 
+    def get_trigram(bin_months: int, root: Path, label: str) -> TrigramSampler:
+        key = (bin_months, str(root), label)
+        if key in trigram_cache:
+            return trigram_cache[key]
+
+        unigram = get_unigram(bin_months, root, label)
+        bigram = get_bigram(bin_months, root, label)
+        sampler = TrigramSampler(load_trigram_probs(root, label), bigram, unigram)
+        trigram_cache[key] = sampler
+        return sampler
+
     total_rows = 0
-    missing_age = 0
+    generated_rows = 0
 
     for unit in units:
-        try:
-            df = load_utts_with_age(unit)
-        except Exception as e:
-            print(f"[WARN] Skipping {unit.folder}: {e}")
-            continue
+        df = pd.read_csv(unit.chi_csv, dtype=str, keep_default_na=False, low_memory=False)
+        df = normalize_generated_metadata(df, unit)
+        contexts = load_child_utterance_contexts(
+            unit,
+            text_col=text_col,
+            lowercase=lowercase,
+            min_token_len=min_token_len,
+        )
 
-        if "utterance" not in df.columns:
-            print(f"[WARN] Skipping {unit.folder}: no 'utterance' column")
-            continue
+        for column in [CONTEXT_P2_COL, CONTEXT_P1_COL, CONTEXT_LAST_TWO_COL]:
+            df[column] = ""
 
-        has_word_count = "word_count" in df.columns
+        for column in generated_model_columns(model_specs, which):
+            df[column] = ""
 
-        df["age_months"] = pd.to_numeric(df["age_months"], errors="coerce")
-        mask_age = df["age_months"].notna()
-        missing_age += int((~mask_age).sum())
+        for context in contexts:
+            if context.age_months < min_age_months or context.age_months > max_age_months:
+                continue
 
-        # create cols (blank by default)
-        for bin_m, _root in model_specs:
-            if which in ("random", "all"):
-                df[f"random_model_utterance_bin{bin_m}"] = ""
-            if which in ("unigram", "all"):
-                df[f"unigram_model_utterance_bin{bin_m}"] = ""
-            if which in ("bigram", "all"):
-                df[f"bigram_model_utterance_bin{bin_m}"] = ""
+            n_tokens = len(context.child_tokens)
+            if n_tokens <= 0:
+                continue
 
-        df_ok = df[mask_age].copy()
-        df_ok = df_ok[(df_ok["age_months"] >= min_age_months) & (df_ok["age_months"] <= max_age_months)].copy()
+            row_text = df.at[context.row_index, text_col] if text_col in df.columns else ""
+            punct = terminal_punctuation(row_text) if preserve_terminal_punct else ""
+            for column, value in caretaker_context_debug_values(context.previous_caretaker_tokens).items():
+                df.at[context.row_index, column] = value
 
-        if not df_ok.empty:
-            for row in df_ok.itertuples(index=True):
-                idx = row.Index
-                age_m = float(row.age_months)
-                utt = row.utterance
+            for bin_months, root in model_specs:
+                label = label_for_age(bin_months, root, context.age_months)
+                if label is None:
+                    continue
 
-                L = int(row.word_count) if has_word_count and not (
-                    isinstance(row.word_count, float) and math.isnan(row.word_count)
-                ) else estimate_word_len_from_utterance(utt)
+                if which in {"random", "all"}:
+                    sampled = get_uniform(bin_months, root, label).sample_n(rng, n_tokens)
+                    df.at[context.row_index, f"random_model_utterance_bin{bin_months}"] = (
+                        with_terminal_punctuation(sampled, punct)
+                    )
 
-                puncts = trailing_punct_tokens(utt) if preserve_trailing_punct else []
+                if which in {"unigram", "all"}:
+                    sampled = get_unigram(bin_months, root, label).sample_n(rng, n_tokens)
+                    df.at[context.row_index, f"unigram_model_utterance_bin{bin_months}"] = (
+                        with_terminal_punctuation(sampled, punct)
+                    )
 
-                for bin_m, root in model_specs:
-                    bstart = bin_start(age_m, bin_m, min_age_months)
-                    blabel = bin_label(bstart, bin_m)
+                if which in {"bigram", "all"}:
+                    sampled = get_bigram(bin_months, root, label).sample_sequence(
+                        rng, n_tokens, context.previous_caretaker_tokens
+                    )
+                    df.at[context.row_index, f"bigram_model_utterance_bin{bin_months}"] = (
+                        with_terminal_punctuation(sampled, punct)
+                    )
 
-                    if which in ("random", "all"):
-                        uni = get_uniform(bin_m, root, blabel)
-                        sampled = uni.sample_n(rng, L)
-                        if puncts:
-                            sampled = sampled + puncts
-                        df.at[idx, f"random_model_utterance_bin{bin_m}"] = " ".join(sampled)
+                if which in {"trigram", "all"}:
+                    sampled = get_trigram(bin_months, root, label).sample_sequence(
+                        rng, n_tokens, context.previous_caretaker_tokens
+                    )
+                    df.at[context.row_index, f"trigram_model_utterance_bin{bin_months}"] = (
+                        with_terminal_punctuation(sampled, punct)
+                    )
 
-                    if which in ("unigram", "all"):
-                        u = get_unigram(bin_m, root, blabel)
-                        sampled = u.sample_n(rng, L)
-                        if puncts:
-                            sampled = sampled + puncts
-                        df.at[idx, f"unigram_model_utterance_bin{bin_m}"] = " ".join(sampled)
+            generated_rows += 1
 
-                    if which in ("bigram", "all"):
-                        b = get_bigram(bin_m, root, blabel)
-                        sampled = b.sample_sequence(rng, L, start_prev=PAD_TOKEN)
-                        if puncts:
-                            sampled = sampled + puncts
-                        df.at[idx, f"bigram_model_utterance_bin{bin_m}"] = " ".join(sampled)
-
-        # write output
         if out_mode == "sibling":
-            out_path = unit.folder / "child_utts.random_unigram_bigram.csv"
+            out_path = unit.folder / "chi.ngram_generated.csv"
         elif out_mode == "inplace":
-            bak = unit.folder / "child_utts.csv.bak_random_unigram_bigram"
-            if not bak.exists():
-                unit.child_utts_csv.replace(bak)
-            out_path = unit.folder / "child_utts.csv"
+            out_path = unit.chi_csv
         else:
-            raise ValueError("--out_mode must be 'sibling' or 'inplace'")
+            raise ValueError("out_mode must be 'sibling' or 'inplace'")
 
-        df.to_csv(out_path, index=False)
-        total_rows += len(df)
+        output_df = enforce_generated_output_schema(df, model_specs, which)
+        output_df.to_csv(
+            out_path,
+            index=False,
+            quoting=csv.QUOTE_ALL,
+            lineterminator="\n",
+        )
+        total_rows += len(output_df)
         print(f"[OK] {unit.dataset}/{unit.child}: wrote {out_path}")
 
-    print("\n[SUMMARY]")
-    print(f"  Total rows seen: {total_rows}")
-    print(f"  Rows missing age_months (cols left blank): {missing_age}")
-    print(f"  which: {which}")
-    print(f"  allowed_at_tags for @TAG forms: {sorted(allowed_at_tags)}")
-    print(f"  drop_chat_markers: {drop_chat_markers} (drops 0*, &*, xxx/yyy/www)")
-    print(f"  drop_angle_artifacts: {drop_angle_artifacts} (drops tokens containing < or >)")
+    print("[SUMMARY]")
+    print(f"  Child rows seen: {total_rows}")
+    print(f"  Scorable child rows generated: {generated_rows}")
+    print(f"  Models: {which}")
 
 
-def parse_model_specs(args_models: List[str]) -> List[Tuple[int, Path]]:
-    """
-    Parse --models items like:
-      3:results/age_word_dicts/bin3
-      6:results/age_word_dicts/bin6
-      12:results/age_word_dicts/bin12
-    """
-    out: List[Tuple[int, Path]] = []
-    for item in args_models:
-        if ":" not in item:
-            raise ValueError(f"Bad --models entry (expected BIN:PATH): {item}")
-        left, right = item.split(":", 1)
-        bin_m = int(left)
-        if bin_m <= 0:
-            raise ValueError(f"Bin months must be positive; got {bin_m}")
-        p = Path(right)
-        if not p.exists():
-            raise ValueError(f"Dict root does not exist: {p}")
-        out.append((bin_m, p))
-    out.sort(key=lambda x: x[0])
-    return out
-
-
-def main():
-    ap = argparse.ArgumentParser()
-    ap.add_argument("--data_dir", type=str, default="data")
-    ap.add_argument("--datasets", nargs="+", default=["Brown", "Manchester", "Providence"])
-
-    ap.add_argument(
+def main() -> None:
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--data_dir", type=str, default="data/preprocessed_data")
+    parser.add_argument("--datasets", nargs="+", default=["Brown", "Manchester", "Providence"])
+    parser.add_argument(
         "--models",
         nargs="+",
-        required=True,
-        help="List of BIN:DICT_ROOT like 3:results/age_word_dicts/bin3 6:... 12:...",
+        default=["6:results/age_ngram_dicts/bin6"],
+        help="BIN:DICT_ROOT entries, for example 6:results/age_ngram_dicts/bin6.",
     )
+    parser.add_argument("--which", choices=["random", "unigram", "bigram", "trigram", "all"], default="all")
+    parser.add_argument("--seed", type=int, default=123)
+    parser.add_argument("--min_age_months", type=float, default=0.0)
+    parser.add_argument("--max_age_months", type=float, default=120.0)
+    parser.add_argument("--out_mode", choices=["sibling", "inplace"], default="sibling")
+    parser.add_argument("--no_preserve_terminal_punct", action="store_true")
+    parser.add_argument("--allowed_at_tags", nargs="+", default=sorted(_ALLOWED_AT_TAGS_DEFAULT))
+    parser.add_argument("--keep_chat_markers", action="store_true")
+    parser.add_argument("--keep_angle_artifacts", action="store_true")
+    parser.add_argument("--text_col", type=str, default="utterance_clean")
+    parser.add_argument("--no_lowercase", action="store_true")
+    parser.add_argument("--min_token_len", type=int, default=1)
 
-    ap.add_argument("--which", choices=["random", "unigram", "bigram", "all"], default="all")
-    ap.add_argument("--seed", type=int, default=123)
-    ap.add_argument("--min_age_months", type=float, default=0.0)
-    ap.add_argument("--max_age_months", type=float, default=120.0)
+    args = parser.parse_args()
 
-    ap.add_argument("--out_mode", type=str, default="sibling", choices=["sibling", "inplace"])
-    ap.add_argument("--no_preserve_trailing_punct", action="store_true")
-
-    ap.add_argument(
-        "--allowed_at_tags",
-        nargs="+",
-        default=sorted(_ALLOWED_AT_TAGS_DEFAULT),
-        help="For tokens with @TAG, only keep if TAG is in this set; then strip @TAG. Default: b c o",
-    )
-    ap.add_argument(
-        "--keep_chat_markers",
-        action="store_true",
-        help="If set, DO NOT drop CHAT markers (0*, &*, xxx/yyy/www). Default is to drop them.",
-    )
-    ap.add_argument(
-        "--keep_angle_artifacts",
-        action="store_true",
-        help="If set, DO NOT drop tokens containing '<' or '>'. Default is to drop them.",
-    )
-
-    args = ap.parse_args()
-
-    units = discover_child_units(Path(args.data_dir), args.datasets)
+    units = iter_child_units(Path(args.data_dir), args.datasets)
     if not units:
-        raise SystemExit(f"No child_utts.csv found under {args.data_dir} for datasets={args.datasets}")
-
-    model_specs = parse_model_specs(args.models)
-    allowed_at_tags = set(args.allowed_at_tags)
+        raise SystemExit(f"No chi.csv files found under {args.data_dir} for datasets={args.datasets}.")
 
     process(
         units=units,
-        model_specs=model_specs,
+        model_specs=parse_model_specs(args.models),
         which=args.which,
         out_mode=args.out_mode,
         seed=args.seed,
         min_age_months=args.min_age_months,
         max_age_months=args.max_age_months,
-        preserve_trailing_punct=not args.no_preserve_trailing_punct,
-        allowed_at_tags=allowed_at_tags,
+        preserve_terminal_punct=not args.no_preserve_terminal_punct,
+        allowed_at_tags=set(args.allowed_at_tags),
         drop_chat_markers=not args.keep_chat_markers,
         drop_angle_artifacts=not args.keep_angle_artifacts,
+        text_col=args.text_col,
+        lowercase=not args.no_lowercase,
+        min_token_len=args.min_token_len,
     )
 
 

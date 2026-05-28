@@ -1,1133 +1,698 @@
 #!/usr/bin/env python3
 """
-prepare_datasets.py
-===================
+Prepare raw CHAT transcripts into simple raw/cleaned CSV files.
 
-Stage 0: Unified corpus pre-processor for CHILDES subsets.
+Goal
+----
+This is the maintainable Stage 0 preprocessing entry point. It keeps the useful
+corpus traversal skeleton from the older prepare_datasets.py, but delegates all
+utterance cleaning to cleaning.py so there is one cleaning policy to test.
 
-For each DATASET = {Providence, Manchester, Brown}:
-  For each child directory under the dataset root, create FIVE CSVs:
-    • child_utts.csv        — *CHI* utterances
-    • mot_utts.csv          — *MOT* utterances
-    • fat_utts.csv          — *FAT* utterances
-    • caretakers_utts.csv   — *MOT+FAT* utterances merged, in chronological line order
-    • child_meta.csv        — a one-row file with arrays aligned to sessions
-                              (session_ids, session_ages, session_ages_months, session_paths)
+Normal output for each child/session group:
+- chi.csv: CHI utterances only.
+- caretakers.csv: MOT and FAT utterances in CHAT order.
 
-For DATASET = Hall:
-  The raw layout is expected to be:
-    data/raw_data/Hall/BlackPro/*.cha
-    data/raw_data/Hall/BlackWork/*.cha
-    data/raw_data/Hall/WhitePro/*.cha
-    data/raw_data/Hall/WhiteWork/*.cha
+Testing output:
+- When --testing is passed, also write testing.csv with CHI, MOT, and FAT rows
+  together in CHAT order. This is for quick human inspection of raw vs cleaned
+  output.
 
-  Each .cha file is treated as one child with one session. Outputs are written by default to:
-    data/preprocessed_data/Hall/<child_stem>/
-
-  The Hall group folder (BlackPro, BlackWork, WhitePro, WhiteWork) is stored in
-  the CSV column `source_group` and in child_meta.csv, not in the child folder name.
-
-Optionally, also write:
-    • session_index.csv — one row per session with counts per role
-
-IMPORTANT CHANGE
-----------------
-• We keep the utterance text RAW (as in CHAT main tier) in column `utterance`.
-• We ALSO compute a canonical cleaned text in `utterance_clean`, used for:
-    - word_count
-    - syllable counts (multiple strategies)
-    - later LM scoring consistency
-
-@-TOKEN POLICY (STRICT)
------------------------
-Before TOKEN_RE extraction for word_count/syllables:
-  - keep only base@{c|b|o}  -> replace with base
-  - drop all other @ tokens entirely (so 'y@l' is removed, not turned into 'y' + 'l')
-
-Caretakers CSV
---------------
-`caretakers_utts.csv` contains MOT + FAT utterances together, with:
-  - `speaker` column: MOT or FAT
-  - `utt_id_role` column: original per-role utt_id from mot_utts/fat_utts
-  - `utt_id` re-numbered to be unique within caretakers_utts.csv
-  - rows sorted by (session_id, file, line_no) to preserve CHAT file order
+This script intentionally does not compute word counts, syllables, morphemes,
+contexts, generated utterances, or scoring inputs.
 """
 
 from __future__ import annotations
 
 import argparse
 import csv
-import json
 import re
 import sys
-from datetime import datetime
+from collections import defaultdict
+from dataclasses import dataclass
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, Iterable, List, Optional, Sequence, Tuple
 
-# ────────────────────────────────────────────────────────────────
-# Corpus config
-# ────────────────────────────────────────────────────────────────
+from cleaning import DEFAULT_SPEAKERS, iter_cleaned_chat_rows
+
 
 SCRIPT_DIR = Path(__file__).resolve().parent
 PROJECT_ROOT = SCRIPT_DIR.parent
 
-DEFAULT_ROOTS = {
-    # Old-style locations kept for backward compatibility.
-    "Providence": [PROJECT_ROOT / "data" / "Providence" / "Providence",
-                   Path.cwd() / "data" / "Providence" / "Providence",
-                   PROJECT_ROOT / "data" / "preprocessed_data" / "Providence",
-                   Path.cwd() / "data" / "preprocessed_data" / "Providence"],
-    "Manchester": [PROJECT_ROOT / "data" / "Manchester",
-                   Path.cwd() / "data" / "Manchester",
-                   PROJECT_ROOT / "data" / "preprocessed_data" / "Manchester",
-                   Path.cwd() / "data" / "preprocessed_data" / "Manchester"],
-    "Brown":      [PROJECT_ROOT / "data" / "Brown",
-                   Path.cwd() / "data" / "Brown",
-                   PROJECT_ROOT / "data" / "preprocessed_data" / "Brown",
-                   Path.cwd() / "data" / "preprocessed_data" / "Brown"],
-
-    # Hall is downloaded under data/raw_data/Hall in your current project.
-    "Hall":      [PROJECT_ROOT / "data" / "raw_data" / "Hall",
-                  Path.cwd() / "data" / "raw_data" / "Hall"],
-}
-
-DEFAULT_OUTPUT_ROOTS = {
-    # If --output-dir is not given, old datasets still write in-place.
-    "Providence": None,
-    "Manchester": None,
-    "Brown": None,
-
-    # For Hall, default to writing processed CSVs away from raw_data.
-    "Hall": [PROJECT_ROOT / "data" / "preprocessed_data" / "Hall",
-             Path.cwd() / "data" / "preprocessed_data" / "Hall"],
-}
-
-SUMMARY_FILENAMES = {
-    "Providence": "summary_providence.txt",
-    "Manchester": "summary_manchester.txt",
-    "Brown":      "summary_brown.txt",
-    "Hall":       "summary_hall.txt",
-}
-
-MISSING_AGE_REPORT = "missing_age_sessions.txt"
-
-# Punctuation seen as standalone %mor items; ignore these in morpheme counts
-PUNCT_TOKENS = {".", "?", "!", ",", ":", ";", "…", "—"}
-
-# Affix codes to count as overt bound morphemes (case-insensitive)
-MOR_AFFIX_CODES = {
-    "PL", "POSS",          # -s plural, -'s possessive
-    "ING", "GER",          # -ing
-    "ED", "PAST", "PT",    # -ed / past / participle
-    "ER", "COMP",          # -er comparative
-    "EST", "SUP",          # -est superlative
-}
-
-# Parse CHI demographics from an @ID line:
-# @ID: language|corpus|CHI|AGE|SEX|...
-CHI_ID_RE = re.compile(
-    r"^@ID:[^|]*\|[^|]*\|CHI\|([^|]*)\|([^|]*)\|", re.IGNORECASE)
-
-# Word tokenizer (alpha + diacritics + apostrophes)
-TOKEN_RE = re.compile(r"[A-Za-zÀ-ÖØ-öø-ÿ]+(?:'[A-Za-zÀ-ÖØ-öø-ÿ]+)*")
-
-# CHAT date lines
-BIRTH_RE = re.compile(r"^@Birth of CHI:\s*(.+)\s*$", re.IGNORECASE)
-DATE_RE = re.compile(r"^@Date:\s*(.+)\s*$", re.IGNORECASE)
-
-# ────────────────────────────────────────────────────────────────
-# Canonical cleaning (shared policy)
-# ────────────────────────────────────────────────────────────────
-
-# time bullets: \x15 34413_37325 \x15 (allow spaces + '_' or ':' and optional second number)
-_TIMECODE_RE = re.compile(r"\x15\s*\d+(?:[_:]\d+)?\s*\x15")
-
-_BRACKETS_RE = re.compile(r"\[[^\]]*]")        # [...]
-_PARENS_RE   = re.compile(r"\([^)]*\)")        # remove only the (...) part, keep surrounding text
-
-# IMPORTANT: keep the words inside <...> (CHAT overlap span), do NOT delete them
-_ANGLE_KEEP_RE = re.compile(r"<([^>]*)>")      # <...> -> content
-
-_UNTRANS_RE  = re.compile(r"\b(?:xxx|yyy|www)\b", re.IGNORECASE)
-
-# CHAT + fragments (token-level markers)
-_PLUS_MARKER_RE = re.compile(r"(?:(?<=\s)|^)\+(?:[/\.\-]+|\S+)")
-
-# Standard CHAT planning fillers should remain available for scoring/counting.
-# Canonicalize the CHAT spelling to a plain lexical stem:
-#   &-uh -> uh, &-um -> um, &-er -> er, &-eh -> eh
-# Hall also contains elongated variants such as &-er:r and &-um:, which are
-# normalized to the same base filler when they end as a whitespace token.
-_FILLER_MARKER_RE = re.compile(
-    r"(?:(?<=\s)|^)&-(uh|um|er|eh)(?::[A-Za-z]*)?(?=[\s,.;!?]|$)",
-    re.IGNORECASE,
+DATASETS = (
+    "Brown",
+    "Manchester",
+    "Providence",
+    "Hall",
+    "MPI-EVA-Manchester",
+    "Belfast",
+    "Wells",
+    "Champaign",
+    "EHS",
+    "Cummings",
+    "Lara",
+    "Sachs",
+    "Weist",
+    "Kuczaj",
+    "Post",
+    "Demetras1",
+    "Forrester",
 )
 
-# Standalone @markers (token begins with @)
-_AT_MARKER_RE = re.compile(r"(?:(?<=\s)|^)@[^\s]+")
-
-# Other tokens starting with & are CHAT artifacts to remove.
-_AMP_MARKER_RE = re.compile(r"(?:(?<=\s)|^)&[^\s]+")
-
-# Omission tokens like 0word, 0, 0xxx
-_ZERO_MARKER_RE = re.compile(r"(?:(?<=\s)|^)0[^\s]*")
-
-_SPACES_RE = re.compile(r"\s+")
-
-# Preserve an utterance-final sentence mark even when the CHAT syntax carrying
-# it is removed, e.g. "two +//. 2965221_2967008" -> "two."
-_TRAILING_TRANSCRIPT_TIME_RE = re.compile(
-    r"(?:\s*(?:\x15\s*\d+(?:[_:]\d+)?\s*\x15|\d+(?:[_:]\d+)))+\s*$"
-)
-_TERMINAL_SENTENCE_PUNCT_RE = re.compile(r"([.!?])\s*$")
-
-# STRICT @ rule: allow only base@c|b|o (case-insensitive) at whitespace-token level
-_ALLOWED_AT_TOKEN_RE = re.compile(r"^([^@\s]+)@([cbo])$", re.IGNORECASE)
-
-# Strip leading/trailing junk but keep letters/diacritics/apostrophes/@ for @-rule checking
-_STRIP_OUTER_JUNK_RE = re.compile(r"^[^A-Za-zÀ-ÖØ-öø-ÿ'@]+|[^A-Za-zÀ-ÖØ-öø-ÿ'@]+$")
-
-
-def _apply_strict_at_policy_whitespace_tokens(s: str) -> str:
-    """
-    Enforce strict @ policy BEFORE TOKEN_RE extraction:
-
-      - if token contains '@':
-          * keep only base@{c|b|o} -> replace token with base
-          * drop everything else (e.g., y@l) completely
-      - tokens without '@' are kept (after light outer-junk stripping)
-
-    This prevents TOKEN_RE from counting the '@tag' letters as extra "words".
-    """
-    out: List[str] = []
-    for raw in (s or "").split():
-        t = raw.replace("<", "").replace(">", "")
-        t = _STRIP_OUTER_JUNK_RE.sub("", t).strip()
-        if not t:
-            continue
-
-        if "@" in t:
-            m = _ALLOWED_AT_TOKEN_RE.fullmatch(t)
-            if not m:
-                continue
-            base = m.group(1).replace("<", "").replace(">", "")
-            base = _STRIP_OUTER_JUNK_RE.sub("", base).strip()
-            if not base:
-                continue
-            out.append(base)
-        else:
-            out.append(t)
-
-    return " ".join(out)
-
-
-def _terminal_sentence_punctuation(text: str) -> str:
-    """
-    Return a meaningful final ".", "!", or "?" from a raw utterance.
-
-    Some CHAT rows carry timing spans after the final sentence mark, including
-    plain transcript ids such as ``2965221_2967008``. Strip those suffixes only
-    for punctuation detection; the main cleaning pass handles the full text.
-    """
-    s = "" if text is None else str(text).strip()
-    if not s:
-        return ""
-
-    s = _TRAILING_TRANSCRIPT_TIME_RE.sub("", s).rstrip()
-    match = _TERMINAL_SENTENCE_PUNCT_RE.search(s)
-    return match.group(1) if match else ""
-
-
-def clean_chat_for_counts(text: str) -> str:
-    """
-    Canonical cleaning used for:
-      - word_count
-      - syllable counts
-      - consistency with later LM scoring / random LM tooling
-
-    Policy:
-      - Keep lexical material inside <...> (overlap spans) by unwrapping them.
-      - Remove bracketed annotations [...] and parenthetical spans (...).
-      - Preserve standard planning fillers &-uh/&-um/&-er/&-eh as plain stems.
-      - Remove other CHAT markers (@..., +..., remaining &..., 0...).
-      - Preserve an utterance-final ., !, or ? when lexical material remains.
-      - Enforce strict @ policy on remaining whitespace tokens:
-          keep base@{c|b|o} -> base; drop all other @ tokens
-    """
-    s = "" if text is None else str(text)
-    terminal_punct = _terminal_sentence_punctuation(s)
-
-    s = _TIMECODE_RE.sub(" ", s)
-    s = _BRACKETS_RE.sub(" ", s)
-    s = _PARENS_RE.sub(" ", s)
-
-    # unwrap <...> -> content
-    s = _ANGLE_KEEP_RE.sub(r"\1", s)
-
-    s = _UNTRANS_RE.sub(" ", s)
-
-    s = _FILLER_MARKER_RE.sub(lambda m: f" {m.group(1).lower()} ", s)
-    s = _AT_MARKER_RE.sub(" ", s)
-    s = _PLUS_MARKER_RE.sub(" ", s)
-    s = _AMP_MARKER_RE.sub(" ", s)
-    s = _ZERO_MARKER_RE.sub(" ", s)
-
-    s = _SPACES_RE.sub(" ", s).strip()
-
-    # strict @ post-pass
-    s = _apply_strict_at_policy_whitespace_tokens(s)
-
-    s = _SPACES_RE.sub(" ", s).strip()
-    if s and terminal_punct:
-        s = f"{s}{terminal_punct}"
-    return s
-
-
-def clean_and_count_words(text: str) -> Tuple[str, int, int]:
-    """
-    Returns:
-      cleaned_text, word_count, n_alpha_words
-    """
-    cleaned = clean_chat_for_counts(text)
-    words = TOKEN_RE.findall(cleaned)
-    return cleaned, len(words), len(words)
-
-# ────────────────────────────────────────────────────────────────
-# Syllable strategies
-# ────────────────────────────────────────────────────────────────
-
-_VOWELS_BASIC = "aeiouy"
-_VOWELS_NOY   = "aeiou"
-_VGROUP_RE_BASIC = re.compile(r"[aeiouy]+", re.IGNORECASE)
-_VGROUP_RE_NOY   = re.compile(r"[aeiou]+", re.IGNORECASE)
-
-
-def _strip_nonletters_ends(word: str) -> str:
-    w = word.lower().strip()
-    w = re.sub(r"^[^a-z]+|[^a-z]+$", "", w)
-    return w
-
-
-def syllables_basic(word: str) -> int:
-    w = _strip_nonletters_ends(word)
-    if not w:
-        return 0
-    if len(w) <= 3:
-        return 1
-    groups = _VGROUP_RE_BASIC.findall(w)
-    n = len(groups)
-    if w.endswith("e"):
-        n -= 1
-    return max(1, n)
-
-
-def syllables_lenient(word: str) -> int:
-    w = _strip_nonletters_ends(word)
-    if not w:
-        return 0
-    if len(w) <= 3:
-        return 1
-    groups = _VGROUP_RE_BASIC.findall(w)
-    return max(1, len(groups))
-
-
-def syllables_strict_y(word: str) -> int:
-    w = _strip_nonletters_ends(word)
-    if not w:
-        return 0
-    if len(w) <= 3:
-        return 1
-
-    has_aeiou = bool(_VGROUP_RE_NOY.search(w))
-    if has_aeiou:
-        groups = _VGROUP_RE_NOY.findall(w)
-        n = len(groups)
-        if w.endswith("e"):
-            n -= 1
-        if w.endswith("y"):
-            n += 1
-        return max(1, n)
-    else:
-        groups = _VGROUP_RE_BASIC.findall(w)
-        n = len(groups)
-        if w.endswith("e"):
-            n -= 1
-        return max(1, n)
-
-
-def syllables_le(word: str) -> int:
-    w = _strip_nonletters_ends(word)
-    if not w:
-        return 0
-    if len(w) <= 3:
-        return 1
-
-    n = syllables_basic(w)
-
-    if len(w) >= 3 and w.endswith("le"):
-        prev = w[-3]
-        if prev not in _VOWELS_BASIC and w[-3:] not in ("lle",):
-            n += 1
-
-    if len(w) >= 3 and w.endswith("ed"):
-        prev = w[-3]
-        if prev in ("t", "d"):
-            n += 1
-
-    if len(w) >= 3 and w.endswith("es"):
-        prev2 = w[-3:-1]
-        if prev2 in ("sh", "ch") or w[-3] in ("s", "x", "z"):
-            n += 1
-
-    return max(1, n)
-
-
-def count_utt_syllables(cleaned_text: str) -> Dict[str, int]:
-    words = TOKEN_RE.findall(cleaned_text or "")
-    tot_basic = 0
-    tot_lenient = 0
-    tot_stricty = 0
-    tot_le = 0
-    for w in words:
-        tot_basic += syllables_basic(w)
-        tot_lenient += syllables_lenient(w)
-        tot_stricty += syllables_strict_y(w)
-        tot_le += syllables_le(w)
-    return {
-        "utt_syllables_basic": tot_basic,
-        "utt_syllables_lenient": tot_lenient,
-        "utt_syllables_strictY": tot_stricty,
-        "utt_syllables_le": tot_le,
-        "n_alpha_words": len(words),
-    }
-
-# ────────────────────────────────────────────────────────────────
-# Date + age helpers
-# ────────────────────────────────────────────────────────────────
-
-def resolve_base_dir(dataset: str, base_override: Optional[str]) -> Tuple[Path, List[Path]]:
-    if base_override:
-        b = Path(base_override).expanduser().resolve()
-        return b, [b]
-    candidates = DEFAULT_ROOTS[dataset]
-    for c in candidates:
-        if c.exists():
-            return c, candidates
-    return candidates[0], candidates
-
-
-def resolve_output_dir(dataset: str, base_dir: Path, output_override: Optional[str]) -> Path:
-    """
-    Where processed CSVs are written.
-
-    Old corpora default to the original behavior: write beside the .cha files.
-    Hall defaults to data/preprocessed_data/Hall because its raw files live in
-    data/raw_data/Hall.
-    """
-    if output_override:
-        return Path(output_override).expanduser().resolve()
-
-    candidates = DEFAULT_OUTPUT_ROOTS.get(dataset)
-    if not candidates:
-        return base_dir
-
-    for c in candidates:
-        if c.exists():
-            return c.resolve()
-
-    return candidates[0].resolve()
-
-
-def parse_chat_date(s: str) -> Optional[datetime]:
-    s = s.strip()
-    fmts = ["%d-%b-%Y", "%d-%B-%Y", "%Y-%m-%d", "%d/%m/%Y", "%m/%d/%Y"]
-    for f in fmts:
-        try:
-            return datetime.strptime(s, f)
-        except Exception:
-            continue
-    return None
-
-
-def months_between(d1: datetime, d0: datetime) -> float:
-    years = d1.year - d0.year
-    months = d1.month - d0.month
-    days = d1.day - d0.day
-    total = years * 12 + months + (days / 30.0)
-    return round(float(total), 3)
-
-
-def age_str_to_months(age: str) -> Optional[float]:
-    if not age:
-        return None
-    s = age.strip()
-    m = re.match(r"^\s*(\d+)\s*;\s*(\d{1,2})(?:\.(\d{0,2}))?\s*\.?\s*$", s)
-    if m:
-        years = int(m.group(1))
-        months = int(m.group(2))
-        days_str = m.group(3) if m.group(3) is not None else ""
-        days = int(days_str) if (days_str and days_str.isdigit()) else 0
-        total = years * 12 + months + (days / 30.0)
-        return round(total, 3)
-    m2 = re.match(r"^\s*(\d+)\s*;\s*$", s)
-    if m2:
-        years = int(m2.group(1))
-        return float(years * 12)
-    return None
-
-
-def extract_chi_age_sex(cha_path: Path) -> Tuple[str, Optional[float], str, Optional[datetime], Optional[datetime]]:
-    age_raw, sex = "", ""
-    birth_dt: Optional[datetime] = None
-    sess_dt: Optional[datetime] = None
-
-    with cha_path.open(encoding="utf-8", errors="replace") as fh:
-        for line in fh:
-            if not age_raw and line.startswith("@ID:") and "|CHI|" in line:
-                m = CHI_ID_RE.match(line)
-                if m:
-                    age_raw = m.group(1).strip()
-                    sex = m.group(2).strip()
-            mb = BIRTH_RE.match(line)
-            if mb and birth_dt is None:
-                birth_dt = parse_chat_date(mb.group(1))
-            md = DATE_RE.match(line)
-            if md and sess_dt is None:
-                sess_dt = parse_chat_date(md.group(1))
-
-    age_m = age_str_to_months(age_raw)
-    if age_m is None and birth_dt and sess_dt:
-        try:
-            age_m = months_between(sess_dt, birth_dt)
-        except Exception:
-            age_m = None
-
-    return age_raw, age_m, sex, birth_dt, sess_dt
-
-
-def count_morphemes_from_mor(mor_line: str) -> Optional[int]:
-    if not mor_line.lstrip().startswith("%mor:"):
-        return None
-    body = mor_line.split(":", 1)[1].strip()
-    if not body:
-        return 0
-
-    total = 0
-    for tok in body.split():
-        if tok in PUNCT_TOKENS:
-            continue
-        for sub in tok.split("~"):
-            sub = sub.strip()
-            if not sub or sub in PUNCT_TOKENS:
-                continue
-            add = 1
-            right = sub.split("|", 1)[1] if "|" in sub else sub
-            parts = right.split("-")
-            feats = parts[1:] if len(parts) > 1 else []
-            add += sum(1 for f in feats if f.upper() in MOR_AFFIX_CODES)
-            total += add
-    return total
-
-# ────────────────────────────────────────────────────────────────
-# CSV schema
-# ────────────────────────────────────────────────────────────────
-
-CSV_UTT_COLUMNS = [
-    "utt_id", "child_id", "session_id",
-    "utterance",
-    "utterance_clean",
-    "word_count",
-    "morph_count",
-    "utt_syllables_basic",
-    "utt_syllables_lenient",
-    "utt_syllables_strictY",
-    "utt_syllables_le",
-    "n_alpha_words",
-    "source_group",
-    "file", "line_no",
-]
-
-CSV_CARETAKER_COLUMNS = [
-    "utt_id",
-    "utt_id_role",
-    "speaker",
-    "child_id", "session_id",
-    "utterance",
-    "utterance_clean",
-    "word_count",
-    "morph_count",
-    "utt_syllables_basic",
-    "utt_syllables_lenient",
-    "utt_syllables_strictY",
-    "utt_syllables_le",
-    "n_alpha_words",
-    "source_group",
-    "file", "line_no",
-]
-
-CSV_META_COLUMNS = ["child_id", "sex", "source_group", "session_ids", "session_ages",
-                    "session_ages_months", "session_paths", "n_sessions"]
-
-CSV_SESSION_IDX_COLUMNS = [
-    "session_id", "age_raw", "age_months", "path",
-    "utts_CHI", "m0_CHI", "words_CHI", "morphs_CHI",
-    "utts_MOT", "m0_MOT", "words_MOT", "morphs_MOT",
-    "utts_FAT", "m0_FAT", "words_FAT", "morphs_FAT",
-]
-
-CSV_CLEANED_EXPORT_COLUMNS = [
+DEFAULT_RAW_ROOTS = {
+    "Brown": [
+        PROJECT_ROOT / "data" / "raw_data" / "Brown",
+        PROJECT_ROOT / "data" / "Brown",
+        Path.cwd() / "data" / "raw_data" / "Brown",
+        Path.cwd() / "data" / "Brown",
+    ],
+    "Manchester": [
+        PROJECT_ROOT / "data" / "raw_data" / "Manchester",
+        PROJECT_ROOT / "data" / "Manchester",
+        Path.cwd() / "data" / "raw_data" / "Manchester",
+        Path.cwd() / "data" / "Manchester",
+    ],
+    "Providence": [
+        PROJECT_ROOT / "data" / "raw_data" / "Providence",
+        PROJECT_ROOT / "data" / "Providence",
+        Path.cwd() / "data" / "raw_data" / "Providence",
+        Path.cwd() / "data" / "Providence",
+    ],
+    "Hall": [
+        PROJECT_ROOT / "data" / "raw_data" / "Hall",
+        Path.cwd() / "data" / "raw_data" / "Hall",
+    ],
+    "MPI-EVA-Manchester": [
+        PROJECT_ROOT / "data" / "raw_data" / "MPI-EVA-Manchester",
+        PROJECT_ROOT / "data" / "MPI-EVA-Manchester",
+        Path.cwd() / "data" / "raw_data" / "MPI-EVA-Manchester",
+        Path.cwd() / "data" / "MPI-EVA-Manchester",
+    ],
+    "Belfast": [
+        PROJECT_ROOT / "data" / "raw_data" / "Belfast",
+        PROJECT_ROOT / "data" / "Belfast",
+        Path.cwd() / "data" / "raw_data" / "Belfast",
+        Path.cwd() / "data" / "Belfast",
+    ],
+    "Wells": [
+        PROJECT_ROOT / "data" / "raw_data" / "Wells",
+        PROJECT_ROOT / "data" / "Wells",
+        Path.cwd() / "data" / "raw_data" / "Wells",
+        Path.cwd() / "data" / "Wells",
+    ],
+    "Champaign": [
+        PROJECT_ROOT / "data" / "raw_data" / "Champaign",
+        PROJECT_ROOT / "data" / "Champaign",
+        Path.cwd() / "data" / "raw_data" / "Champaign",
+        Path.cwd() / "data" / "Champaign",
+    ],
+    "EHS": [
+        PROJECT_ROOT / "data" / "raw_data" / "EHS",
+        PROJECT_ROOT / "data" / "EHS",
+        Path.cwd() / "data" / "raw_data" / "EHS",
+        Path.cwd() / "data" / "EHS",
+    ],
+    "Cummings": [
+        PROJECT_ROOT / "data" / "raw_data" / "Cummings",
+        PROJECT_ROOT / "data" / "Cummings",
+        Path.cwd() / "data" / "raw_data" / "Cummings",
+        Path.cwd() / "data" / "Cummings",
+    ],
+    "Lara": [
+        PROJECT_ROOT / "data" / "raw_data" / "Lara",
+        PROJECT_ROOT / "data" / "Lara",
+        Path.cwd() / "data" / "raw_data" / "Lara",
+        Path.cwd() / "data" / "Lara",
+    ],
+    "Sachs": [
+        PROJECT_ROOT / "data" / "raw_data" / "Sachs",
+        PROJECT_ROOT / "data" / "Sachs",
+        Path.cwd() / "data" / "raw_data" / "Sachs",
+        Path.cwd() / "data" / "Sachs",
+    ],
+    "Weist": [
+        PROJECT_ROOT / "data" / "raw_data" / "Weist",
+        PROJECT_ROOT / "data" / "Weist",
+        Path.cwd() / "data" / "raw_data" / "Weist",
+        Path.cwd() / "data" / "Weist",
+    ],
+    "Kuczaj": [
+        PROJECT_ROOT / "data" / "raw_data" / "Kuczaj",
+        PROJECT_ROOT / "data" / "Kuczaj",
+        Path.cwd() / "data" / "raw_data" / "Kuczaj",
+        Path.cwd() / "data" / "Kuczaj",
+    ],
+    "Post": [
+        PROJECT_ROOT / "data" / "raw_data" / "Post",
+        PROJECT_ROOT / "data" / "Post",
+        Path.cwd() / "data" / "raw_data" / "Post",
+        Path.cwd() / "data" / "Post",
+    ],
+    "Demetras1": [
+        PROJECT_ROOT / "data" / "raw_data" / "Demetras1",
+        PROJECT_ROOT / "data" / "Demetras1",
+        Path.cwd() / "data" / "raw_data" / "Demetras1",
+        Path.cwd() / "data" / "Demetras1",
+    ],
+    "Forrester": [
+        PROJECT_ROOT / "data" / "raw_data" / "Forrester",
+        PROJECT_ROOT / "data" / "Forrester",
+        Path.cwd() / "data" / "raw_data" / "Forrester",
+        Path.cwd() / "data" / "Forrester",
+    ],
+}
+
+ROOT_DIRECT_CHILD_IDS = {
+    "Lara": "Lara",
+    "Sachs": "Naomi",
+    "Kuczaj": "Abe",
+    "Demetras1": "Trevor",
+    "Forrester": "Ella",
+}
+
+DEFAULT_CARETAKER_SPEAKERS = ("MOT", "FAT")
+CARETAKER_SPEAKERS_BY_DATASET = {
+    # Lara includes a grandmother speaker (`ELS`) as a primary caregiver in
+    # many recordings; keep her with caretakers rather than losing that context.
+    "Lara": ("MOT", "FAT", "ELS"),
+}
+
+DEFAULT_OUTPUT_ROOT = PROJECT_ROOT / "data" / "preprocessed_data"
+
+PREPARED_CHAT_COLUMNS = [
     "dataset",
-    "speaker",
     "child_id",
-    "sex",
     "source_group",
     "session_id",
     "age_raw",
     "age_months",
-    "utt_id",
-    "utterance",
-    "utterance_clean",
-    "word_count",
-    "morph_count",
-    "utt_syllables_basic",
-    "utt_syllables_lenient",
-    "utt_syllables_strictY",
-    "utt_syllables_le",
-    "n_alpha_words",
+    "sex",
     "file",
     "line_no",
-]
-
-CSV_CLEANED_CARETAKER_EXPORT_COLUMNS = [
-    *CSV_CLEANED_EXPORT_COLUMNS[:9],
+    "reference_line",
+    "utt_id",
     "utt_id_role",
-    *CSV_CLEANED_EXPORT_COLUMNS[9:],
+    "speaker",
+    "utterance",
+    "utterance_clean",
+    "cleaned_is_empty",
 ]
 
+CHI_ID_RE = re.compile(r"^@ID:\s*[^|]*\|[^|]*\|CHI\|([^|]*)\|([^|]*)\|", re.IGNORECASE)
+FILENAME_AGE_RE = re.compile(r"^(?P<years>\d{2})(?P<months>\d{2})(?P<days>\d{2})(?:[a-z])?$", re.IGNORECASE)
+PARENT_MONTH_AGE_RE = re.compile(r"^(?P<months>\d{2})(?:[-_a-z]+)$", re.IGNORECASE)
+COMMENT_AGE_RE = re.compile(r"^@Comment:\s*age\s+is\s+(.+?)\s*$", re.IGNORECASE)
+COMMENT_SEX_RE = re.compile(r"^@Comment:\s*sex\s+is\s+(.+?)\s*$", re.IGNORECASE)
 
-def _columns_for_source_group(columns: List[str], include_source_group: bool) -> List[str]:
+
+@dataclass(frozen=True)
+class ChatUnit:
     """
-    `source_group` is only meaningful for corpora such as Hall that expose a
-    subgroup folder. Keep the schema compact for corpora where it would be an
-    all-empty placeholder column.
+    A group of CHAT files that should become one prepared child directory.
+
+    Goal: represent the only unit prepare_datasets.py writes: one child-like
+    folder containing chi.csv, caretakers.csv, and optionally testing.csv.
     """
-    if include_source_group:
-        return list(columns)
-    return [column for column in columns if column != "source_group"]
+
+    child_id: str
+    files: List[Path]
+    base_dir: Path
+    dataset: str = ""
+    source_group: str = ""
 
 
-def _impute_missing_morph_counts_as_zero(rows: List[Dict]) -> None:
-    for r in rows:
-        if r.get("morph_count") in (None, ""):
-            r["morph_count"] = 0
+def age_str_to_months(age: str) -> Optional[float]:
+    """
+    Convert a CHILDES age string like 5;00.16 into months.
+
+    Goal: preserve a lightweight age field without pulling the old heavy
+    metadata machinery back into this preprocessing stage.
+    """
+    if not age:
+        return None
+
+    match = re.match(r"^\s*(\d+)\s*;\s*(\d{1,2})(?:\.(\d{0,2}))?\s*\.?\s*$", age)
+    if not match:
+        return None
+
+    years = int(match.group(1))
+    months = int(match.group(2))
+    days_text = match.group(3) or ""
+    days = int(days_text) if days_text.isdigit() else 0
+    return round((years * 12) + months + (days / 30.0), 3)
 
 
-def write_csv(path: Path, columns: List[str], rows: List[Dict]) -> None:
+def age_from_filename_stem(cha_path: Path) -> Tuple[str, Optional[float]]:
+    """
+    Infer a CHILDES-style age string from filename stems like 030400 or 020500b.
+
+    Goal: MPI-EVA-Manchester has some files where the CHI @ID age is blank but
+    the filename encodes the recording age as YYMMDD, optionally followed by a
+    session letter. This keeps those sessions usable in age-bin analyses without
+    changing the raw CHAT files.
+    """
+    match = FILENAME_AGE_RE.match(cha_path.stem)
+    if not match:
+        return "", None
+
+    years = int(match.group("years"))
+    months = int(match.group("months"))
+    days = int(match.group("days"))
+
+    if months > 11 or days > 31:
+        return "", None
+
+    age_raw = f"{years};{months:02d}.{days:02d}"
+    return age_raw, age_str_to_months(age_raw)
+
+
+def age_from_parent_month_dir(cha_path: Path) -> Tuple[str, Optional[float]]:
+    """
+    Infer a CHILDES-style age from parent folders like 21P or 30X.
+
+    Goal: Champaign groups files under nominal measurement/context folders. A
+    few transcripts have blank CHI @ID age, so the parent directory gives the
+    best available age-bin value.
+    """
+    match = PARENT_MONTH_AGE_RE.match(cha_path.parent.name)
+    if not match:
+        return "", None
+
+    total_months = int(match.group("months"))
+    years, months = divmod(total_months, 12)
+    age_raw = f"{years};{months:02d}.00"
+    return age_raw, float(total_months)
+
+
+def read_session_metadata(cha_path: Path) -> Dict[str, object]:
+    """
+    Read only the CHI age and sex metadata from one CHAT file.
+
+    Goal: add basic provenance columns to output rows while ignoring dependent
+    tiers and avoiding scientific measures that belong in later pipeline steps.
+    """
+    age_raw = ""
+    sex = ""
+    comment_age_raw = ""
+    comment_sex = ""
+
+    with cha_path.open(encoding="utf-8", errors="replace") as fh:
+        for line in fh:
+            if line.startswith("*"):
+                break
+            if line.startswith("@ID:") and "|CHI|" in line:
+                match = CHI_ID_RE.match(line)
+                if match:
+                    age_raw = match.group(1).strip()
+                    sex = match.group(2).strip()
+                continue
+            age_match = COMMENT_AGE_RE.match(line)
+            if age_match and not comment_age_raw:
+                comment_age_raw = age_match.group(1).strip()
+            sex_match = COMMENT_SEX_RE.match(line)
+            if sex_match and not comment_sex:
+                comment_sex = sex_match.group(1).strip()
+
+    if not age_raw:
+        age_raw = comment_age_raw
+    if not sex:
+        sex = comment_sex
+    if not age_raw:
+        age_raw, _ = age_from_filename_stem(cha_path)
+    if not age_raw:
+        age_raw, _ = age_from_parent_month_dir(cha_path)
+
+    return {
+        "age_raw": age_raw,
+        "age_months": age_str_to_months(age_raw),
+        "sex": sex,
+    }
+
+
+def write_csv(path: Path, rows: Sequence[Dict[str, object]]) -> None:
+    """
+    Write prepared rows using the stable Stage 0 schema.
+
+    Goal: make chi.csv, caretakers.csv, and testing.csv share exactly the same
+    columns so files can be compared directly.
+    """
     path.parent.mkdir(parents=True, exist_ok=True)
     with path.open("w", newline="", encoding="utf-8") as fh:
-        # Quote textual fields so values such as CHILDES ages ("1;04.27")
-        # remain single cells even in spreadsheet importers that also enable
-        # semicolons as separators.
-        w = csv.DictWriter(fh, fieldnames=columns, quoting=csv.QUOTE_NONNUMERIC)
-        w.writeheader()
-        for r in rows:
-            sanitized = {k: ("" if r.get(k) is None else r.get(k)) for k in columns}
-            w.writerow(sanitized)
+        writer = csv.DictWriter(
+            fh,
+            fieldnames=PREPARED_CHAT_COLUMNS,
+            quoting=csv.QUOTE_NONNUMERIC,
+        )
+        writer.writeheader()
+        for row in rows:
+            writer.writerow({column: "" if row.get(column) is None else row.get(column) for column in PREPARED_CHAT_COLUMNS})
 
-# ────────────────────────────────────────────────────────────────
-# Core traversal
-# ────────────────────────────────────────────────────────────────
 
-def collect_child(base_dir: Path, child_dir: Path,
-                  emit_session_counts: bool,
-                  child_id_override: Optional[str] = None,
-                  cha_files_override: Optional[List[Path]] = None,
-                  source_group: str = "") -> Tuple[Dict, List[str]]:
-    child_id = child_id_override or child_dir.name
-    payload = {
-        "sex": "",
-        "source_group": source_group,
-        "sessions": [],
-        "utts": {"CHI": [], "MOT": [], "FAT": []},
-        "_next_utt_id": {"CHI": 1, "MOT": 1, "FAT": 1},
-        "_session_index_rows": [] if emit_session_counts else None,
-    }
-    missing_age_paths: List[str] = []
+def resolve_base_dir(dataset: str, base_override: Optional[Path]) -> Path:
+    """
+    Resolve the raw-data directory for a known dataset.
 
-    sessions_info: List[Dict] = []
-    cha_files = sorted(cha_files_override) if cha_files_override is not None else sorted(child_dir.glob("*.cha"))
-    for cha_file in cha_files:
-        age_raw, age_m, sex, birth_dt, sess_dt = extract_chi_age_sex(cha_file)
-        rel_path = cha_file.relative_to(base_dir).as_posix()
-        if age_m is None:
-            missing_age_paths.append(rel_path)
-        sessions_info.append({
-            "path": rel_path,
-            "abs_path": cha_file,
-            "age": age_raw,
-            "age_m": age_m,
-            "sex": sex,
-            "birth_dt": birth_dt,
-            "sess_dt": sess_dt,
-        })
+    Goal: keep the old convenient --dataset interface while preferring the
+    current data/raw_data layout.
+    """
+    if base_override is not None:
+        return base_override.expanduser().resolve()
 
-    sessions_info.sort(key=lambda s: (
-        s["age_m"] is None,
-        s["age_m"] if s["age_m"] is not None else float("inf"),
-        s["path"]
-    ))
+    for candidate in DEFAULT_RAW_ROOTS[dataset]:
+        if candidate.exists():
+            return candidate.resolve()
 
-    for session_idx, sess in enumerate(sessions_info, start=1):
-        rel_path = sess["path"]
-        cha_file = sess["abs_path"]
+    return DEFAULT_RAW_ROOTS[dataset][0].resolve()
 
-        if sess["sex"]:
-            payload["sex"] = sess["sex"]
 
-        if emit_session_counts:
-            counters = {
-                "session_id": session_idx,
-                "age_raw": sess["age"],
-                "age_months": sess["age_m"],
-                "path": rel_path,
-                "utts_CHI": 0, "m0_CHI": 0, "words_CHI": 0, "morphs_CHI": 0,
-                "utts_MOT": 0, "m0_MOT": 0, "words_MOT": 0, "morphs_MOT": 0,
-                "utts_FAT": 0, "m0_FAT": 0, "words_FAT": 0, "morphs_FAT": 0,
-            }
-        else:
-            counters = None
+def _files_directly_under(path: Path) -> List[Path]:
+    """Return sorted direct .cha children for a directory."""
+    return sorted(p for p in path.glob("*.cha") if p.is_file())
 
-        current_row_ref: Optional[Dict] = None
 
-        with cha_file.open(encoding="utf-8", errors="replace") as fh:
-            for line_no, raw in enumerate(fh, start=1):
-                line = raw.rstrip("\n")
+def discover_input_units(input_path: Path) -> List[ChatUnit]:
+    """
+    Discover child-like units from a standalone CHAT file or arbitrary directory.
 
-                if line.startswith("%mor:"):
-                    if current_row_ref is not None:
-                        mc = count_morphemes_from_mor(line)
-                        if mc is not None:
-                            current_row_ref["morph_count"] = mc
-                            if counters is not None:
-                                spk = current_row_ref["_speaker"]
-                                counters[f"morphs_{spk}"] += (mc or 0)
-                    continue
+    Goal: support quick fixture/debug runs without requiring the full corpus
+    directory layout.
+    """
+    input_path = input_path.expanduser().resolve()
+    if input_path.is_file():
+        return [
+            ChatUnit(
+                child_id=input_path.stem,
+                files=[input_path],
+                base_dir=input_path.parent,
+            )
+        ]
 
-                s = line.lstrip()
-                if not s.startswith("*") or ":" not in s:
-                    continue
-                speaker, utter = s.split(":", 1)
-                speaker = speaker[1:].strip().upper()
-                # CHAT main tiers are commonly tab-indented after "*SPK:".
-                # That whitespace is layout, not utterance content, and can
-                # make downstream CSV viewers appear column-shifted.
-                utter = utter.strip()
-                if speaker not in ("CHI", "MOT", "FAT"):
-                    current_row_ref = None
-                    continue
+    if not input_path.exists():
+        raise FileNotFoundError(f"Input path does not exist: {input_path}")
 
-                utter_raw = utter
-                utter_clean, wc, _n_words = clean_and_count_words(utter_raw)
-                if wc == 0:
-                    # Do not carry punctuation-only or marker-only rows into
-                    # scoring inputs; their following %mor tier belongs to a
-                    # row we intentionally excluded.
-                    current_row_ref = None
-                    continue
-                syls = count_utt_syllables(utter_clean)
+    direct_files = _files_directly_under(input_path)
+    if direct_files:
+        return [
+            ChatUnit(
+                child_id=input_path.name,
+                files=direct_files,
+                base_dir=input_path,
+            )
+        ]
 
-                utt_id = payload["_next_utt_id"][speaker]
-                row = {
-                    "utt_id": utt_id,
-                    "child_id": child_id,
-                    "session_id": session_idx,
-                    "utterance": utter_raw,
-                    "utterance_clean": utter_clean,
-                    "word_count": wc,
-                    "morph_count": None,
-                    **syls,
-                    "source_group": source_group,
-                    "file": rel_path,
-                    "line_no": line_no,
-                    "_speaker": speaker,
+    units: List[ChatUnit] = []
+    for child_dir in sorted(p for p in input_path.iterdir() if p.is_dir()):
+        files = _files_directly_under(child_dir)
+        if files:
+            units.append(ChatUnit(child_id=child_dir.name, files=files, base_dir=input_path))
+
+    if units:
+        return units
+
+    raise FileNotFoundError(f"No .cha files found under {input_path}")
+
+
+def discover_dataset_units(dataset: str, base_dir: Path) -> List[ChatUnit]:
+    """
+    Discover child-like units for a known corpus layout.
+
+    Goal: keep the old corpus convenience while emitting the new simple output
+    files. Hall is handled as one child per .cha file; other corpora are handled
+    as one child directory containing one or more .cha sessions.
+    """
+    if dataset == "Hall":
+        units: List[ChatUnit] = []
+        seen: Dict[str, int] = {}
+        for group_dir in sorted(p for p in base_dir.iterdir() if p.is_dir()):
+            files = _files_directly_under(group_dir)
+            for cha_path in files:
+                base_child_id = cha_path.stem
+                seen[base_child_id] = seen.get(base_child_id, 0) + 1
+                child_id = base_child_id if seen[base_child_id] == 1 else f"{base_child_id}_{group_dir.name}"
+                units.append(
+                    ChatUnit(
+                        child_id=child_id,
+                        files=[cha_path],
+                        base_dir=base_dir,
+                        dataset=dataset,
+                        source_group=group_dir.name,
+                    )
+                )
+        return units
+
+    if dataset in {"Champaign", "EHS"}:
+        files_by_child: Dict[str, List[Path]] = defaultdict(list)
+        for measurement_dir in sorted(p for p in base_dir.iterdir() if p.is_dir()):
+            for cha_path in _files_directly_under(measurement_dir):
+                files_by_child[cha_path.stem].append(cha_path)
+        return [
+            ChatUnit(
+                child_id=child_id,
+                files=sorted(files),
+                base_dir=base_dir,
+                dataset=dataset,
+                source_group=dataset,
+            )
+            for child_id, files in sorted(files_by_child.items())
+        ]
+
+    direct_files = _files_directly_under(base_dir)
+    if direct_files:
+        return [
+            ChatUnit(
+                child_id=ROOT_DIRECT_CHILD_IDS.get(dataset, dataset),
+                files=direct_files,
+                base_dir=base_dir,
+                dataset=dataset,
+                source_group=dataset,
+            )
+        ]
+
+    return [
+        ChatUnit(
+            child_id=child_dir.name,
+            files=_files_directly_under(child_dir),
+            base_dir=base_dir,
+            dataset=dataset,
+            source_group=dataset,
+        )
+        for child_dir in sorted(p for p in base_dir.iterdir() if p.is_dir())
+        if _files_directly_under(child_dir)
+    ]
+
+
+def caretaker_speakers_for_unit(unit: ChatUnit) -> Tuple[str, ...]:
+    """Return the CHAT speaker tiers that count as caretakers for one unit."""
+    return CARETAKER_SPEAKERS_BY_DATASET.get(unit.dataset, DEFAULT_CARETAKER_SPEAKERS)
+
+
+def prepared_rows_for_unit(unit: ChatUnit) -> List[Dict[str, object]]:
+    """
+    Build all prepared CHI/MOT/FAT rows for one child-like unit.
+
+    Goal: enrich the raw/cleaned rows produced by cleaning.py with stable
+    provenance columns and role-order identifiers, without changing the cleaning
+    policy here.
+    """
+    rows: List[Dict[str, object]] = []
+    speakers = ("CHI", *caretaker_speakers_for_unit(unit))
+    role_counts = {speaker: 0 for speaker in speakers}
+
+    for session_id, cha_path in enumerate(sorted(unit.files), start=1):
+        metadata = read_session_metadata(cha_path)
+        for raw_row in iter_cleaned_chat_rows(cha_path, base_dir=unit.base_dir, speakers=speakers):
+            speaker = str(raw_row["speaker"])
+            reference_line = f"{raw_row['file']}:{raw_row['line_no']}"
+            role_counts[speaker] += 1
+            rows.append(
+                {
+                    "dataset": unit.dataset,
+                    "child_id": unit.child_id,
+                    "source_group": unit.source_group,
+                    "session_id": session_id,
+                    "age_raw": metadata["age_raw"],
+                    "age_months": metadata["age_months"],
+                    "sex": metadata["sex"],
+                    "file": raw_row["file"],
+                    "line_no": raw_row["line_no"],
+                    "reference_line": reference_line,
+                    "utt_id": len(rows) + 1,
+                    "utt_id_role": role_counts[speaker],
+                    "speaker": speaker,
+                    "utterance": raw_row["utterance"],
+                    "utterance_clean": raw_row["utterance_clean"],
+                    "cleaned_is_empty": raw_row["cleaned_is_empty"],
                 }
-
-                payload["utts"][speaker].append(row)
-                payload["_next_utt_id"][speaker] += 1
-                current_row_ref = row
-
-                if counters is not None:
-                    counters[f"utts_{speaker}"] += 1
-                    counters[f"words_{speaker}"] += wc
-
-        payload["sessions"].append({
-            "id": session_idx,
-            "age": sess["age"],
-            "age_m": sess["age_m"],
-            "path": rel_path,
-        })
-
-        # ensure morph_count filled for rows in this session (if missing %mor)
-        for spk in ("CHI", "MOT", "FAT"):
-            for r in payload["utts"][spk]:
-                if r["session_id"] == session_idx and (r.get("morph_count") in (None, "")):
-                    r["morph_count"] = 0
-
-        if counters is not None:
-            for spk in ("CHI", "MOT", "FAT"):
-                sess_rows = [r for r in payload["utts"][spk] if r["session_id"] == session_idx]
-                counters[f"m0_{spk}"] = sum(1 for r in sess_rows if int(r.get("morph_count") or 0) == 0)
-            payload["_session_index_rows"].append(counters)
-
-    return payload, missing_age_paths
-
-
-def _build_caretakers_rows(payload: Dict) -> List[Dict]:
-    combined: List[Dict] = []
-    for spk in ("MOT", "FAT"):
-        for r in payload["utts"][spk]:
-            rr = dict(r)
-            rr["utt_id_role"] = rr.get("utt_id")
-            rr["speaker"] = spk
-            combined.append(rr)
-
-    combined.sort(key=lambda r: (
-        int(r.get("session_id") or 0),
-        str(r.get("file") or ""),
-        int(r.get("line_no") or 0),
-    ))
-
-    for i, r in enumerate(combined, start=1):
-        r["utt_id"] = i
-
-    for r in combined:
-        r.pop("_speaker", None)
-
-    return combined
-
-
-def write_child_outputs(child_dir: Path,
-                        child_id: str,
-                        payload: Dict,
-                        emit_session_counts: bool) -> None:
-    for spk in ("CHI", "MOT", "FAT"):
-        for r in payload["utts"][spk]:
-            r.pop("_speaker", None)
-
-    for spk in ("CHI", "MOT", "FAT"):
-        _impute_missing_morph_counts_as_zero(payload["utts"][spk])
-
-    include_source_group = bool(payload.get("source_group"))
-    utt_columns = _columns_for_source_group(CSV_UTT_COLUMNS, include_source_group)
-    caretaker_columns = _columns_for_source_group(CSV_CARETAKER_COLUMNS, include_source_group)
-    meta_columns = _columns_for_source_group(CSV_META_COLUMNS, include_source_group)
-
-    write_csv(child_dir / "child_utts.csv", utt_columns, payload["utts"]["CHI"])
-    write_csv(child_dir / "mot_utts.csv",   utt_columns, payload["utts"]["MOT"])
-    write_csv(child_dir / "fat_utts.csv",   utt_columns, payload["utts"]["FAT"])
-
-    caretakers_rows = _build_caretakers_rows(payload)
-    _impute_missing_morph_counts_as_zero(caretakers_rows)
-    write_csv(child_dir / "caretakers_utts.csv", caretaker_columns, caretakers_rows)
-
-    session_ids = [s["id"] for s in payload["sessions"]]
-    session_ages = [s["age"] for s in payload["sessions"]]
-    session_ages_m = [s["age_m"] for s in payload["sessions"]]
-    session_paths = [s["path"] for s in payload["sessions"]]
-
-    meta_row = {
-        "child_id":               child_id,
-        "sex":                    payload["sex"],
-        "source_group":           payload.get("source_group", ""),
-        "session_ids":            json.dumps(session_ids, ensure_ascii=False),
-        "session_ages":           json.dumps(session_ages, ensure_ascii=False),
-        "session_ages_months":    json.dumps(session_ages_m, ensure_ascii=False),
-        "session_paths":          json.dumps(session_paths, ensure_ascii=False),
-        "n_sessions":             len(payload["sessions"]),
-    }
-    write_csv(child_dir / "child_meta.csv", meta_columns, [meta_row])
-
-    if emit_session_counts and payload.get("_session_index_rows"):
-        write_csv(child_dir / "session_index.csv", CSV_SESSION_IDX_COLUMNS, payload["_session_index_rows"])
-
-
-def _session_lookup(payload: Dict) -> Dict[int, Dict]:
-    return {int(s["id"]): s for s in payload.get("sessions", [])}
-
-
-def _cleaned_export_row(dataset: str, payload: Dict, speaker: str, row: Dict) -> Dict:
-    session = _session_lookup(payload).get(int(row.get("session_id") or 0), {})
-    exported = {
-        "dataset": dataset,
-        "speaker": speaker,
-        "child_id": row.get("child_id", ""),
-        "sex": payload.get("sex", ""),
-        "source_group": row.get("source_group", payload.get("source_group", "")),
-        "session_id": row.get("session_id", ""),
-        "age_raw": session.get("age", ""),
-        "age_months": session.get("age_m", ""),
-        "utt_id": row.get("utt_id", ""),
-        "utt_id_role": row.get("utt_id_role", ""),
-        "utterance": row.get("utterance", ""),
-        "utterance_clean": row.get("utterance_clean", ""),
-        "word_count": row.get("word_count", ""),
-        "morph_count": row.get("morph_count", ""),
-        "utt_syllables_basic": row.get("utt_syllables_basic", ""),
-        "utt_syllables_lenient": row.get("utt_syllables_lenient", ""),
-        "utt_syllables_strictY": row.get("utt_syllables_strictY", ""),
-        "utt_syllables_le": row.get("utt_syllables_le", ""),
-        "n_alpha_words": row.get("n_alpha_words", ""),
-        "file": row.get("file", ""),
-        "line_no": row.get("line_no", ""),
-    }
-    return exported
-
-
-def build_cleaned_export_rows(dataset: str, per_child: Dict[str, Dict]) -> Dict[str, List[Dict]]:
-    rows = {"chi": [], "mot": [], "fat": [], "caretakers": []}
-    for child_id in sorted(per_child):
-        payload = per_child[child_id]
-
-        for speaker, output_name in (("CHI", "chi"), ("MOT", "mot"), ("FAT", "fat")):
-            role_rows = payload["utts"][speaker]
-            _impute_missing_morph_counts_as_zero(role_rows)
-            for row in role_rows:
-                rows[output_name].append(_cleaned_export_row(dataset, payload, speaker, row))
-
-        caretaker_rows = _build_caretakers_rows(payload)
-        _impute_missing_morph_counts_as_zero(caretaker_rows)
-        for row in caretaker_rows:
-            rows["caretakers"].append(
-                _cleaned_export_row(dataset, payload, str(row.get("speaker") or ""), row)
             )
 
     return rows
 
 
-def write_cleaned_utterance_exports(dataset: str, output_root: Path, per_child: Dict[str, Dict]) -> None:
-    dataset_dir = output_root / dataset
-    export_rows = build_cleaned_export_rows(dataset, per_child)
-    include_source_group = any(bool(payload.get("source_group")) for payload in per_child.values())
-    for export_name, rows in export_rows.items():
-        columns = (
-            CSV_CLEANED_CARETAKER_EXPORT_COLUMNS
-            if export_name == "caretakers"
-            else CSV_CLEANED_EXPORT_COLUMNS
-        )
-        write_csv(
-            dataset_dir / f"{export_name}.csv",
-            _columns_for_source_group(columns, include_source_group),
-            rows,
-        )
+def _subset_rows(rows: Sequence[Dict[str, object]], speakers: Iterable[str]) -> List[Dict[str, object]]:
+    """
+    Return rows for one output file and renumber utt_id within that file.
+
+    Goal: make chi.csv and caretakers.csv each have simple sequential utt_id
+    values while keeping utt_id_role as the per-speaker identifier.
+    """
+    speaker_set = set(speakers)
+    selected: List[Dict[str, object]] = []
+    for source_row in rows:
+        if source_row["speaker"] not in speaker_set:
+            continue
+        row = dict(source_row)
+        row["utt_id"] = len(selected) + 1
+        selected.append(row)
+    return selected
 
 
-def build_summary_lines(dataset: str, base_dir: Path, per_child: Dict[str, Dict], missing_age_map: Dict[str, List[str]]) -> List[str]:
-    lines: List[str] = []
-    lines.append(f"SUMMARY — {dataset} corpus")
-    lines.append(f"Base directory: {base_dir}\n")
+def write_prepared_unit(output_dir: Path, unit: ChatUnit, testing: bool = False) -> int:
+    """
+    Write chi.csv, caretakers.csv, and optionally testing.csv for one unit.
 
-    total_children = len(per_child)
-    total_sessions = sum(len(info["sessions"]) for info in per_child.values())
-    total_chi = sum(len(info["utts"]["CHI"]) for info in per_child.values())
-    total_mot = sum(len(info["utts"]["MOT"]) for info in per_child.values())
-    total_fat = sum(len(info["utts"]["FAT"]) for info in per_child.values())
-    lines.append(f"Children: {total_children}")
-    lines.append(f"Total sessions: {total_sessions}")
-    lines.append(f"Total utterances — CHI: {total_chi:,} | MOT: {total_mot:,} | FAT: {total_fat:,} | Caretakers(MOT+FAT): {total_mot+total_fat:,}\n")
-
-    for child_id, info in sorted(per_child.items()):
-        n_sessions = len(info["sessions"])
-        counts = [0] * n_sessions
-        for spk in ("CHI", "MOT", "FAT"):
-            for row in info["utts"][spk]:
-                sid = row["session_id"]
-                if 1 <= sid <= n_sessions:
-                    counts[sid - 1] += 1
-
-        lines.append(f"{child_id} — sessions: {n_sessions}")
-        counts_str = " ".join(str(c) for c in counts) if n_sessions else ""
-        lines.append(f"utts_per_session (CHI+MOT+FAT): {counts_str}")
-
-        miss = missing_age_map.get(child_id, [])
-        if miss:
-            lines.append(f"[WARN] Missing/derived CHI age in {len(miss)} session(s):")
-            for p in miss:
-                lines.append(f"  - {p}")
-        lines.append("")
-
-    return lines
-
-
-def write_summary_files(dataset: str, base_dir: Path,
-                        per_child: Dict[str, Dict],
-                        missing_age_map: Dict[str, List[str]]) -> None:
-    summary_path = base_dir / SUMMARY_FILENAMES[dataset]
-    lines = build_summary_lines(dataset, base_dir, per_child, missing_age_map)
-    with summary_path.open("w", encoding="utf-8") as fh:
-        fh.write("\n".join(lines).rstrip() + "\n")
-
-    report_path = base_dir / MISSING_AGE_REPORT
-    with report_path.open("w", encoding="utf-8") as fh:
-        any_missing = False
-        for child_id, misses in sorted(missing_age_map.items()):
-            if misses:
-                any_missing = True
-                fh.write(f"{child_id}:\n")
-                for p in misses:
-                    fh.write(f"  - {p}\n")
-        if not any_missing:
-            fh.write("No sessions with missing CHI age detected.\n")
-
-# ────────────────────────────────────────────────────────────────
-# Orchestration
-# ────────────────────────────────────────────────────────────────
-
-def process_dataset(dataset: str,
-                    base_override: Optional[str],
-                    output_override: Optional[str],
-                    emit_session_counts: bool,
-                    cleaned_output_override: Optional[str] = None) -> None:
-    base_dir, tried = resolve_base_dir(dataset, base_override)
-    if not base_dir.exists():
-        msg = [f"[ERROR] Base directory not found for {dataset}: {base_dir}"]
-        if tried:
-            msg.append("Tried candidates:")
-            for c in tried:
-                msg.append(f"  - {c}")
-        msg.append("Tip: pass an explicit path, e.g.:")
-        msg.append(f"  uv run python src/prepare_datasets.py --dataset {dataset} --base-dir <path>")
-        sys.exit("\n".join(msg))
-
-    output_dir = resolve_output_dir(dataset, base_dir, output_override)
+    Goal: keep the file contract obvious and small. The testing CSV mirrors the
+    fixture-style combined view requested for manual checking.
+    """
+    rows = prepared_rows_for_unit(unit)
     output_dir.mkdir(parents=True, exist_ok=True)
 
-    print(f"==> {dataset} | input base:  {base_dir}")
-    print(f"==> {dataset} | output base: {output_dir}")
+    write_csv(output_dir / "chi.csv", _subset_rows(rows, ("CHI",)))
+    write_csv(output_dir / "caretakers.csv", _subset_rows(rows, caretaker_speakers_for_unit(unit)))
 
-    per_child: Dict[str, Dict] = {}
-    missing_age_map: Dict[str, List[str]] = {}
+    if testing:
+        testing_rows = [dict(row, utt_id=i) for i, row in enumerate(rows, start=1)]
+        write_csv(output_dir / "testing.csv", testing_rows)
 
-    if dataset == "Hall":
-        # Hall layout:
-        #   Hall/BlackPro/*.cha
-        #   Hall/BlackWork/*.cha
-        #   Hall/WhitePro/*.cha
-        #   Hall/WhiteWork/*.cha
-        # Each .cha file is treated as one child with one session.
-        # Output folder usually uses only the child/file stem.
-        # If a stem appears more than once, suffix with the Hall group.
-        # If the same stem somehow appears more than once within the same group,
-        # suffix with group plus an occurrence index.
-        group_dirs = sorted(
-            p for p in base_dir.iterdir()
-            if p.is_dir() and list(p.glob("*.cha"))
-        )
+    return len(rows)
 
-        if not group_dirs:
-            sys.exit(f"[ERROR] No Hall group folders with .cha files found under: {base_dir}")
 
-        hall_items = []
-        stem_total_counts: Dict[str, int] = {}
-        stem_group_counts: Dict[Tuple[str, str], int] = {}
+def write_units(units: Sequence[ChatUnit], output_root: Path, testing: bool = False) -> Dict[str, int]:
+    """
+    Write all discovered units under one output root.
 
-        for group_dir in group_dirs:
-            group = group_dir.name
-            for cha_file in sorted(group_dir.glob("*.cha")):
-                stem = cha_file.stem
-                hall_items.append((group, group_dir, cha_file, stem))
-                stem_total_counts[stem] = stem_total_counts.get(stem, 0) + 1
-                stem_group_counts[(group, stem)] = stem_group_counts.get((group, stem), 0) + 1
+    Goal: provide one shared writer for --input, --dataset, and --dataset all.
+    """
+    output_root = output_root.expanduser().resolve()
+    total_rows = 0
+    for unit in units:
+        total_rows += write_prepared_unit(output_root / unit.child_id, unit, testing=testing)
+    return {"children": len(units), "rows": total_rows}
 
-        stem_group_seen: Dict[Tuple[str, str], int] = {}
 
-        for group, group_dir, cha_file, stem in hall_items:
-            n_total = stem_total_counts[stem]
-            n_in_group = stem_group_counts[(group, stem)]
-            stem_group_seen[(group, stem)] = stem_group_seen.get((group, stem), 0) + 1
-            ith = stem_group_seen[(group, stem)]
+def process_input_path(input_path: Path, output_root: Path, testing: bool = False) -> Dict[str, int]:
+    """
+    Prepare a standalone CHAT file or arbitrary CHAT directory.
 
-            if n_total == 1:
-                child_id = stem
-            elif n_in_group == 1:
-                child_id = f"{stem}_{group}"
-            else:
-                child_id = f"{stem}_{group}_{ith}"
+    Goal: make it easy to run the new preprocessing on tiny fixtures while
+    developing cleaning rules.
+    """
+    units = discover_input_units(input_path)
+    return write_units(units, output_root, testing=testing)
 
-            print(f"  -> {child_id}  [source_group={group}, original_child_id={stem}]")
-            payload, missing_ages = collect_child(
-                base_dir=base_dir,
-                child_dir=group_dir,
-                emit_session_counts=emit_session_counts,
-                child_id_override=child_id,
-                cha_files_override=[cha_file],
-                source_group=group,
-            )
-            per_child[child_id] = payload
-            missing_age_map[child_id] = missing_ages
-            write_child_outputs(output_dir / child_id, child_id, payload, emit_session_counts=emit_session_counts)
-            if missing_ages:
-                print(f"     [WARN] {child_id}: {len(missing_ages)} session(s) with missing/derived CHI age")
-    else:
-        # Original layout:
-        #   DATASET_ROOT/child_id/*.cha
-        for child_dir in sorted(p for p in base_dir.iterdir() if p.is_dir()):
-            child_id = child_dir.name
-            if not list(child_dir.glob("*.cha")):
-                continue
-            print(f"  -> {child_id}")
-            payload, missing_ages = collect_child(base_dir, child_dir, emit_session_counts=emit_session_counts)
-            per_child[child_id] = payload
-            missing_age_map[child_id] = missing_ages
-            write_child_outputs(output_dir / child_id, child_id, payload, emit_session_counts=emit_session_counts)
-            if missing_ages:
-                print(f"     [WARN] {child_id}: {len(missing_ages)} session(s) with missing/derived CHI age")
 
-    write_summary_files(dataset, output_dir, per_child, missing_age_map)
-    print(f"✔ Wrote summary to {output_dir / SUMMARY_FILENAMES[dataset]}")
-    print(f"✔ Wrote missing-age report to {output_dir / MISSING_AGE_REPORT}")
-    if cleaned_output_override:
-        cleaned_output_dir = Path(cleaned_output_override).expanduser().resolve()
-        write_cleaned_utterance_exports(dataset, cleaned_output_dir, per_child)
-        print(f"✔ Wrote cleaned utterance exports to {cleaned_output_dir / dataset}")
+def process_dataset(
+    dataset: str,
+    output_root: Path,
+    *,
+    base_dir: Optional[Path] = None,
+    testing: bool = False,
+) -> Dict[str, int]:
+    """
+    Prepare one known corpus by dataset name.
+
+    Goal: preserve the ergonomic old command style while writing the new
+    chi.csv/caretakers.csv/testing.csv outputs.
+    """
+    raw_base = resolve_base_dir(dataset, base_dir)
+    if not raw_base.exists():
+        raise FileNotFoundError(f"Raw base directory not found for {dataset}: {raw_base}")
+
+    units = discover_dataset_units(dataset, raw_base)
+    if not units:
+        raise FileNotFoundError(f"No .cha files found for {dataset} under {raw_base}")
+
+    return write_units(units, output_root.expanduser().resolve() / dataset, testing=testing)
 
 
 def build_cli() -> argparse.ArgumentParser:
-    p = argparse.ArgumentParser(
-        description="Stage 0: Create per-child CHI/MOT/FAT/caretakers CSVs + child_meta.csv for CHILDES subsets (RAW utterances + strict @ handling for cleaned counts)."
+    """
+    Build the command-line interface.
+
+    Goal: support both full-corpus runs and small fixture/debug runs from the
+    same implementation.
+    """
+    parser = argparse.ArgumentParser(
+        description="Prepare raw CHAT transcripts into chi.csv and caretakers.csv files."
     )
-    p.add_argument("--dataset", required=True, choices=["Providence", "Manchester", "Brown", "Hall", "all"],
-                   help="Which dataset to prepare (or 'all').")
-    p.add_argument("--base-dir", default=None,
-                   help="Override input base directory for a single dataset. Ignored if --dataset=all.")
-    p.add_argument("--output-dir", default=None,
-                   help="Override output directory for processed CSVs. Ignored if --dataset=all.")
-    p.add_argument("--emit-session-counts", action="store_true",
-                   help="Also write session_index.csv with per-session counts per role.")
-    p.add_argument("--cleaned-output-dir", nargs="?", const="data/cleaned_utterances", default=None,
-                   help="Also write consolidated cleaned utterance CSVs under this directory. "
-                        "Passing the flag without a value uses data/cleaned_utterances.")
-    return p
+    parser.add_argument(
+        "--dataset",
+        choices=[*DATASETS, "all"],
+        default=None,
+        help="Known corpus to prepare. Use --input for a standalone .cha file or arbitrary directory.",
+    )
+    parser.add_argument(
+        "--input",
+        type=Path,
+        default=None,
+        help="Standalone .cha file or directory to prepare outside the known dataset layouts.",
+    )
+    parser.add_argument(
+        "--base-dir",
+        type=Path,
+        default=None,
+        help="Override raw input base directory when using --dataset.",
+    )
+    parser.add_argument(
+        "--output-dir",
+        type=Path,
+        default=DEFAULT_OUTPUT_ROOT,
+        help="Output root. Dataset runs write under <output-dir>/<Dataset>/; --input writes directly under <output-dir>/.",
+    )
+    parser.add_argument(
+        "--testing",
+        action="store_true",
+        help="Also write testing.csv containing CHI, MOT, and FAT rows together for manual inspection.",
+    )
+    parser.add_argument("--emit-session-counts", action="store_true", help=argparse.SUPPRESS)
+    parser.add_argument("--cleaned-output-dir", default=None, help=argparse.SUPPRESS)
+    return parser
 
 
-def main(argv: List[str] | None = None) -> None:
+def main(argv: Optional[Sequence[str]] = None) -> None:
+    """
+    Run preprocessing from CLI arguments.
+
+    Goal: keep command-line behavior thin and testable; all real work happens
+    in process_input_path/process_dataset.
+    """
     args = build_cli().parse_args(argv)
-    if args.dataset == "all":
-        for ds in ["Providence", "Manchester", "Brown", "Hall"]:
-            process_dataset(
-                ds,
-                base_override=None,
-                output_override=None,
-                emit_session_counts=args.emit_session_counts,
-                cleaned_output_override=args.cleaned_output_dir,
-            )
-    else:
-        process_dataset(
-            args.dataset,
-            base_override=args.base_dir,
-            output_override=args.output_dir,
-            emit_session_counts=args.emit_session_counts,
-            cleaned_output_override=args.cleaned_output_dir,
+
+    if args.input is not None and args.dataset is not None:
+        raise SystemExit("[ERROR] Use either --input or --dataset, not both.")
+    if args.input is None and args.dataset is None:
+        raise SystemExit("[ERROR] Provide --input or --dataset.")
+    if args.dataset == "all" and args.base_dir is not None:
+        raise SystemExit("[ERROR] --base-dir can only be used with one dataset, not --dataset all.")
+
+    if args.input is not None:
+        summary = process_input_path(args.input, args.output_dir, testing=args.testing)
+        print(f"Wrote {summary['rows']:,} rows for {summary['children']:,} child folder(s) to {args.output_dir}")
+        return
+
+    datasets = DATASETS if args.dataset == "all" else (args.dataset,)
+    total_children = 0
+    total_rows = 0
+    for dataset in datasets:
+        summary = process_dataset(
+            str(dataset),
+            args.output_dir,
+            base_dir=args.base_dir,
+            testing=args.testing,
         )
+        total_children += summary["children"]
+        total_rows += summary["rows"]
+        print(f"{dataset}: wrote {summary['rows']:,} rows for {summary['children']:,} child folder(s)")
+
+    print(f"Done: wrote {total_rows:,} rows for {total_children:,} child folder(s) to {args.output_dir}")
 
 
 if __name__ == "__main__":
