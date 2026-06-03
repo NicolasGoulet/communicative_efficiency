@@ -288,6 +288,63 @@ confirmed.
 - The before/new comparison is `figs/utterance_distributions_strict_naturalistic_parent_child/ALL_DATASETS/previous_vs_new_strict_downloads_age_bin_counts_6m.csv` and `.png`.
 - Also wrote the caretaker-side strict comparison to `figs/utterance_distributions_strict_naturalistic_parent_child/ALL_DATASETS/caretaker_previous_vs_new_strict_downloads_age_bin_counts_6m.csv` and `.png`.
 
+## 2026-05-28 PBM Additive LSTM Generation
+
+- Added `src/run_lstm_additive_age_context_pipeline.py` as a PBM-focused additive age-bin orchestration layer around `src/generate_lstm_utterances.py`.
+- Added `tests/test_lstm_additive_age_context_pipeline.py`; focused LSTM/additive tests passed with `30 tests OK`.
+- The new script trains one word-level encoder-decoder LSTM per context-window/age-bin cell. For each target age bin, training examples are cumulative from `006` through that bin's end, matching the additive information regime of the random/unigram/bigram/trigram baselines.
+- The age-bin schedule is the current merged-early schedule: `006-023`, then `024-029`, `030-035`, `036-041`, `042-047`, `048-053`, `054-059`, and `060-065`.
+- The first real run was PBM-only, not full strict-naturalistic, to stay comparable to earlier Providence/Brown/Manchester baseline work and avoid scaling before validating the design.
+- Context-window sensitivity was built into the run with independent models for `k=3`, `k=4`, and `k=5` prior caretaker utterances, each capped at 60 context tokens.
+- The main generated variant was same-length only, because same-length generated utterances are the apples-to-apples effort-controlled comparison against the existing random/unigram/bigram/trigram baselines.
+- Added richer training/generation instrumentation:
+  - per-bin `batch_training_log.csv`;
+  - per-bin and run-level `training_summary.csv`;
+  - `model_run_manifest.csv`;
+  - `generation_diagnostics.csv`;
+  - `generation_samples.csv`;
+  - run-level PNG/PDF plots under `plots/`.
+- Real run command:
+
+```bash
+.venv/bin/python src/run_lstm_additive_age_context_pipeline.py \
+  --output_dir results/lstm_baselines/pbm_additive_merged_006_023_k3_k4_k5_same_length \
+  --contexts 3 4 5 \
+  --variants same_length \
+  --epochs 3 \
+  --embedding_dim 128 \
+  --hidden_dim 256 \
+  --batch_size 128 \
+  --max_vocab_size 30000 \
+  --device cuda
+```
+
+- Hardware/runtime context: local PC with NVIDIA GeForce RTX 4060 Ti, 16GB VRAM; NVIDIA driver 595.71.05; PyTorch 2.12.0+cu130; CUDA available.
+- Real run output directory:
+
+```text
+results/lstm_baselines/pbm_additive_merged_006_023_k3_k4_k5_same_length/
+```
+
+- Generated sibling files per PBM child folder:
+  - `chi.lstm_additive_generated.csv`
+  - `chi.shared_caretaker_contexts.with_lstm_additive.csv`
+  - `chi.surprisal_scoring_with_lstm_additive.csv`
+- Generated columns:
+  - `lstm_additive_k3_same_length_utterance`
+  - `lstm_additive_k4_same_length_utterance`
+  - `lstm_additive_k5_same_length_utterance`
+- Validation after the run:
+  - 21 generated child files found;
+  - 519,803 child rows checked;
+  - 446,508 non-empty generated rows per LSTM column;
+  - 0 same-length mismatches for k3, k4, or k5;
+  - 21 context-with-LSTM files and 21 scoring-with-LSTM files found;
+  - 446,985 scoring rows with the LSTM columns.
+- Scoring-context reminder: generation `k3`/`k4`/`k5` and scorer `context_k1`/`context_k2`/`context_k3` are separate axes. Every real child, generated child-like, or caretaker target utterance should be scored with its own row-matched scorer context columns.
+- Added `docs/lstm-additive-pbm-supervisor-summary.md` for a high-level explanation with formulas and supervisor-facing rationale.
+- Added `docs/agentic_history.md` to preserve timestamped decisions from the LSTM design/generation conversation for future agents.
+
 ## 2026-05-29 PBM 006-023 Scoring Patch
 
 - User clarified that LSTM patching can be ignored in this laptop thread; the active work is only the PBM generated-baseline `006-023` patch.

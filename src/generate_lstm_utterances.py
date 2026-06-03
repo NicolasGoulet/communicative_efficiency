@@ -34,6 +34,7 @@ import json
 import math
 import random
 import re
+import time
 from collections import Counter
 from dataclasses import asdict, dataclass
 from pathlib import Path
@@ -449,6 +450,68 @@ def write_summary_csv(path: Path, rows: Sequence[Dict[str, object]]) -> None:
         writer.writerows(rows)
 
 
+def count_trainable_parameters(model) -> int:
+    """Return the number of trainable model parameters."""
+    return sum(parameter.numel() for parameter in model.parameters() if parameter.requires_grad)
+
+
+def cuda_memory_snapshot(torch_module, device) -> Dict[str, int]:
+    """Return CUDA memory counters for the active device when available."""
+    if getattr(device, "type", "") != "cuda" or not torch_module.cuda.is_available():
+        return {
+            "cuda_memory_allocated_bytes": 0,
+            "cuda_memory_reserved_bytes": 0,
+            "cuda_max_memory_allocated_bytes": 0,
+        }
+    return {
+        "cuda_memory_allocated_bytes": int(torch_module.cuda.memory_allocated(device)),
+        "cuda_memory_reserved_bytes": int(torch_module.cuda.memory_reserved(device)),
+        "cuda_max_memory_allocated_bytes": int(torch_module.cuda.max_memory_allocated(device)),
+    }
+
+
+class BatchCSVLogger:
+    """Small append-only CSV logger for training-batch telemetry."""
+
+    fieldnames = [
+        "epoch",
+        "batch_index",
+        "batches_in_epoch",
+        "loss",
+        "target_tokens",
+        "cumulative_tokens",
+        "elapsed_seconds",
+        "tokens_per_second",
+        "grad_norm",
+        "learning_rate",
+        "architecture",
+        "device",
+        "cuda_memory_allocated_bytes",
+        "cuda_memory_reserved_bytes",
+        "cuda_max_memory_allocated_bytes",
+    ]
+
+    def __init__(self, path: Optional[Path]):
+        self.path = path
+        self.handle = None
+        self.writer = None
+        if path is not None:
+            path.parent.mkdir(parents=True, exist_ok=True)
+            self.handle = path.open("w", newline="", encoding="utf-8")
+            self.writer = csv.DictWriter(self.handle, fieldnames=self.fieldnames)
+            self.writer.writeheader()
+
+    def write(self, row: Dict[str, object]) -> None:
+        if self.writer is None or self.handle is None:
+            return
+        self.writer.writerow(row)
+        self.handle.flush()
+
+    def close(self) -> None:
+        if self.handle is not None:
+            self.handle.close()
+
+
 def build_torch_objects(nn_module, DatasetBase):
     """Create torch-dependent classes after torch is available."""
 
@@ -593,6 +656,10 @@ def train_lstm_model(
     vocab: Vocabulary,
     config: LSTMConfig,
     output_dir: Path,
+    *,
+    batch_log_path: Optional[Path] = None,
+    log_every_batches: int = 50,
+    progress_prefix: str = "",
 ):
     """Train the LSTM model and return it with per-epoch summaries."""
     if config.architecture not in ARCHITECTURES:
@@ -649,48 +716,103 @@ def train_lstm_model(
 
     optimizer = torch.optim.Adam(model.parameters(), lr=config.learning_rate)
     loss_fn = nn_module.CrossEntropyLoss(ignore_index=IGNORE_INDEX)
+    parameter_count = count_trainable_parameters(model)
+    device_name = torch.cuda.get_device_name(device) if getattr(device, "type", "") == "cuda" and torch.cuda.is_available() else str(device)
 
     summaries: List[Dict[str, object]] = []
-    for epoch in range(1, config.epochs + 1):
-        model.train()
-        total_loss = 0.0
-        total_tokens = 0
-        for batch in loader:
-            optimizer.zero_grad()
+    batch_logger = BatchCSVLogger(batch_log_path)
+    run_start = time.perf_counter()
+    try:
+        for epoch in range(1, config.epochs + 1):
+            model.train()
+            epoch_start = time.perf_counter()
+            total_loss = 0.0
+            total_tokens = 0
+            n_batches = len(loader)
+            for batch_index, batch in enumerate(loader, start=1):
+                optimizer.zero_grad()
 
-            if config.architecture == "seq2seq_lstm":
-                encoder_input_ids, decoder_input_ids, labels = batch
-                encoder_input_ids = encoder_input_ids.to(device)
-                decoder_input_ids = decoder_input_ids.to(device)
-                labels = labels.to(device)
-                logits, _hidden = model(encoder_input_ids, decoder_input_ids)
-            else:
-                input_ids, labels = batch
-                input_ids = input_ids.to(device)
-                labels = labels.to(device)
-                logits, _hidden = model(input_ids)
+                if config.architecture == "seq2seq_lstm":
+                    encoder_input_ids, decoder_input_ids, labels = batch
+                    encoder_input_ids = encoder_input_ids.to(device)
+                    decoder_input_ids = decoder_input_ids.to(device)
+                    labels = labels.to(device)
+                    logits, _hidden = model(encoder_input_ids, decoder_input_ids)
+                else:
+                    input_ids, labels = batch
+                    input_ids = input_ids.to(device)
+                    labels = labels.to(device)
+                    logits, _hidden = model(input_ids)
 
-            loss = loss_fn(logits.reshape(-1, len(vocab.id_to_token)), labels.reshape(-1))
-            loss.backward()
-            if config.grad_clip and config.grad_clip > 0:
-                torch.nn.utils.clip_grad_norm_(model.parameters(), config.grad_clip)
-            optimizer.step()
+                loss = loss_fn(logits.reshape(-1, len(vocab.id_to_token)), labels.reshape(-1))
+                loss.backward()
+                grad_norm: object = ""
+                if config.grad_clip and config.grad_clip > 0:
+                    grad_norm_tensor = torch.nn.utils.clip_grad_norm_(model.parameters(), config.grad_clip)
+                    grad_norm = float(grad_norm_tensor.item())
+                optimizer.step()
 
-            target_tokens = int((labels != IGNORE_INDEX).sum().item())
-            total_loss += float(loss.item()) * max(target_tokens, 1)
-            total_tokens += target_tokens
+                target_tokens = int((labels != IGNORE_INDEX).sum().item())
+                batch_loss = float(loss.item())
+                total_loss += batch_loss * max(target_tokens, 1)
+                total_tokens += target_tokens
+                should_log = (
+                    batch_index == 1
+                    or batch_index == n_batches
+                    or (log_every_batches > 0 and batch_index % log_every_batches == 0)
+                )
+                if should_log:
+                    elapsed = time.perf_counter() - run_start
+                    memory = cuda_memory_snapshot(torch, device)
+                    batch_logger.write(
+                        {
+                            "epoch": epoch,
+                            "batch_index": batch_index,
+                            "batches_in_epoch": n_batches,
+                            "loss": batch_loss,
+                            "target_tokens": target_tokens,
+                            "cumulative_tokens": total_tokens,
+                            "elapsed_seconds": elapsed,
+                            "tokens_per_second": total_tokens / max(time.perf_counter() - epoch_start, 1e-9),
+                            "grad_norm": grad_norm,
+                            "learning_rate": config.learning_rate,
+                            "architecture": config.architecture,
+                            "device": device_name,
+                            **memory,
+                        }
+                    )
 
-        mean_loss = total_loss / total_tokens if total_tokens else math.nan
-        summaries.append(
-            {
-                "epoch": epoch,
-                "mean_cross_entropy": mean_loss,
-                "target_tokens": total_tokens,
-                "training_examples": len(encoded),
-                "architecture": config.architecture,
-            }
-        )
-        print(f"[TRAIN] epoch={epoch} mean_cross_entropy={mean_loss:.4f} target_tokens={total_tokens}")
+            epoch_seconds = time.perf_counter() - epoch_start
+            mean_loss = total_loss / total_tokens if total_tokens else math.nan
+            memory = cuda_memory_snapshot(torch, device)
+            summaries.append(
+                {
+                    "epoch": epoch,
+                    "mean_cross_entropy": mean_loss,
+                    "perplexity": math.exp(mean_loss) if math.isfinite(mean_loss) else math.nan,
+                    "target_tokens": total_tokens,
+                    "training_examples": len(encoded),
+                    "batches": n_batches,
+                    "epoch_seconds": epoch_seconds,
+                    "tokens_per_second": total_tokens / max(epoch_seconds, 1e-9),
+                    "architecture": config.architecture,
+                    "device": device_name,
+                    "vocab_size": len(vocab.id_to_token),
+                    "trainable_parameters": parameter_count,
+                    **memory,
+                }
+            )
+            prefix = f"{progress_prefix} " if progress_prefix else ""
+            print(
+                f"[TRAIN] {prefix}epoch={epoch} "
+                f"mean_cross_entropy={mean_loss:.4f} "
+                f"perplexity={math.exp(mean_loss):.2f} "
+                f"target_tokens={total_tokens} "
+                f"seconds={epoch_seconds:.1f}",
+                flush=True,
+            )
+    finally:
+        batch_logger.close()
 
     output_dir.mkdir(parents=True, exist_ok=True)
     torch.save(model.state_dict(), output_dir / "model.pt")

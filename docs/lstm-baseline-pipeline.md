@@ -118,6 +118,82 @@ The variant definitions live in the JSON config, so the output column names,
 generation length mode, max token cap, and minimum generated length can be
 changed without editing source code.
 
+## PBM Additive Age-Bin Context-Window Run
+
+For the first serious PBM comparison against the existing
+random/unigram/bigram/trigram baselines, use the additive age-bin script:
+
+```bash
+.venv/bin/python src/run_lstm_additive_age_context_pipeline.py \
+  --output_dir results/lstm_baselines/pbm_additive_merged_006_023_k3_k4_k5_same_length \
+  --contexts 3 4 5 \
+  --variants same_length \
+  --epochs 3 \
+  --embedding_dim 128 \
+  --hidden_dim 256 \
+  --batch_size 128 \
+  --max_vocab_size 30000 \
+  --device cuda
+```
+
+This run is intentionally PBM-only:
+
+- Brown
+- Manchester
+- Providence
+
+It uses the same merged-early/additive bin schedule as the current n-gram
+baselines:
+
+```text
+006-023, 024-029, 030-035, 036-041, 042-047, 048-053, 054-059, 060-065
+```
+
+For each target bin, the model is trained on that bin plus all earlier bins.
+This keeps the information regime comparable to the additive random, unigram,
+bigram, and trigram generation logic.
+
+The generated same-length columns are:
+
+- `lstm_additive_k3_same_length_utterance`
+- `lstm_additive_k4_same_length_utterance`
+- `lstm_additive_k5_same_length_utterance`
+
+The generation context (`k3`, `k4`, `k5`) is separate from the scorer context
+columns. For downstream surprisal scoring, every target string must keep its
+row-matched `context_k1`, `context_k2`, and `context_k3`. This means the real
+child utterance, each random/unigram/bigram/trigram baseline, and each LSTM
+baseline column are all scored under the same row's scoring contexts. Caretaker
+targets remain in `caretakers.surprisal_scoring.csv` with their own matched
+`context_k1`, `context_k2`, and `context_k3`.
+
+Run-level diagnostics include:
+
+- `model_run_manifest.csv`
+- `training_summary.csv`
+- `generation_summary.csv`
+- `generation_diagnostics.csv`
+- `generation_samples.csv`
+- `plots/*.png`
+- `plots/*.pdf`
+
+Each context/bin model also writes:
+
+- `model.pt`
+- `vocab.json`
+- `config.json`
+- `training_summary.csv`
+- `batch_training_log.csv`
+
+The 2026-05-28 completed run wrote:
+
+```text
+results/lstm_baselines/pbm_additive_merged_006_023_k3_k4_k5_same_length/
+```
+
+Validation found 446,508 generated rows per LSTM column and 0 same-length
+mismatches for k3, k4, or k5.
+
 ## Config Files
 
 Full GPU-oriented default:
