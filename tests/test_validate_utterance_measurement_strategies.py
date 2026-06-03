@@ -53,6 +53,20 @@ class TestValidateUtteranceMeasurementStrategies(unittest.TestCase):
         self.assertEqual(counts.syllable_count, 7)
         self.assertEqual(counts.fallback_words, "firetruck;boing;dabadoo")
 
+    def test_syllable_hybrid_falls_back_when_cmudict_has_no_vowel_nucleus(self):
+        counts = count_cmudict_or_syllables_pkg_utterance(["hm", "shh"])
+
+        self.assertEqual(counts.syllable_count, 2)
+        self.assertEqual(counts.fallback_word_count, 2)
+        self.assertEqual(counts.fallback_words, "hm;shh")
+
+    def test_phoneme_hybrid_falls_back_for_unicode_non_g2p_symbol(self):
+        counts = count_cmudict_g2p_utterance(["ð"])
+
+        self.assertEqual(counts.hybrid_phoneme_count, 1)
+        self.assertEqual(counts.hybrid_syllable_count, 1)
+        self.assertEqual(counts.hybrid_g2p_fallback_word_count, 1)
+
     def test_mor_tier_counts_components_and_overt_bound_morpheme_proxy(self):
         mor = "pron|that-Dem~aux|be-Fin-Ind-Pres-S3 det|a-Ind-Art verb|look-Ger-S noun|eye-Plur ."
 

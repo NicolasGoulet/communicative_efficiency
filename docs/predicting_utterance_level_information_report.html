@@ -1,0 +1,284 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Predicting Informational Content at the Utterance Level</title>
+<style>
+:root {
+  color-scheme: light;
+  --ink: #1e2528;
+  --muted: #5e686d;
+  --line: #d9e0df;
+  --paper: #ffffff;
+  --soft: #f5f7f6;
+  --accent: #2f6f73;
+  --accent2: #c76f2c;
+}
+body {
+  margin: 0;
+  background: #eef2f1;
+  color: var(--ink);
+  font: 16px/1.58 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+main {
+  max-width: 980px;
+  margin: 34px auto 56px;
+  padding: 48px 58px;
+  background: var(--paper);
+  box-shadow: 0 18px 50px rgba(31, 45, 48, 0.12);
+}
+h1, h2, h3, h4 {
+  line-height: 1.18;
+  margin: 1.6em 0 0.55em;
+}
+h1 {
+  margin-top: 0;
+  font-size: 2.25rem;
+  border-bottom: 3px solid var(--accent);
+  padding-bottom: 0.45em;
+}
+h2 {
+  font-size: 1.55rem;
+  color: var(--accent);
+}
+h3 {
+  font-size: 1.18rem;
+}
+p {
+  margin: 0.75em 0;
+}
+a {
+  color: var(--accent);
+}
+blockquote {
+  border-left: 4px solid var(--accent2);
+  margin: 1.1em 0;
+  padding: 0.05em 1.1em;
+  color: var(--muted);
+  background: #fff8f2;
+}
+code {
+  background: var(--soft);
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  padding: 0.08em 0.3em;
+  font-family: "SFMono-Regular", Consolas, monospace;
+  font-size: 0.92em;
+}
+pre {
+  background: #f5f7f6;
+  color: var(--ink);
+  border: 1px solid var(--line);
+  padding: 1em;
+  overflow-x: auto;
+  border-radius: 7px;
+}
+pre code {
+  background: transparent;
+  border: 0;
+  padding: 0;
+  color: inherit;
+}
+table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 1.15em 0 1.45em;
+  font-size: 0.95em;
+}
+th, td {
+  border: 1px solid var(--line);
+  padding: 0.54em 0.68em;
+  vertical-align: top;
+}
+th {
+  background: #e7efed;
+  text-align: left;
+}
+tr:nth-child(even) td {
+  background: #fafbfb;
+}
+img {
+  max-width: 100%;
+  display: block;
+  margin: 1.1em auto 0.45em;
+}
+ul, ol {
+  padding-left: 1.4em;
+}
+.caption {
+  color: var(--muted);
+  font-size: 0.92em;
+  margin-top: -0.15em;
+}
+@media print {
+  body {
+    background: white;
+  }
+  main {
+    box-shadow: none;
+    margin: 0;
+    max-width: none;
+    padding: 28px;
+  }
+}
+</style>
+</head>
+<body>
+<main>
+<h1>Predicting Informational Content at the Utterance Level</h1>
+<p>Working draft, June 2026</p>
+<h2>Introduction</h2>
+<p>This document describes an utterance-level analysis of communicative efficiency in child language. The broad goal is to understand how children learn to package information in speech while managing the effort required to produce it.</p>
+<p>In this framing, communicative efficiency has two parts. The first is <strong>informativeness</strong>: how much information an utterance conveys in context. The second is <strong>effort</strong>: how much linguistic material is produced to convey that information. A developmental increase in total surprisal is not meaningful on its own if it simply reflects that older children produce longer utterances. For this reason, the analyses must compare informational content while controlling for utterance length and other effort-related properties.</p>
+<p>The analyses will focus on three related quantities:</p>
+<ul>
+<li><strong>total information per utterance</strong>, measured with <code>sum_bits</code>;</li>
+<li><strong>information per unit of production effort</strong>, primarily</li>
+<p><code>sum_bits / cleaned_target_word_count</code>;</p>
+<li><strong>tokenizer-level sensitivity</strong>, measured with <code>mean_bits_per_token</code>.</li>
+</ul>
+<p>The most important outcome for communicative-efficiency interpretation is information per lexical word. Total information is still useful, but it is strongly affected by utterance length. Later versions of the analysis may also include morpheme, syllable, or phoneme counts as additional measures of production effort.</p>
+<p>The present document focuses only on utterance-level surprisal. Analyses of context entropy, KL divergence, and word-level informativity will be treated separately.</p>
+<h2>Analysis Sample</h2>
+<p>The initial analysis uses three longitudinal naturalistic caregiver-child corpora from CHILDES: Providence, Brown, and Manchester. Together, these corpora provide dense developmental trajectories for 21 children, with both child speech and caretaker speech scored under the same Mistral-based surprisal framework.</p>
+<p>The first comparisons focus on real child utterances, caretaker utterances, and matched-length baseline utterances. These comparisons are meant to tell us whether children&#x27;s utterances are merely becoming longer over time, or whether they are changing in how efficiently they use linguistic material to carry information.</p>
+<h2>Developmental Age Bins</h2>
+<p>For descriptive plots and age-binned summaries, the first age bin combines the early months:</p>
+<ul>
+<li><code>006-023</code> months</li>
+</ul>
+<p>The following bins are six-month intervals:</p>
+<ul>
+<li><code>024-029</code></li>
+<li><code>030-035</code></li>
+<li><code>036-041</code></li>
+<li><code>042-047</code></li>
+<li><code>048-053</code></li>
+<li><code>054-059</code></li>
+<li><code>060-065</code></li>
+</ul>
+<p>This binning scheme gives enough support to the youngest period while retaining six-month developmental resolution afterward. All scored child and caretaker utterances in the current analysis sample are assigned to one of these bins.</p>
+<h2>Utterance Coverage by Age</h2>
+<p>The current analysis sample contains 446,985 child utterances and 668,903 caretaker utterances. The table below shows their distribution across developmental age bins.</p>
+<table>
+<thead><tr>
+<th>Age bin</th>
+<th>Caretaker utterances</th>
+<th>Child utterances</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>006-023</td>
+<td>150,345</td>
+<td>62,816</td>
+</tr>
+<tr>
+<td>024-029</td>
+<td>249,127</td>
+<td>162,210</td>
+</tr>
+<tr>
+<td>030-035</td>
+<td>199,242</td>
+<td>142,447</td>
+</tr>
+<tr>
+<td>036-041</td>
+<td>37,663</td>
+<td>37,683</td>
+</tr>
+<tr>
+<td>042-047</td>
+<td>18,374</td>
+<td>16,345</td>
+</tr>
+<tr>
+<td>048-053</td>
+<td>7,910</td>
+<td>12,909</td>
+</tr>
+<tr>
+<td>054-059</td>
+<td>5,226</td>
+<td>10,033</td>
+</tr>
+<tr>
+<td>060-065</td>
+<td>1,016</td>
+<td>2,542</td>
+</tr>
+</tbody></table>
+<img src="../figs/utterance_information/total_utterances_by_age_bin.png" alt="Total child and caretaker utterances by developmental age bin">
+<p>Most utterances fall between 6 and 35 months, especially because Manchester is dense in the early-to-middle toddler range. The later bins remain useful, but they contain fewer observations, particularly for caretakers in the oldest bin. This should be kept in mind when interpreting age-binned descriptive summaries.</p>
+<p>The contribution of each corpus also changes across developmental time:</p>
+<img src="../figs/utterance_information/utterances_by_age_bin_and_corpus.png" alt="Corpus contribution to utterance counts by age bin">
+<p>This uneven corpus contribution is expected for longitudinal CHILDES data. It is one reason that the explanatory models should control for child identity, and potentially corpus identity if later model comparisons require it.</p>
+<h2>Corpora and Children</h2>
+<p>The current Providence/Brown/Manchester analysis set contains 21 children.</p>
+<table>
+<thead><tr>
+<th>Corpus</th>
+<th>Children</th>
+<th>Child utterances</th>
+<th>Caretaker utterances</th>
+<th>Child age range</th>
+<th>Transcript files</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>Brown</td>
+<td>3</td>
+<td>92,555</td>
+<td>64,206</td>
+<td>18.0-62.4</td>
+<td>214</td>
+</tr>
+<tr>
+<td>Manchester</td>
+<td>12</td>
+<td>232,614</td>
+<td>342,246</td>
+<td>20.7-36.3</td>
+<td>408</td>
+</tr>
+<tr>
+<td>Providence</td>
+<td>6</td>
+<td>121,816</td>
+<td>262,451</td>
+<td>11.1-48.1</td>
+<td>361</td>
+</tr>
+<tr>
+<td>Total</td>
+<td>21</td>
+<td>446,985</td>
+<td>668,903</td>
+<td>11.1-62.4</td>
+<td>983</td>
+</tr>
+</tbody></table>
+<h3>Brown</h3>
+<p>Brown contributes three children. Eve covers the earliest Brown range, from about 18 to 27 months. Adam and Sarah contribute longer developmental trajectories extending into the 60-month range. Brown is therefore especially important for the later bins.</p>
+<h3>Manchester</h3>
+<p>Manchester contributes 12 children and the largest number of child utterances in the current analysis set. Its developmental window is narrower, roughly 21 to 36 months, but it is dense within that period. Manchester is therefore a major contributor to the early and middle bins.</p>
+<h3>Providence</h3>
+<p>Providence contributes six children, with the earliest scored rows beginning around 11 months. Some Providence children extend into the late 40-month range. This corpus is important for the earliest developmental bin and for linking the infant/toddler range to later preschool ages.</p>
+<img src="../figs/utterance_information/child_developmental_coverage.png" alt="Developmental coverage of individual children">
+<p>This child-level structure is central to the modeling strategy. The same child contributes many utterances over time, so rows should not be treated as independent observations from unrelated speakers. At minimum, child identity must be controlled. Later models may also aggregate by child, age bin, context window, and utterance-length band to make the repeated-observation structure more explicit.</p>
+<h2>Comparison Baselines</h2>
+<p>To interpret children&#x27;s communicative efficiency, we need comparison utterances that preserve some properties of the child data while removing others. The current baselines are designed to ask how much of children&#x27;s informational profile can be explained by vocabulary growth, frequency structure, local word dependencies, and conversational context.</p>
+<p>All generated baselines are matched to the length of the corresponding child utterance. This is important: if a baseline produced shorter or longer utterances, differences in surprisal would be confounded with differences in production effort.</p>
+<h3>Random Baseline</h3>
+<p>The random baseline samples words uniformly from the additive vocabulary available at the child&#x27;s developmental age. It preserves the broad developmental constraint that later bins have access to a larger vocabulary, but it does not use word frequency, local syntax, or discourse context.</p>
+<h3>N-Gram Baselines</h3>
+<p>The unigram, bigram, and trigram baselines use additive developmental training bins. For a given target age bin, the model has access to that bin and all previous bins. This mirrors the idea that the comparison model should not use future developmental data to generate earlier utterances.</p>
+<p>The unigram baseline samples from word frequencies. The bigram and trigram baselines additionally use local word dependencies. At utterance boundaries, they use the immediately preceding caretaker speech as context for the first generated child words, so that the baseline is not completely blind to the conversation turn it is responding to.</p>
+<h3>LSTM Baseline</h3>
+<p>The LSTM baseline is designed as a stronger comparison than the frequency-based models while remaining much simpler than a large language model. It uses an encoder-decoder architecture: the encoder reads a bounded window of preceding caretaker speech, and the decoder generates a child-like response.</p>
+<p>The planned LSTM comparison follows the same additive developmental logic as the n-gram baselines. For each age bin, the LSTM is trained on the current bin plus all previous bins, then used to generate utterances only for the target bin. This keeps the comparison aligned with the developmental information available to the n-gram baselines.</p>
+<p>The first LSTM comparison will use same-length generated utterances, so effort is held constant relative to the real child utterance. A later free-length variant can ask a different question: whether the model chooses a similar amount of communicative effort when responding to the same caretaker context.</p>
+</main>
+</body>
+</html>

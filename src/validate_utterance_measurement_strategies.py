@@ -376,6 +376,9 @@ def count_cmudict_g2p_utterance(tokens: Sequence[str]) -> HybridUtteranceCounts:
             phones = list(g2p_pronunciation_for_word(token))
             source = "g2p_en"
             g2p_words.append(token)
+        if not phones:
+            phones = ["ORTH"]
+            source = "orthographic_fallback"
         syllable_count = phones_syllable_count(phones)
         if syllable_count <= 0 and phones:
             syllable_count = 1
@@ -403,7 +406,7 @@ def count_cmudict_or_syllables_pkg_utterance(tokens: Sequence[str]) -> SyllableU
     fallback_words: list[str] = []
     for token in tokens:
         cmu = first_cmu_pronunciation(token)
-        if cmu.pronunciation_count and cmu.syllables_first is not None:
+        if cmu.pronunciation_count and cmu.syllables_first is not None and cmu.syllables_first > 0:
             source = "cmudict"
             syllable_count = int(cmu.syllables_first)
         else:

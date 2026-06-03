@@ -92,6 +92,18 @@ Generated/scoring-ready row counts for this current bundle:
 The current data needed for LSTM generation should be transferred between
 machines with `rsync`, not Git.
 
+Current supervisor-facing utterance-information report:
+
+```text
+docs/predicting_utterance_level_information_report.md
+docs/predicting_utterance_level_information_report.html
+```
+
+Before editing this report, always reread the current Markdown file because the
+user may be editing it manually between agent turns. Keep the report
+supervisor-facing: avoid implementation paths, repo workflow details, and
+internal labels such as "Route 1" in the report body.
+
 ## Current LSTM Focus
 
 Next likely work: run or modify the LSTM utterance-generation pipeline on a GPU
@@ -238,8 +250,8 @@ If `uv` is available, this also works:
 env UV_CACHE_DIR=/tmp/uv-cache uv run python -m unittest discover -s tests
 ```
 
-Latest known full-suite check on 2026-06-02 after the additive age-bin LSTM
-rewrite: 156 tests passing.
+Latest known full-suite check on 2026-06-03 after the utterance-information
+report asset builder: 163 tests passing.
 
 ## Project-Specific Constraints
 

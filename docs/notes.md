@@ -462,3 +462,137 @@ results/lstm_baselines/pbm_additive_merged_006_023_k3_k4_k5_same_length/
 - Interpretation: PBM is large enough for the first fair comparison, especially
   through mid-childhood bins, but the final `060-065` target bin is small and
   should be flagged in analyses.
+
+## 2026-06-03 Utterance-Level Information Report Started
+
+- Added `docs/predicting_utterance_level_information_report.md` as the active
+  supervisor-facing report for predicting informational content at the
+  utterance level.
+- Scope is intentionally narrow: utterance-level informational content over
+  development, with controls for target length/effort, context, and repeated
+  child observations.
+- The report explicitly excludes Route 2 entropy/KL analyses and the
+  Levshina-style word-token informativity route.
+- The current source-of-truth handoff is
+  `docs/route1_from_compute_surprisal_handoff_2026-06-03.md`.
+- The current scored source tree for Route 1 is the patched PBM Mistral tree:
+  `results/external/compute_surprisal_mila/raw_surprisal_cleaned_mistral_patched_006_023`.
+- The report records the current scientific framing, PBM corpus coverage,
+  developmental bins, child trajectories, staged modeling questions, and
+  interpretation guardrails without exposing distracting implementation paths.
+
+## 2026-06-03 Route 1 Coverage Assets And HTML Report
+
+- Added `src/build_route1_report_assets.py` to build Route 1 coverage tables
+  and figures from the patched PBM Mistral scored tree.
+- Added `src/render_markdown_report.py` as a dependency-light Markdown-to-HTML
+  renderer so the Markdown report remains the source and the HTML report is
+  reproducible on the laptop without pandoc.
+- Added `tests/test_build_route1_report_assets.py` with coverage for the
+  merged `006-023` Route 1 bin, six-month follow-up bins, filename-age recovery,
+  k0 child/caretaker counting, Markdown table rendering, and HTML rendering.
+- During the first coverage pass, 477 child rows and 507 caretaker rows appeared
+  unbinned. Audit showed all of them were Providence/Naima `Naima/030000.cha`
+  rows with blank scored `age_months`.
+- Fixed the Route 1 asset builder to recover blank scored ages from
+  YYMMDD-style CHAT filename stems, reusing the convention from
+  `prepare_datasets.py`. `030000.cha` resolves to 36.0 months and is assigned
+  to the `036-041` bin.
+- Regenerated Route 1 coverage assets:
+  - child k0 scored rows: 446,985; rows in Route 1 bins: 446,985
+  - caretaker k0 scored rows: 668,903; rows in Route 1 bins: 668,903
+  - missing age after recovery: 0 for both roles
+  - outside Route 1 bins: 0 for both roles
+- Generated figures under `figs/utterance_information/` and tables under
+  `results/utterance_information/report_assets/`.
+- Rendered the HTML report to
+  `docs/predicting_utterance_level_information_report.html`.
+- Verification:
+  - `env MPLCONFIGDIR=/tmp/matplotlib UV_CACHE_DIR=/tmp/uv-cache uv run python -m unittest tests.test_build_route1_report_assets` passed with 6 tests.
+  - `env MPLCONFIGDIR=/tmp/matplotlib UV_CACHE_DIR=/tmp/uv-cache uv run python -m unittest discover -s tests` passed with 163 tests.
+
+## 2026-06-03 Supervisor-Facing Report Framing Update
+
+- User clarified that the report should not expose internal labels such as
+  "Route 1" or implementation details such as paths/symlinks/workflow sections.
+- Reworked `docs/predicting_utterance_level_information_report.md` around
+  communicative efficiency: informativeness versus production effort.
+- Removed the premature "Analysis Questions" and next-modeling sections.
+- Added a "Comparison Baselines" section describing:
+  - random baseline as uniform sampling from age-additive vocabulary;
+  - unigram/bigram/trigram baselines as additive developmental n-gram models;
+  - LSTM baseline as an encoder-decoder comparison using the same additive age
+    bin training logic, with same-length generation as the first effort-held
+    comparison.
+- Retitled report figures with short formal titles:
+  - `Utterance Coverage by Age`
+  - `Corpus Contributions by Age`
+  - `Child Age Coverage`
+- Regenerated report assets:
+  - `env MPLCONFIGDIR=/tmp/matplotlib UV_CACHE_DIR=/tmp/uv-cache uv run python src/build_route1_report_assets.py`
+  - `env UV_CACHE_DIR=/tmp/uv-cache uv run python src/render_markdown_report.py docs/predicting_utterance_level_information_report.md docs/predicting_utterance_level_information_report.html`
+- Full suite verification: `env MPLCONFIGDIR=/tmp/matplotlib UV_CACHE_DIR=/tmp/uv-cache uv run python -m unittest discover -s tests` passed with 163 tests.
+
+## 2026-06-03 Route 1 Analysis Dataset Recovery
+
+- Added `src/build_route1_analysis_dataset.py` and
+  `tests/test_build_route1_analysis_dataset.py` to build a normalized
+  utterance-level modeling CSV with scored `sum_bits` and selected effort
+  counts for child real utterances, generated random/unigram/bigram/trigram
+  baselines, and caretaker utterances.
+- The first full build found exactly 7,632 unscored generated-baseline rows:
+  Providence/Naima `Naima/030000.cha`, 477 underlying child utterances, for
+  random/unigram/bigram/trigram across k0/k1/k2/k3. Real child rows were scored.
+  Extracted row keys to:
+  - `results/route1_analysis_dataset/unscored_generated_baseline_rows_long.csv`
+  - `results/route1_analysis_dataset/unscored_generated_baseline_rows_unique.csv`
+  - `results/route1_analysis_dataset/unscored_generated_baseline_summary.csv`
+- Updated effort counting so word-like fillers or special word forms such as
+  `hm`, `mm`, `shh`, and `ð` receive at least one syllable and at least one
+  phoneme if they survive as scored lexical targets.
+- Added atomic output publication to `src/build_route1_analysis_dataset.py`: the
+  builder now writes hidden temporary files and only replaces the final CSV and
+  audit files after validation succeeds. This prevents interrupted long runs
+  from leaving a truncated file under the final output name.
+- A user interruption left
+  `results/route1_analysis_dataset/route1_scored_utterance_effort_long.csv.gz`
+  truncated (`gzip -t` reported unexpected EOF). Moved that corrupt CSV and
+  stale audit/schema files to:
+  `results/route1_analysis_dataset/interrupted_2026-06-03_pre_atomic/`.
+- Current status: the final Route 1 analysis CSV is intentionally absent and
+  must be rebuilt with the atomic builder before modeling.
+- Verification after code changes:
+  `env MPLCONFIGDIR=/tmp/matplotlib UV_CACHE_DIR=/tmp/uv-cache uv run python -m unittest tests.test_validate_utterance_measurement_strategies tests.test_build_route1_analysis_dataset`
+  passed with 17 tests.
+
+## 2026-06-03 Naima 030000 Missing-Baseline Patch
+
+- Investigated the 7,632 missing generated-baseline scoring tasks. The missing
+  scope is exactly Providence/Naima `Naima/030000.cha`: 477 scorable child
+  utterances x random/unigram/bigram/trigram x k0/k1/k2/k3.
+- Real child utterance scores for these 477 rows exist in the Mistral scored
+  tree; generated-baseline target text and scores were blank because the source
+  scorer input had blank `age_months`.
+- Confirmed `Naima/030000.cha` can be assigned to 36.0 months from the CHAT
+  filename, so the scientifically consistent generated-baseline bin is the
+  current additive `036-041` dictionary bin.
+- Added `src/create_naima_030000_missing_baseline_patch.py` plus
+  `tests/test_create_naima_030000_missing_baseline_patch.py`. The patch builder
+  reads the real-child scored rows, recovers age from filename, generates
+  same-word-count random/unigram/bigram/trigram utterances from the current
+  additive `036-041` n-gram dictionaries, and writes a tiny cleaned-data-style
+  scorer input.
+- Generated and validated:
+  - `results/scoring_patches/cleaned_data_patches/naima_030000_missing_baselines/data/preprocessed_data/Providence/Naima/chi.surprisal_scoring.csv`
+  - `results/scoring_bundles/naima_030000_missing_baselines_scoring_patch_2026-06-03.tar.gz`
+  - row count: 477
+  - blank generated baselines: 0 for all four generated columns
+  - recovered `age_months`: 36 for every row
+- Added scorer-side helpers and copied them into
+  `/home/apaixonada/EvaPortelance/Projet_1/compute_surprisal_mila/`:
+  - `scripts/score_naima_030000_missing_baselines_local.sh`
+  - `src/merge_naima_030000_missing_baseline_patch_scores.py`
+- Verification:
+  - `env MPLCONFIGDIR=/tmp/matplotlib UV_CACHE_DIR=/tmp/uv-cache uv run python -m unittest tests.test_create_naima_030000_missing_baseline_patch tests.test_build_route1_analysis_dataset` passed with 8 tests.
+  - `bash -n scripts/compute_surprisal_mila/score_naima_030000_missing_baselines_local.sh` passed.
+  - `env UV_CACHE_DIR=/tmp/uv-cache uv run python -m py_compile scripts/compute_surprisal_mila/merge_naima_030000_missing_baseline_patch_scores.py src/create_naima_030000_missing_baseline_patch.py` passed.
