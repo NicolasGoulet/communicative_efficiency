@@ -41,3 +41,6 @@ docs/figs_docs/
 
 # Logs
 *.log
+
+# Temporary cross-repo scratch files
+tmp_compute_surprisal_mila_*.md
