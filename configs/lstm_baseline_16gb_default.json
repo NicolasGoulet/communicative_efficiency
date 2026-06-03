@@ -1,8 +1,8 @@
 {
-  "description": "Default GPU run for the strict naturalistic merged-early bundle. Trains a word-level encoder-decoder LSTM that encodes bounded caretaker context and decodes child-like utterances.",
+  "description": "Default GPU run for the strict naturalistic merged-early bundle. Trains one additive age-bin word-level encoder-decoder LSTM per target bin, matching the developmental information constraints used by the n-gram baselines.",
   "manifest": "data/big_cleaned_dataset/default_naturalistic_merged_006_023/manifest.csv",
   "data_dir": "data/big_cleaned_dataset/default_naturalistic_merged_006_023/preprocessed_data",
-  "output_dir": "results/lstm_baselines/default_naturalistic_merged_006_023_seq2seq_ctx3",
+  "output_dir": "results/lstm_baselines/default_naturalistic_merged_006_023_additive_seq2seq_ctx3",
   "datasets": [],
   "variants": [
     {
@@ -25,6 +25,11 @@
   "context_output_filename": "chi.shared_caretaker_contexts.with_lstm.csv",
   "scoring_output_filename": "chi.surprisal_scoring_with_lstm.csv",
   "dry_run": false,
+  "age_binning": {
+    "mode": "additive_age_bins",
+    "bins_config": "data/big_cleaned_dataset/default_naturalistic_merged_006_023/age_ngram_dicts/merged_early_006_023/age_bins.json",
+    "strategy": "merged_early_006_023"
+  },
   "model": {
     "architecture": "seq2seq_lstm",
     "context_utterances": 3,

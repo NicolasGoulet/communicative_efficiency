@@ -77,6 +77,8 @@ ls /home/alkan/Portelance/communicative_efficiency/data/big_cleaned_dataset/defa
 Main model:
 
 - word-level encoder-decoder LSTM
+- one cumulative/additive model per target age bin, matching the n-gram baseline
+  training/vocabulary constraints
 - encoder input: bounded prior caretaker context
 - decoder output: child-like utterance
 - default context: last 3 caretaker utterances, capped at 60 tokens
@@ -88,6 +90,7 @@ Read:
 - `docs/lstm-baseline-pipeline.md`
 - `configs/lstm_baseline_16gb_smoke.json`
 - `configs/lstm_baseline_16gb_default.json`
+- `configs/lstm_baseline_16gb_pbm_additive.json`
 - `src/run_lstm_baseline_pipeline.py`
 - `src/generate_lstm_utterances.py`
 
@@ -115,23 +118,36 @@ Full GPU run:
   --config configs/lstm_baseline_16gb_default.json
 ```
 
+PBM-only GPU run, for comparison against PBM-trained n-gram baselines:
+
+```bash
+.venv/bin/python src/run_lstm_baseline_pipeline.py \
+  --config configs/lstm_baseline_16gb_pbm_additive.json
+```
+
 ## Expected Outputs
 
 Run-level output folder from the default config:
 
 ```text
-results/lstm_baselines/default_naturalistic_merged_006_023_seq2seq_ctx3/
+results/lstm_baselines/default_naturalistic_merged_006_023_additive_seq2seq_ctx3/
 ```
 
 Expected run-level artifacts:
 
 - `config.json`
 - `variants.json`
-- `vocab.json`
-- `model.pt`
-- `training_summary.csv`
+- `age_bins.json`
+- `lstm_age_bin_manifest.csv`
 - `generation_summary.csv`
 - `lstm_pipeline_manifest.csv`
+
+Expected per-bin artifacts:
+
+- `bin_006-023/vocab.json`
+- `bin_006-023/model.pt`
+- `bin_006-023/training_summary.csv`
+- the same structure for `024-029`, `030-035`, ..., `060-065`
 
 Expected per-child sibling files:
 
@@ -161,5 +177,6 @@ Record:
 - any training losses
 - any failed or interrupted run
 
-Do not claim a model was trained unless `model.pt`, `training_summary.csv`, and
-generation outputs actually exist.
+Do not claim additive LSTM models were trained unless the expected per-bin
+`model.pt` files, per-bin `training_summary.csv` files, and generation outputs
+actually exist.

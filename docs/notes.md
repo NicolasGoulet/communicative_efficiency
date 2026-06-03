@@ -287,3 +287,121 @@ confirmed.
 - The main total distribution is `figs/utterance_distributions_strict_naturalistic_parent_child/ALL_DATASETS/utterance_counts_by_age_bin_6m.csv`.
 - The before/new comparison is `figs/utterance_distributions_strict_naturalistic_parent_child/ALL_DATASETS/previous_vs_new_strict_downloads_age_bin_counts_6m.csv` and `.png`.
 - Also wrote the caretaker-side strict comparison to `figs/utterance_distributions_strict_naturalistic_parent_child/ALL_DATASETS/caretaker_previous_vs_new_strict_downloads_age_bin_counts_6m.csv` and `.png`.
+
+## 2026-05-29 PBM 006-023 Scoring Patch
+
+- User clarified that LSTM patching can be ignored in this laptop thread; the active work is only the PBM generated-baseline `006-023` patch.
+- Added a tested patch workflow to the local `compute_surprisal_mila` checkout:
+  - `src/create_pbm_006_023_scoring_patch.py`
+  - `src/replace_pbm_006_023_input_baselines.py`
+  - `src/merge_pbm_006_023_patch_scores.py`
+  - `slurm/submit_pbm_006_023_patch_mistral.sh`
+  - `slurm/merge_pbm_006_023_patch_scores.sbatch`
+  - `docs/pbm_006_023_patch_rescoring.md`
+  - `tests/test_pbm_006_023_patch.py`
+- The patch creation script filters the current merged-early scoring CSVs to Brown, Manchester, and Providence child rows with `6 <= age_months < 24`.
+- The input replacement script updates only the four generated baseline utterance columns in Mila's full cleaned-data inputs, after a dry-run audit and optional backup, so future full scoring reruns use the corrected `006-023` generated utterances.
+- The merge script is dry-run by default and only applies changes when patch rows match full scored-result rows by stable utterance provenance keys: `dataset`, `child_id`, `session_id`, `file`, `line_no`, and `utt_id`.
+- Verification in `compute_surprisal_mila`: `PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s tests` passed with 4 tests.
+- Built the actual patch tree at `results/scoring_patches/cleaned_data_patches/pbm_006_023_merged_early_baselines/`.
+- Patch input tree summary: 17 child files, 62,816 rows. Dataset split: Brown 1 child / 6,715 rows; Manchester 10 children / 22,272 rows; Providence 6 children / 33,829 rows.
+- Validated the scorer manifest with `src/build_cleaned_scoring_manifest.py`; it produced 272 tasks and no missing combinations: 17 child files times 4 generated modes times 4 context settings.
+- Created tarball `results/scoring_bundles/pbm_006_023_scoring_patch_2026-05-29.tar.gz` for transfer to Mila.
+
+## 2026-06-01 Route 1 From-Zero Reset
+
+- User explicitly reset the scientific analysis plan: older `compute_surprisal_mila` analysis outputs are archive/scaffold, not the evidential baseline.
+- Added `docs/route1_from_zero_handoff_2026-06-01.md` as the current compass for the 2026-06-02 Route 1 rebuild.
+- The handoff records that `communicative_efficiency` is now the from-zero scientific analysis workspace, while `compute_surprisal_mila` remains the scoring/HPC/audit repo.
+- Audited usable inputs carried forward: main cleaned Mistral tree with 504/504 CSVs and LSTM additive same-length tree with 252/252 CSVs.
+- Route 1 should start with real-child Mistral scores, recomputed cleaned word counts, descriptive plots, and the simplest age/length/child model before adding contexts, generated baselines, LSTM comparisons, entropy/KL features, or word-level features.
+- Pending caveats recorded in the handoff: PBM `006-023` generated-baseline patch still needs corrected Mila completion/audit after the Slurm comma-export bug; context entropy, KL/JS, and word-level surprisal features should not be used until hardened reruns pass audits.
+
+## 2026-06-02 Utterance Measurement Validation Probe
+
+- Added `src/validate_utterance_measurement_strategies.py` for publication-oriented audit rows covering word, morpheme, syllable, and phoneme counts side by side.
+- Added `tests/test_validate_utterance_measurement_strategies.py`.
+- Installed lightweight measurement dependencies with `uv add cmudict pronouncing pyphen syllables`, then added `g2p-en` for OOV word-form phoneme/syllable fallback.
+- Added `openpyxl` so the validation probe can write a formatted LibreOffice-friendly `.xlsx` review workbook.
+- Downloaded `g2p-en` NLTK resources under `data/nltk_data/`: `cmudict`, `averaged_perceptron_tagger`, and `averaged_perceptron_tagger_eng`.
+- Generated the initial 25-row validation outputs, then replaced them with a more human-reviewable 50-row stratified probe.
+- Current 50-row validation outputs:
+  - `results/count_validation/publication_measurement_probe_50.csv`
+  - `results/count_validation/publication_measurement_probe_50.md`
+  - `results/count_validation/publication_measurement_review_50.csv`
+  - `results/count_validation/publication_measurement_review_50_tokens.csv`
+  - `results/count_validation/publication_measurement_review_50.xlsx`
+- The review set is stratified by surface word length: 14 short rows, 14 medium rows, 12 long rows, and 10 very long rows. It has 0 duplicate cleaned utterances, 0 blank recommended syllable counts, and 0 blank recommended phoneme counts.
+- The review workbook puts the utterance, indexed tokens, automatic counts, and blank manual columns together so the user can make judgment calls without scrolling across the full audit schema.
+- The preferred phoneme counts use CMUdict ARPABET pronunciations for known words and `g2p-en` ARPABET predictions for OOV words as written.
+- The preferred syllable counts now use CMUdict for known words and the `syllables` package for OOV words as written. G2P-derived syllables remain visible as a diagnostic only, after manual review caught `firetruck` as an undercount under G2P vowel-nucleus syllable counting.
+- CMU-only diagnostic columns still go blank for OOV rows, but `recommended_syllable_count` and `recommended_phoneme_count` are complete for every non-empty validation row.
+- The probe explicitly distinguishes surface-string counts from CHAT `%mor`/MLU-style counts. Rows with retracing/repetition markup such as `[/]` are flagged with `raw_repetition_marker` and `mor_surface_mismatch`.
+- Added `docs/utterance_measurement_validation.md` to record the method hierarchy and the Levshina/word-level-bits context decision.
+- Added `docs/utterance_measurement_package_writeup.md` as a reviewer-facing description of each package/resource used for word, morpheme, syllable, phoneme, and spreadsheet infrastructure.
+- Verification:
+  - `env UV_CACHE_DIR=/tmp/uv-cache uv run python -m unittest tests.test_validate_utterance_measurement_strategies` passed with 8 tests.
+  - `env UV_CACHE_DIR=/tmp/uv-cache uv run python -m unittest discover -s tests` passed with 153 tests.
+
+## 2026-06-02 Additive Age-Bin LSTM Rewrite
+
+- Corrected the LSTM baseline design so the default GPU configs now train one
+  cumulative/additive LSTM per target age bin, matching the developmental
+  information constraints used by random/unigram/bigram/trigram baselines.
+- Added `LSTMAgeBinning`, additive bin-run helpers, cumulative training/example
+  selection, per-bin model/vocabulary outputs, `lstm_age_bin` provenance, and
+  dry-run summaries to `src/run_lstm_baseline_pipeline.py`.
+- Updated default and smoke configs:
+  - `configs/lstm_baseline_16gb_default.json`
+  - `configs/lstm_baseline_16gb_smoke.json`
+- The default age bins are loaded from:
+  - `data/big_cleaned_dataset/default_naturalistic_merged_006_023/age_ngram_dicts/merged_early_006_023/age_bins.json`
+- Additive-bin dry run on the laptop completed without training:
+  - command: `env UV_CACHE_DIR=/tmp/uv-cache uv run python src/run_lstm_baseline_pipeline.py --config configs/lstm_baseline_16gb_default.json --dry_run`
+  - units: 79
+  - examples total: 1,140,218
+  - bins: 8
+  - summary: `results/lstm_baselines/default_naturalistic_merged_006_023_additive_seq2seq_ctx3/dry_run_summary.json`
+- Dry-run additive plan:
+  - `006-023`: train 82,720, target 82,720
+  - `024-029`: train 386,676, target 303,956
+  - `030-035`: train 662,895, target 276,219
+  - `036-041`: train 887,348, target 224,453
+  - `042-047`: train 971,400, target 84,052
+  - `048-053`: train 1,064,947, target 93,547
+  - `054-059`: train 1,114,730, target 49,783
+  - `060-065`: train 1,140,218, target 25,488
+- Updated `docs/lstm-baseline-pipeline.md`, `docs/lstm_pc_handoff.md`, and
+  `AGENTS.md` so future agents do not replace additive-bin scientific logic
+  with a simplified global LSTM unless explicitly requested.
+- No GPU training was run on the laptop.
+- Verification:
+  - `env UV_CACHE_DIR=/tmp/uv-cache uv run python -m unittest tests.test_lstm_baseline_pipeline` passed with 11 tests.
+  - `env UV_CACHE_DIR=/tmp/uv-cache uv run python -m unittest discover -s tests` passed with 156 tests.
+
+## 2026-06-02 PBM-Only Additive LSTM Config
+
+- Added `configs/lstm_baseline_16gb_pbm_additive.json` for the first fair LSTM
+  comparison against PBM-trained random/unigram/bigram/trigram baselines.
+- The PBM config uses only Brown, Manchester, and Providence but preserves the
+  same additive age-bin logic and same LSTM architecture/hyperparameters as the
+  all-corpus default config.
+- PBM dry-run command:
+  - `env UV_CACHE_DIR=/tmp/uv-cache uv run python src/run_lstm_baseline_pipeline.py --config configs/lstm_baseline_16gb_pbm_additive.json --dry_run`
+- PBM dry-run summary:
+  - summary path: `results/lstm_baselines/pbm_merged_006_023_additive_seq2seq_ctx3/dry_run_summary.json`
+  - units: 21
+  - examples total: 446,508
+  - bins: 8
+- PBM additive plan:
+  - `006-023`: train 62,816, target 62,816
+  - `024-029`: train 225,026, target 162,210
+  - `030-035`: train 367,473, target 142,447
+  - `036-041`: train 404,679, target 37,206
+  - `042-047`: train 421,024, target 16,345
+  - `048-053`: train 433,933, target 12,909
+  - `054-059`: train 443,966, target 10,033
+  - `060-065`: train 446,508, target 2,542
+- Interpretation: PBM is large enough for the first fair comparison, especially
+  through mid-childhood bins, but the final `060-065` target bin is small and
+  should be flagged in analyses.

@@ -17,6 +17,7 @@ Question:
 Default model:
 
 - architecture: word-level encoder-decoder LSTM
+- training scope: one additive model per target age bin
 - encoder input: the last `k` prior caretaker utterances
 - context cap: only the last `max_context_tokens` context tokens are kept
 - decoder input during training: `<bos>` plus the child utterance prefix
@@ -28,6 +29,51 @@ The default architecture is `seq2seq_lstm`. A legacy `causal_lstm` option is
 also available, but the encoder-decoder model is the one to describe as the main
 baseline.
 
+## Additive Age-Bin Logic
+
+The fair LSTM baseline now mirrors the developmental information constraint used
+by the random/unigram/bigram/trigram baselines.
+
+Default bins:
+
+```text
+006-023
+024-029
+030-035
+036-041
+042-047
+048-053
+054-059
+060-065
+```
+
+For each target bin, the pipeline trains a separate LSTM:
+
+| Target bin | LSTM training examples | Generated rows |
+| --- | --- | --- |
+| `006-023` | child examples in `006-023` | rows in `006-023` |
+| `024-029` | child examples in `006-023` plus `024-029` | rows in `024-029` |
+| `030-035` | child examples through `030-035` | rows in `030-035` |
+| later bins | all previous bins plus current bin | rows in current bin only |
+
+This means the model used for an early child utterance never trains on later
+developmental data. The current bin is included, matching the additive
+vocabulary/count logic used by the n-gram baselines.
+
+The JSON config controls this with:
+
+```json
+"age_binning": {
+  "mode": "additive_age_bins",
+  "bins_config": "data/big_cleaned_dataset/default_naturalistic_merged_006_023/age_ngram_dicts/merged_early_006_023/age_bins.json",
+  "strategy": "merged_early_006_023"
+}
+```
+
+A legacy/exploratory global run remains possible with `"mode": "global"`, but
+that should not be used as the main fair comparison to the additive n-gram
+baselines.
+
 ## Why This Is Not An LLM Baseline
 
 The model is intentionally small and bounded:
@@ -36,7 +82,8 @@ The model is intentionally small and bounded:
 - LSTM recurrence, not transformer attention
 - no pretrained language knowledge
 - finite caretaker context window
-- trained only on the prepared CHILDES-derived data
+- trained only on the prepared CHILDES-derived data available to the target age
+  bin
 
 This makes it useful as a middle baseline: more context-sensitive than n-grams,
 but much less powerful than Mistral or another pretrained LLM.
@@ -77,12 +124,18 @@ Full GPU-oriented default:
 
 - `configs/lstm_baseline_16gb_default.json`
 
+PBM-only additive run for fair comparison against PBM-trained n-gram baselines:
+
+- `configs/lstm_baseline_16gb_pbm_additive.json`
+
 Small GPU smoke run:
 
 - `configs/lstm_baseline_16gb_smoke.json`
 
 Important knobs:
 
+- `age_binning.mode`: default `additive_age_bins`
+- `age_binning.bins_config`: JSON age-bin file shared with the n-gram baselines
 - `context_utterances`: how many previous caretaker utterances are eligible
 - `max_context_tokens`: maximum context tokens after flattening caretaker turns
 - `embedding_dim`
@@ -118,11 +171,26 @@ Full run:
   --config configs/lstm_baseline_16gb_default.json
 ```
 
+PBM-only run:
+
+```bash
+.venv/bin/python src/run_lstm_baseline_pipeline.py \
+  --config configs/lstm_baseline_16gb_pbm_additive.json
+```
+
 Dry-run validation, with no training:
 
 ```bash
 .venv/bin/python src/run_lstm_baseline_pipeline.py \
   --config configs/lstm_baseline_16gb_default.json \
+  --dry_run
+```
+
+PBM-only dry run:
+
+```bash
+.venv/bin/python src/run_lstm_baseline_pipeline.py \
+  --config configs/lstm_baseline_16gb_pbm_additive.json \
   --dry_run
 ```
 
@@ -132,11 +200,17 @@ The pipeline writes run-level artifacts:
 
 - `config.json`
 - `variants.json`
-- `vocab.json`
-- `model.pt`
-- `training_summary.csv`
+- `age_bins.json`
+- `lstm_age_bin_manifest.csv`
 - `generation_summary.csv`
 - `lstm_pipeline_manifest.csv`
+
+For each additive age bin, it writes:
+
+- `bin_<AGE-BIN>/config.json`
+- `bin_<AGE-BIN>/vocab.json`
+- `bin_<AGE-BIN>/model.pt`
+- `bin_<AGE-BIN>/training_summary.csv`
 
 It also writes sibling files in each child folder:
 
@@ -152,6 +226,7 @@ The final scoring file keeps:
 - real child utterance
 - random/unigram/bigram/trigram baselines
 - LSTM generated columns
+- `lstm_age_bin` provenance column
 
 These files are inputs to the separate Mila scoring project. This repository
 does not perform the actual large-scale surprisal scoring.
@@ -160,9 +235,11 @@ does not perform the actual large-scale surprisal scoring.
 
 In one sentence:
 
-> We train a small word-level encoder-decoder LSTM from bounded recent caretaker
-> context to the next child utterance, then use it to generate child-like
-> baseline utterances under either matched-length or free-length decoding.
+> We train small word-level encoder-decoder LSTMs under additive developmental
+> age-bin constraints: each model maps bounded recent caretaker context to the
+> next child utterance using only training examples from the target bin and
+> earlier bins, then generates child-like baseline utterances for rows in the
+> target bin.
 
 What is conditioned on:
 
@@ -178,6 +255,7 @@ What it controls:
 
 - same-length variant controls production length
 - free-length variant tests whether the model chooses similar utterance lengths
+- additive age-bin training controls developmental information leakage
 
 Why context is bounded:
 

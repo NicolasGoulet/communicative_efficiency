@@ -30,6 +30,30 @@ Broad scientific objects:
 
 ## Current Active Data State
 
+Mila scored-output handoff, created 2026-06-01:
+
+```text
+results/external/compute_surprisal_mila/raw_surprisal_cleaned_mistral
+results/external/compute_surprisal_mila/raw_surprisal_cleaned_mistral_patched_006_023
+results/external/compute_surprisal_mila/raw_surprisal_lstm_additive_same_length
+```
+
+These are symlinks into:
+
+```text
+/home/apaixonada/EvaPortelance/Projet_1/compute_surprisal_mila/
+```
+
+Use these paths for the from-zero analysis rebuild. Do not copy the multi-GB
+scored outputs into this repo. Prefer
+`raw_surprisal_cleaned_mistral_patched_006_023` for new analyses: it is a
+complete 504-file scored tree where the PBM 006-023 generated-baseline rows
+have been merged into the main cleaned Mistral results. Pending Mila feature
+products such as
+context-only entropy, KL/JS, and word-level surprisal should be symlinked here
+only after they have been rsynced locally and passed audits in
+`compute_surprisal_mila`.
+
 Current strict naturalistic big-cleaned bundle:
 
 ```text
@@ -79,14 +103,17 @@ Read these first:
 1. `docs/lstm-baseline-pipeline.md`
 2. `configs/lstm_baseline_16gb_smoke.json`
 3. `configs/lstm_baseline_16gb_default.json`
-4. `src/run_lstm_baseline_pipeline.py`
-5. `src/generate_lstm_utterances.py`
-6. `tests/test_lstm_baseline_pipeline.py`
-7. `tests/test_lstm_generation.py`
+4. `configs/lstm_baseline_16gb_pbm_additive.json`
+5. `src/run_lstm_baseline_pipeline.py`
+6. `src/generate_lstm_utterances.py`
+7. `tests/test_lstm_baseline_pipeline.py`
+8. `tests/test_lstm_generation.py`
 
 The LSTM pipeline:
 
 - trains a small word-level encoder-decoder LSTM;
+- trains one model per additive age bin by default, matching the developmental
+  information constraints used by the random/unigram/bigram/trigram baselines;
 - encodes bounded prior caretaker context;
 - decodes child-like utterance baselines;
 - supports same-length and free-length generation variants;
@@ -188,6 +215,14 @@ Default behavior:
 - Keep documentation synchronized when changing file formats or assumptions.
 - After meaningful work, update `TODO.md` and `docs/notes.md` with dates,
   commands, outputs, and verification.
+- Do not simplify scientific designs for convenience. If the requested analysis
+  requires matched developmental information constraints, additive age bins,
+  separate train/generate scopes, or other statistically important structure,
+  implement that structure with tests or explicitly stop and explain the
+  scientific tradeoff before coding.
+- Treat this as senior-engineer research software for a PhD project: exhaustive
+  tests, transparent provenance, and methods-level documentation are part of the
+  deliverable, not optional polish.
 
 ## Testing
 
@@ -203,7 +238,8 @@ If `uv` is available, this also works:
 env UV_CACHE_DIR=/tmp/uv-cache uv run python -m unittest discover -s tests
 ```
 
-Latest known full-suite check on 2026-05-28: 145 tests passing.
+Latest known full-suite check on 2026-06-02 after the additive age-bin LSTM
+rewrite: 156 tests passing.
 
 ## Project-Specific Constraints
 
@@ -214,6 +250,13 @@ Latest known full-suite check on 2026-05-28: 145 tests passing.
 - Do not treat empty or punctuation-only utterances as normal scored utterances.
 - Do not change output schemas without documenting the change.
 - Do not run GPU LSTM training on the laptop.
+- Do not replace additive age-bin baselines with global training unless the user
+  explicitly asks for an exploratory/global baseline. The fair LSTM baseline is
+  additive by age bin: train on the current bin plus all previous bins, generate
+  only for rows in the target bin.
+- Match the LSTM training corpus to the comparison target. If comparing against
+  PBM-trained n-gram baselines, use the PBM-only additive config; if comparing
+  against full strict-naturalistic n-grams, use the all-corpus additive config.
 
 ## Data Handling Rules
 

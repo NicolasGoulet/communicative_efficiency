@@ -24,6 +24,14 @@ from typing import Dict, Iterable, List, Optional, Sequence, Tuple
 import pandas as pd
 
 from build_age_word_dicts import ChildUnit
+from custom_age_bins import (
+    AgeBin,
+    age_bins_to_dicts,
+    find_age_bin,
+    floor_age_month,
+    load_age_bins_config,
+    make_merged_early_bins,
+)
 from create_minimal_surprisal_scoring_csvs import (
     CHILD_OUTPUT_COLUMNS,
     child_scoring_row,
@@ -58,6 +66,7 @@ DEFAULT_SCORING_WITH_LSTM_FILENAME = "chi.surprisal_scoring_with_lstm.csv"
 DEFAULT_CONTEXT_FILENAME = "chi.shared_caretaker_contexts.csv"
 DEFAULT_SCORING_FILENAME = "chi.surprisal_scoring.csv"
 DEFAULT_CONFIG = PROJECT_ROOT / "configs" / "lstm_baseline_16gb_default.json"
+DEFAULT_AGE_BINS_CONFIG = DEFAULT_BIG_DATASET_ROOT / "age_ngram_dicts" / "merged_early_006_023" / "age_bins.json"
 
 UNIT_MANIFEST_COLUMNS = [
     "dataset",
@@ -83,6 +92,24 @@ class LSTMVariant:
     generation_length_mode: str
     max_generated_tokens: int
     min_generated_tokens: int
+
+
+@dataclass(frozen=True)
+class LSTMAgeBinning:
+    """How LSTM training/generation should be split by child age."""
+
+    mode: str = "global"
+    bins_config: Optional[str] = None
+    strategy: str = "merged_early_006_023"
+
+
+@dataclass(frozen=True)
+class AdditiveBinRun:
+    """One additive age-bin LSTM run."""
+
+    age_bin: AgeBin
+    train_examples: Tuple[LSTMExample, ...]
+    target_examples: Tuple[LSTMExample, ...]
 
 
 DEFAULT_VARIANTS = {
@@ -226,6 +253,7 @@ def load_pipeline_config(path: Path) -> Dict[str, object]:
         "context_output_filename",
         "scoring_output_filename",
         "dry_run",
+        "age_binning",
         "model",
     }
     unknown = sorted(set(raw) - allowed_top_level)
@@ -254,6 +282,7 @@ def load_pipeline_config(path: Path) -> Dict[str, object]:
         generation_length_mode="same_as_child",
     )
     lstm_config = lstm_config_from_mapping(model_mapping, base_config)
+    age_binning = age_binning_from_mapping(raw.get("age_binning", {}))
 
     return {
         "manifest_path": resolve_project_path(raw.get("manifest", DEFAULT_MANIFEST)),
@@ -267,7 +296,29 @@ def load_pipeline_config(path: Path) -> Dict[str, object]:
         "scoring_output_filename": str(raw.get("scoring_output_filename", DEFAULT_SCORING_WITH_LSTM_FILENAME)),
         "dry_run": bool(raw.get("dry_run", False)),
         "config": lstm_config,
+        "age_binning": age_binning,
     }
+
+
+def age_binning_from_mapping(value: object) -> LSTMAgeBinning:
+    """Build an age-binning config from JSON."""
+    if value in (None, ""):
+        return LSTMAgeBinning()
+    if not isinstance(value, Mapping):
+        raise ValueError("Expected 'age_binning' to be an object.")
+    allowed = {"mode", "bins_config", "strategy"}
+    unknown = sorted(set(value) - allowed)
+    if unknown:
+        raise ValueError(f"Unknown age_binning field(s): {unknown}")
+    mode = str(value.get("mode", "global"))
+    if mode not in {"global", "additive_age_bins"}:
+        raise ValueError(f"Unknown LSTM age_binning mode: {mode}")
+    bins_config = value.get("bins_config")
+    return LSTMAgeBinning(
+        mode=mode,
+        bins_config=str(resolve_project_path(bins_config)) if bins_config else None,
+        strategy=str(value.get("strategy", "merged_early_006_023")),
+    )
 
 
 def build_examples_by_unit(
@@ -282,6 +333,62 @@ def build_examples_by_unit(
         examples_by_unit[unit.folder] = examples
         all_examples.extend(examples)
     return examples_by_unit, all_examples
+
+
+def resolve_lstm_age_bins(age_binning: LSTMAgeBinning, config: LSTMConfig) -> List[AgeBin]:
+    """Return the age bins for additive LSTM training."""
+    if age_binning.mode == "global":
+        return []
+    if age_binning.bins_config:
+        bins = load_age_bins_config(Path(age_binning.bins_config))
+    elif age_binning.strategy == "merged_early_006_023":
+        bins = make_merged_early_bins(max_month=int(config.max_age_months))
+    else:
+        raise ValueError(f"Unsupported additive LSTM age-bin strategy: {age_binning.strategy}")
+    if not bins:
+        raise ValueError("Additive LSTM age-binning requires at least one age bin.")
+    return bins
+
+
+def examples_in_target_bin(examples: Sequence[LSTMExample], age_bin: AgeBin) -> Tuple[LSTMExample, ...]:
+    """Return examples whose floored age is inside one target bin."""
+    return tuple(
+        example
+        for example in examples
+        if (month := floor_age_month(example.age_months)) is not None and age_bin.contains_month(month)
+    )
+
+
+def examples_for_additive_training_bin(
+    examples: Sequence[LSTMExample],
+    age_bin: AgeBin,
+    bins: Sequence[AgeBin],
+) -> Tuple[LSTMExample, ...]:
+    """Return cumulative examples from the first bin through the target bin."""
+    first_start = bins[0].start
+    return tuple(
+        example
+        for example in examples
+        if (month := floor_age_month(example.age_months)) is not None
+        and first_start <= month <= age_bin.end
+    )
+
+
+def build_additive_bin_runs(
+    examples: Sequence[LSTMExample],
+    bins: Sequence[AgeBin],
+) -> List[AdditiveBinRun]:
+    """Build cumulative training sets and target-generation sets for each bin."""
+    runs: List[AdditiveBinRun] = []
+    for age_bin in bins:
+        runs.append(
+            AdditiveBinRun(
+                age_bin=age_bin,
+                train_examples=examples_for_additive_training_bin(examples, age_bin, bins),
+                target_examples=examples_in_target_bin(examples, age_bin),
+            )
+        )
+    return runs
 
 
 def variant_config(base_config: LSTMConfig, variant: LSTMVariant) -> LSTMConfig:
@@ -339,10 +446,79 @@ def write_multi_variant_generated_files(
     return summaries
 
 
+def initialize_generated_frames(
+    units: Sequence[ChildUnit],
+    variants: Sequence[LSTMVariant],
+    *,
+    include_age_bin: bool,
+) -> Dict[Path, pd.DataFrame]:
+    """Return per-child source frames with empty LSTM output columns."""
+    frames: Dict[Path, pd.DataFrame] = {}
+    for unit in units:
+        df = pd.read_csv(unit.chi_csv, dtype=str, keep_default_na=False, low_memory=False)
+        for variant in variants:
+            df[variant.output_column] = ""
+        if include_age_bin:
+            df["lstm_age_bin"] = ""
+        frames[unit.folder] = df
+    return frames
+
+
+def fill_generated_frames_for_examples(
+    frames: Dict[Path, pd.DataFrame],
+    examples: Sequence[LSTMExample],
+    *,
+    model,
+    vocab: Vocabulary,
+    base_config: LSTMConfig,
+    variants: Sequence[LSTMVariant],
+    age_bin_label: str,
+) -> Dict[str, int]:
+    """Generate LSTM text for selected examples and fill existing frames."""
+    row_counts = {variant.output_column: 0 for variant in variants}
+    for variant in variants:
+        config = variant_config(base_config, variant)
+        for example in examples:
+            df = frames[example.unit.folder]
+            generated_tokens = generate_tokens_with_lstm(model, vocab, example, config)
+            generated = with_terminal_punctuation(generated_tokens, example.terminal_punct)
+            df.at[example.row_index, variant.output_column] = generated
+            df.at[example.row_index, "lstm_age_bin"] = age_bin_label
+            if generated.strip():
+                row_counts[variant.output_column] += 1
+    return row_counts
+
+
+def write_generated_frames(
+    units: Sequence[ChildUnit],
+    frames: Dict[Path, pd.DataFrame],
+    variants: Sequence[LSTMVariant],
+    *,
+    output_filename: str,
+) -> List[Dict[str, object]]:
+    """Write accumulated generated frames and summarize per child."""
+    summaries: List[Dict[str, object]] = []
+    for unit in units:
+        df = frames[unit.folder]
+        out_path = unit.folder / output_filename
+        df.to_csv(out_path, index=False, quoting=csv.QUOTE_ALL, lineterminator="\n")
+        summary = {
+            "dataset": unit.dataset,
+            "child_id": unit.child,
+            "source_rows": len(df),
+            "generated_csv": str(out_path),
+        }
+        for variant in variants:
+            summary[variant.output_column] = int(df[variant.output_column].astype(str).str.strip().ne("").sum())
+        summaries.append(summary)
+    return summaries
+
+
 def merge_lstm_columns_into_context(
     context_df: pd.DataFrame,
     generated_df: pd.DataFrame,
     lstm_columns: Sequence[str],
+    extra_columns: Sequence[str] = (),
 ) -> pd.DataFrame:
     """Left-join LSTM columns into child shared-context rows without changing row count."""
     join_keys = ["dataset", "child_id", "session_id", "file", "line_no", "utt_id"]
@@ -353,12 +529,12 @@ def merge_lstm_columns_into_context(
             if key not in df.columns:
                 df[key] = ""
             df[key] = df[key].fillna("").astype(str)
-    keep_columns = [*join_keys, *lstm_columns]
-    for column in lstm_columns:
+    keep_columns = [*join_keys, *extra_columns, *lstm_columns]
+    for column in [*extra_columns, *lstm_columns]:
         if column not in right.columns:
             right[column] = ""
     merged = left.merge(right[keep_columns], on=join_keys, how="left", validate="one_to_one")
-    for column in lstm_columns:
+    for column in [*extra_columns, *lstm_columns]:
         merged[column] = merged[column].fillna("").astype(str)
     if len(merged) != len(context_df):
         raise RuntimeError("Merging LSTM columns changed the number of context rows.")
@@ -369,12 +545,15 @@ def build_child_scoring_rows_with_lstm(
     context_df: pd.DataFrame,
     lstm_columns: Sequence[str],
     *,
+    extra_columns: Sequence[str] = (),
     drop_empty: bool = True,
 ) -> List[Dict[str, str]]:
     """Build compact child scoring rows with extra LSTM generated utterance columns."""
     rows: List[Dict[str, str]] = []
     for _, source_row in context_df.iterrows():
         row = child_scoring_row(source_row)
+        for column in extra_columns:
+            row[column] = text_or_empty(source_row.get(column, ""))
         for column in lstm_columns:
             row[column] = text_or_empty(source_row.get(column, ""))
         if drop_empty and not any(text_or_empty(row[column]) for column in ["chi_utterance_clean", *lstm_columns]):
@@ -391,6 +570,7 @@ def write_lstm_context_and_scoring_files_for_unit(
     context_output_filename: str,
     scoring_output_filename: str,
     lstm_columns: Sequence[str],
+    extra_columns: Sequence[str] = (),
 ) -> Dict[str, object]:
     """Merge generated LSTM utterances into context and scoring sibling files."""
     context_path = unit.folder / context_filename
@@ -402,14 +582,14 @@ def write_lstm_context_and_scoring_files_for_unit(
 
     context_df = pd.read_csv(context_path, dtype=str, keep_default_na=False, low_memory=False)
     generated_df = pd.read_csv(generated_path, dtype=str, keep_default_na=False, low_memory=False)
-    merged_df = merge_lstm_columns_into_context(context_df, generated_df, lstm_columns)
+    merged_df = merge_lstm_columns_into_context(context_df, generated_df, lstm_columns, extra_columns)
 
     context_out = unit.folder / context_output_filename
     merged_df.to_csv(context_out, index=False, quoting=csv.QUOTE_ALL, lineterminator="\n")
 
-    scoring_rows = build_child_scoring_rows_with_lstm(merged_df, lstm_columns, drop_empty=True)
+    scoring_rows = build_child_scoring_rows_with_lstm(merged_df, lstm_columns, extra_columns=extra_columns, drop_empty=True)
     scoring_out = unit.folder / scoring_output_filename
-    write_rows(scoring_out, [*CHILD_OUTPUT_COLUMNS, *lstm_columns], scoring_rows)
+    write_rows(scoring_out, [*CHILD_OUTPUT_COLUMNS, *extra_columns, *lstm_columns], scoring_rows)
     return {
         "dataset": unit.dataset,
         "child_id": unit.child,
@@ -470,12 +650,15 @@ def write_dry_run_summary(
     examples_by_unit: Dict[Path, List[LSTMExample]],
     train_examples: Sequence[LSTMExample],
     variants: Sequence[LSTMVariant],
+    age_binning: LSTMAgeBinning = LSTMAgeBinning(),
+    additive_bin_runs: Sequence[AdditiveBinRun] = (),
 ) -> Path:
     """Write a JSON summary when validating inputs without training."""
     payload = {
         "dry_run": True,
         "config": {**asdict(config), "datasets": list(config.datasets)},
         "variants": [asdict(variant) for variant in variants],
+        "age_binning": asdict(age_binning),
         "n_units": len(units),
         "n_examples_total": sum(len(examples) for examples in examples_by_unit.values()),
         "n_train_examples_after_limit": len(train_examples),
@@ -490,10 +673,173 @@ def write_dry_run_summary(
             for unit in units
         ],
     }
+    if additive_bin_runs:
+        payload["n_cumulative_train_example_uses_across_bins"] = sum(len(run.train_examples) for run in additive_bin_runs)
+        payload["additive_age_bins"] = [
+            {
+                "label": run.age_bin.label,
+                "start": run.age_bin.start,
+                "end": run.age_bin.end,
+                "train_examples": len(run.train_examples),
+                "target_examples": len(run.target_examples),
+            }
+            for run in additive_bin_runs
+        ]
     output_dir.mkdir(parents=True, exist_ok=True)
     path = output_dir / "dry_run_summary.json"
     path.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
     return path
+
+
+def write_additive_bin_manifest(
+    path: Path,
+    rows: Sequence[Dict[str, object]],
+) -> None:
+    """Write one summary row per additive LSTM age-bin model."""
+    base_fieldnames = [
+        "age_bin",
+        "start",
+        "end",
+        "train_examples",
+        "train_examples_after_limit",
+        "target_examples",
+        "vocab_size",
+        "model_dir",
+        "training_summary_csv",
+    ]
+    extra_fieldnames = sorted({key for row in rows for key in row if key not in base_fieldnames})
+    fieldnames = [*base_fieldnames, *extra_fieldnames]
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with path.open("w", newline="", encoding="utf-8") as handle:
+        writer = csv.DictWriter(handle, fieldnames=fieldnames, extrasaction="ignore")
+        writer.writeheader()
+        writer.writerows(rows)
+
+
+def run_additive_age_binned_lstm(
+    *,
+    units: Sequence[ChildUnit],
+    examples_by_unit: Dict[Path, List[LSTMExample]],
+    all_examples: Sequence[LSTMExample],
+    output_dir: Path,
+    variants: Sequence[LSTMVariant],
+    context_filename: str,
+    generated_filename: str,
+    context_output_filename: str,
+    scoring_output_filename: str,
+    dry_run: bool,
+    base_config: LSTMConfig,
+    age_binning: LSTMAgeBinning,
+) -> Dict[str, object]:
+    """Train/generate one cumulative LSTM per target age bin."""
+    bins = resolve_lstm_age_bins(age_binning, base_config)
+    bin_runs = build_additive_bin_runs(all_examples, bins)
+    output_dir.mkdir(parents=True, exist_ok=True)
+    (output_dir / "age_bins.json").write_text(
+        json.dumps({"strategy": age_binning.strategy, "bins": age_bins_to_dicts(bins)}, ensure_ascii=False, indent=2),
+        encoding="utf-8",
+    )
+
+    if dry_run:
+        dry_path = write_dry_run_summary(
+            output_dir,
+            config=base_config,
+            units=units,
+            examples_by_unit=examples_by_unit,
+            train_examples=all_examples,
+            variants=variants,
+            age_binning=age_binning,
+            additive_bin_runs=bin_runs,
+        )
+        return {
+            "dry_run": True,
+            "age_binning_mode": age_binning.mode,
+            "units": len(units),
+            "examples_total": len(all_examples),
+            "age_bins": len(bin_runs),
+            "summary_path": str(dry_path),
+        }
+
+    frames = initialize_generated_frames(units, variants, include_age_bin=True)
+    bin_manifest_rows: List[Dict[str, object]] = []
+
+    for run in bin_runs:
+        if not run.target_examples:
+            continue
+        train_examples = limit_examples(run.train_examples, base_config.max_train_examples, base_config.seed)
+        if not train_examples:
+            raise RuntimeError(f"No LSTM training examples available for additive bin {run.age_bin.label}.")
+
+        bin_dir = output_dir / f"bin_{run.age_bin.label}"
+        bin_dir.mkdir(parents=True, exist_ok=True)
+        bin_config = replace(
+            base_config,
+            output_dir=str(bin_dir),
+            min_age_months=float(bins[0].start),
+            max_age_months=float(run.age_bin.end + 0.999),
+        )
+        save_config(bin_dir / "config.json", bin_config)
+        vocab = Vocabulary.build(
+            (example.context_tokens + example.child_tokens for example in train_examples),
+            min_freq=bin_config.min_freq,
+            max_vocab_size=bin_config.max_vocab_size,
+        )
+        save_vocab(bin_dir / "vocab.json", vocab)
+        model, training_rows = train_lstm_model(train_examples, vocab, bin_config, bin_dir)
+        training_summary_path = bin_dir / "training_summary.csv"
+        write_summary_csv(training_summary_path, training_rows)
+
+        row_counts = fill_generated_frames_for_examples(
+            frames,
+            run.target_examples,
+            model=model,
+            vocab=vocab,
+            base_config=bin_config,
+            variants=variants,
+            age_bin_label=run.age_bin.label,
+        )
+        bin_manifest_rows.append(
+            {
+                "age_bin": run.age_bin.label,
+                "start": run.age_bin.start,
+                "end": run.age_bin.end,
+                "train_examples": len(run.train_examples),
+                "train_examples_after_limit": len(train_examples),
+                "target_examples": len(run.target_examples),
+                "vocab_size": len(vocab.id_to_token),
+                "model_dir": str(bin_dir),
+                "training_summary_csv": str(training_summary_path),
+                **row_counts,
+            }
+        )
+
+    write_additive_bin_manifest(output_dir / "lstm_age_bin_manifest.csv", bin_manifest_rows)
+    generation_rows = write_generated_frames(units, frames, variants, output_filename=generated_filename)
+    write_summary_csv(output_dir / "generation_summary.csv", generation_rows)
+
+    lstm_columns = [variant.output_column for variant in variants]
+    scoring_rows = [
+        write_lstm_context_and_scoring_files_for_unit(
+            unit,
+            generated_filename=generated_filename,
+            context_filename=context_filename,
+            context_output_filename=context_output_filename,
+            scoring_output_filename=scoring_output_filename,
+            lstm_columns=lstm_columns,
+            extra_columns=("lstm_age_bin",),
+        )
+        for unit in units
+    ]
+    manifest_rows = write_pipeline_manifest(output_dir / "lstm_pipeline_manifest.csv", units, generation_rows, scoring_rows, variants)
+    return {
+        "dry_run": False,
+        "age_binning_mode": age_binning.mode,
+        "units": len(units),
+        "examples_total": len(all_examples),
+        "age_bins": len(bin_manifest_rows),
+        "manifest_rows": len(manifest_rows),
+        "output_dir": str(output_dir),
+    }
 
 
 def run_lstm_baseline_pipeline(
@@ -509,6 +855,7 @@ def run_lstm_baseline_pipeline(
     scoring_output_filename: str = DEFAULT_SCORING_WITH_LSTM_FILENAME,
     dry_run: bool = False,
     config: Optional[LSTMConfig] = None,
+    age_binning: LSTMAgeBinning = LSTMAgeBinning(),
 ) -> Dict[str, object]:
     """Run or dry-run the LSTM baseline pipeline."""
     if not manifest_path.exists():
@@ -542,6 +889,22 @@ def run_lstm_baseline_pipeline(
     )
 
     examples_by_unit, all_examples = build_examples_by_unit(units, base_config)
+    if age_binning.mode == "additive_age_bins":
+        return run_additive_age_binned_lstm(
+            units=units,
+            examples_by_unit=examples_by_unit,
+            all_examples=all_examples,
+            output_dir=output_dir,
+            variants=variants,
+            context_filename=context_filename,
+            generated_filename=generated_filename,
+            context_output_filename=context_output_filename,
+            scoring_output_filename=scoring_output_filename,
+            dry_run=dry_run,
+            base_config=base_config,
+            age_binning=age_binning,
+        )
+
     train_examples = limit_examples(all_examples, base_config.max_train_examples, base_config.seed)
     if not train_examples:
         raise RuntimeError("No LSTM training examples available after filtering.")
@@ -554,6 +917,7 @@ def run_lstm_baseline_pipeline(
             examples_by_unit=examples_by_unit,
             train_examples=train_examples,
             variants=variants,
+            age_binning=age_binning,
         )
         return {
             "dry_run": True,
@@ -708,6 +1072,7 @@ def main(argv: Optional[Sequence[str]] = None) -> None:
             scoring_output_filename=settings["scoring_output_filename"],
             dry_run=bool(args.dry_run or settings["dry_run"]),
             config=settings["config"],
+            age_binning=settings["age_binning"],
         )
         print(json.dumps(summary, ensure_ascii=False, indent=2))
         return
