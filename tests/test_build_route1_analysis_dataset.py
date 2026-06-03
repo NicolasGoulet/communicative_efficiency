@@ -1,4 +1,5 @@
 import csv
+import gzip
 import tempfile
 import unittest
 from pathlib import Path
@@ -12,6 +13,7 @@ from build_route1_analysis_dataset import (
     ANALYSIS_COLUMNS,
     build_analysis_dataset,
     count_effort,
+    open_text_output,
     parse_scored_file,
 )
 
@@ -209,6 +211,17 @@ class TestBuildRoute1AnalysisDataset(unittest.TestCase):
         self.assertEqual(audits[0]["blank_target_rows"], "1")
         self.assertEqual(audits[0]["zero_word_rows"], "1")
         self.assertEqual(audits[0]["missing_sum_bits_rows"], "1")
+
+    def test_atomic_temp_output_preserves_gzip_compression(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / ".route1_scored_utterance_effort_long.csv.gz.tmp"
+            with open_text_output(path) as handle:
+                handle.write("score_source,target\nx,y\n")
+
+            with gzip.open(path, "rt", encoding="utf-8", newline="") as handle:
+                contents = handle.read()
+
+        self.assertEqual(contents, "score_source,target\nx,y\n")
 
 
 def scored_child_row(

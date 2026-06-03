@@ -449,7 +449,7 @@ def open_text_output(path: Path) -> TextIO:
     """Open plain or gzipped text output based on suffix."""
 
     path.parent.mkdir(parents=True, exist_ok=True)
-    if path.suffix == ".gz":
+    if ".gz" in path.suffixes:
         return gzip.open(path, "wt", encoding="utf-8", newline="")
     return path.open("w", encoding="utf-8", newline="")
 
