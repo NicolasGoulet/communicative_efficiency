@@ -596,3 +596,7 @@ results/lstm_baselines/pbm_additive_merged_006_023_k3_k4_k5_same_length/
   - `env MPLCONFIGDIR=/tmp/matplotlib UV_CACHE_DIR=/tmp/uv-cache uv run python -m unittest tests.test_create_naima_030000_missing_baseline_patch tests.test_build_route1_analysis_dataset` passed with 8 tests.
   - `bash -n scripts/compute_surprisal_mila/score_naima_030000_missing_baselines_local.sh` passed.
   - `env UV_CACHE_DIR=/tmp/uv-cache uv run python -m py_compile scripts/compute_surprisal_mila/merge_naima_030000_missing_baseline_patch_scores.py src/create_naima_030000_missing_baseline_patch.py` passed.
+- Updated the sibling `compute_surprisal_mila` Markdown workflow docs so an
+  agent can resume from Git after push/pull:
+  `AGENTS.md`, `README.md`, and
+  `docs/naima_030000_missing_baseline_patch.md`.
