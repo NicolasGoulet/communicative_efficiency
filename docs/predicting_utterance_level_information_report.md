@@ -6,7 +6,7 @@ Working draft, June 2026
 
 This document describes an utterance-level analysis of communicative efficiency
 in child language. The broad goal is to understand how children learn to package
-information in speech while managing the effort required to produce it.
+information in speech while managing the effort required to produce it. 
 
 In this framing, communicative efficiency has two parts. The first is
 **informativeness**: how much information an utterance conveys in context. The
@@ -19,19 +19,10 @@ controlling for utterance length and other effort-related properties.
 The analyses will focus on three related quantities:
 
 - **total information per utterance**, measured with `sum_bits`;
-- **information per unit of production effort**, primarily
-  `sum_bits / cleaned_target_word_count`;
+- **information per unit of production effort**, where `sum_bits` is divided by the number of words, morphemes, phonemes or syllables in an utterance;
 - **tokenizer-level sensitivity**, measured with `mean_bits_per_token`.
 
-The most important outcome for communicative-efficiency interpretation is
-information per lexical word. Total information is still useful, but it is
-strongly affected by utterance length. The analyses therefore also track
-morphemes, syllables, and phonemes as complementary measures of production
-effort.
-
-The present document focuses only on utterance-level surprisal. Analyses of
-context entropy, KL divergence, and word-level informativity will be treated
-separately.
+A follow-up document will be shared in the following days that will explore the analyses proposed by Professor Xu : how (and if) do contextual information predict utterance length / utterance effort. 
 
 ## Analysis Sample
 
@@ -53,6 +44,8 @@ For descriptive plots and age-binned summaries, the first age bin combines the
 early months:
 
 - `006-023` months
+
+This is partly due to having very few utterances in these 6 months bins, but t is also consistent with well-established developmental changes in utterance length: around the second year, children increasingly move from single-word productions to multiword utterances, and mean length of utterance rises over early childhood.
 
 The following bins are six-month intervals:
 
@@ -96,9 +89,7 @@ The contribution of each corpus also changes across developmental time:
 
 ![Corpus contribution to utterance counts by age bin](../figs/utterance_information/utterances_by_age_bin_and_corpus.png)
 
-This uneven corpus contribution is expected for longitudinal CHILDES data. It is
-one reason that the explanatory models should control for child identity, and
-potentially corpus identity if later model comparisons require it.
+This uneven corpus contribution is expected for longitudinal CHILDES data. 
 
 ## Corpora and Children
 
@@ -157,26 +148,20 @@ child utterance.
 
 Word count is not the only possible measure of effort. Two utterances can have
 the same number of words but differ in morphological or phonological
-complexity. For this reason, the analysis also keeps:
+complexity. The current effort measures are computed from the cleaned target
+string submitted for surprisal scoring:
 
-- number of morphemes;
-- number of syllables;
-- number of phonemes.
+- **Words**: lexical orthographic tokens counted with a local regex tokenizer;
+  punctuation is excluded.
+- **Morphemes**: `auto_morphemes_surface`, a surface-aligned heuristic computed
+  from the cleaned utterance, not from CHILDES `%mor` tiers.
+- **Syllables**: two retained estimates, since after manual validation no clear winner was identified, `auto_syllables_cmu_or_pkg` and `auto_syllables_pkg`.
+  The first uses CMUdict ARPABET vowel nuclei when available and the `syllables` package for OOV forms, while the second uses the `syllables` package throughout.
+- **Phonemes**: `auto_phonemes_cmu_or_g2p`; CMUdict ARPABET phone counts are
+  used for dictionary-covered words, with `g2p-en` applied to OOV forms as
+  written.
 
-Morpheme counts are computed from the surface cleaned utterance. For syllables,
-two automatic estimates are retained for now because manual validation showed
-that no single automatic solution dominated all cases. One estimate prioritizes
-dictionary pronunciations when available and falls back to an automatic
-syllable package for out-of-vocabulary words; the other uses the automatic
-syllable package throughout. Keeping both lets us test whether the substantive
-patterns depend on a particular syllable-counting strategy.
-
-Phoneme counts are estimated from grapheme-to-phoneme conversion. This gives a
-consistent phonological estimate for both real child utterances and generated
-baseline utterances, including non-standard forms that would be lost if we only
-used corrected dictionary forms.
-
-These measures are especially important because the generated baselines are
+These measures are also important because the generated baselines (discussed bellow) are
 matched to children in word count, but not necessarily in morphemes, syllables,
 or phonemes. A baseline may therefore use the same number of words while still
 requiring a different amount of phonological or morphological effort.
@@ -185,12 +170,12 @@ requiring a different amount of phonological or morphological effort.
 
 The second part of the analysis concerns informational content. Information is
 measured with Mistral surprisal in bits. Higher surprisal means that the model
-found the produced utterance less predictable in context; lower surprisal means
-that the utterance was more predictable.
+found the produced utterance less predictable in context, i.e. it contained *more information*; lower surprisal means
+that the utterance was more predictable, i.e. it contained *less information*.
 
 The main information measure is total utterance surprisal, `sum_bits`. This is
 the total amount of information assigned to the produced target utterance under
-the model. Because longer utterances naturally tend to accumulate more bits,
+the model. Because longer utterances naturally tend to accumulate more bits and also tend to make individual tokens less surprising,
 total information must be interpreted alongside effort.
 
 The analysis therefore also considers information per unit of effort. The
@@ -209,40 +194,25 @@ from target surprisal. Surprisal measures the information in the utterance that
 was actually produced. Context entropy measures the model's uncertainty about
 what could come next after the preceding context. This can later be used to ask
 whether children produce longer or more informative utterances in contexts that
-are themselves more uncertain.
+are themselves more uncertain. It can also be used as a predictor of the informational contents of an utterance. 
 
 ## Comparison Baselines
 
-To interpret children's communicative efficiency, we need comparison utterances
-that preserve some properties of the child data while removing others. The
-current baselines are designed to ask how much of children's informational
-profile can be explained by vocabulary growth, frequency structure, local word
-dependencies, and conversational context.
+To interpret children’s communicative efficiency, it is useful to compare their utterances to baseline language models. The current baselines are designed to ask: given the same number of words per utterance and access to the same age-binned vocabulary, how do baseline-generated utterances differ from children’s actual utterances in informational content and communicative efficiency?
 
-All generated baselines are matched to the length of the corresponding child
-utterance. This is important: if a baseline produced shorter or longer
-utterances, differences in surprisal would be confounded with differences in
-production effort.
+All these baselines use additive age-bins, where the size of their vocabulary is expended incrementally with each new age bin.
 
 ### Random Baseline
 
-The random baseline samples words uniformly from the additive vocabulary
-available at the child's developmental age. It preserves the broad developmental
-constraint that later bins have access to a larger vocabulary, but it does not
-use word frequency, local syntax, or discourse context.
+For each age bin, the random baseline samples uniformly from the corresponding additive vocabulary, without using word frequency, local word order, or conversational context.
 
 ### N-Gram Baselines
-
-The unigram, bigram, and trigram baselines use additive developmental training
-bins. For a given target age bin, the model has access to that bin and all
-previous bins. This mirrors the idea that the comparison model should not use
-future developmental data to generate earlier utterances.
 
 The unigram baseline samples from word frequencies. The bigram and trigram
 baselines additionally use local word dependencies. At utterance boundaries,
 they use the immediately preceding caretaker speech as context for the first
 generated child words, so that the baseline is not completely blind to the
-conversation turn it is responding to.
+conversation turn it is responding to (this is also done when creating the dictionaries of bigrams and trigrams).
 
 ### LSTM Baseline
 
@@ -252,12 +222,56 @@ encoder-decoder architecture: the encoder reads a bounded window of preceding
 caretaker speech, and the decoder generates a child-like response.
 
 The planned LSTM comparison follows the same additive developmental logic as the
-n-gram baselines. For each age bin, the LSTM is trained on the current bin plus
+n-gram baselines. For each age bin, a different LSTM is trained on the current bin plus
 all previous bins, then used to generate utterances only for the target bin.
 This keeps the comparison aligned with the developmental information available
 to the n-gram baselines.
+
+The LSTM can listen to caretaker language, but it is only allowed to speak using the child-side vocabulary observed in the age-appropriate training data. 
 
 The first LSTM comparison will use same-length generated utterances, so effort
 is held constant relative to the real child utterance. A later free-length
 variant can ask a different question: whether the model chooses a similar amount
 of communicative effort when responding to the same caretaker context.
+
+
+## Explanatory Models
+
+This section of the document describes certain models that attempt to predict informational contents of child speech in naturalistic settings at the utterance level.
+
+Additionally, SES metrics were not available systematically for all children and was particularly sparse for the PBM sample. 
+
+(At the time of sharing this report these are still underway).
+
+### First Model
+
+TODO ADD RESULTS AND PLOTS
+
+### Second Model 
+
+TODO ADD RESULTS AND PLOTS
+
+### Third Model 
+
+TODO ADD RESULTS AND PLOTS
+
+### Key takeways
+
+- TODO 
+
+## Possible Next Steps 
+
+### Using the full (still expending) data set
+
+TODO DESCRIBE SUPER BRIEFLY THE NON-CLINICAL DATASET WE HAVE
+
+TODO DESCRIBE SUPER BREIFLY THE CLINICAL DATASET WE HAVE
+
+### Generate utterances with BabyLM-like architectures
+
+An even stronger baseline would be have a BabyLM-like transformer architecture to generate utterances for each child utterance. To not have these models make inference on their training data, we train a new model for each corpus 
+
+### Word-level surprisal
+
+TODO DESCRIBE THIS IDEA
+
