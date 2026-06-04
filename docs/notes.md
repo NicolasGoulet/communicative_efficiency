@@ -36,6 +36,38 @@ Known current structure:
   figures from the special-form, filler/shortening, and preprocessing-variant
   diagnostics, including a child-versus-caretaker age trajectory comparing
   special forms, fillers, and shortenings in one figure.
+- 2026-06-03 - SES/race metadata is now handled through an explicit codebook
+  rather than a single inferred covariate. Local CHAT `@ID` SES values are kept
+  separate from curated documentation-based fields with source URL, scope, and
+  confidence. The current PBM result: Brown has child-specific SES for Adam and
+  Sarah and child-specific race only for Adam; Manchester has corpus-level
+  predominant middle-class status; Providence has no defensible SES/race values.
+  The full 79-child strict-naturalistic codebook has 33 children with some
+  SES/class value, but only 4 have child-specific or single-child evidence
+  marked as usable with caution as a core predictor. Race/ethnicity is known
+  only for Adam, Forrester/Ella, Lara, plus Post's community-level
+  predominantly-white description.
+- 2026-06-03 - Context entropy is present locally at
+  `results/external/compute_surprisal_mila/context_entropy_mistral/`.
+  Added `src/attach_context_entropy_to_route1_dataset.py` to join those
+  context-level Mistral next-token entropy features onto the long utterance
+  dataset by `(context_col_used, context_text)`. The enriched output is
+  `results/route1_analysis_dataset/route1_scored_utterance_effort_context_entropy_long.csv.gz`.
+  It preserves all 11,607,680 base rows. Join statuses are explicit:
+  6,609,625 exact matched child-context rows, 15,385 child rows recovered by
+  text-only fallback across k labels, 2,233,017 child k0 rows with no context,
+  39,900 child rows with empty context, 2,675,612 caretaker rows marked
+  not-applicable, and 34,141 child rows with missing entropy. The text-only
+  fallback is correct because the entropy scorer deduplicates by context text,
+  not by context-window label; H(next token | text) is unchanged if the same
+  text appears as `context_k1` in one row and `context_k2` in another. The true
+  missing rows correspond to 2,250 unique context windows listed in
+  `results/route1_analysis_dataset/missing_context_entropy_contexts.csv`.
+  They are concentrated in Brown Adam `Adam/050212.cha`, Brown Sarah's
+  `050xxx.cha` files, and Providence Naima `Naima/030000.cha`, because the
+  older Yang/context-entropy manifest was built from a May 28 PBM row-level
+  dataset that omitted Adam/Sarah age-60+ files and Naima's recovered-age
+  `030000.cha`.
 
 ## Commands That Worked
 
@@ -48,6 +80,10 @@ env UV_CACHE_DIR=/tmp/uv-cache uv run python src/plot_diagnostic_analyses.py --r
 env UV_CACHE_DIR=/tmp/uv-cache uv run python src/prepare_datasets.py --dataset Brown
 env UV_CACHE_DIR=/tmp/uv-cache uv run python src/prepare_datasets.py --dataset Manchester
 env UV_CACHE_DIR=/tmp/uv-cache uv run python src/prepare_datasets.py --dataset Providence
+env UV_CACHE_DIR=/tmp/uv-cache uv run python src/build_child_demographic_codebook.py
+env UV_CACHE_DIR=/tmp/uv-cache uv run python -m unittest tests.test_build_child_demographic_codebook
+env UV_CACHE_DIR=/tmp/uv-cache uv run python src/attach_context_entropy_to_route1_dataset.py
+env UV_CACHE_DIR=/tmp/uv-cache uv run python -m unittest tests.test_attach_context_entropy_to_route1_dataset
 ```
 
 TODO: Add preprocessing, dictionary-building, and plotting commands as they are
@@ -600,3 +636,35 @@ results/lstm_baselines/pbm_additive_merged_006_023_k3_k4_k5_same_length/
   agent can resume from Git after push/pull:
   `AGENTS.md`, `README.md`, and
   `docs/naima_030000_missing_baseline_patch.md`.
+
+## 2026-06-04 Route 1 Context-Entropy Patch Handoff
+
+- The Mistral context-entropy run in `compute_surprisal_mila` is complete for
+  its original manifest: both
+  `mila_results/context_entropy_mistral/context_entropy_manifest.csv.gz` and
+  `mila_results/context_entropy_mistral/context_entropy_features.csv.gz` have
+  1,675,520 rows, and the feature file has 0 blank
+  `llm_next_entropy_bits` values.
+- The current Route 1 long table contains additional contexts that were not in
+  that original manifest. After correcting the entropy attach script to reuse
+  entropy by context text across k labels, the remaining gap is 34,141
+  child-context rows across 2,250 missing-context audit rows.
+- Added `src/create_context_entropy_rescoring_patch.py` and
+  `tests/test_create_context_entropy_rescoring_patch.py`.
+- Built the scorer handoff:
+  - `results/scoring_bundles/route1_missing_context_entropy_patch_2026-06-04/context_entropy_patch_manifest.csv.gz`
+  - `results/scoring_bundles/route1_missing_context_entropy_patch_2026-06-04/context_entropy_patch_contexts_with_examples.csv`
+  - `results/scoring_bundles/route1_missing_context_entropy_patch_2026-06-04/README.md`
+  - `results/scoring_bundles/route1_missing_context_entropy_patch_2026-06-04.tar.gz`
+- Patch counts:
+  - missing-context audit rows read: 2,250
+  - nonempty context rows: 2,250
+  - unique scorer contexts written: 2,235
+  - duplicate context-id rows collapsed: 15
+  - Route 1 rows represented: 34,141
+- Copied the patch into the sibling scorer repo:
+  - `/home/apaixonada/EvaPortelance/Projet_1/compute_surprisal_mila/new_data/route1_missing_context_entropy_patch/`
+  - `/home/apaixonada/EvaPortelance/Projet_1/compute_surprisal_mila/new_data/route1_missing_context_entropy_patch_2026-06-04.tar.gz`
+- Focused verification:
+  `./.venv/bin/python -m unittest tests.test_create_context_entropy_rescoring_patch`
+  passed with 2 tests.

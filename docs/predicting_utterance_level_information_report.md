@@ -25,9 +25,9 @@ The analyses will focus on three related quantities:
 
 The most important outcome for communicative-efficiency interpretation is
 information per lexical word. Total information is still useful, but it is
-strongly affected by utterance length. Later versions of the analysis may also
-include morpheme, syllable, or phoneme counts as additional measures of
-production effort.
+strongly affected by utterance length. The analyses therefore also track
+morphemes, syllables, and phonemes as complementary measures of production
+effort.
 
 The present document focuses only on utterance-level surprisal. Analyses of
 context entropy, KL divergence, and word-level informativity will be treated
@@ -140,6 +140,76 @@ independent observations from unrelated speakers. At minimum, child identity
 must be controlled. Later models may also aggregate by child, age bin, context
 window, and utterance-length band to make the repeated-observation structure
 more explicit.
+
+## Complexity / Effort
+
+The first part of the analysis concerns the amount of linguistic material used
+to produce an utterance. In this document, this is treated as production
+effort. The central idea is simple: an utterance with more words, more
+morphemes, more syllables, or more phonemes generally requires more material to
+produce than a shorter utterance.
+
+The primary effort measure is the number of lexical words in the cleaned target
+utterance. This measure is easy to interpret and aligns directly with the
+matched-length baseline design, since the random, n-gram, and same-length LSTM
+baselines are generated with the same number of words as the corresponding
+child utterance.
+
+Word count is not the only possible measure of effort. Two utterances can have
+the same number of words but differ in morphological or phonological
+complexity. For this reason, the analysis also keeps:
+
+- number of morphemes;
+- number of syllables;
+- number of phonemes.
+
+Morpheme counts are computed from the surface cleaned utterance. For syllables,
+two automatic estimates are retained for now because manual validation showed
+that no single automatic solution dominated all cases. One estimate prioritizes
+dictionary pronunciations when available and falls back to an automatic
+syllable package for out-of-vocabulary words; the other uses the automatic
+syllable package throughout. Keeping both lets us test whether the substantive
+patterns depend on a particular syllable-counting strategy.
+
+Phoneme counts are estimated from grapheme-to-phoneme conversion. This gives a
+consistent phonological estimate for both real child utterances and generated
+baseline utterances, including non-standard forms that would be lost if we only
+used corrected dictionary forms.
+
+These measures are especially important because the generated baselines are
+matched to children in word count, but not necessarily in morphemes, syllables,
+or phonemes. A baseline may therefore use the same number of words while still
+requiring a different amount of phonological or morphological effort.
+
+## Information
+
+The second part of the analysis concerns informational content. Information is
+measured with Mistral surprisal in bits. Higher surprisal means that the model
+found the produced utterance less predictable in context; lower surprisal means
+that the utterance was more predictable.
+
+The main information measure is total utterance surprisal, `sum_bits`. This is
+the total amount of information assigned to the produced target utterance under
+the model. Because longer utterances naturally tend to accumulate more bits,
+total information must be interpreted alongside effort.
+
+The analysis therefore also considers information per unit of effort. The
+simplest version is bits per lexical word, but the same logic can be extended
+to morphemes, syllables, or phonemes. These ratios ask whether children are
+packing more or less information into the linguistic material they produce.
+
+Context is part of the interpretation. The same target utterance can be scored
+without preceding context or with one, two, or three previous caretaker
+utterances. This lets us ask whether developmental changes in surprisal reflect
+the utterance alone, the conversational context, or the relationship between
+the two.
+
+Context entropy is also measured in bits, but it captures a different object
+from target surprisal. Surprisal measures the information in the utterance that
+was actually produced. Context entropy measures the model's uncertainty about
+what could come next after the preceding context. This can later be used to ask
+whether children produce longer or more informative utterances in contexts that
+are themselves more uncertain.
 
 ## Comparison Baselines
 
