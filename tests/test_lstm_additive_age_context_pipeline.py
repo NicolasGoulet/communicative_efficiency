@@ -10,9 +10,10 @@ sys.path.insert(0, str(SRC_DIR))
 
 from build_age_word_dicts import ChildUnit
 from custom_age_bins import AgeBin
-from generate_lstm_utterances import LSTMConfig, LSTMExample
+from generate_lstm_utterances import LSTMConfig, LSTMExample, Vocabulary
 from run_lstm_additive_age_context_pipeline import (
     additive_column_name,
+    child_output_token_ids,
     cumulative_train_examples,
     run_additive_age_context_pipeline,
     target_bin_examples,
@@ -75,6 +76,25 @@ class TestLSTMAdditiveAgeContextPipeline(unittest.TestCase):
 
         self.assertEqual([example.row_index for example in cumulative], [0, 1, 2])
         self.assertEqual([example.row_index for example in target], [1, 2])
+
+    def test_child_output_token_ids_excludes_parent_only_context_words(self):
+        unit = ChildUnit("Toy", "Ada", Path("Ada"), Path("Ada/chi.csv"), Path("Ada/caretakers.csv"))
+        examples = [
+            LSTMExample(
+                unit,
+                row_index=0,
+                age_months=7.0,
+                context_tokens=("parentonly", "shared"),
+                child_tokens=("childonly", "shared"),
+            )
+        ]
+        vocab = Vocabulary.build(example.context_tokens + example.child_tokens for example in examples)
+
+        allowed_ids = child_output_token_ids(examples, vocab)
+
+        self.assertIn(vocab.token_to_id["childonly"], allowed_ids)
+        self.assertIn(vocab.token_to_id["shared"], allowed_ids)
+        self.assertNotIn(vocab.token_to_id["parentonly"], allowed_ids)
 
     def test_dry_run_writes_additive_plan_without_training(self):
         with tempfile.TemporaryDirectory() as tmp:

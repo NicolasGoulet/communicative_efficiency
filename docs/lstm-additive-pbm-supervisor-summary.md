@@ -162,6 +162,33 @@ where \(c_{i,k}\) is the row-matched scoring context from `context_k1`,
 contexts from other rows or using the generation-time LSTM context window as if
 it were the scorer context.
 
+## Input And Output Vocabularies
+
+The LSTM uses a shared token vocabulary internally so that the encoder can read
+caretaker context words and the decoder can represent child utterance words in
+one embedding space. However, generation is constrained by a child-side output
+vocabulary.
+
+For each additive age-bin model:
+
+```text
+shared model vocabulary = caretaker context tokens + child target tokens
+allowed generated output vocabulary = child target tokens only
+```
+
+Thus, caretaker-only words can help condition the model as input context, but
+they cannot be sampled as generated child baseline words unless they have also
+appeared in child utterances in the cumulative training data for that age bin.
+
+This preserves the scientific interpretation of the generated baseline:
+
+```text
+parents provide context; children define the output lexicon
+```
+
+The run manifest records both `vocab_size` and `child_output_vocab_size` for
+each context-window/age-bin model.
+
 ## Data Scope
 
 This run used only:

@@ -499,6 +499,31 @@ results/lstm_baselines/pbm_additive_merged_006_023_k3_k4_k5_same_length/
   through mid-childhood bins, but the final `060-065` target bin is small and
   should be flagged in analyses.
 
+## 2026-06-03 Child-Output Vocabulary Constraint For PBM LSTM Generation
+
+- Clarified the LSTM vocabulary design before the real PBM run: caretaker words
+  are input-context tokens, while generated baseline utterances should represent
+  child-like output.
+- Updated `src/generate_lstm_utterances.py` so generation can take an
+  `allowed_output_token_ids` mask. Sampling now rejects tokens outside that mask
+  after applying normal special-token bans.
+- Updated `src/run_lstm_additive_age_context_pipeline.py` so each additive
+  context-window/age-bin model builds:
+  - one shared model vocabulary from caretaker context tokens plus child target
+    tokens;
+  - one child-side allowed output vocabulary from child target tokens only.
+- The effect is that parent-only words can condition the encoder but cannot be
+  sampled as generated child baseline words unless they also appeared in child
+  utterances in the cumulative training data for that age bin.
+- Added `child_output_vocab_size` to `model_run_manifest.csv` so each trained
+  model records both its shared vocabulary size and its child-side output
+  vocabulary size.
+- Added focused tests for output masking and child-only output id selection.
+- Verification:
+  - `.venv/bin/python -m unittest tests.test_lstm_generation tests.test_lstm_additive_age_context_pipeline tests.test_lstm_baseline_pipeline` passed with 35 tests.
+  - Tiny PBM constrained smoke run completed all 24 k/bin cells with 234
+    generated rows, 0 empty generated rows, and 0 same-length mismatches.
+
 ## 2026-06-03 Utterance-Level Information Report Started
 
 - Added `docs/predicting_utterance_level_information_report.md` as the active
@@ -668,3 +693,50 @@ results/lstm_baselines/pbm_additive_merged_006_023_k3_k4_k5_same_length/
 - Focused verification:
   `./.venv/bin/python -m unittest tests.test_create_context_entropy_rescoring_patch`
   passed with 2 tests.
+
+## 2026-06-04 PBM Additive LSTM Generation Completed
+
+- Completed the real PBM additive age-bin LSTM training and generation run on
+  the local PC GPU.
+- This run is separate from older LSTM/all-data artifacts. It is the new
+  PBM-only same-length generated-utterance baseline intended for later scoring
+  in `compute_surprisal_mila`.
+- Completed run directory:
+  `results/lstm_baselines/pbm_additive_lstm_training_generation_2026_06_03/`
+- Completed run command:
+
+```bash
+.venv/bin/python src/run_lstm_additive_age_context_pipeline.py \
+  --output_dir results/lstm_baselines/pbm_additive_lstm_training_generation_2026_06_03 \
+  --datasets Brown Manchester Providence \
+  --contexts 3 4 5 \
+  --variants same_length \
+  --epochs 20 \
+  --embedding_dim 256 \
+  --hidden_dim 512 \
+  --num_layers 2 \
+  --dropout 0.2 \
+  --batch_size 256 \
+  --max_vocab_size 30000 \
+  --device cuda
+```
+
+- Validation after completion:
+  - 24 model checkpoints found;
+  - 24 generation diagnostic rows found;
+  - 1,339,524 generated rows across k/bin diagnostics;
+  - 446,508 generated rows per LSTM column;
+  - 0 empty generated rows;
+  - 0 same-length mismatches;
+  - 21 PBM `chi.surprisal_scoring_with_lstm_additive.csv` files found;
+  - `model_run_manifest.csv` includes `child_output_vocab_size`.
+- Generated columns:
+  - `lstm_additive_k3_same_length_utterance`
+  - `lstm_additive_k4_same_length_utterance`
+  - `lstm_additive_k5_same_length_utterance`
+- Scorer-ready files for the `compute_surprisal_mila` agent:
+  `data/big_cleaned_dataset/default_naturalistic_merged_006_023/preprocessed_data/{Brown,Manchester,Providence}/{child}/chi.surprisal_scoring_with_lstm_additive.csv`
+- Added `docs/lstm_additive_pbm_compute_surprisal_handoff_2026-06-04.md`
+  as the dedicated handoff for the scoring agent.
+- Reminder: this repository does not score the LSTM utterances. Scoring happens
+  in `/home/alkan/Portelance/compute_surprisal_mila`.

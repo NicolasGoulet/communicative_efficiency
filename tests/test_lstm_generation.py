@@ -20,6 +20,7 @@ from generate_lstm_utterances import (
     LSTMExample,
     Vocabulary,
     banned_ids_for_step,
+    build_allowed_generation_mask,
     build_lstm_examples_from_frames,
     context_tokens_from_history,
     encode_seq2seq_example,
@@ -30,6 +31,7 @@ from generate_lstm_utterances import (
     load_lstm_examples_for_unit,
     parse_args,
     require_torch,
+    sample_next_id,
     should_stop_on_token,
     train_lstm_model,
 )
@@ -346,6 +348,30 @@ class TestLSTMGenerationHelpers(unittest.TestCase):
         self.assertFalse(should_stop_on_token(eos_id, 0, vocab, config))
         self.assertTrue(should_stop_on_token(eos_id, 1, vocab, config))
         self.assertFalse(should_stop_on_token(more_id, 1, vocab, config))
+
+    def test_sample_next_id_respects_allowed_output_mask(self):
+        torch, _nn_module, _functional, _DataLoader, _DatasetBase = require_torch()
+        vocab = Vocabulary.build([["childword", "parentword"]])
+        allowed_mask = build_allowed_generation_mask(
+            torch,
+            vocab,
+            [vocab.token_to_id["childword"]],
+            torch.device("cpu"),
+        )
+        logits = torch.full((len(vocab.id_to_token),), -20.0)
+        logits[vocab.token_to_id["parentword"]] = 100.0
+        logits[vocab.token_to_id["childword"]] = 0.0
+
+        token_id = sample_next_id(
+            torch,
+            logits,
+            temperature=0.0,
+            top_k=0,
+            banned_ids=[],
+            allowed_mask=allowed_mask,
+        )
+
+        self.assertEqual(vocab.decode_id(token_id), "childword")
 
     def test_limit_examples_samples_a_stable_subset(self):
         examples = list(range(10))

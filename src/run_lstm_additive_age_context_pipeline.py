@@ -74,6 +74,19 @@ def bin_end_age(age_bin: AgeBin) -> float:
     return float(age_bin.end) + 0.999
 
 
+def child_output_token_ids(examples: Sequence[LSTMExample], vocab: Vocabulary) -> List[int]:
+    """Return vocabulary ids for child-side tokens observed in training examples."""
+    token_ids = {
+        vocab.token_to_id[token]
+        for example in examples
+        for token in example.child_tokens
+        if token in vocab.token_to_id
+    }
+    if not token_ids:
+        raise RuntimeError("No child-side output tokens were available for constrained LSTM generation.")
+    return sorted(token_ids)
+
+
 def example_bin(example: LSTMExample, bins: Sequence[AgeBin]) -> Optional[AgeBin]:
     """Return the configured age bin for one example."""
     return find_age_bin(example.age_months, bins)
@@ -488,6 +501,7 @@ def run_additive_age_context_pipeline(
                 min_freq=bin_config.min_freq,
                 max_vocab_size=bin_config.max_vocab_size,
             )
+            allowed_output_token_ids = child_output_token_ids(limited_train_examples, vocab)
             save_vocab(bin_dir / "vocab.json", vocab)
             model, bin_training_rows = train_lstm_model(
                 limited_train_examples,
@@ -508,6 +522,7 @@ def run_additive_age_context_pipeline(
                     "train_examples_after_limit": len(limited_train_examples),
                     "target_examples": len(target_examples),
                     "vocab_size": len(vocab.id_to_token),
+                    "child_output_vocab_size": len(allowed_output_token_ids),
                     "trainable_parameters": final_training.get("trainable_parameters", ""),
                     "final_mean_cross_entropy": final_training.get("mean_cross_entropy", ""),
                     "final_perplexity": final_training.get("perplexity", ""),
@@ -540,7 +555,13 @@ def run_additive_age_context_pipeline(
                             max_generated_tokens=30 if variant == "free_length" else 50,
                             min_generated_tokens=1,
                         )
-                        generated_tokens = generate_tokens_with_lstm(model, vocab, example, variant_config)
+                        generated_tokens = generate_tokens_with_lstm(
+                            model,
+                            vocab,
+                            example,
+                            variant_config,
+                            allowed_output_token_ids=allowed_output_token_ids,
+                        )
                         generated_text = with_terminal_punctuation(generated_tokens, example.terminal_punct)
                         generated_by_unit[unit.folder][example.row_index][column] = generated_text
                         if generated_text.strip():

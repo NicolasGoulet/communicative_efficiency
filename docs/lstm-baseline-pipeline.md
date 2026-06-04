@@ -120,18 +120,25 @@ changed without editing source code.
 
 ## PBM Additive Age-Bin Context-Window Run
 
+For the completed 2026-06-03/04 PBM run and scorer handoff details, read:
+
+- `docs/lstm_additive_pbm_compute_surprisal_handoff_2026-06-04.md`
+
 For the first serious PBM comparison against the existing
 random/unigram/bigram/trigram baselines, use the additive age-bin script:
 
 ```bash
 .venv/bin/python src/run_lstm_additive_age_context_pipeline.py \
-  --output_dir results/lstm_baselines/pbm_additive_merged_006_023_k3_k4_k5_same_length \
+  --output_dir results/lstm_baselines/pbm_additive_lstm_training_generation_2026_06_03 \
+  --datasets Brown Manchester Providence \
   --contexts 3 4 5 \
   --variants same_length \
-  --epochs 3 \
-  --embedding_dim 128 \
-  --hidden_dim 256 \
-  --batch_size 128 \
+  --epochs 20 \
+  --embedding_dim 256 \
+  --hidden_dim 512 \
+  --num_layers 2 \
+  --dropout 0.2 \
+  --batch_size 256 \
   --max_vocab_size 30000 \
   --device cuda
 ```
@@ -159,6 +166,14 @@ The generated same-length columns are:
 - `lstm_additive_k4_same_length_utterance`
 - `lstm_additive_k5_same_length_utterance`
 
+The additive PBM generator uses a shared model vocabulary for encoding
+caretaker context and child targets, but constrains decoded output to
+child-side training tokens for the corresponding cumulative age bin. In short:
+caretaker-only words can condition generation, but they cannot appear in the
+generated child baseline unless they also occurred in child utterances in the
+training data for that bin. The model manifest records both `vocab_size` and
+`child_output_vocab_size`.
+
 The generation context (`k3`, `k4`, `k5`) is separate from the scorer context
 columns. For downstream surprisal scoring, every target string must keep its
 row-matched `context_k1`, `context_k2`, and `context_k3`. This means the real
@@ -185,14 +200,14 @@ Each context/bin model also writes:
 - `training_summary.csv`
 - `batch_training_log.csv`
 
-The 2026-05-28 completed run wrote:
+The current 2026-06-03/04 completed PBM run wrote:
 
 ```text
-results/lstm_baselines/pbm_additive_merged_006_023_k3_k4_k5_same_length/
+results/lstm_baselines/pbm_additive_lstm_training_generation_2026_06_03/
 ```
 
-Validation found 446,508 generated rows per LSTM column and 0 same-length
-mismatches for k3, k4, or k5.
+Validation found 24 trained model checkpoints, 446,508 generated rows per LSTM
+column, 0 empty generated rows, and 0 same-length mismatches for k3, k4, or k5.
 
 ## Config Files
 

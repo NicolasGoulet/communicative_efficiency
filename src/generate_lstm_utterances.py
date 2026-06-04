@@ -819,11 +819,24 @@ def train_lstm_model(
     return model, summaries
 
 
-def sample_next_id(torch_module, logits, *, temperature: float, top_k: int, banned_ids: Sequence[int]) -> int:
-    """Sample one token id from logits with temperature and optional top-k."""
+def sample_next_id(
+    torch_module,
+    logits,
+    *,
+    temperature: float,
+    top_k: int,
+    banned_ids: Sequence[int],
+    allowed_mask=None,
+) -> int:
+    """Sample one token id from logits with optional top-k and output masking."""
     adjusted = logits.clone()
+    if allowed_mask is not None:
+        adjusted = adjusted.masked_fill(~allowed_mask, -float("inf"))
     for token_id in banned_ids:
         adjusted[token_id] = -float("inf")
+
+    if not bool(torch_module.isfinite(adjusted).any().item()):
+        raise RuntimeError("No valid LSTM output tokens remain after applying generation masks.")
 
     if temperature <= 0:
         return int(torch_module.argmax(adjusted).item())
@@ -845,6 +858,7 @@ def generate_tokens_with_lstm(
     vocab: Vocabulary,
     example: LSTMExample,
     config: LSTMConfig,
+    allowed_output_token_ids: Optional[Sequence[int]] = None,
 ) -> List[str]:
     """Generate an utterance from a trained LSTM model."""
     if config.generation_length_mode not in GENERATION_LENGTH_MODES:
@@ -853,9 +867,9 @@ def generate_tokens_with_lstm(
             f"Expected one of {GENERATION_LENGTH_MODES}."
         )
     if config.architecture == "seq2seq_lstm":
-        return generate_tokens_with_seq2seq_lstm(model, vocab, example, config)
+        return generate_tokens_with_seq2seq_lstm(model, vocab, example, config, allowed_output_token_ids)
     if config.architecture == "causal_lstm":
-        return generate_tokens_with_causal_lstm(model, vocab, example, config)
+        return generate_tokens_with_causal_lstm(model, vocab, example, config, allowed_output_token_ids)
     raise ValueError(f"Unknown architecture '{config.architecture}'. Expected one of {ARCHITECTURES}.")
 
 
@@ -901,16 +915,41 @@ def should_stop_on_token(token_id: int, step_index: int, vocab: Vocabulary, conf
     return token_id == vocab.token_to_id[EOS_TOKEN] and eos_is_allowed(step_index, config)
 
 
+def build_allowed_generation_mask(torch_module, vocab: Vocabulary, allowed_output_token_ids: Optional[Sequence[int]], device):
+    """Return a boolean mask for lexical tokens allowed during generation."""
+    if allowed_output_token_ids is None:
+        return None
+    mask = torch_module.zeros(len(vocab.id_to_token), dtype=torch_module.bool, device=device)
+    ids = sorted({int(token_id) for token_id in allowed_output_token_ids if 0 <= int(token_id) < len(vocab.id_to_token)})
+    if not ids:
+        raise ValueError("allowed_output_token_ids was provided but contained no valid vocabulary ids.")
+    mask[torch_module.tensor(ids, dtype=torch_module.long, device=device)] = True
+    return mask
+
+
+def allowed_mask_for_step(torch_module, base_allowed_mask, vocab: Vocabulary, step_index: int, config: LSTMConfig):
+    """Return the generation mask for one decoding step, adding <eos> only when allowed."""
+    if base_allowed_mask is None:
+        return None
+    if eos_is_allowed(step_index, config):
+        mask = base_allowed_mask.clone()
+        mask[vocab.token_to_id[EOS_TOKEN]] = True
+        return mask
+    return base_allowed_mask
+
+
 def generate_tokens_with_causal_lstm(
     model,
     vocab: Vocabulary,
     example: LSTMExample,
     config: LSTMConfig,
+    allowed_output_token_ids: Optional[Sequence[int]] = None,
 ) -> List[str]:
     """Generate an utterance from the causal/prefix LSTM."""
     torch, _nn_module, _functional, _DataLoader, _DatasetBase = require_torch()
     device = next(model.parameters()).device
     model.eval()
+    base_allowed_mask = build_allowed_generation_mask(torch, vocab, allowed_output_token_ids, device)
 
     prompt_ids = [vocab.encode_token(token) for token in example.context_tokens] + [vocab.bos_id]
     if not prompt_ids:
@@ -929,6 +968,7 @@ def generate_tokens_with_causal_lstm(
                 temperature=config.temperature,
                 top_k=config.top_k,
                 banned_ids=banned_ids_for_step(vocab, step_index, config),
+                allowed_mask=allowed_mask_for_step(torch, base_allowed_mask, vocab, step_index, config),
             )
             if should_stop_on_token(token_id, step_index, vocab, config):
                 break
@@ -946,11 +986,13 @@ def generate_tokens_with_seq2seq_lstm(
     vocab: Vocabulary,
     example: LSTMExample,
     config: LSTMConfig,
+    allowed_output_token_ids: Optional[Sequence[int]] = None,
 ) -> List[str]:
     """Generate an utterance from the encoder-decoder LSTM."""
     torch, _nn_module, _functional, _DataLoader, _DatasetBase = require_torch()
     device = next(model.parameters()).device
     model.eval()
+    base_allowed_mask = build_allowed_generation_mask(torch, vocab, allowed_output_token_ids, device)
 
     encoder_ids = [vocab.encode_token(token) for token in example.context_tokens]
     if not encoder_ids:
@@ -970,6 +1012,7 @@ def generate_tokens_with_seq2seq_lstm(
                 temperature=config.temperature,
                 top_k=config.top_k,
                 banned_ids=banned_ids_for_step(vocab, step_index, config),
+                allowed_mask=allowed_mask_for_step(torch, base_allowed_mask, vocab, step_index, config),
             )
             if should_stop_on_token(token_id, step_index, vocab, config):
                 break

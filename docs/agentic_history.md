@@ -102,3 +102,65 @@ Course-material alignment:
   cross-entropy-style loss. This project uses the same neural sequence-modeling
   logic, but with an encoder-decoder generation target instead of sequence
   labeling/classification.
+
+## 2026-06-04 Current PBM Additive LSTM Handoff
+
+Current status:
+
+- The old/all-data LSTM artifacts should be left alone.
+- A new PBM-only additive age-bin LSTM training/generation run is complete.
+- This repository performed training and generation only.
+- Scoring is intentionally deferred to
+  `/home/alkan/Portelance/compute_surprisal_mila`.
+
+Completed run:
+
+```text
+results/lstm_baselines/pbm_additive_lstm_training_generation_2026_06_03/
+```
+
+Completed run command:
+
+```bash
+.venv/bin/python src/run_lstm_additive_age_context_pipeline.py \
+  --output_dir results/lstm_baselines/pbm_additive_lstm_training_generation_2026_06_03 \
+  --datasets Brown Manchester Providence \
+  --contexts 3 4 5 \
+  --variants same_length \
+  --epochs 20 \
+  --embedding_dim 256 \
+  --hidden_dim 512 \
+  --num_layers 2 \
+  --dropout 0.2 \
+  --batch_size 256 \
+  --max_vocab_size 30000 \
+  --device cuda
+```
+
+Validation:
+
+- 24 trained model checkpoints: 3 context windows times 8 additive age bins.
+- 21 PBM scorer-ready child files.
+- 446,508 generated rows per LSTM column.
+- 0 empty generated rows.
+- 0 same-length mismatches.
+- `model_run_manifest.csv` records both `vocab_size` and
+  `child_output_vocab_size`.
+
+Generated columns:
+
+- `lstm_additive_k3_same_length_utterance`
+- `lstm_additive_k4_same_length_utterance`
+- `lstm_additive_k5_same_length_utterance`
+
+Scorer-ready files for the `compute_surprisal_mila` agent:
+
+```text
+data/big_cleaned_dataset/default_naturalistic_merged_006_023/preprocessed_data/{Brown,Manchester,Providence}/{child}/chi.surprisal_scoring_with_lstm_additive.csv
+```
+
+Dedicated scoring handoff:
+
+```text
+docs/lstm_additive_pbm_compute_surprisal_handoff_2026-06-04.md
+```
