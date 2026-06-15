@@ -2016,6 +2016,36 @@ env MPLCONFIGDIR=/tmp/matplotlib .venv/bin/python \
 
 passed with 12 focused tests.
 
+## 2026-06-15 - Mila Plan For Response-Space Entropy Generation
+
+- Added a dedicated handoff note:
+
+```text
+docs/response_entropy_mila_generation_plan.md
+```
+
+- Motivation:
+  - the PC pilot is useful for output-quality and temperature diagnostics;
+  - production response-space entropy scales as
+    `unique_contexts x temperatures x samples_per_context`;
+  - the RTX 4060 Ti 16GB forces small microbatches, so production should move
+    to Mila if the final manifest is large.
+- Recommended Mila strategy:
+  - keep the same scientific settings decided from the pilot;
+  - shard the manifest by context rows;
+  - run Slurm array tasks over `temperature x shard_id`;
+  - write one sample CSV per shard and temperature;
+  - use one shared Hugging Face cache via `HF_HOME`, preferably on scratch;
+  - audit completion before any analysis uses the generated samples.
+- Important distinction:
+  - `samples_per_context` is the scientific sample size;
+  - `batch_samples` is only a computational microbatch for GPU memory.
+- Stop condition:
+  - do not launch the main Mila generation run yet;
+  - first finish the current PC pilot, run final diagnostics, inspect
+    temperature/output-quality/stability results, and produce recommendations
+    for user review.
+
 ## 2026-06-15 - Pawar-Style Age-Trajectory Robustness Report
 
 - Added a complementary robustness workflow for Route 1 real child utterance

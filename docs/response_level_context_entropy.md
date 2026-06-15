@@ -216,6 +216,15 @@ This pilot is a decision step, not the production run. After diagnostics are
 rendered, review the temperature/output-quality recommendations before
 launching any larger response-space entropy job.
 
+For the larger generation run, use the Mila handoff:
+
+```text
+docs/response_entropy_mila_generation_plan.md
+```
+
+That note records the sharding strategy, cache rules, Slurm-oriented execution
+plan, completion audit, and stop point before production.
+
 ## First Inferential Model
 
 For real child utterances:
