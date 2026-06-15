@@ -9,6 +9,7 @@ writes one row per sampled response.
 from __future__ import annotations
 
 import argparse
+import gzip
 import time
 from pathlib import Path
 from typing import Sequence
@@ -21,6 +22,26 @@ DEFAULT_MANIFEST = Path("results/response_level_context_entropy/context_response
 DEFAULT_OUTPUT = Path("results/response_level_context_entropy/context_response_samples.csv.gz")
 DEFAULT_PROMPT_TEMPLATE = "Caregiver: {context}\nChild:"
 DEFAULT_STOP_STRINGS = ["\nCaregiver:", "\nParent:", "\nAdult:", "\nChild:", "\nCHI:"]
+OUTPUT_COLUMNS = [
+    "context_id",
+    "manifest_row",
+    "context_text",
+    "prompt_text",
+    "temperature",
+    "sample_index",
+    "raw_generated_text",
+    "sampled_response_text",
+    "generated_token_count",
+    "hit_max_new_tokens",
+    "stopped_by_speaker_boundary",
+    "speaker_boundary_marker",
+    "empty_response",
+    "model_used",
+    "max_new_tokens",
+    "top_p",
+    "top_k",
+    "seed_used",
+]
 
 
 def parse_float_csv(value: str) -> list[float]:
@@ -70,6 +91,21 @@ def model_input_device(model) -> torch.device:
         return torch.device("cpu")
 
 
+def resolve_model_source(model_name: str, model_dir: Path | None) -> tuple[str, str | None]:
+    """Return the Hugging Face source and optional cache directory.
+
+    ``model_dir`` can either be a direct local model snapshot containing
+    ``config.json`` or a cache directory. If omitted, Transformers uses the
+    user's shared Hugging Face cache, avoiding project-local duplicate weights.
+    """
+
+    if model_dir is None:
+        return model_name, None
+    if (model_dir / "config.json").exists():
+        return str(model_dir), None
+    return model_name, str(model_dir)
+
+
 def load_transformers_model(model_name: str, *, device: str, dtype: str, model_dir: Path | None):
     """Load a causal LM and tokenizer lazily so importing this script is cheap."""
 
@@ -83,13 +119,14 @@ def load_transformers_model(model_name: str, *, device: str, dtype: str, model_d
     elif dtype == "float32":
         torch_dtype = torch.float32
 
-    tokenizer = AutoTokenizer.from_pretrained(model_name, cache_dir=str(model_dir) if model_dir else None)
+    model_source, cache_dir = resolve_model_source(model_name, model_dir)
+    tokenizer = AutoTokenizer.from_pretrained(model_source, cache_dir=cache_dir)
     if tokenizer.pad_token_id is None:
         tokenizer.pad_token = tokenizer.eos_token
     tokenizer.padding_side = "left"
     model = AutoModelForCausalLM.from_pretrained(
-        model_name,
-        cache_dir=str(model_dir) if model_dir else None,
+        model_source,
+        cache_dir=cache_dir,
         torch_dtype=torch_dtype,
         device_map=device if device == "auto" else None,
     )
@@ -108,6 +145,7 @@ def sample_for_contexts(
     prompt_template: str,
     temperature: float,
     samples_per_context: int,
+    batch_samples: int,
     max_new_tokens: int,
     top_p: float,
     top_k: int,
@@ -121,52 +159,98 @@ def sample_for_contexts(
     repeated_rows = [row for _, row in batch.iterrows() for _ in range(samples_per_context)]
     sample_indices = [idx for _ in prompts for idx in range(samples_per_context)]
 
-    input_device = model_input_device(model)
-    generator = torch.Generator(device=input_device)
-    generator.manual_seed(seed)
-    encoded = tokenizer(repeated_prompts, return_tensors="pt", padding=True).to(input_device)
-    outputs = model.generate(
-        **encoded,
-        do_sample=True,
-        temperature=temperature,
-        top_p=top_p,
-        top_k=top_k,
-        max_new_tokens=max_new_tokens,
-        num_return_sequences=1,
-        pad_token_id=tokenizer.pad_token_id,
-        eos_token_id=tokenizer.eos_token_id,
-        renormalize_logits=True,
-        generator=generator,
-    )
-    input_lengths = encoded["attention_mask"].sum(dim=1).detach().cpu().tolist()
     rows: list[dict[str, object]] = []
-    for output_ids, input_len, source_row, sample_index, prompt in zip(outputs, input_lengths, repeated_rows, sample_indices, repeated_prompts):
-        generated_ids = output_ids[int(input_len) :]
-        raw_generated = tokenizer.decode(generated_ids, skip_special_tokens=True)
-        response, stopped_by_boundary, stop_marker = clean_generated_response_with_audit(raw_generated)
-        rows.append(
-            {
-                "context_id": source_row["context_id"],
-                "manifest_row": source_row.get("manifest_row", ""),
-                "context_text": source_row["context_text"],
-                "prompt_text": prompt,
-                "temperature": temperature,
-                "sample_index": sample_index,
-                "raw_generated_text": raw_generated,
-                "sampled_response_text": response,
-                "generated_token_count": int(len(generated_ids)),
-                "hit_max_new_tokens": int(len(generated_ids) >= max_new_tokens),
-                "stopped_by_speaker_boundary": int(stopped_by_boundary),
-                "speaker_boundary_marker": stop_marker,
-                "empty_response": int(response.strip() == ""),
-                "model_used": model_name,
-                "max_new_tokens": max_new_tokens,
-                "top_p": top_p,
-                "top_k": top_k,
-                "seed_used": seed,
-            }
+    input_device = model_input_device(model)
+    for offset in range(0, len(repeated_prompts), batch_samples):
+        prompt_batch = repeated_prompts[offset : offset + batch_samples]
+        row_batch = repeated_rows[offset : offset + batch_samples]
+        sample_index_batch = sample_indices[offset : offset + batch_samples]
+        torch.manual_seed(seed + offset)
+        if torch.cuda.is_available():
+            torch.cuda.manual_seed_all(seed + offset)
+        encoded = tokenizer(prompt_batch, return_tensors="pt", padding=True).to(input_device)
+        outputs = model.generate(
+            **encoded,
+            do_sample=True,
+            temperature=temperature,
+            top_p=top_p,
+            top_k=top_k,
+            max_new_tokens=max_new_tokens,
+            num_return_sequences=1,
+            pad_token_id=tokenizer.pad_token_id,
+            eos_token_id=tokenizer.eos_token_id,
+            renormalize_logits=True,
         )
+        input_lengths = encoded["attention_mask"].sum(dim=1).detach().cpu().tolist()
+        for output_ids, input_len, source_row, sample_index, prompt in zip(
+            outputs, input_lengths, row_batch, sample_index_batch, prompt_batch
+        ):
+            generated_ids = output_ids[int(input_len) :]
+            raw_generated = tokenizer.decode(generated_ids, skip_special_tokens=True)
+            response, stopped_by_boundary, stop_marker = clean_generated_response_with_audit(raw_generated)
+            rows.append(
+                {
+                    "context_id": source_row["context_id"],
+                    "manifest_row": source_row.get("manifest_row", ""),
+                    "context_text": source_row["context_text"],
+                    "prompt_text": prompt,
+                    "temperature": temperature,
+                    "sample_index": sample_index,
+                    "raw_generated_text": raw_generated,
+                    "sampled_response_text": response,
+                    "generated_token_count": int(len(generated_ids)),
+                    "hit_max_new_tokens": int(len(generated_ids) >= max_new_tokens),
+                    "stopped_by_speaker_boundary": int(stopped_by_boundary),
+                    "speaker_boundary_marker": stop_marker,
+                    "empty_response": int(response.strip() == ""),
+                    "model_used": model_name,
+                    "max_new_tokens": max_new_tokens,
+                    "top_p": top_p,
+                    "top_k": top_k,
+                    "seed_used": seed + offset,
+                }
+            )
     return rows
+
+
+def completed_context_temperatures(output_csv: Path, samples_per_context: int) -> set[tuple[str, float]]:
+    """Return context/temperature pairs already fully written to output."""
+
+    if not output_csv.exists():
+        return set()
+    counts: dict[tuple[str, float], int] = {}
+    try:
+        reader = pd.read_csv(output_csv, usecols=["context_id", "temperature", "sample_index"], chunksize=100_000)
+        for chunk in reader:
+            chunk["temperature"] = pd.to_numeric(chunk["temperature"], errors="coerce")
+            for (context_id, temperature), group in chunk.groupby(["context_id", "temperature"], dropna=False):
+                if pd.isna(temperature):
+                    continue
+                key = (str(context_id), float(temperature))
+                counts[key] = counts.get(key, 0) + group["sample_index"].nunique()
+    except (EOFError, gzip.BadGzipFile, pd.errors.EmptyDataError):
+        return set()
+    return {key for key, count in counts.items() if count >= samples_per_context}
+
+
+def append_rows(output_csv: Path, rows: list[dict[str, object]]) -> int:
+    """Append sampled rows immediately so long GPU runs are resumable."""
+
+    if not rows:
+        return 0
+    output_csv.parent.mkdir(parents=True, exist_ok=True)
+    frame = pd.DataFrame(rows)
+    for column in OUTPUT_COLUMNS:
+        if column not in frame.columns:
+            frame[column] = ""
+    frame = frame[OUTPUT_COLUMNS]
+    write_header = not output_csv.exists() or output_csv.stat().st_size == 0
+    if output_csv.suffix == ".gz":
+        with gzip.open(output_csv, "at", newline="") as handle:
+            frame.to_csv(handle, index=False, header=write_header)
+    else:
+        frame.to_csv(output_csv, index=False, mode="a", header=write_header)
+    return len(frame)
 
 
 def sample_responses(
@@ -177,6 +261,7 @@ def sample_responses(
     temperatures: Sequence[float],
     samples_per_context: int,
     batch_contexts: int,
+    batch_samples: int,
     max_new_tokens: int,
     top_p: float,
     top_k: int,
@@ -186,6 +271,7 @@ def sample_responses(
     model_dir: Path | None,
     max_contexts: int | None,
     seed: int,
+    resume: bool,
 ) -> pd.DataFrame:
     """Sample responses and write a long response-sample CSV."""
 
@@ -196,14 +282,26 @@ def sample_responses(
     missing = required - set(manifest.columns)
     if missing:
         raise KeyError(f"{manifest_csv} missing required columns: {sorted(missing)}")
+    if batch_samples < 1:
+        raise ValueError("--batch-samples must be >= 1")
 
     tokenizer, model = load_transformers_model(model_name, device=device, dtype=dtype, model_dir=model_dir)
     output_csv.parent.mkdir(parents=True, exist_ok=True)
-    all_rows: list[pd.DataFrame] = []
+    completed = completed_context_temperatures(output_csv, samples_per_context) if resume else set()
+    if completed:
+        print(f"[INFO] resuming with {len(completed):,} completed context-temperature pairs")
     start_time = time.time()
+    written_rows = 0
     for temperature in temperatures:
         for start in range(0, len(manifest), batch_contexts):
             batch = manifest.iloc[start : start + batch_contexts].copy()
+            batch = batch[
+                ~batch["context_id"].astype(str).map(lambda context_id: (context_id, float(temperature)) in completed)
+            ].copy()
+            if batch.empty:
+                done = min(start + batch_contexts, len(manifest))
+                print(f"[INFO] temp={temperature} contexts={done:,}/{len(manifest):,} already_done")
+                continue
             rows = sample_for_contexts(
                 batch,
                 tokenizer=tokenizer,
@@ -211,20 +309,21 @@ def sample_responses(
                 prompt_template=prompt_template,
                 temperature=float(temperature),
                 samples_per_context=samples_per_context,
+                batch_samples=batch_samples,
                 max_new_tokens=max_new_tokens,
                 top_p=top_p,
                 top_k=top_k,
                 seed=seed + int(round(float(temperature) * 1000)) + start,
                 model_name=model_name,
             )
-            all_rows.append(pd.DataFrame(rows))
+            written_rows += append_rows(output_csv, rows)
             done = min(start + batch_contexts, len(manifest))
-            print(f"[INFO] temp={temperature} contexts={done:,}/{len(manifest):,}")
-    out = pd.concat(all_rows, ignore_index=True) if all_rows else pd.DataFrame()
-    out.to_csv(output_csv, index=False)
+            print(f"[INFO] temp={temperature} contexts={done:,}/{len(manifest):,} rows_written={written_rows:,}")
     print(f"[BENCH] elapsed_seconds={time.time() - start_time:.1f}")
-    print(f"[OK] wrote {len(out):,} samples to {output_csv}")
-    return out
+    print(f"[OK] wrote/appended {written_rows:,} new samples to {output_csv}")
+    if output_csv.exists():
+        return pd.read_csv(output_csv)
+    return pd.DataFrame(columns=OUTPUT_COLUMNS)
 
 
 def main(argv: Sequence[str] | None = None) -> None:
@@ -235,15 +334,17 @@ def main(argv: Sequence[str] | None = None) -> None:
     parser.add_argument("--temperatures", default="0.7,1.0,1.3")
     parser.add_argument("--samples-per-context", type=int, default=100)
     parser.add_argument("--batch-contexts", type=int, default=2)
+    parser.add_argument("--batch-samples", type=int, default=4)
     parser.add_argument("--max-new-tokens", type=int, default=24)
     parser.add_argument("--top-p", type=float, default=0.95)
     parser.add_argument("--top-k", type=int, default=0)
     parser.add_argument("--prompt-template", default=DEFAULT_PROMPT_TEMPLATE)
     parser.add_argument("--device", default="auto")
     parser.add_argument("--dtype", default="auto")
-    parser.add_argument("--model-dir", type=Path, default=Path("results/response_level_context_entropy/model_cache"))
+    parser.add_argument("--model-dir", type=Path, default=None)
     parser.add_argument("--max-contexts", type=int, default=None)
     parser.add_argument("--seed", type=int, default=20260605)
+    parser.add_argument("--no-resume", action="store_true", help="Ignore existing output rows and append a fresh run.")
     args = parser.parse_args(argv)
     sample_responses(
         manifest_csv=args.manifest,
@@ -252,6 +353,7 @@ def main(argv: Sequence[str] | None = None) -> None:
         temperatures=parse_float_csv(args.temperatures),
         samples_per_context=args.samples_per_context,
         batch_contexts=args.batch_contexts,
+        batch_samples=args.batch_samples,
         max_new_tokens=args.max_new_tokens,
         top_p=args.top_p,
         top_k=args.top_k,
@@ -261,6 +363,7 @@ def main(argv: Sequence[str] | None = None) -> None:
         model_dir=args.model_dir,
         max_contexts=args.max_contexts,
         seed=args.seed,
+        resume=not args.no_resume,
     )
 
 

@@ -386,6 +386,7 @@ def command_block(
     top_p: float,
     top_k: int,
     batch_contexts: int,
+    batch_samples: int,
     dtype: str,
 ) -> str:
     """Return a copy-pasteable generation command."""
@@ -399,6 +400,7 @@ def command_block(
   --temperatures {temps} \\
   --samples-per-context {samples_per_context} \\
   --batch-contexts {batch_contexts} \\
+  --batch-samples {batch_samples} \\
   --max-new-tokens {max_new_tokens} \\
   --top-p {top_p} \\
   --top-k {top_k} \\
@@ -518,6 +520,7 @@ def build_pilot_manifest(
     model_name: str,
     prompt_template: str,
     batch_contexts: int,
+    batch_samples: int,
     dtype: str,
     seed: int,
 ) -> dict[str, Path]:
@@ -547,6 +550,8 @@ def build_pilot_manifest(
         "max_new_tokens": max_new_tokens,
         "top_p": top_p,
         "top_k": top_k,
+        "batch_contexts": batch_contexts,
+        "batch_samples": batch_samples,
         "do_sample": True,
         "num_beams": 1,
         "repetition_penalty": 1.0,
@@ -584,6 +589,7 @@ def build_pilot_manifest(
         top_p=top_p,
         top_k=top_k,
         batch_contexts=batch_contexts,
+        batch_samples=batch_samples,
         dtype=dtype,
     )
     markdown = build_design_markdown(
@@ -1017,6 +1023,7 @@ def build_cli() -> argparse.ArgumentParser:
     parser.add_argument("--model", default=DEFAULT_MODEL)
     parser.add_argument("--prompt-template", default=DEFAULT_PROMPT_TEMPLATE)
     parser.add_argument("--batch-contexts", type=int, default=2)
+    parser.add_argument("--batch-samples", type=int, default=16)
     parser.add_argument("--dtype", default="bfloat16")
     parser.add_argument("--seed", type=int, default=DEFAULT_SEED)
     parser.add_argument("--samples", type=Path, default=DEFAULT_OUTPUT_DIR / "pilot_response_samples.csv.gz")
@@ -1050,6 +1057,7 @@ def main(argv: Sequence[str] | None = None) -> None:
             model_name=args.model,
             prompt_template=args.prompt_template,
             batch_contexts=args.batch_contexts,
+            batch_samples=args.batch_samples,
             dtype=args.dtype,
             seed=args.seed,
         )

@@ -185,6 +185,7 @@ env MPLCONFIGDIR=/tmp/matplotlib .venv/bin/python \
   --temperatures 0.3,0.5,0.7,1.0,1.3,1.6 \
   --samples-per-context 100 \
   --batch-contexts 2 \
+  --batch-samples 16 \
   --max-new-tokens 24 \
   --top-p 0.95 \
   --top-k 0 \
@@ -210,6 +211,10 @@ Diagnostics include:
 - downsample stability for M=25, 50, 75, 100;
 - temperature rank-correlation matrix;
 - publication-facing diagnostic HTML.
+
+This pilot is a decision step, not the production run. After diagnostics are
+rendered, review the temperature/output-quality recommendations before
+launching any larger response-space entropy job.
 
 ## First Inferential Model
 

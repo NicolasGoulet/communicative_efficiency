@@ -1876,6 +1876,121 @@ MPLCONFIGDIR=/tmp/matplotlib .venv/bin/python \
 
 passed with 3 tests.
 
+## 2026-06-15 - PC Response-Space Entropy Pilot Launch Fixes
+
+- The first PC run exposed two implementation issues:
+  - `src/sample_context_responses.py` defaulted `--model-dir` to a
+    project-local cache under `results/response_level_context_entropy/model_cache`,
+    which caused a redundant/incomplete Mistral download even though the PC had
+    a complete shared Hugging Face cache.
+  - the sampler tried to generate `batch_contexts * samples_per_context`
+    continuations in one `model.generate` call. With the planned pilot settings,
+    that would have been 200 simultaneous continuations, too risky for the
+    16GB RTX 4060 Ti.
+- Fixes made:
+  - default `--model-dir` is now `None`, so Transformers uses the shared
+    Hugging Face cache unless a direct local snapshot/cache is explicitly
+    supplied;
+  - `resolve_model_source()` supports either the shared cache, a cache
+    directory, or a direct local snapshot containing `config.json`;
+  - sampled rows are appended incrementally to the output CSV/CSV.GZ, making
+    long GPU runs resumable;
+  - `--batch-samples` was added to microbatch repeated samples while preserving
+    the scientific `samples_per_context` value;
+  - Transformers 5 compatibility was fixed by replacing the rejected
+    `generator=` argument with explicit Torch seeding before each microbatch.
+- Verification on the laptop:
+
+```bash
+env MPLCONFIGDIR=/tmp/matplotlib .venv/bin/python \
+  -m unittest tests.test_response_level_context_entropy \
+              tests.test_build_response_entropy_pilot_grid
+
+.venv/bin/python -m py_compile src/sample_context_responses.py
+```
+
+passed with 11 focused tests.
+
+- Verification on the PC:
+  - removed incomplete duplicate cache:
+
+```text
+/home/alkan/Portelance/communicative_efficiency/results/response_level_context_entropy/model_cache
+```
+
+  - preserved complete shared model cache:
+
+```text
+/home/alkan/.cache/huggingface/hub/models--mistralai--Mistral-7B-v0.3
+```
+
+  - tiny GPU smoke test wrote two sampled rows to:
+
+```text
+results/response_entropy_pilot_grid/pilot_response_samples_smoke.csv.gz
+```
+
+  - `--batch-samples 8` and `--batch-samples 16` smoke tests both succeeded;
+  - `--batch-samples 16` also succeeded on the longest selected pilot context;
+  - the 600-row partial output from the slower `--batch-samples 4` run was
+    discarded so the final pilot has one consistent generation setting.
+
+- Full PC pilot launched cleanly in the background:
+
+```bash
+cd /home/alkan/Portelance/communicative_efficiency
+
+nohup env HF_HOME=/home/alkan/.cache/huggingface MPLCONFIGDIR=/tmp/matplotlib \
+  .venv/bin/python src/sample_context_responses.py \
+  --manifest results/response_entropy_pilot_grid/pilot_generation_manifest.csv \
+  --output results/response_entropy_pilot_grid/pilot_response_samples.csv.gz \
+  --model mistralai/Mistral-7B-v0.3 \
+  --temperatures 0.3,0.5,0.7,1.0,1.3,1.6 \
+  --samples-per-context 100 \
+  --batch-contexts 2 \
+  --batch-samples 16 \
+  --max-new-tokens 24 \
+  --top-p 0.95 \
+  --top-k 0 \
+  --dtype bfloat16 \
+  --device auto \
+  > results/response_entropy_pilot_grid/logs/pilot_generation.log 2>&1 &
+```
+
+PID recorded on the PC:
+
+```text
+results/response_entropy_pilot_grid/logs/pilot_generation.pid
+PID 9701
+```
+
+- Initial health check:
+  - GPU: RTX 4060 Ti, about 14.36GB / 16.38GB VRAM used, 99% utilization;
+  - output file began writing successfully at
+    `results/response_entropy_pilot_grid/pilot_response_samples.csv.gz`;
+  - process active as `.venv/bin/python src/sample_context_responses.py ...`.
+- Progress check command:
+
+```bash
+cd /home/alkan/Portelance/communicative_efficiency
+ps -p "$(cat results/response_entropy_pilot_grid/logs/pilot_generation.pid)" \
+  -o pid,etime,%cpu,%mem,rss,cmd
+nvidia-smi
+ls -lh results/response_entropy_pilot_grid/pilot_response_samples.csv.gz
+tail -n 40 results/response_entropy_pilot_grid/logs/pilot_generation.log
+```
+
+- After generation finishes, run diagnostics on the PC:
+
+```bash
+cd /home/alkan/Portelance/communicative_efficiency
+env MPLCONFIGDIR=/tmp/matplotlib .venv/bin/python \
+  src/build_response_entropy_pilot_grid.py \
+  --stage diagnostics \
+  --samples results/response_entropy_pilot_grid/pilot_response_samples.csv.gz \
+  --output-dir results/response_entropy_pilot_grid
+```
+
 ## 2026-06-15 - Pawar-Style Age-Trajectory Robustness Report
 
 - Added a complementary robustness workflow for Route 1 real child utterance

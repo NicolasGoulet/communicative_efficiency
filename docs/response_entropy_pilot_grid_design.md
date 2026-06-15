@@ -90,6 +90,7 @@ env MPLCONFIGDIR=/tmp/matplotlib .venv/bin/python \
   --temperatures 0.3,0.5,0.7,1.0,1.3,1.6 \
   --samples-per-context 100 \
   --batch-contexts 2 \
+  --batch-samples 16 \
   --max-new-tokens 24 \
   --top-p 0.95 \
   --top-k 0 \

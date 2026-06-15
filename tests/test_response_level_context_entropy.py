@@ -7,7 +7,14 @@ import pandas as pd
 
 from src.build_response_entropy_manifest import build_manifest, context_id, normalize_context
 from src.attach_response_entropy_features import attach_response_entropy_features
-from src.sample_context_responses import clean_generated_response, clean_generated_response_with_audit, format_prompt
+from src.sample_context_responses import (
+    append_rows,
+    clean_generated_response,
+    clean_generated_response_with_audit,
+    completed_context_temperatures,
+    format_prompt,
+    resolve_model_source,
+)
 from src.summarize_response_entropy_samples import (
     canonical_response,
     empirical_entropy_bits,
@@ -42,6 +49,54 @@ class ResponseLevelContextEntropyTests(unittest.TestCase):
         self.assertEqual(cleaned, "riding a bike")
         self.assertTrue(stopped)
         self.assertEqual(marker, "Caregiver:")
+
+    def test_model_dir_none_uses_shared_huggingface_cache(self):
+        self.assertEqual(resolve_model_source("mistral", None), ("mistral", None))
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            cache_dir = root / "cache"
+            cache_dir.mkdir()
+            self.assertEqual(resolve_model_source("mistral", cache_dir), ("mistral", str(cache_dir)))
+            snapshot = root / "snapshot"
+            snapshot.mkdir()
+            (snapshot / "config.json").write_text("{}", encoding="utf-8")
+            self.assertEqual(resolve_model_source("mistral", snapshot), (str(snapshot), None))
+
+    def test_response_sampler_appends_and_detects_complete_context_temperatures(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            output_csv = Path(tmp) / "samples.csv.gz"
+            rows = [
+                {
+                    "context_id": "ctx1",
+                    "manifest_row": "0",
+                    "context_text": "what do you like",
+                    "prompt_text": "Caregiver: what do you like\nChild:",
+                    "temperature": 1.0,
+                    "sample_index": sample_index,
+                    "raw_generated_text": "bike",
+                    "sampled_response_text": "bike",
+                    "generated_token_count": 1,
+                    "hit_max_new_tokens": 0,
+                    "stopped_by_speaker_boundary": 0,
+                    "speaker_boundary_marker": "",
+                    "empty_response": 0,
+                    "model_used": "toy",
+                    "max_new_tokens": 24,
+                    "top_p": 0.95,
+                    "top_k": 0,
+                    "seed_used": 1,
+                }
+                for sample_index in range(2)
+            ]
+
+            self.assertEqual(append_rows(output_csv, rows[:1]), 1)
+            self.assertEqual(completed_context_temperatures(output_csv, samples_per_context=2), set())
+            self.assertEqual(append_rows(output_csv, rows[1:]), 1)
+
+            completed = completed_context_temperatures(output_csv, samples_per_context=2)
+
+            self.assertEqual(completed, {("ctx1", 1.0)})
+            self.assertEqual(len(pd.read_csv(output_csv)), 2)
 
     def test_build_manifest_filters_and_aggregates_duplicate_contexts(self):
         with tempfile.TemporaryDirectory() as tmp:

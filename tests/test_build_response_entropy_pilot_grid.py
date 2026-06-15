@@ -55,6 +55,7 @@ class ResponseEntropyPilotGridTests(unittest.TestCase):
                 model_name="toy-model",
                 prompt_template="Caregiver: {context}\nChild:",
                 batch_contexts=1,
+                batch_samples=2,
                 dtype="float32",
                 seed=1,
             )
@@ -65,6 +66,7 @@ class ResponseEntropyPilotGridTests(unittest.TestCase):
             self.assertLessEqual(selected.groupby(["selection_age_bin", "selection_context_k"]).size().max(), 1)
             self.assertLessEqual(len(generation), len(selected))
             self.assertIn("planned generations", paths["design_md"].read_text(encoding="utf-8"))
+            self.assertIn("--batch-samples 2", paths["design_md"].read_text(encoding="utf-8"))
             self.assertTrue((audit["selected_context_strata"] <= audit["eligible_context_strata"]).all())
 
     def test_diagnostics_stage_writes_quality_reliability_and_plots(self):
