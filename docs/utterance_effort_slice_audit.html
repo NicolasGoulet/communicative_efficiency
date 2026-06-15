@@ -1,0 +1,1103 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Effort Slice Audit For Adjusted Age Plots</title>
+<style>
+:root {
+  color-scheme: light;
+  --ink: #1e2528;
+  --muted: #5e686d;
+  --line: #d9e0df;
+  --paper: #ffffff;
+  --soft: #f5f7f6;
+  --accent: #2f6f73;
+  --accent2: #c76f2c;
+}
+body {
+  margin: 0;
+  background: #eef2f1;
+  color: var(--ink);
+  font: 16px/1.58 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+main {
+  max-width: 980px;
+  margin: 34px auto 56px;
+  padding: 48px 58px;
+  background: var(--paper);
+  box-shadow: 0 18px 50px rgba(31, 45, 48, 0.12);
+}
+h1, h2, h3, h4 {
+  line-height: 1.18;
+  margin: 1.6em 0 0.55em;
+}
+h1 {
+  margin-top: 0;
+  font-size: 2.25rem;
+  border-bottom: 3px solid var(--accent);
+  padding-bottom: 0.45em;
+}
+h2 {
+  font-size: 1.55rem;
+  color: var(--accent);
+}
+h3 {
+  font-size: 1.18rem;
+}
+p {
+  margin: 0.75em 0;
+}
+a {
+  color: var(--accent);
+}
+blockquote {
+  border-left: 4px solid var(--accent2);
+  margin: 1.1em 0;
+  padding: 0.05em 1.1em;
+  color: var(--muted);
+  background: #fff8f2;
+}
+code {
+  background: var(--soft);
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  padding: 0.08em 0.3em;
+  font-family: "SFMono-Regular", Consolas, monospace;
+  font-size: 0.92em;
+}
+pre {
+  background: #f5f7f6;
+  color: var(--ink);
+  border: 1px solid var(--line);
+  padding: 1em;
+  overflow-x: auto;
+  border-radius: 7px;
+}
+pre code {
+  background: transparent;
+  border: 0;
+  padding: 0;
+  color: inherit;
+}
+table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 1.15em 0 1.45em;
+  font-size: 0.95em;
+}
+th, td {
+  border: 1px solid var(--line);
+  padding: 0.54em 0.68em;
+  vertical-align: top;
+}
+th {
+  background: #e7efed;
+  text-align: left;
+}
+tr:nth-child(even) td {
+  background: #fafbfb;
+}
+img {
+  max-width: 100%;
+  display: block;
+  margin: 1.1em auto 0.45em;
+}
+ul, ol {
+  padding-left: 1.4em;
+}
+.caption {
+  color: var(--muted);
+  font-size: 0.92em;
+  margin-top: -0.15em;
+}
+@media print {
+  body {
+    background: white;
+  }
+  main {
+    box-shadow: none;
+    margin: 0;
+    max-width: none;
+    padding: 28px;
+  }
+}
+</style>
+</head>
+<body>
+<main>
+<h1>Effort Slice Audit For Adjusted Age Plots</h1>
+<p>This document fixes the plotting issue we identified: a single median-effort line is only one conditional slice of a fitted model. It is useful, but it is not enough as the main evidence.</p>
+<p>The audit uses the same real-child <code>k3</code> modeling rows used by the M1-M6 reports. It does not refit any M1-M6 model.</p>
+<h2>Straight Answer</h2>
+<p>Use three complementary views:</p>
+<ol>
+<li><strong>Exact fixed-effort slices.</strong> These are the strongest visual controls</li>
+<p>because every plotted line corresponds to a concrete effort count.</p>
+<li><strong>Low / median / high fixed slices.</strong> These should be quantile anchors such</li>
+<p>as p25/p50/p75 or wider p10/p50/p90, not only one median line.</p>
+<li><strong>Low / mid / high effort groups.</strong> These are diagnostic categorical models.</li>
+<p>They are not the same thing as exact fixed-effort control because each group contains a range of effort values.</p>
+</ol>
+<h2>Saved Outputs</h2>
+<pre><code>results/effort_slice_audit/effort_quantile_summary.csv
+results/effort_slice_audit/effort_value_distribution.csv
+results/effort_slice_audit/effort_by_age_bin_distribution.csv
+results/effort_slice_audit/effort_level_definitions.csv
+results/effort_slice_audit/proposed_fixed_effort_slices.csv</code></pre>
+<h2>Effort Distributions</h2>
+<img src="../figs/effort_slice_audit/effort_value_distributions.png" alt="Exact effort value distributions">
+<table>
+<thead><tr>
+<th>effort_label</th>
+<th>rows</th>
+<th>mean</th>
+<th>sd</th>
+<th>p10</th>
+<th>p25</th>
+<th>p33</th>
+<th>p50</th>
+<th>p66</th>
+<th>p75</th>
+<th>p90</th>
+<th>p95</th>
+<th>p99</th>
+<th>max</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>Words</td>
+<td>446985</td>
+<td>2.66</td>
+<td>2.02</td>
+<td>1</td>
+<td>1</td>
+<td>1</td>
+<td>2</td>
+<td>3</td>
+<td>4</td>
+<td>5</td>
+<td>6</td>
+<td>10</td>
+<td>70</td>
+</tr>
+<tr>
+<td>Morphemes</td>
+<td>446985</td>
+<td>2.96</td>
+<td>2.32</td>
+<td>1</td>
+<td>1</td>
+<td>1</td>
+<td>2</td>
+<td>3</td>
+<td>4</td>
+<td>6</td>
+<td>7</td>
+<td>11</td>
+<td>98</td>
+</tr>
+<tr>
+<td>Syllables: CMU/pkg</td>
+<td>446985</td>
+<td>3.24</td>
+<td>2.48</td>
+<td>1</td>
+<td>1</td>
+<td>2</td>
+<td>3</td>
+<td>4</td>
+<td>4</td>
+<td>6</td>
+<td>8</td>
+<td>12</td>
+<td>84</td>
+</tr>
+<tr>
+<td>Syllables: pkg</td>
+<td>446985</td>
+<td>3.43</td>
+<td>2.64</td>
+<td>1</td>
+<td>1</td>
+<td>2</td>
+<td>3</td>
+<td>4</td>
+<td>5</td>
+<td>7</td>
+<td>8</td>
+<td>12</td>
+<td>84</td>
+</tr>
+<tr>
+<td>Phonemes</td>
+<td>446985</td>
+<td>8.04</td>
+<td>6.22</td>
+<td>2</td>
+<td>3</td>
+<td>4</td>
+<td>7</td>
+<td>9</td>
+<td>11</td>
+<td>16</td>
+<td>19</td>
+<td>29</td>
+<td>266</td>
+</tr>
+</tbody></table>
+<h2>How Low / Mid / High Effort Is Currently Defined</h2>
+<p>For each effort unit separately, we compute the empirical 33rd and 66th percentiles. Then:</p>
+<pre><code>low effort  = value &lt;= p33
+high effort = value &gt;= p66
+mid effort  = values between p33 and p66</code></pre>
+<p>Because effort counts are integers, these groups can be uneven. If p33 and p66 fall around the same integer, the mid group can become very narrow. This is why low/mid/high effort groups should be treated as a diagnostic view, not the only evidence.</p>
+<table>
+<thead><tr>
+<th>effort_label</th>
+<th>effort_level</th>
+<th>rule</th>
+<th>rows</th>
+<th>pct_rows</th>
+<th>min_value</th>
+<th>median_value</th>
+<th>max_value</th>
+<th>n_children</th>
+<th>n_age_bins</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>Words</td>
+<td>low effort</td>
+<td>value &lt;= p33 (1.00)</td>
+<td>164264</td>
+<td>0.367</td>
+<td>1</td>
+<td>1</td>
+<td>1</td>
+<td>21</td>
+<td>8</td>
+</tr>
+<tr>
+<td>Words</td>
+<td>mid effort</td>
+<td>p33 &lt; value &lt; p66 (1.00 to 3.00)</td>
+<td>93824</td>
+<td>0.21</td>
+<td>2</td>
+<td>2</td>
+<td>2</td>
+<td>21</td>
+<td>8</td>
+</tr>
+<tr>
+<td>Words</td>
+<td>high effort</td>
+<td>value &gt;= p66 (3.00)</td>
+<td>188897</td>
+<td>0.423</td>
+<td>3</td>
+<td>4</td>
+<td>70</td>
+<td>21</td>
+<td>8</td>
+</tr>
+<tr>
+<td>Morphemes</td>
+<td>low effort</td>
+<td>value &lt;= p33 (1.00)</td>
+<td>153917</td>
+<td>0.344</td>
+<td>1</td>
+<td>1</td>
+<td>1</td>
+<td>21</td>
+<td>8</td>
+</tr>
+<tr>
+<td>Morphemes</td>
+<td>mid effort</td>
+<td>p33 &lt; value &lt; p66 (1.00 to 3.00)</td>
+<td>81932</td>
+<td>0.183</td>
+<td>2</td>
+<td>2</td>
+<td>2</td>
+<td>21</td>
+<td>8</td>
+</tr>
+<tr>
+<td>Morphemes</td>
+<td>high effort</td>
+<td>value &gt;= p66 (3.00)</td>
+<td>211136</td>
+<td>0.472</td>
+<td>3</td>
+<td>4</td>
+<td>98</td>
+<td>21</td>
+<td>8</td>
+</tr>
+<tr>
+<td>Syllables: CMU/pkg</td>
+<td>low effort</td>
+<td>value &lt;= p33 (2.00)</td>
+<td>216253</td>
+<td>0.484</td>
+<td>1</td>
+<td>1</td>
+<td>2</td>
+<td>21</td>
+<td>8</td>
+</tr>
+<tr>
+<td>Syllables: CMU/pkg</td>
+<td>mid effort</td>
+<td>p33 &lt; value &lt; p66 (2.00 to 4.00)</td>
+<td>72346</td>
+<td>0.162</td>
+<td>3</td>
+<td>3</td>
+<td>3</td>
+<td>21</td>
+<td>8</td>
+</tr>
+<tr>
+<td>Syllables: CMU/pkg</td>
+<td>high effort</td>
+<td>value &gt;= p66 (4.00)</td>
+<td>158386</td>
+<td>0.354</td>
+<td>4</td>
+<td>5</td>
+<td>84</td>
+<td>21</td>
+<td>8</td>
+</tr>
+<tr>
+<td>Syllables: pkg</td>
+<td>low effort</td>
+<td>value &lt;= p33 (2.00)</td>
+<td>204338</td>
+<td>0.457</td>
+<td>1</td>
+<td>1</td>
+<td>2</td>
+<td>21</td>
+<td>8</td>
+</tr>
+<tr>
+<td>Syllables: pkg</td>
+<td>mid effort</td>
+<td>p33 &lt; value &lt; p66 (2.00 to 4.00)</td>
+<td>67784</td>
+<td>0.152</td>
+<td>3</td>
+<td>3</td>
+<td>3</td>
+<td>21</td>
+<td>8</td>
+</tr>
+<tr>
+<td>Syllables: pkg</td>
+<td>high effort</td>
+<td>value &gt;= p66 (4.00)</td>
+<td>174863</td>
+<td>0.391</td>
+<td>4</td>
+<td>5</td>
+<td>84</td>
+<td>21</td>
+<td>8</td>
+</tr>
+<tr>
+<td>Phonemes</td>
+<td>low effort</td>
+<td>value &lt;= p33 (4.00)</td>
+<td>152639</td>
+<td>0.341</td>
+<td>1</td>
+<td>3</td>
+<td>4</td>
+<td>21</td>
+<td>8</td>
+</tr>
+<tr>
+<td>Phonemes</td>
+<td>mid effort</td>
+<td>p33 &lt; value &lt; p66 (4.00 to 9.00)</td>
+<td>128154</td>
+<td>0.287</td>
+<td>5</td>
+<td>6</td>
+<td>8</td>
+<td>21</td>
+<td>8</td>
+</tr>
+<tr>
+<td>Phonemes</td>
+<td>high effort</td>
+<td>value &gt;= p66 (9.00)</td>
+<td>166192</td>
+<td>0.372</td>
+<td>9</td>
+<td>12</td>
+<td>266</td>
+<td>21</td>
+<td>8</td>
+</tr>
+</tbody></table>
+<h2>Proposed Fixed Effort Slices</h2>
+<h3>Mandatory Exact Word And Morpheme Slices</h3>
+<p>These implement the decision to show words and morphemes from 1 to 12.</p>
+<table>
+<thead><tr>
+<th>effort</th>
+<th>values</th>
+<th>supported_values</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>Words</td>
+<td>1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12</td>
+<td>1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12</td>
+</tr>
+<tr>
+<td>Morphemes</td>
+<td>1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12</td>
+<td>1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12</td>
+</tr>
+<tr>
+<td>Syllables: CMU/pkg</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>Syllables: pkg</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>Phonemes</td>
+<td></td>
+<td></td>
+</tr>
+</tbody></table>
+<h3>Primary Low / Median / High Fixed Slices</h3>
+<p>These are p25/p50/p75 anchors. They are a cleaner replacement for a single median line when we want only three lines.</p>
+<table>
+<thead><tr>
+<th>effort</th>
+<th>values</th>
+<th>supported_values</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>Words</td>
+<td>1, 2, 4</td>
+<td>1, 2, 4</td>
+</tr>
+<tr>
+<td>Morphemes</td>
+<td>1, 2, 4</td>
+<td>1, 2, 4</td>
+</tr>
+<tr>
+<td>Syllables: CMU/pkg</td>
+<td>1, 3, 4</td>
+<td>1, 3, 4</td>
+</tr>
+<tr>
+<td>Syllables: pkg</td>
+<td>1, 3, 5</td>
+<td>1, 3, 5</td>
+</tr>
+<tr>
+<td>Phonemes</td>
+<td>3, 7, 11</td>
+<td>3, 7, 11</td>
+</tr>
+</tbody></table>
+<h3>Wider Low / Median / High Fixed Slices</h3>
+<p>These are p10/p50/p90 anchors. They are useful when p25/p75 are too close and we want to visibly stress-test the trajectory at small versus large utterances.</p>
+<table>
+<thead><tr>
+<th>effort</th>
+<th>values</th>
+<th>supported_values</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>Words</td>
+<td>1, 2, 5</td>
+<td>1, 2, 5</td>
+</tr>
+<tr>
+<td>Morphemes</td>
+<td>1, 2, 6</td>
+<td>1, 2, 6</td>
+</tr>
+<tr>
+<td>Syllables: CMU/pkg</td>
+<td>1, 3, 6</td>
+<td>1, 3, 6</td>
+</tr>
+<tr>
+<td>Syllables: pkg</td>
+<td>1, 3, 7</td>
+<td>1, 3, 7</td>
+</tr>
+<tr>
+<td>Phonemes</td>
+<td>2, 7, 16</td>
+<td>2, 7, 16</td>
+</tr>
+</tbody></table>
+<h3>Data-Supported Dense Core</h3>
+<p>These are exact effort values with enough support to be plotted without relying on tiny cells. Current support rule:</p>
+<pre><code>at least 500 rows, at least 10 children, at least 6 age bins, and not above p95</code></pre>
+<table>
+<thead><tr>
+<th>effort</th>
+<th>values</th>
+<th>supported_values</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>Words</td>
+<td>1, 2, 3, 4, 5, 6</td>
+<td>1, 2, 3, 4, 5, 6</td>
+</tr>
+<tr>
+<td>Morphemes</td>
+<td>1, 2, 3, 4, 5, 6, 7</td>
+<td>1, 2, 3, 4, 5, 6, 7</td>
+</tr>
+<tr>
+<td>Syllables: CMU/pkg</td>
+<td>1, 2, 3, 4, 5, 6, 7, 8</td>
+<td>1, 2, 3, 4, 5, 6, 7, 8</td>
+</tr>
+<tr>
+<td>Syllables: pkg</td>
+<td>1, 2, 3, 4, 5, 6, 7, 8</td>
+<td>1, 2, 3, 4, 5, 6, 7, 8</td>
+</tr>
+<tr>
+<td>Phonemes</td>
+<td>1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19</td>
+<td>1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19</td>
+</tr>
+</tbody></table>
+<h2>Support Preview For Key Proposed Values</h2>
+<table>
+<thead><tr>
+<th>effort_label</th>
+<th>proposal_set</th>
+<th>fixed_effort_value</th>
+<th>rows</th>
+<th>n_children</th>
+<th>n_age_bins</th>
+<th>meets_support_rule</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>Morphemes</td>
+<td>primary_low_median_high_p25_p50_p75</td>
+<td>1</td>
+<td>153917</td>
+<td>21</td>
+<td>8</td>
+<td>True</td>
+</tr>
+<tr>
+<td>Morphemes</td>
+<td>primary_low_median_high_p25_p50_p75</td>
+<td>2</td>
+<td>81932</td>
+<td>21</td>
+<td>8</td>
+<td>True</td>
+</tr>
+<tr>
+<td>Morphemes</td>
+<td>primary_low_median_high_p25_p50_p75</td>
+<td>4</td>
+<td>52894</td>
+<td>21</td>
+<td>8</td>
+<td>True</td>
+</tr>
+<tr>
+<td>Morphemes</td>
+<td>requested_dense_1_12</td>
+<td>1</td>
+<td>153917</td>
+<td>21</td>
+<td>8</td>
+<td>True</td>
+</tr>
+<tr>
+<td>Morphemes</td>
+<td>requested_dense_1_12</td>
+<td>2</td>
+<td>81932</td>
+<td>21</td>
+<td>8</td>
+<td>True</td>
+</tr>
+<tr>
+<td>Morphemes</td>
+<td>requested_dense_1_12</td>
+<td>3</td>
+<td>69111</td>
+<td>21</td>
+<td>8</td>
+<td>True</td>
+</tr>
+<tr>
+<td>Morphemes</td>
+<td>requested_dense_1_12</td>
+<td>4</td>
+<td>52894</td>
+<td>21</td>
+<td>8</td>
+<td>True</td>
+</tr>
+<tr>
+<td>Morphemes</td>
+<td>requested_dense_1_12</td>
+<td>5</td>
+<td>35618</td>
+<td>21</td>
+<td>8</td>
+<td>True</td>
+</tr>
+<tr>
+<td>Morphemes</td>
+<td>requested_dense_1_12</td>
+<td>6</td>
+<td>21774</td>
+<td>21</td>
+<td>8</td>
+<td>True</td>
+</tr>
+<tr>
+<td>Morphemes</td>
+<td>requested_dense_1_12</td>
+<td>7</td>
+<td>12587</td>
+<td>21</td>
+<td>8</td>
+<td>True</td>
+</tr>
+<tr>
+<td>Morphemes</td>
+<td>requested_dense_1_12</td>
+<td>8</td>
+<td>7378</td>
+<td>21</td>
+<td>8</td>
+<td>True</td>
+</tr>
+<tr>
+<td>Morphemes</td>
+<td>requested_dense_1_12</td>
+<td>9</td>
+<td>4295</td>
+<td>21</td>
+<td>8</td>
+<td>True</td>
+</tr>
+<tr>
+<td>Morphemes</td>
+<td>requested_dense_1_12</td>
+<td>10</td>
+<td>2526</td>
+<td>21</td>
+<td>8</td>
+<td>True</td>
+</tr>
+<tr>
+<td>Morphemes</td>
+<td>requested_dense_1_12</td>
+<td>11</td>
+<td>1568</td>
+<td>21</td>
+<td>8</td>
+<td>True</td>
+</tr>
+<tr>
+<td>Morphemes</td>
+<td>requested_dense_1_12</td>
+<td>12</td>
+<td>1020</td>
+<td>21</td>
+<td>8</td>
+<td>True</td>
+</tr>
+<tr>
+<td>Morphemes</td>
+<td>wide_low_median_high_p10_p50_p90</td>
+<td>1</td>
+<td>153917</td>
+<td>21</td>
+<td>8</td>
+<td>True</td>
+</tr>
+<tr>
+<td>Morphemes</td>
+<td>wide_low_median_high_p10_p50_p90</td>
+<td>2</td>
+<td>81932</td>
+<td>21</td>
+<td>8</td>
+<td>True</td>
+</tr>
+<tr>
+<td>Morphemes</td>
+<td>wide_low_median_high_p10_p50_p90</td>
+<td>6</td>
+<td>21774</td>
+<td>21</td>
+<td>8</td>
+<td>True</td>
+</tr>
+<tr>
+<td>Phonemes</td>
+<td>primary_low_median_high_p25_p50_p75</td>
+<td>3</td>
+<td>46836</td>
+<td>21</td>
+<td>8</td>
+<td>True</td>
+</tr>
+<tr>
+<td>Phonemes</td>
+<td>primary_low_median_high_p25_p50_p75</td>
+<td>7</td>
+<td>32405</td>
+<td>21</td>
+<td>8</td>
+<td>True</td>
+</tr>
+<tr>
+<td>Phonemes</td>
+<td>primary_low_median_high_p25_p50_p75</td>
+<td>11</td>
+<td>20107</td>
+<td>21</td>
+<td>8</td>
+<td>True</td>
+</tr>
+<tr>
+<td>Phonemes</td>
+<td>wide_low_median_high_p10_p50_p90</td>
+<td>2</td>
+<td>58082</td>
+<td>21</td>
+<td>8</td>
+<td>True</td>
+</tr>
+<tr>
+<td>Phonemes</td>
+<td>wide_low_median_high_p10_p50_p90</td>
+<td>7</td>
+<td>32405</td>
+<td>21</td>
+<td>8</td>
+<td>True</td>
+</tr>
+<tr>
+<td>Phonemes</td>
+<td>wide_low_median_high_p10_p50_p90</td>
+<td>16</td>
+<td>8327</td>
+<td>21</td>
+<td>8</td>
+<td>True</td>
+</tr>
+<tr>
+<td>Syllables: CMU/pkg</td>
+<td>primary_low_median_high_p25_p50_p75</td>
+<td>1</td>
+<td>121839</td>
+<td>21</td>
+<td>8</td>
+<td>True</td>
+</tr>
+<tr>
+<td>Syllables: CMU/pkg</td>
+<td>primary_low_median_high_p25_p50_p75</td>
+<td>3</td>
+<td>72346</td>
+<td>21</td>
+<td>8</td>
+<td>True</td>
+</tr>
+<tr>
+<td>Syllables: CMU/pkg</td>
+<td>primary_low_median_high_p25_p50_p75</td>
+<td>4</td>
+<td>55990</td>
+<td>21</td>
+<td>8</td>
+<td>True</td>
+</tr>
+<tr>
+<td>Syllables: CMU/pkg</td>
+<td>wide_low_median_high_p10_p50_p90</td>
+<td>1</td>
+<td>121839</td>
+<td>21</td>
+<td>8</td>
+<td>True</td>
+</tr>
+<tr>
+<td>Syllables: CMU/pkg</td>
+<td>wide_low_median_high_p10_p50_p90</td>
+<td>3</td>
+<td>72346</td>
+<td>21</td>
+<td>8</td>
+<td>True</td>
+</tr>
+<tr>
+<td>Syllables: CMU/pkg</td>
+<td>wide_low_median_high_p10_p50_p90</td>
+<td>6</td>
+<td>25149</td>
+<td>21</td>
+<td>8</td>
+<td>True</td>
+</tr>
+<tr>
+<td>Syllables: pkg</td>
+<td>primary_low_median_high_p25_p50_p75</td>
+<td>1</td>
+<td>116868</td>
+<td>21</td>
+<td>8</td>
+<td>True</td>
+</tr>
+<tr>
+<td>Syllables: pkg</td>
+<td>primary_low_median_high_p25_p50_p75</td>
+<td>3</td>
+<td>67784</td>
+<td>21</td>
+<td>8</td>
+<td>True</td>
+</tr>
+<tr>
+<td>Syllables: pkg</td>
+<td>primary_low_median_high_p25_p50_p75</td>
+<td>5</td>
+<td>40416</td>
+<td>21</td>
+<td>8</td>
+<td>True</td>
+</tr>
+<tr>
+<td>Syllables: pkg</td>
+<td>wide_low_median_high_p10_p50_p90</td>
+<td>1</td>
+<td>116868</td>
+<td>21</td>
+<td>8</td>
+<td>True</td>
+</tr>
+<tr>
+<td>Syllables: pkg</td>
+<td>wide_low_median_high_p10_p50_p90</td>
+<td>3</td>
+<td>67784</td>
+<td>21</td>
+<td>8</td>
+<td>True</td>
+</tr>
+<tr>
+<td>Syllables: pkg</td>
+<td>wide_low_median_high_p10_p50_p90</td>
+<td>7</td>
+<td>17456</td>
+<td>21</td>
+<td>8</td>
+<td>True</td>
+</tr>
+<tr>
+<td>Words</td>
+<td>primary_low_median_high_p25_p50_p75</td>
+<td>1</td>
+<td>164264</td>
+<td>21</td>
+<td>8</td>
+<td>True</td>
+</tr>
+<tr>
+<td>Words</td>
+<td>primary_low_median_high_p25_p50_p75</td>
+<td>2</td>
+<td>93824</td>
+<td>21</td>
+<td>8</td>
+<td>True</td>
+</tr>
+<tr>
+<td>Words</td>
+<td>primary_low_median_high_p25_p50_p75</td>
+<td>4</td>
+<td>49421</td>
+<td>21</td>
+<td>8</td>
+<td>True</td>
+</tr>
+<tr>
+<td>Words</td>
+<td>requested_dense_1_12</td>
+<td>1</td>
+<td>164264</td>
+<td>21</td>
+<td>8</td>
+<td>True</td>
+</tr>
+<tr>
+<td>Words</td>
+<td>requested_dense_1_12</td>
+<td>2</td>
+<td>93824</td>
+<td>21</td>
+<td>8</td>
+<td>True</td>
+</tr>
+<tr>
+<td>Words</td>
+<td>requested_dense_1_12</td>
+<td>3</td>
+<td>74048</td>
+<td>21</td>
+<td>8</td>
+<td>True</td>
+</tr>
+<tr>
+<td>Words</td>
+<td>requested_dense_1_12</td>
+<td>4</td>
+<td>49421</td>
+<td>21</td>
+<td>8</td>
+<td>True</td>
+</tr>
+<tr>
+<td>Words</td>
+<td>requested_dense_1_12</td>
+<td>5</td>
+<td>28966</td>
+<td>21</td>
+<td>8</td>
+<td>True</td>
+</tr>
+<tr>
+<td>Words</td>
+<td>requested_dense_1_12</td>
+<td>6</td>
+<td>15966</td>
+<td>21</td>
+<td>8</td>
+<td>True</td>
+</tr>
+<tr>
+<td>Words</td>
+<td>requested_dense_1_12</td>
+<td>7</td>
+<td>8606</td>
+<td>21</td>
+<td>8</td>
+<td>True</td>
+</tr>
+<tr>
+<td>Words</td>
+<td>requested_dense_1_12</td>
+<td>8</td>
+<td>4725</td>
+<td>21</td>
+<td>8</td>
+<td>True</td>
+</tr>
+<tr>
+<td>Words</td>
+<td>requested_dense_1_12</td>
+<td>9</td>
+<td>2656</td>
+<td>21</td>
+<td>8</td>
+<td>True</td>
+</tr>
+<tr>
+<td>Words</td>
+<td>requested_dense_1_12</td>
+<td>10</td>
+<td>1594</td>
+<td>21</td>
+<td>8</td>
+<td>True</td>
+</tr>
+<tr>
+<td>Words</td>
+<td>requested_dense_1_12</td>
+<td>11</td>
+<td>896</td>
+<td>21</td>
+<td>8</td>
+<td>True</td>
+</tr>
+<tr>
+<td>Words</td>
+<td>requested_dense_1_12</td>
+<td>12</td>
+<td>591</td>
+<td>20</td>
+<td>8</td>
+<td>True</td>
+</tr>
+<tr>
+<td>Words</td>
+<td>wide_low_median_high_p10_p50_p90</td>
+<td>1</td>
+<td>164264</td>
+<td>21</td>
+<td>8</td>
+<td>True</td>
+</tr>
+<tr>
+<td>Words</td>
+<td>wide_low_median_high_p10_p50_p90</td>
+<td>2</td>
+<td>93824</td>
+<td>21</td>
+<td>8</td>
+<td>True</td>
+</tr>
+<tr>
+<td>Words</td>
+<td>wide_low_median_high_p10_p50_p90</td>
+<td>5</td>
+<td>28966</td>
+<td>21</td>
+<td>8</td>
+<td>True</td>
+</tr>
+</tbody></table>
+<h2>Recommendation</h2>
+<p>For the next M1-M6 figures:</p>
+<ul>
+<li>use <strong>1-12 exact slices</strong> for words and morphemes;</li>
+<li>use <strong>distribution-supported dense-core values</strong> for syllables and phonemes;</li>
+<li>include <strong>p25/p50/p75</strong> and optionally <strong>p10/p50/p90</strong> versions as compact</li>
+<p>low/median/high summaries;</p>
+<li>keep low/mid/high categorical models, but label them as coarse diagnostics.</li>
+</ul>
+<p>This is more granular and safer than median-only plotting.</p>
+</main>
+</body>
+</html>

@@ -1,0 +1,1952 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Context Predictor Permutations: k2</title>
+<style>
+:root {
+  color-scheme: light;
+  --ink: #1e2528;
+  --muted: #5e686d;
+  --line: #d9e0df;
+  --paper: #ffffff;
+  --soft: #f5f7f6;
+  --accent: #2f6f73;
+  --accent2: #c76f2c;
+}
+body {
+  margin: 0;
+  background: #eef2f1;
+  color: var(--ink);
+  font: 16px/1.58 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+main {
+  max-width: 980px;
+  margin: 34px auto 56px;
+  padding: 48px 58px;
+  background: var(--paper);
+  box-shadow: 0 18px 50px rgba(31, 45, 48, 0.12);
+}
+h1, h2, h3, h4 {
+  line-height: 1.18;
+  margin: 1.6em 0 0.55em;
+}
+h1 {
+  margin-top: 0;
+  font-size: 2.25rem;
+  border-bottom: 3px solid var(--accent);
+  padding-bottom: 0.45em;
+}
+h2 {
+  font-size: 1.55rem;
+  color: var(--accent);
+}
+h3 {
+  font-size: 1.18rem;
+}
+p {
+  margin: 0.75em 0;
+}
+a {
+  color: var(--accent);
+}
+blockquote {
+  border-left: 4px solid var(--accent2);
+  margin: 1.1em 0;
+  padding: 0.05em 1.1em;
+  color: var(--muted);
+  background: #fff8f2;
+}
+code {
+  background: var(--soft);
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  padding: 0.08em 0.3em;
+  font-family: "SFMono-Regular", Consolas, monospace;
+  font-size: 0.92em;
+}
+pre {
+  background: #f5f7f6;
+  color: var(--ink);
+  border: 1px solid var(--line);
+  padding: 1em;
+  overflow-x: auto;
+  border-radius: 7px;
+}
+pre code {
+  background: transparent;
+  border: 0;
+  padding: 0;
+  color: inherit;
+}
+table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 1.15em 0 1.45em;
+  font-size: 0.95em;
+}
+th, td {
+  border: 1px solid var(--line);
+  padding: 0.54em 0.68em;
+  vertical-align: top;
+}
+th {
+  background: #e7efed;
+  text-align: left;
+}
+tr:nth-child(even) td {
+  background: #fafbfb;
+}
+img {
+  max-width: 100%;
+  display: block;
+  margin: 1.1em auto 0.45em;
+}
+ul, ol {
+  padding-left: 1.4em;
+}
+.caption {
+  color: var(--muted);
+  font-size: 0.92em;
+  margin-top: -0.15em;
+}
+@media print {
+  body {
+    background: white;
+  }
+  main {
+    box-shadow: none;
+    margin: 0;
+    max-width: none;
+    padding: 28px;
+  }
+}
+</style>
+</head>
+<body>
+<main>
+<h1>Context Predictor Permutations: k2</h1>
+<p>This internal report is separate from the previous M1-M6 reports. It asks whether context predictors explain total child utterance information.</p>
+<p>Context predictors are computed from the preceding caretaker context text for this k window.</p>
+<h2>Model Question</h2>
+<p>Outcome:</p>
+<pre><code>sum_bits</code></pre>
+<p>Baseline controls:</p>
+<pre><code>age + target utterance effort + child identity</code></pre>
+<p>Context predictor permutations:</p>
+<pre><code>C0: no context predictor
+C1: context entropy only
+C2: context-window size only
+C3: context entropy + context-window size</code></pre>
+<p>Implementation details for every fitted row:</p>
+<pre><code>Estimator: linear ordinary least squares regression
+Library: statsmodels.formula.api.ols
+Uncertainty: child-cluster robust standard errors, cov_type=&#x27;cluster&#x27;
+Cluster unit: child_id</code></pre>
+<p>This means the fitted mean is linear in the listed predictors. The p-values and confidence intervals are adjusted for repeated observations within children by clustering the covariance matrix at the child level. This is not a GEE, GLM, or mixed-effects model; those would be separate estimator subvariants.</p>
+<p>The target utterance effort unit and context-window size unit are varied separately. That means, for example, one row may control target utterance phonemes while using context-window words as the context-size predictor.</p>
+<h2>Table Column Guide</h2>
+<table>
+<thead><tr>
+<th>column</th>
+<th>how_to_interpret</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>model_label</td>
+<td>Which context-predictor permutation is being fit.</td>
+</tr>
+<tr>
+<td>estimator</td>
+<td>The model family. Here this is linear OLS for every fitted row.</td>
+</tr>
+<tr>
+<td>library</td>
+<td>The Python implementation used to fit the model.</td>
+</tr>
+<tr>
+<td>covariance</td>
+<td>How standard errors and p-values are computed.</td>
+</tr>
+<tr>
+<td>target_effort_label</td>
+<td>Which target utterance effort unit is controlled.</td>
+</tr>
+<tr>
+<td>context_size_label</td>
+<td>Which context-window size unit is used; blank when the model has no context-size predictor.</td>
+</tr>
+<tr>
+<td>r2_observed_fitted</td>
+<td>In-sample fitted-versus-observed R2.</td>
+</tr>
+<tr>
+<td>delta_r2_vs_baseline</td>
+<td>Extra R2 relative to the same target-effort baseline with no context predictor.</td>
+</tr>
+<tr>
+<td>context_entropy_coef</td>
+<td>Estimated bit change for a one-bit increase in context entropy.</td>
+</tr>
+<tr>
+<td>context_size_coef</td>
+<td>Estimated bit change for one additional context-size unit.</td>
+</tr>
+<tr>
+<td>std_context_entropy_beta</td>
+<td>Standardized entropy coefficient, useful for scale comparison.</td>
+</tr>
+<tr>
+<td>std_context_size_beta</td>
+<td>Standardized context-size coefficient, useful for scale comparison.</td>
+</tr>
+</tbody></table>
+<h2>Context Predictor Distributions</h2>
+<p>How to read: these tables and plots describe the context window itself, not the target utterance. For <code>k0</code>, context sizes are zero and entropy is unavailable.</p>
+<table>
+<thead><tr>
+<th>context_k</th>
+<th>measure_col</th>
+<th>measure_label</th>
+<th>rows</th>
+<th>mean</th>
+<th>median</th>
+<th>p75</th>
+<th>p90</th>
+<th>max</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>k2</td>
+<td>context_nb_words</td>
+<td>Context words</td>
+<td>446985</td>
+<td>8.74</td>
+<td>8</td>
+<td>11</td>
+<td>15</td>
+<td>114</td>
+</tr>
+<tr>
+<td>k2</td>
+<td>context_nb_morphemes</td>
+<td>Context morphemes</td>
+<td>446985</td>
+<td>10.1</td>
+<td>9</td>
+<td>13</td>
+<td>17</td>
+<td>122</td>
+</tr>
+<tr>
+<td>k2</td>
+<td>context_nb_syllables_cmu_or_pkg</td>
+<td>Context syllables: CMU/pkg</td>
+<td>446985</td>
+<td>10.6</td>
+<td>10</td>
+<td>14</td>
+<td>18</td>
+<td>131</td>
+</tr>
+<tr>
+<td>k2</td>
+<td>context_nb_syllables_pkg</td>
+<td>Context syllables: pkg</td>
+<td>446985</td>
+<td>11.2</td>
+<td>10</td>
+<td>14</td>
+<td>19</td>
+<td>138</td>
+</tr>
+<tr>
+<td>k2</td>
+<td>context_nb_phonemes</td>
+<td>Context phonemes</td>
+<td>446985</td>
+<td>26.8</td>
+<td>24</td>
+<td>34</td>
+<td>46</td>
+<td>341</td>
+</tr>
+<tr>
+<td>k2</td>
+<td>context_entropy_bits</td>
+<td>Context entropy bits</td>
+<td>441461</td>
+<td>6</td>
+<td>6</td>
+<td>6.64</td>
+<td>7.25</td>
+<td>11.3</td>
+</tr>
+</tbody></table>
+<img src="../figs/context_predictor_permutations/k2_context_size_distribution.png" alt="k2 context size distribution">
+<img src="../figs/context_predictor_permutations/k2_context_predictors_by_age.png" alt="k2 context predictors by age">
+<h2>Model Fit Overview</h2>
+<p>How to read: the R2 plot shows fit; the delta-R2 plot shows how much context predictors add beyond age, target effort, and child identity.</p>
+<img src="../figs/context_predictor_permutations/k2_model_family_r2.png" alt="k2 R2 by model family">
+<h2>Coefficient Views</h2>
+<p>How to read: coefficients are in Mistral bits. Negative entropy coefficients mean higher context entropy is associated with lower target utterance bits after controls; positive context-size coefficients mean longer preceding context is associated with higher target utterance bits after controls.</p>
+<img src="../figs/context_predictor_permutations/k2_entropy_coefficients.png" alt="k2 entropy coefficients">
+<img src="../figs/context_predictor_permutations/k2_context_size_coefficients.png" alt="k2 context size coefficients">
+<img src="../figs/context_predictor_permutations/k2_age_coefficients.png" alt="k2 age coefficients">
+<h2>Top Context Effects</h2>
+<table>
+<thead><tr>
+<th>model_label</th>
+<th>target_effort_label</th>
+<th>context_size_label</th>
+<th>r2_observed_fitted</th>
+<th>delta_r2_vs_baseline</th>
+<th>context_entropy_coef</th>
+<th>context_entropy_p</th>
+<th>context_size_coef</th>
+<th>context_size_p</th>
+<th>std_context_entropy_beta</th>
+<th>std_context_size_beta</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>Context size only</td>
+<td>Words</td>
+<td>Context words</td>
+<td>0.635</td>
+<td>0.001178</td>
+<td></td>
+<td></td>
+<td>-0.07164</td>
+<td>&lt;.001</td>
+<td></td>
+<td>-0.02112</td>
+</tr>
+<tr>
+<td>Context size only</td>
+<td>Words</td>
+<td>Context syllables: pkg</td>
+<td>0.6349</td>
+<td>0.001094</td>
+<td></td>
+<td></td>
+<td>-0.04905</td>
+<td>&lt;.001</td>
+<td></td>
+<td>-0.01894</td>
+</tr>
+<tr>
+<td>Context size only</td>
+<td>Words</td>
+<td>Context phonemes</td>
+<td>0.6349</td>
+<td>0.001087</td>
+<td></td>
+<td></td>
+<td>-0.02024</td>
+<td>&lt;.001</td>
+<td></td>
+<td>-0.01873</td>
+</tr>
+<tr>
+<td>Context size only</td>
+<td>Words</td>
+<td>Context morphemes</td>
+<td>0.6349</td>
+<td>0.001068</td>
+<td></td>
+<td></td>
+<td>-0.0532</td>
+<td>&lt;.001</td>
+<td></td>
+<td>-0.01813</td>
+</tr>
+<tr>
+<td>Context size only</td>
+<td>Words</td>
+<td>Context syllables: CMU/pkg</td>
+<td>0.6349</td>
+<td>0.001061</td>
+<td></td>
+<td></td>
+<td>-0.04926</td>
+<td>&lt;.001</td>
+<td></td>
+<td>-0.01798</td>
+</tr>
+<tr>
+<td>Context size only</td>
+<td>Syllables: CMU/pkg</td>
+<td>Context syllables: pkg</td>
+<td>0.6561</td>
+<td>0.001044</td>
+<td></td>
+<td></td>
+<td>-0.04663</td>
+<td>&lt;.001</td>
+<td></td>
+<td>-0.01801</td>
+</tr>
+<tr>
+<td>Context size only</td>
+<td>Syllables: CMU/pkg</td>
+<td>Context syllables: CMU/pkg</td>
+<td>0.6561</td>
+<td>0.001039</td>
+<td></td>
+<td></td>
+<td>-0.04898</td>
+<td>&lt;.001</td>
+<td></td>
+<td>-0.01788</td>
+</tr>
+<tr>
+<td>Context size only</td>
+<td>Syllables: pkg</td>
+<td>Context syllables: pkg</td>
+<td>0.64</td>
+<td>0.001031</td>
+<td></td>
+<td></td>
+<td>-0.04671</td>
+<td>&lt;.001</td>
+<td></td>
+<td>-0.01804</td>
+</tr>
+<tr>
+<td>Context size only</td>
+<td>Syllables: CMU/pkg</td>
+<td>Context phonemes</td>
+<td>0.6561</td>
+<td>0.00101</td>
+<td></td>
+<td></td>
+<td>-0.01835</td>
+<td>&lt;.001</td>
+<td></td>
+<td>-0.01697</td>
+</tr>
+<tr>
+<td>Context size only</td>
+<td>Morphemes</td>
+<td>Context words</td>
+<td>0.6227</td>
+<td>0.0009996</td>
+<td></td>
+<td></td>
+<td>-0.0655</td>
+<td>&lt;.001</td>
+<td></td>
+<td>-0.01931</td>
+</tr>
+<tr>
+<td>Context size only</td>
+<td>Phonemes</td>
+<td>Context phonemes</td>
+<td>0.6552</td>
+<td>0.0009952</td>
+<td></td>
+<td></td>
+<td>-0.01841</td>
+<td>&lt;.001</td>
+<td></td>
+<td>-0.01703</td>
+</tr>
+<tr>
+<td>Context size only</td>
+<td>Morphemes</td>
+<td>Context morphemes</td>
+<td>0.6227</td>
+<td>0.0009866</td>
+<td></td>
+<td></td>
+<td>-0.05554</td>
+<td>&lt;.001</td>
+<td></td>
+<td>-0.01892</td>
+</tr>
+</tbody></table>
+<h2>Full Model Summary</h2>
+<table>
+<thead><tr>
+<th>model_label</th>
+<th>estimator</th>
+<th>library</th>
+<th>covariance</th>
+<th>target_effort_label</th>
+<th>context_size_label</th>
+<th>status</th>
+<th>n_obs</th>
+<th>n_children</th>
+<th>r2_observed_fitted</th>
+<th>delta_r2_vs_baseline</th>
+<th>age_coef</th>
+<th>age_p</th>
+<th>target_effort_coef</th>
+<th>target_effort_p</th>
+<th>context_entropy_coef</th>
+<th>context_entropy_p</th>
+<th>context_size_coef</th>
+<th>context_size_p</th>
+<th>std_context_entropy_beta</th>
+<th>std_context_size_beta</th>
+<th>error</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>Baseline controls</td>
+<td>linear OLS</td>
+<td>statsmodels.formula.api.ols</td>
+<td>child-cluster robust SE via cov_type=&#x27;cluster&#x27;</td>
+<td>Words</td>
+<td>No context-size predictor</td>
+<td>fit</td>
+<td>446985</td>
+<td>21</td>
+<td>0.6338</td>
+<td>0</td>
+<td>-0.1287</td>
+<td>&lt;.001</td>
+<td>6.468</td>
+<td>&lt;.001</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>Entropy only</td>
+<td>linear OLS</td>
+<td>statsmodels.formula.api.ols</td>
+<td>child-cluster robust SE via cov_type=&#x27;cluster&#x27;</td>
+<td>Words</td>
+<td>No context-size predictor</td>
+<td>fit</td>
+<td>441461</td>
+<td>21</td>
+<td>0.6343</td>
+<td>0.0004413</td>
+<td>-0.1318</td>
+<td>&lt;.001</td>
+<td>6.47</td>
+<td>&lt;.001</td>
+<td>-0.4107</td>
+<td>&lt;.001</td>
+<td></td>
+<td></td>
+<td>-0.02595</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>Context size only</td>
+<td>linear OLS</td>
+<td>statsmodels.formula.api.ols</td>
+<td>child-cluster robust SE via cov_type=&#x27;cluster&#x27;</td>
+<td>Words</td>
+<td>Context words</td>
+<td>fit</td>
+<td>444325</td>
+<td>21</td>
+<td>0.635</td>
+<td>0.001178</td>
+<td>-0.1289</td>
+<td>&lt;.001</td>
+<td>6.464</td>
+<td>&lt;.001</td>
+<td></td>
+<td></td>
+<td>-0.07164</td>
+<td>&lt;.001</td>
+<td></td>
+<td>-0.02112</td>
+<td></td>
+</tr>
+<tr>
+<td>Context size only</td>
+<td>linear OLS</td>
+<td>statsmodels.formula.api.ols</td>
+<td>child-cluster robust SE via cov_type=&#x27;cluster&#x27;</td>
+<td>Words</td>
+<td>Context morphemes</td>
+<td>fit</td>
+<td>444325</td>
+<td>21</td>
+<td>0.6349</td>
+<td>0.001068</td>
+<td>-0.1298</td>
+<td>&lt;.001</td>
+<td>6.464</td>
+<td>&lt;.001</td>
+<td></td>
+<td></td>
+<td>-0.0532</td>
+<td>&lt;.001</td>
+<td></td>
+<td>-0.01813</td>
+<td></td>
+</tr>
+<tr>
+<td>Context size only</td>
+<td>linear OLS</td>
+<td>statsmodels.formula.api.ols</td>
+<td>child-cluster robust SE via cov_type=&#x27;cluster&#x27;</td>
+<td>Words</td>
+<td>Context syllables: CMU/pkg</td>
+<td>fit</td>
+<td>444325</td>
+<td>21</td>
+<td>0.6349</td>
+<td>0.001061</td>
+<td>-0.1296</td>
+<td>&lt;.001</td>
+<td>6.464</td>
+<td>&lt;.001</td>
+<td></td>
+<td></td>
+<td>-0.04926</td>
+<td>&lt;.001</td>
+<td></td>
+<td>-0.01798</td>
+<td></td>
+</tr>
+<tr>
+<td>Context size only</td>
+<td>linear OLS</td>
+<td>statsmodels.formula.api.ols</td>
+<td>child-cluster robust SE via cov_type=&#x27;cluster&#x27;</td>
+<td>Words</td>
+<td>Context syllables: pkg</td>
+<td>fit</td>
+<td>444325</td>
+<td>21</td>
+<td>0.6349</td>
+<td>0.001094</td>
+<td>-0.1295</td>
+<td>&lt;.001</td>
+<td>6.463</td>
+<td>&lt;.001</td>
+<td></td>
+<td></td>
+<td>-0.04905</td>
+<td>&lt;.001</td>
+<td></td>
+<td>-0.01894</td>
+<td></td>
+</tr>
+<tr>
+<td>Context size only</td>
+<td>linear OLS</td>
+<td>statsmodels.formula.api.ols</td>
+<td>child-cluster robust SE via cov_type=&#x27;cluster&#x27;</td>
+<td>Words</td>
+<td>Context phonemes</td>
+<td>fit</td>
+<td>444325</td>
+<td>21</td>
+<td>0.6349</td>
+<td>0.001087</td>
+<td>-0.1295</td>
+<td>&lt;.001</td>
+<td>6.463</td>
+<td>&lt;.001</td>
+<td></td>
+<td></td>
+<td>-0.02024</td>
+<td>&lt;.001</td>
+<td></td>
+<td>-0.01873</td>
+<td></td>
+</tr>
+<tr>
+<td>Entropy plus context size</td>
+<td>linear OLS</td>
+<td>statsmodels.formula.api.ols</td>
+<td>child-cluster robust SE via cov_type=&#x27;cluster&#x27;</td>
+<td>Words</td>
+<td>Context words</td>
+<td>fit</td>
+<td>441461</td>
+<td>21</td>
+<td>0.6347</td>
+<td>0.0008435</td>
+<td>-0.1273</td>
+<td>&lt;.001</td>
+<td>6.47</td>
+<td>&lt;.001</td>
+<td>-0.4087</td>
+<td>&lt;.001</td>
+<td>-0.06994</td>
+<td>&lt;.001</td>
+<td>-0.02583</td>
+<td>-0.02066</td>
+<td></td>
+</tr>
+<tr>
+<td>Entropy plus context size</td>
+<td>linear OLS</td>
+<td>statsmodels.formula.api.ols</td>
+<td>child-cluster robust SE via cov_type=&#x27;cluster&#x27;</td>
+<td>Words</td>
+<td>Context morphemes</td>
+<td>fit</td>
+<td>441461</td>
+<td>21</td>
+<td>0.6346</td>
+<td>0.0007412</td>
+<td>-0.1282</td>
+<td>&lt;.001</td>
+<td>6.471</td>
+<td>&lt;.001</td>
+<td>-0.4104</td>
+<td>&lt;.001</td>
+<td>-0.05217</td>
+<td>&lt;.001</td>
+<td>-0.02593</td>
+<td>-0.01782</td>
+<td></td>
+</tr>
+<tr>
+<td>Entropy plus context size</td>
+<td>linear OLS</td>
+<td>statsmodels.formula.api.ols</td>
+<td>child-cluster robust SE via cov_type=&#x27;cluster&#x27;</td>
+<td>Words</td>
+<td>Context syllables: CMU/pkg</td>
+<td>fit</td>
+<td>441461</td>
+<td>21</td>
+<td>0.6346</td>
+<td>0.0007227</td>
+<td>-0.1281</td>
+<td>&lt;.001</td>
+<td>6.47</td>
+<td>&lt;.001</td>
+<td>-0.4069</td>
+<td>&lt;.001</td>
+<td>-0.04739</td>
+<td>&lt;.001</td>
+<td>-0.02572</td>
+<td>-0.01733</td>
+<td></td>
+</tr>
+<tr>
+<td>Entropy plus context size</td>
+<td>linear OLS</td>
+<td>statsmodels.formula.api.ols</td>
+<td>child-cluster robust SE via cov_type=&#x27;cluster&#x27;</td>
+<td>Words</td>
+<td>Context syllables: pkg</td>
+<td>fit</td>
+<td>441461</td>
+<td>21</td>
+<td>0.6346</td>
+<td>0.0007564</td>
+<td>-0.1279</td>
+<td>&lt;.001</td>
+<td>6.47</td>
+<td>&lt;.001</td>
+<td>-0.4068</td>
+<td>&lt;.001</td>
+<td>-0.04737</td>
+<td>&lt;.001</td>
+<td>-0.02571</td>
+<td>-0.01833</td>
+<td></td>
+</tr>
+<tr>
+<td>Entropy plus context size</td>
+<td>linear OLS</td>
+<td>statsmodels.formula.api.ols</td>
+<td>child-cluster robust SE via cov_type=&#x27;cluster&#x27;</td>
+<td>Words</td>
+<td>Context phonemes</td>
+<td>fit</td>
+<td>441461</td>
+<td>21</td>
+<td>0.6346</td>
+<td>0.0007449</td>
+<td>-0.128</td>
+<td>&lt;.001</td>
+<td>6.47</td>
+<td>&lt;.001</td>
+<td>-0.4059</td>
+<td>&lt;.001</td>
+<td>-0.0194</td>
+<td>&lt;.001</td>
+<td>-0.02565</td>
+<td>-0.01799</td>
+<td></td>
+</tr>
+<tr>
+<td>Baseline controls</td>
+<td>linear OLS</td>
+<td>statsmodels.formula.api.ols</td>
+<td>child-cluster robust SE via cov_type=&#x27;cluster&#x27;</td>
+<td>Morphemes</td>
+<td>No context-size predictor</td>
+<td>fit</td>
+<td>446985</td>
+<td>21</td>
+<td>0.6217</td>
+<td>0</td>
+<td>-0.1425</td>
+<td>&lt;.001</td>
+<td>5.581</td>
+<td>&lt;.001</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>Entropy only</td>
+<td>linear OLS</td>
+<td>statsmodels.formula.api.ols</td>
+<td>child-cluster robust SE via cov_type=&#x27;cluster&#x27;</td>
+<td>Morphemes</td>
+<td>No context-size predictor</td>
+<td>fit</td>
+<td>441461</td>
+<td>21</td>
+<td>0.622</td>
+<td>0.0002391</td>
+<td>-0.1458</td>
+<td>&lt;.001</td>
+<td>5.582</td>
+<td>&lt;.001</td>
+<td>-0.4256</td>
+<td>&lt;.001</td>
+<td></td>
+<td></td>
+<td>-0.0269</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>Context size only</td>
+<td>linear OLS</td>
+<td>statsmodels.formula.api.ols</td>
+<td>child-cluster robust SE via cov_type=&#x27;cluster&#x27;</td>
+<td>Morphemes</td>
+<td>Context words</td>
+<td>fit</td>
+<td>444325</td>
+<td>21</td>
+<td>0.6227</td>
+<td>0.0009996</td>
+<td>-0.143</td>
+<td>&lt;.001</td>
+<td>5.576</td>
+<td>&lt;.001</td>
+<td></td>
+<td></td>
+<td>-0.0655</td>
+<td>&lt;.001</td>
+<td></td>
+<td>-0.01931</td>
+<td></td>
+</tr>
+<tr>
+<td>Context size only</td>
+<td>linear OLS</td>
+<td>statsmodels.formula.api.ols</td>
+<td>child-cluster robust SE via cov_type=&#x27;cluster&#x27;</td>
+<td>Morphemes</td>
+<td>Context morphemes</td>
+<td>fit</td>
+<td>444325</td>
+<td>21</td>
+<td>0.6227</td>
+<td>0.0009866</td>
+<td>-0.1433</td>
+<td>&lt;.001</td>
+<td>5.577</td>
+<td>&lt;.001</td>
+<td></td>
+<td></td>
+<td>-0.05554</td>
+<td>&lt;.001</td>
+<td></td>
+<td>-0.01892</td>
+<td></td>
+</tr>
+<tr>
+<td>Context size only</td>
+<td>linear OLS</td>
+<td>statsmodels.formula.api.ols</td>
+<td>child-cluster robust SE via cov_type=&#x27;cluster&#x27;</td>
+<td>Morphemes</td>
+<td>Context syllables: CMU/pkg</td>
+<td>fit</td>
+<td>444325</td>
+<td>21</td>
+<td>0.6226</td>
+<td>0.0009202</td>
+<td>-0.1435</td>
+<td>&lt;.001</td>
+<td>5.576</td>
+<td>&lt;.001</td>
+<td></td>
+<td></td>
+<td>-0.04668</td>
+<td>&lt;.001</td>
+<td></td>
+<td>-0.01704</td>
+<td></td>
+</tr>
+<tr>
+<td>Context size only</td>
+<td>linear OLS</td>
+<td>statsmodels.formula.api.ols</td>
+<td>child-cluster robust SE via cov_type=&#x27;cluster&#x27;</td>
+<td>Morphemes</td>
+<td>Context syllables: pkg</td>
+<td>fit</td>
+<td>444325</td>
+<td>21</td>
+<td>0.6227</td>
+<td>0.000951</td>
+<td>-0.1433</td>
+<td>&lt;.001</td>
+<td>5.576</td>
+<td>&lt;.001</td>
+<td></td>
+<td></td>
+<td>-0.04652</td>
+<td>&lt;.001</td>
+<td></td>
+<td>-0.01797</td>
+<td></td>
+</tr>
+<tr>
+<td>Context size only</td>
+<td>linear OLS</td>
+<td>statsmodels.formula.api.ols</td>
+<td>child-cluster robust SE via cov_type=&#x27;cluster&#x27;</td>
+<td>Morphemes</td>
+<td>Context phonemes</td>
+<td>fit</td>
+<td>444325</td>
+<td>21</td>
+<td>0.6227</td>
+<td>0.0009719</td>
+<td>-0.1432</td>
+<td>&lt;.001</td>
+<td>5.576</td>
+<td>&lt;.001</td>
+<td></td>
+<td></td>
+<td>-0.02007</td>
+<td>&lt;.001</td>
+<td></td>
+<td>-0.01857</td>
+<td></td>
+</tr>
+<tr>
+<td>Entropy plus context size</td>
+<td>linear OLS</td>
+<td>statsmodels.formula.api.ols</td>
+<td>child-cluster robust SE via cov_type=&#x27;cluster&#x27;</td>
+<td>Morphemes</td>
+<td>Context words</td>
+<td>fit</td>
+<td>441461</td>
+<td>21</td>
+<td>0.6223</td>
+<td>0.000572</td>
+<td>-0.1417</td>
+<td>&lt;.001</td>
+<td>5.581</td>
+<td>&lt;.001</td>
+<td>-0.4238</td>
+<td>&lt;.001</td>
+<td>-0.06363</td>
+<td>&lt;.001</td>
+<td>-0.02678</td>
+<td>-0.01879</td>
+<td></td>
+</tr>
+<tr>
+<td>Entropy plus context size</td>
+<td>linear OLS</td>
+<td>statsmodels.formula.api.ols</td>
+<td>child-cluster robust SE via cov_type=&#x27;cluster&#x27;</td>
+<td>Morphemes</td>
+<td>Context morphemes</td>
+<td>fit</td>
+<td>441461</td>
+<td>21</td>
+<td>0.6223</td>
+<td>0.000565</td>
+<td>-0.142</td>
+<td>&lt;.001</td>
+<td>5.582</td>
+<td>&lt;.001</td>
+<td>-0.4253</td>
+<td>&lt;.001</td>
+<td>-0.05438</td>
+<td>&lt;.001</td>
+<td>-0.02688</td>
+<td>-0.01857</td>
+<td></td>
+</tr>
+<tr>
+<td>Entropy plus context size</td>
+<td>linear OLS</td>
+<td>statsmodels.formula.api.ols</td>
+<td>child-cluster robust SE via cov_type=&#x27;cluster&#x27;</td>
+<td>Morphemes</td>
+<td>Context syllables: CMU/pkg</td>
+<td>fit</td>
+<td>441461</td>
+<td>21</td>
+<td>0.6222</td>
+<td>0.0004892</td>
+<td>-0.1423</td>
+<td>&lt;.001</td>
+<td>5.581</td>
+<td>&lt;.001</td>
+<td>-0.4221</td>
+<td>&lt;.001</td>
+<td>-0.04468</td>
+<td>&lt;.001</td>
+<td>-0.02667</td>
+<td>-0.01634</td>
+<td></td>
+</tr>
+<tr>
+<td>Entropy plus context size</td>
+<td>linear OLS</td>
+<td>statsmodels.formula.api.ols</td>
+<td>child-cluster robust SE via cov_type=&#x27;cluster&#x27;</td>
+<td>Morphemes</td>
+<td>Context syllables: pkg</td>
+<td>fit</td>
+<td>441461</td>
+<td>21</td>
+<td>0.6222</td>
+<td>0.0005194</td>
+<td>-0.1421</td>
+<td>&lt;.001</td>
+<td>5.581</td>
+<td>&lt;.001</td>
+<td>-0.4219</td>
+<td>&lt;.001</td>
+<td>-0.04468</td>
+<td>&lt;.001</td>
+<td>-0.02666</td>
+<td>-0.01729</td>
+<td></td>
+</tr>
+<tr>
+<td>Entropy plus context size</td>
+<td>linear OLS</td>
+<td>statsmodels.formula.api.ols</td>
+<td>child-cluster robust SE via cov_type=&#x27;cluster&#x27;</td>
+<td>Morphemes</td>
+<td>Context phonemes</td>
+<td>fit</td>
+<td>441461</td>
+<td>21</td>
+<td>0.6222</td>
+<td>0.0005349</td>
+<td>-0.142</td>
+<td>&lt;.001</td>
+<td>5.581</td>
+<td>&lt;.001</td>
+<td>-0.4209</td>
+<td>&lt;.001</td>
+<td>-0.01915</td>
+<td>&lt;.001</td>
+<td>-0.0266</td>
+<td>-0.01776</td>
+<td></td>
+</tr>
+<tr>
+<td>Baseline controls</td>
+<td>linear OLS</td>
+<td>statsmodels.formula.api.ols</td>
+<td>child-cluster robust SE via cov_type=&#x27;cluster&#x27;</td>
+<td>Syllables: CMU/pkg</td>
+<td>No context-size predictor</td>
+<td>fit</td>
+<td>446985</td>
+<td>21</td>
+<td>0.6551</td>
+<td>0</td>
+<td>-0.06903</td>
+<td>0.007</td>
+<td>5.323</td>
+<td>&lt;.001</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>Entropy only</td>
+<td>linear OLS</td>
+<td>statsmodels.formula.api.ols</td>
+<td>child-cluster robust SE via cov_type=&#x27;cluster&#x27;</td>
+<td>Syllables: CMU/pkg</td>
+<td>No context-size predictor</td>
+<td>fit</td>
+<td>441461</td>
+<td>21</td>
+<td>0.6557</td>
+<td>0.0006248</td>
+<td>-0.06891</td>
+<td>0.006</td>
+<td>5.324</td>
+<td>&lt;.001</td>
+<td>-0.4558</td>
+<td>&lt;.001</td>
+<td></td>
+<td></td>
+<td>-0.0288</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>Context size only</td>
+<td>linear OLS</td>
+<td>statsmodels.formula.api.ols</td>
+<td>child-cluster robust SE via cov_type=&#x27;cluster&#x27;</td>
+<td>Syllables: CMU/pkg</td>
+<td>Context words</td>
+<td>fit</td>
+<td>444325</td>
+<td>21</td>
+<td>0.656</td>
+<td>0.0009273</td>
+<td>-0.07034</td>
+<td>0.006</td>
+<td>5.318</td>
+<td>&lt;.001</td>
+<td></td>
+<td></td>
+<td>-0.04782</td>
+<td>&lt;.001</td>
+<td></td>
+<td>-0.01409</td>
+<td></td>
+</tr>
+<tr>
+<td>Context size only</td>
+<td>linear OLS</td>
+<td>statsmodels.formula.api.ols</td>
+<td>child-cluster robust SE via cov_type=&#x27;cluster&#x27;</td>
+<td>Syllables: CMU/pkg</td>
+<td>Context morphemes</td>
+<td>fit</td>
+<td>444325</td>
+<td>21</td>
+<td>0.656</td>
+<td>0.000884</td>
+<td>-0.0709</td>
+<td>0.006</td>
+<td>5.319</td>
+<td>&lt;.001</td>
+<td></td>
+<td></td>
+<td>-0.03623</td>
+<td>&lt;.001</td>
+<td></td>
+<td>-0.01235</td>
+<td></td>
+</tr>
+<tr>
+<td>Context size only</td>
+<td>linear OLS</td>
+<td>statsmodels.formula.api.ols</td>
+<td>child-cluster robust SE via cov_type=&#x27;cluster&#x27;</td>
+<td>Syllables: CMU/pkg</td>
+<td>Context syllables: CMU/pkg</td>
+<td>fit</td>
+<td>444325</td>
+<td>21</td>
+<td>0.6561</td>
+<td>0.001039</td>
+<td>-0.06963</td>
+<td>0.007</td>
+<td>5.319</td>
+<td>&lt;.001</td>
+<td></td>
+<td></td>
+<td>-0.04898</td>
+<td>&lt;.001</td>
+<td></td>
+<td>-0.01788</td>
+<td></td>
+</tr>
+<tr>
+<td>Context size only</td>
+<td>linear OLS</td>
+<td>statsmodels.formula.api.ols</td>
+<td>child-cluster robust SE via cov_type=&#x27;cluster&#x27;</td>
+<td>Syllables: CMU/pkg</td>
+<td>Context syllables: pkg</td>
+<td>fit</td>
+<td>444325</td>
+<td>21</td>
+<td>0.6561</td>
+<td>0.001044</td>
+<td>-0.06962</td>
+<td>0.007</td>
+<td>5.319</td>
+<td>&lt;.001</td>
+<td></td>
+<td></td>
+<td>-0.04663</td>
+<td>&lt;.001</td>
+<td></td>
+<td>-0.01801</td>
+<td></td>
+</tr>
+<tr>
+<td>Context size only</td>
+<td>linear OLS</td>
+<td>statsmodels.formula.api.ols</td>
+<td>child-cluster robust SE via cov_type=&#x27;cluster&#x27;</td>
+<td>Syllables: CMU/pkg</td>
+<td>Context phonemes</td>
+<td>fit</td>
+<td>444325</td>
+<td>21</td>
+<td>0.6561</td>
+<td>0.00101</td>
+<td>-0.06983</td>
+<td>0.007</td>
+<td>5.319</td>
+<td>&lt;.001</td>
+<td></td>
+<td></td>
+<td>-0.01835</td>
+<td>&lt;.001</td>
+<td></td>
+<td>-0.01697</td>
+<td></td>
+</tr>
+<tr>
+<td>Entropy plus context size</td>
+<td>linear OLS</td>
+<td>statsmodels.formula.api.ols</td>
+<td>child-cluster robust SE via cov_type=&#x27;cluster&#x27;</td>
+<td>Syllables: CMU/pkg</td>
+<td>Context words</td>
+<td>fit</td>
+<td>441461</td>
+<td>21</td>
+<td>0.6559</td>
+<td>0.0007997</td>
+<td>-0.06588</td>
+<td>0.008</td>
+<td>5.323</td>
+<td>&lt;.001</td>
+<td>-0.4545</td>
+<td>&lt;.001</td>
+<td>-0.04612</td>
+<td>&lt;.001</td>
+<td>-0.02872</td>
+<td>-0.01362</td>
+<td></td>
+</tr>
+<tr>
+<td>Entropy plus context size</td>
+<td>linear OLS</td>
+<td>statsmodels.formula.api.ols</td>
+<td>child-cluster robust SE via cov_type=&#x27;cluster&#x27;</td>
+<td>Syllables: CMU/pkg</td>
+<td>Context morphemes</td>
+<td>fit</td>
+<td>441461</td>
+<td>21</td>
+<td>0.6559</td>
+<td>0.0007613</td>
+<td>-0.0664</td>
+<td>0.007</td>
+<td>5.323</td>
+<td>&lt;.001</td>
+<td>-0.4556</td>
+<td>&lt;.001</td>
+<td>-0.0352</td>
+<td>&lt;.001</td>
+<td>-0.02879</td>
+<td>-0.01202</td>
+<td></td>
+</tr>
+<tr>
+<td>Entropy plus context size</td>
+<td>linear OLS</td>
+<td>statsmodels.formula.api.ols</td>
+<td>child-cluster robust SE via cov_type=&#x27;cluster&#x27;</td>
+<td>Syllables: CMU/pkg</td>
+<td>Context syllables: CMU/pkg</td>
+<td>fit</td>
+<td>441461</td>
+<td>21</td>
+<td>0.656</td>
+<td>0.0009026</td>
+<td>-0.06519</td>
+<td>0.009</td>
+<td>5.324</td>
+<td>&lt;.001</td>
+<td>-0.4521</td>
+<td>&lt;.001</td>
+<td>-0.04709</td>
+<td>&lt;.001</td>
+<td>-0.02857</td>
+<td>-0.01723</td>
+<td></td>
+</tr>
+<tr>
+<td>Entropy plus context size</td>
+<td>linear OLS</td>
+<td>statsmodels.formula.api.ols</td>
+<td>child-cluster robust SE via cov_type=&#x27;cluster&#x27;</td>
+<td>Syllables: CMU/pkg</td>
+<td>Context syllables: pkg</td>
+<td>fit</td>
+<td>441461</td>
+<td>21</td>
+<td>0.656</td>
+<td>0.0009078</td>
+<td>-0.06519</td>
+<td>0.009</td>
+<td>5.323</td>
+<td>&lt;.001</td>
+<td>-0.4521</td>
+<td>&lt;.001</td>
+<td>-0.04489</td>
+<td>&lt;.001</td>
+<td>-0.02857</td>
+<td>-0.01738</td>
+<td></td>
+</tr>
+<tr>
+<td>Entropy plus context size</td>
+<td>linear OLS</td>
+<td>statsmodels.formula.api.ols</td>
+<td>child-cluster robust SE via cov_type=&#x27;cluster&#x27;</td>
+<td>Syllables: CMU/pkg</td>
+<td>Context phonemes</td>
+<td>fit</td>
+<td>441461</td>
+<td>21</td>
+<td>0.656</td>
+<td>0.0008703</td>
+<td>-0.06548</td>
+<td>0.008</td>
+<td>5.323</td>
+<td>&lt;.001</td>
+<td>-0.4515</td>
+<td>&lt;.001</td>
+<td>-0.01745</td>
+<td>&lt;.001</td>
+<td>-0.02853</td>
+<td>-0.01618</td>
+<td></td>
+</tr>
+<tr>
+<td>Baseline controls</td>
+<td>linear OLS</td>
+<td>statsmodels.formula.api.ols</td>
+<td>child-cluster robust SE via cov_type=&#x27;cluster&#x27;</td>
+<td>Syllables: pkg</td>
+<td>No context-size predictor</td>
+<td>fit</td>
+<td>446985</td>
+<td>21</td>
+<td>0.639</td>
+<td>0</td>
+<td>-0.0542</td>
+<td>0.021</td>
+<td>4.914</td>
+<td>&lt;.001</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>Entropy only</td>
+<td>linear OLS</td>
+<td>statsmodels.formula.api.ols</td>
+<td>child-cluster robust SE via cov_type=&#x27;cluster&#x27;</td>
+<td>Syllables: pkg</td>
+<td>No context-size predictor</td>
+<td>fit</td>
+<td>441461</td>
+<td>21</td>
+<td>0.6396</td>
+<td>0.000602</td>
+<td>-0.05248</td>
+<td>0.017</td>
+<td>4.913</td>
+<td>&lt;.001</td>
+<td>-0.4543</td>
+<td>&lt;.001</td>
+<td></td>
+<td></td>
+<td>-0.02871</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>Context size only</td>
+<td>linear OLS</td>
+<td>statsmodels.formula.api.ols</td>
+<td>child-cluster robust SE via cov_type=&#x27;cluster&#x27;</td>
+<td>Syllables: pkg</td>
+<td>Context words</td>
+<td>fit</td>
+<td>444325</td>
+<td>21</td>
+<td>0.6398</td>
+<td>0.0008781</td>
+<td>-0.05582</td>
+<td>0.018</td>
+<td>4.909</td>
+<td>&lt;.001</td>
+<td></td>
+<td></td>
+<td>-0.04306</td>
+<td>&lt;.001</td>
+<td></td>
+<td>-0.01269</td>
+<td></td>
+</tr>
+<tr>
+<td>Context size only</td>
+<td>linear OLS</td>
+<td>statsmodels.formula.api.ols</td>
+<td>child-cluster robust SE via cov_type=&#x27;cluster&#x27;</td>
+<td>Syllables: pkg</td>
+<td>Context morphemes</td>
+<td>fit</td>
+<td>444325</td>
+<td>21</td>
+<td>0.6398</td>
+<td>0.0008324</td>
+<td>-0.05643</td>
+<td>0.017</td>
+<td>4.909</td>
+<td>&lt;.001</td>
+<td></td>
+<td></td>
+<td>-0.03109</td>
+<td>&lt;.001</td>
+<td></td>
+<td>-0.0106</td>
+<td></td>
+</tr>
+<tr>
+<td>Context size only</td>
+<td>linear OLS</td>
+<td>statsmodels.formula.api.ols</td>
+<td>child-cluster robust SE via cov_type=&#x27;cluster&#x27;</td>
+<td>Syllables: pkg</td>
+<td>Context syllables: CMU/pkg</td>
+<td>fit</td>
+<td>444325</td>
+<td>21</td>
+<td>0.6399</td>
+<td>0.0009449</td>
+<td>-0.05534</td>
+<td>0.019</td>
+<td>4.909</td>
+<td>&lt;.001</td>
+<td></td>
+<td></td>
+<td>-0.04186</td>
+<td>&lt;.001</td>
+<td></td>
+<td>-0.01528</td>
+<td></td>
+</tr>
+<tr>
+<td>Context size only</td>
+<td>linear OLS</td>
+<td>statsmodels.formula.api.ols</td>
+<td>child-cluster robust SE via cov_type=&#x27;cluster&#x27;</td>
+<td>Syllables: pkg</td>
+<td>Context syllables: pkg</td>
+<td>fit</td>
+<td>444325</td>
+<td>21</td>
+<td>0.64</td>
+<td>0.001031</td>
+<td>-0.05479</td>
+<td>0.021</td>
+<td>4.909</td>
+<td>&lt;.001</td>
+<td></td>
+<td></td>
+<td>-0.04671</td>
+<td>&lt;.001</td>
+<td></td>
+<td>-0.01804</td>
+<td></td>
+</tr>
+<tr>
+<td>Context size only</td>
+<td>linear OLS</td>
+<td>statsmodels.formula.api.ols</td>
+<td>child-cluster robust SE via cov_type=&#x27;cluster&#x27;</td>
+<td>Syllables: pkg</td>
+<td>Context phonemes</td>
+<td>fit</td>
+<td>444325</td>
+<td>21</td>
+<td>0.6399</td>
+<td>0.0009473</td>
+<td>-0.05534</td>
+<td>0.019</td>
+<td>4.909</td>
+<td>&lt;.001</td>
+<td></td>
+<td></td>
+<td>-0.01658</td>
+<td>&lt;.001</td>
+<td></td>
+<td>-0.01534</td>
+<td></td>
+</tr>
+<tr>
+<td>Entropy plus context size</td>
+<td>linear OLS</td>
+<td>statsmodels.formula.api.ols</td>
+<td>child-cluster robust SE via cov_type=&#x27;cluster&#x27;</td>
+<td>Syllables: pkg</td>
+<td>Context words</td>
+<td>fit</td>
+<td>441461</td>
+<td>21</td>
+<td>0.6397</td>
+<td>0.0007414</td>
+<td>-0.04975</td>
+<td>0.023</td>
+<td>4.912</td>
+<td>&lt;.001</td>
+<td>-0.4531</td>
+<td>&lt;.001</td>
+<td>-0.04118</td>
+<td>&lt;.001</td>
+<td>-0.02863</td>
+<td>-0.01216</td>
+<td></td>
+</tr>
+<tr>
+<td>Entropy plus context size</td>
+<td>linear OLS</td>
+<td>statsmodels.formula.api.ols</td>
+<td>child-cluster robust SE via cov_type=&#x27;cluster&#x27;</td>
+<td>Syllables: pkg</td>
+<td>Context morphemes</td>
+<td>fit</td>
+<td>441461</td>
+<td>21</td>
+<td>0.6397</td>
+<td>0.0007005</td>
+<td>-0.05032</td>
+<td>0.022</td>
+<td>4.913</td>
+<td>&lt;.001</td>
+<td>-0.4541</td>
+<td>&lt;.001</td>
+<td>-0.0299</td>
+<td>&lt;.001</td>
+<td>-0.02869</td>
+<td>-0.01021</td>
+<td></td>
+</tr>
+<tr>
+<td>Entropy plus context size</td>
+<td>linear OLS</td>
+<td>statsmodels.formula.api.ols</td>
+<td>child-cluster robust SE via cov_type=&#x27;cluster&#x27;</td>
+<td>Syllables: pkg</td>
+<td>Context syllables: CMU/pkg</td>
+<td>fit</td>
+<td>441461</td>
+<td>21</td>
+<td>0.6398</td>
+<td>0.0008012</td>
+<td>-0.04929</td>
+<td>0.025</td>
+<td>4.913</td>
+<td>&lt;.001</td>
+<td>-0.4511</td>
+<td>&lt;.001</td>
+<td>-0.03987</td>
+<td>&lt;.001</td>
+<td>-0.02851</td>
+<td>-0.01459</td>
+<td></td>
+</tr>
+<tr>
+<td>Entropy plus context size</td>
+<td>linear OLS</td>
+<td>statsmodels.formula.api.ols</td>
+<td>child-cluster robust SE via cov_type=&#x27;cluster&#x27;</td>
+<td>Syllables: pkg</td>
+<td>Context syllables: pkg</td>
+<td>fit</td>
+<td>441461</td>
+<td>21</td>
+<td>0.6399</td>
+<td>0.0008847</td>
+<td>-0.04875</td>
+<td>0.027</td>
+<td>4.913</td>
+<td>&lt;.001</td>
+<td>-0.4506</td>
+<td>&lt;.001</td>
+<td>-0.04487</td>
+<td>&lt;.001</td>
+<td>-0.02847</td>
+<td>-0.01737</td>
+<td></td>
+</tr>
+<tr>
+<td>Entropy plus context size</td>
+<td>linear OLS</td>
+<td>statsmodels.formula.api.ols</td>
+<td>child-cluster robust SE via cov_type=&#x27;cluster&#x27;</td>
+<td>Syllables: pkg</td>
+<td>Context phonemes</td>
+<td>fit</td>
+<td>441461</td>
+<td>21</td>
+<td>0.6398</td>
+<td>0.0007988</td>
+<td>-0.04938</td>
+<td>0.025</td>
+<td>4.913</td>
+<td>&lt;.001</td>
+<td>-0.4504</td>
+<td>&lt;.001</td>
+<td>-0.01562</td>
+<td>&lt;.001</td>
+<td>-0.02846</td>
+<td>-0.01448</td>
+<td></td>
+</tr>
+<tr>
+<td>Baseline controls</td>
+<td>linear OLS</td>
+<td>statsmodels.formula.api.ols</td>
+<td>child-cluster robust SE via cov_type=&#x27;cluster&#x27;</td>
+<td>Phonemes</td>
+<td>No context-size predictor</td>
+<td>fit</td>
+<td>446985</td>
+<td>21</td>
+<td>0.6542</td>
+<td>0</td>
+<td>-0.07096</td>
+<td>0.005</td>
+<td>2.12</td>
+<td>&lt;.001</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>Entropy only</td>
+<td>linear OLS</td>
+<td>statsmodels.formula.api.ols</td>
+<td>child-cluster robust SE via cov_type=&#x27;cluster&#x27;</td>
+<td>Phonemes</td>
+<td>No context-size predictor</td>
+<td>fit</td>
+<td>441461</td>
+<td>21</td>
+<td>0.6549</td>
+<td>0.0007242</td>
+<td>-0.06995</td>
+<td>0.006</td>
+<td>2.12</td>
+<td>&lt;.001</td>
+<td>-0.4942</td>
+<td>&lt;.001</td>
+<td></td>
+<td></td>
+<td>-0.03123</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>Context size only</td>
+<td>linear OLS</td>
+<td>statsmodels.formula.api.ols</td>
+<td>child-cluster robust SE via cov_type=&#x27;cluster&#x27;</td>
+<td>Phonemes</td>
+<td>Context words</td>
+<td>fit</td>
+<td>444325</td>
+<td>21</td>
+<td>0.655</td>
+<td>0.0008686</td>
+<td>-0.07258</td>
+<td>0.005</td>
+<td>2.118</td>
+<td>&lt;.001</td>
+<td></td>
+<td></td>
+<td>-0.04218</td>
+<td>&lt;.001</td>
+<td></td>
+<td>-0.01243</td>
+<td></td>
+</tr>
+<tr>
+<td>Context size only</td>
+<td>linear OLS</td>
+<td>statsmodels.formula.api.ols</td>
+<td>child-cluster robust SE via cov_type=&#x27;cluster&#x27;</td>
+<td>Phonemes</td>
+<td>Context morphemes</td>
+<td>fit</td>
+<td>444325</td>
+<td>21</td>
+<td>0.655</td>
+<td>0.0008507</td>
+<td>-0.07292</td>
+<td>0.005</td>
+<td>2.118</td>
+<td>&lt;.001</td>
+<td></td>
+<td></td>
+<td>-0.03414</td>
+<td>&lt;.001</td>
+<td></td>
+<td>-0.01163</td>
+<td></td>
+</tr>
+<tr>
+<td>Context size only</td>
+<td>linear OLS</td>
+<td>statsmodels.formula.api.ols</td>
+<td>child-cluster robust SE via cov_type=&#x27;cluster&#x27;</td>
+<td>Phonemes</td>
+<td>Context syllables: CMU/pkg</td>
+<td>fit</td>
+<td>444325</td>
+<td>21</td>
+<td>0.6551</td>
+<td>0.0009288</td>
+<td>-0.07213</td>
+<td>0.005</td>
+<td>2.118</td>
+<td>&lt;.001</td>
+<td></td>
+<td></td>
+<td>-0.04062</td>
+<td>&lt;.001</td>
+<td></td>
+<td>-0.01483</td>
+<td></td>
+</tr>
+<tr>
+<td>Context size only</td>
+<td>linear OLS</td>
+<td>statsmodels.formula.api.ols</td>
+<td>child-cluster robust SE via cov_type=&#x27;cluster&#x27;</td>
+<td>Phonemes</td>
+<td>Context syllables: pkg</td>
+<td>fit</td>
+<td>444325</td>
+<td>21</td>
+<td>0.6551</td>
+<td>0.0009555</td>
+<td>-0.07195</td>
+<td>0.005</td>
+<td>2.118</td>
+<td>&lt;.001</td>
+<td></td>
+<td></td>
+<td>-0.04078</td>
+<td>&lt;.001</td>
+<td></td>
+<td>-0.01575</td>
+<td></td>
+</tr>
+<tr>
+<td>Context size only</td>
+<td>linear OLS</td>
+<td>statsmodels.formula.api.ols</td>
+<td>child-cluster robust SE via cov_type=&#x27;cluster&#x27;</td>
+<td>Phonemes</td>
+<td>Context phonemes</td>
+<td>fit</td>
+<td>444325</td>
+<td>21</td>
+<td>0.6552</td>
+<td>0.0009952</td>
+<td>-0.0717</td>
+<td>0.005</td>
+<td>2.118</td>
+<td>&lt;.001</td>
+<td></td>
+<td></td>
+<td>-0.01841</td>
+<td>&lt;.001</td>
+<td></td>
+<td>-0.01703</td>
+<td></td>
+</tr>
+<tr>
+<td>Entropy plus context size</td>
+<td>linear OLS</td>
+<td>statsmodels.formula.api.ols</td>
+<td>child-cluster robust SE via cov_type=&#x27;cluster&#x27;</td>
+<td>Phonemes</td>
+<td>Context words</td>
+<td>fit</td>
+<td>441461</td>
+<td>21</td>
+<td>0.655</td>
+<td>0.0008593</td>
+<td>-0.06726</td>
+<td>0.007</td>
+<td>2.12</td>
+<td>&lt;.001</td>
+<td>-0.493</td>
+<td>&lt;.001</td>
+<td>-0.04053</td>
+<td>&lt;.001</td>
+<td>-0.03115</td>
+<td>-0.01197</td>
+<td></td>
+</tr>
+<tr>
+<td>Entropy plus context size</td>
+<td>linear OLS</td>
+<td>statsmodels.formula.api.ols</td>
+<td>child-cluster robust SE via cov_type=&#x27;cluster&#x27;</td>
+<td>Phonemes</td>
+<td>Context morphemes</td>
+<td>fit</td>
+<td>441461</td>
+<td>21</td>
+<td>0.655</td>
+<td>0.0008456</td>
+<td>-0.06757</td>
+<td>0.007</td>
+<td>2.12</td>
+<td>&lt;.001</td>
+<td>-0.4939</td>
+<td>&lt;.001</td>
+<td>-0.03319</td>
+<td>&lt;.001</td>
+<td>-0.03121</td>
+<td>-0.01133</td>
+<td></td>
+</tr>
+<tr>
+<td>Entropy plus context size</td>
+<td>linear OLS</td>
+<td>statsmodels.formula.api.ols</td>
+<td>child-cluster robust SE via cov_type=&#x27;cluster&#x27;</td>
+<td>Phonemes</td>
+<td>Context syllables: CMU/pkg</td>
+<td>fit</td>
+<td>441461</td>
+<td>21</td>
+<td>0.6551</td>
+<td>0.0009123</td>
+<td>-0.06684</td>
+<td>0.008</td>
+<td>2.12</td>
+<td>&lt;.001</td>
+<td>-0.4911</td>
+<td>&lt;.001</td>
+<td>-0.03875</td>
+<td>&lt;.001</td>
+<td>-0.03103</td>
+<td>-0.01417</td>
+<td></td>
+</tr>
+<tr>
+<td>Entropy plus context size</td>
+<td>linear OLS</td>
+<td>statsmodels.formula.api.ols</td>
+<td>child-cluster robust SE via cov_type=&#x27;cluster&#x27;</td>
+<td>Phonemes</td>
+<td>Context syllables: pkg</td>
+<td>fit</td>
+<td>441461</td>
+<td>21</td>
+<td>0.6551</td>
+<td>0.0009383</td>
+<td>-0.06668</td>
+<td>0.008</td>
+<td>2.12</td>
+<td>&lt;.001</td>
+<td>-0.4909</td>
+<td>&lt;.001</td>
+<td>-0.03905</td>
+<td>&lt;.001</td>
+<td>-0.03102</td>
+<td>-0.01511</td>
+<td></td>
+</tr>
+<tr>
+<td>Entropy plus context size</td>
+<td>linear OLS</td>
+<td>statsmodels.formula.api.ols</td>
+<td>child-cluster robust SE via cov_type=&#x27;cluster&#x27;</td>
+<td>Phonemes</td>
+<td>Context phonemes</td>
+<td>fit</td>
+<td>441461</td>
+<td>21</td>
+<td>0.6551</td>
+<td>0.0009716</td>
+<td>-0.0665</td>
+<td>0.008</td>
+<td>2.12</td>
+<td>&lt;.001</td>
+<td>-0.4898</td>
+<td>&lt;.001</td>
+<td>-0.01751</td>
+<td>&lt;.001</td>
+<td>-0.03096</td>
+<td>-0.01624</td>
+<td></td>
+</tr>
+</tbody></table>
+<h2>Hottest Takeaways For k2</h2>
+<ul>
+<li>Baseline controls alone average R2=0.641 across target effort controls.</li>
+<li>Best context addition: Context size only with Words and Context words, delta R2=0.0012.</li>
+<li>Entropy appears in 30 fitted rows: 30 have p&lt;.05 and 30 have negative coefficients.</li>
+<li>Context size appears in 50 fitted rows: 50 have p&lt;.05 and 0 have positive coefficients.</li>
+</ul>
+<h2>Saved Outputs</h2>
+<pre><code>results/context_predictor_permutations/context_predictor_model_summary.csv
+results/context_predictor_permutations/context_predictor_distribution.csv
+results/context_predictor_permutations/context_predictors_by_age.csv
+figs/context_predictor_permutations/</code></pre>
+</main>
+</body>
+</html>

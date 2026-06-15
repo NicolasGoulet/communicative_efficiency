@@ -1,0 +1,1636 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Age-Trajectory Robustness: Balanced Bootstrap and Scrambling Controls</title>
+<style>
+:root {
+  color-scheme: light;
+  --ink: #1e2528;
+  --muted: #5e686d;
+  --line: #d9e0df;
+  --paper: #ffffff;
+  --soft: #f5f7f6;
+  --accent: #2f6f73;
+  --accent2: #c76f2c;
+}
+body {
+  margin: 0;
+  background: #eef2f1;
+  color: var(--ink);
+  font: 16px/1.58 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+main {
+  max-width: 980px;
+  margin: 34px auto 56px;
+  padding: 48px 58px;
+  background: var(--paper);
+  box-shadow: 0 18px 50px rgba(31, 45, 48, 0.12);
+}
+h1, h2, h3, h4 {
+  line-height: 1.18;
+  margin: 1.6em 0 0.55em;
+}
+h1 {
+  margin-top: 0;
+  font-size: 2.25rem;
+  border-bottom: 3px solid var(--accent);
+  padding-bottom: 0.45em;
+}
+h2 {
+  font-size: 1.55rem;
+  color: var(--accent);
+}
+h3 {
+  font-size: 1.18rem;
+}
+p {
+  margin: 0.75em 0;
+}
+a {
+  color: var(--accent);
+}
+blockquote {
+  border-left: 4px solid var(--accent2);
+  margin: 1.1em 0;
+  padding: 0.05em 1.1em;
+  color: var(--muted);
+  background: #fff8f2;
+}
+code {
+  background: var(--soft);
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  padding: 0.08em 0.3em;
+  font-family: "SFMono-Regular", Consolas, monospace;
+  font-size: 0.92em;
+}
+pre {
+  background: #f5f7f6;
+  color: var(--ink);
+  border: 1px solid var(--line);
+  padding: 1em;
+  overflow-x: auto;
+  border-radius: 7px;
+}
+pre code {
+  background: transparent;
+  border: 0;
+  padding: 0;
+  color: inherit;
+}
+table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 1.15em 0 1.45em;
+  font-size: 0.95em;
+}
+th, td {
+  border: 1px solid var(--line);
+  padding: 0.54em 0.68em;
+  vertical-align: top;
+}
+th {
+  background: #e7efed;
+  text-align: left;
+}
+tr:nth-child(even) td {
+  background: #fafbfb;
+}
+img {
+  max-width: 100%;
+  display: block;
+  margin: 1.1em auto 0.45em;
+}
+ul, ol {
+  padding-left: 1.4em;
+}
+.caption {
+  color: var(--muted);
+  font-size: 0.92em;
+  margin-top: -0.15em;
+}
+@media print {
+  body {
+    background: white;
+  }
+  main {
+    box-shadow: none;
+    margin: 0;
+    max-width: none;
+    padding: 28px;
+  }
+}
+</style>
+</head>
+<body>
+<main>
+<h1>Age-Trajectory Robustness: Balanced Bootstrap and Scrambling Controls</h1>
+<p>This is a complementary validation report for the utterance-level information models. It asks a very specific question:</p>
+<pre><code>Do the developmental age effects survive equalized age-bin sampling, and do
+they weaken when we deliberately break the true age ordering?</code></pre>
+<p>This report does not replace the main M1-M6 model reports and it does not modify any source data.</p>
+<p>The design is inspired by Pawar and Cychosz (2025), who used equalized age-bin samples and age-label scrambling controls to test whether a developmental informativity trajectory was real rather than an artifact of bin composition.</p>
+<h2>Data And Unit</h2>
+<p>The analysis uses real child utterances only, then aggregates them to:</p>
+<pre><code>child x session x context window</code></pre>
+<p>This is intentional. The scrambling tests should not pretend that millions of utterance rows are independent. Each unit stores the mean total bits, mean effort, mean context entropy when available, and the number of utterances that contributed to that unit.</p>
+<p>The default data path streams the split scored-result tree file by file and then writes the compact unit frame. Future refits can use that unit frame directly instead of rereading the scored files.</p>
+<h2>Audit Summary</h2>
+<table>
+<thead><tr>
+<th>source</th>
+<th>source_path</th>
+<th>source_files_read</th>
+<th>source_rows_read</th>
+<th>source_rows_kept</th>
+<th>source_rows_dropped</th>
+<th>unit_rows</th>
+<th>children</th>
+<th>datasets</th>
+<th>child_sessions</th>
+<th>context_windows</th>
+<th>age_bins</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>scored-tree</td>
+<td>results/external/compute_surprisal_mila/raw_surprisal_cleaned_mistral_patched_006_023</td>
+<td>84</td>
+<td>1.788e+06</td>
+<td>1.788e+06</td>
+<td>0</td>
+<td>3932</td>
+<td>21</td>
+<td>3</td>
+<td>983</td>
+<td>k0,k1,k2,k3</td>
+<td>006-023,024-029,030-035,036-041,042-047,048-053,054-059,060-065</td>
+</tr>
+</tbody></table>
+<h3>Source Coverage By Context Window</h3>
+<table>
+<thead><tr>
+<th>context_k</th>
+<th>files</th>
+<th>rows_read</th>
+<th>rows_kept</th>
+<th>rows_dropped</th>
+<th>entropy_matched_rows</th>
+<th>entropy_missing_rows</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>k0</td>
+<td>21</td>
+<td>4.47e+05</td>
+<td>4.47e+05</td>
+<td>0</td>
+<td>0</td>
+<td>4.47e+05</td>
+</tr>
+<tr>
+<td>k1</td>
+<td>21</td>
+<td>4.47e+05</td>
+<td>4.47e+05</td>
+<td>0</td>
+<td>4.422e+05</td>
+<td>4765</td>
+</tr>
+<tr>
+<td>k2</td>
+<td>21</td>
+<td>4.47e+05</td>
+<td>4.47e+05</td>
+<td>0</td>
+<td>4.415e+05</td>
+<td>5524</td>
+</tr>
+<tr>
+<td>k3</td>
+<td>21</td>
+<td>4.47e+05</td>
+<td>4.47e+05</td>
+<td>0</td>
+<td>4.414e+05</td>
+<td>5572</td>
+</tr>
+</tbody></table>
+<p><strong>How to read this table.</strong> <code>rows_read</code> is the number of scored real-child utterance rows found in the split files. <code>rows_kept</code> is the number retained before aggregation. <code>rows_dropped</code> should be zero. <code>entropy_matched_rows</code> applies to k1-k3; k0 intentionally has no context entropy because no context is provided.</p>
+<img src="../figs/age_scrambling_robustness/age_bin_unit_support.png" alt="age-bin unit support">
+<p><strong>How to read this plot.</strong> Bars show how many child-session-context units are available in each age bin. This makes clear where the developmental trajectory has strong or weak support.</p>
+<h2>Robustness Checks</h2>
+<table>
+<thead><tr>
+<th>check</th>
+<th>what it asks</th>
+<th>what would reassure us</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>balanced bootstrap</td>
+<td>Does the age effect survive when every age bin contributes the same number of units?</td>
+<td>The real slope keeps the same direction and sits away from zero.</td>
+</tr>
+<tr>
+<td>age-bin label scramble</td>
+<td>Could the trend appear if whole age-bin labels were assigned to the wrong bins?</td>
+<td>The real slope is stronger than these scrambled slopes.</td>
+</tr>
+<tr>
+<td>unit-age scramble</td>
+<td>Could the trend appear after randomly disconnecting units from their true ages?</td>
+<td>The real slope is stronger than these scrambled slopes.</td>
+</tr>
+<tr>
+<td>within-child age scramble</td>
+<td>Could the trend appear from child-specific style alone if each child&#x27;s timeline is broken?</td>
+<td>The real slope is stronger than this within-child null.</td>
+</tr>
+</tbody></table>
+<h2>Model Map</h2>
+<table>
+<thead><tr>
+<th>model_id</th>
+<th>question</th>
+<th>formula</th>
+<th>context_windows</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>M1</td>
+<td>Does age predict total bits after controlling production effort, pooling children?</td>
+<td>mean_sum_bits ~ age + mean_effort</td>
+<td>k0-k3</td>
+</tr>
+<tr>
+<td>M2</td>
+<td>Does the age effect remain after controlling each child&#x27;s baseline?</td>
+<td>mean_sum_bits ~ age + mean_effort + child identity</td>
+<td>k0-k3</td>
+</tr>
+<tr>
+<td>M3</td>
+<td>Does the age effect change as production effort changes?</td>
+<td>mean_sum_bits ~ age * mean_effort + child identity</td>
+<td>k0-k3</td>
+</tr>
+<tr>
+<td>M4</td>
+<td>Does the age effect remain after effort, child identity, and context entropy are controlled?</td>
+<td>mean_sum_bits ~ age + mean_effort + mean_context_entropy + child identity</td>
+<td>k1-k3 only</td>
+</tr>
+<tr>
+<td>M5</td>
+<td>Does the context-entropy association change over developmental time?</td>
+<td>mean_sum_bits ~ age * mean_context_entropy + mean_effort + child identity</td>
+<td>k1-k3 only</td>
+</tr>
+<tr>
+<td>M6</td>
+<td>Do age, effort, and context entropy interact when predicting total bits?</td>
+<td>mean_sum_bits ~ age <em> mean_effort + age </em> mean_context_entropy + mean_effort * mean_context_entropy + child identity</td>
+<td>k1-k3 only</td>
+</tr>
+</tbody></table>
+<h2>Overview Plot</h2>
+<img src="../figs/age_scrambling_robustness/observed_age_slope_overview.png" alt="observed age slope overview">
+<p><strong>How to read this plot.</strong> Each point is an observed age coefficient from a unit-level model. Negative values mean predicted total Mistral bits decrease with age after the model&#x27;s controls. This is a map of the results; the model sections below give the interpretable regression-line views.</p>
+<h2>Compact Robustness Summary</h2>
+<table>
+<thead><tr>
+<th>model_id</th>
+<th>robustness_method</th>
+<th>rows</th>
+<th>negative_observed</th>
+<th>outside_null_95</th>
+<th>mean_same_sign_share</th>
+<th>median_permutation_p</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>M1</td>
+<td>age_bin_group_scramble</td>
+<td>20</td>
+<td>2</td>
+<td>16</td>
+<td>0.5115</td>
+<td>0.010</td>
+</tr>
+<tr>
+<td>M1</td>
+<td>balanced_bootstrap</td>
+<td>20</td>
+<td>2</td>
+<td>16</td>
+<td>0.866</td>
+<td></td>
+</tr>
+<tr>
+<td>M1</td>
+<td>unit_age_scramble</td>
+<td>20</td>
+<td>2</td>
+<td>20</td>
+<td>0.5195</td>
+<td>0.010</td>
+</tr>
+<tr>
+<td>M1</td>
+<td>within_child_age_scramble</td>
+<td>20</td>
+<td>2</td>
+<td>13</td>
+<td>0.9</td>
+<td>0.812</td>
+</tr>
+<tr>
+<td>M2</td>
+<td>age_bin_group_scramble</td>
+<td>20</td>
+<td>20</td>
+<td>20</td>
+<td>0.4895</td>
+<td>0.010</td>
+</tr>
+<tr>
+<td>M2</td>
+<td>balanced_bootstrap</td>
+<td>20</td>
+<td>20</td>
+<td>1</td>
+<td>0.996</td>
+<td></td>
+</tr>
+<tr>
+<td>M2</td>
+<td>unit_age_scramble</td>
+<td>20</td>
+<td>20</td>
+<td>20</td>
+<td>0.513</td>
+<td>0.010</td>
+</tr>
+<tr>
+<td>M2</td>
+<td>within_child_age_scramble</td>
+<td>20</td>
+<td>20</td>
+<td>20</td>
+<td>0.509</td>
+<td>0.010</td>
+</tr>
+<tr>
+<td>M3</td>
+<td>age_bin_group_scramble</td>
+<td>20</td>
+<td>20</td>
+<td>20</td>
+<td>0.5215</td>
+<td>0.010</td>
+</tr>
+<tr>
+<td>M3</td>
+<td>balanced_bootstrap</td>
+<td>20</td>
+<td>20</td>
+<td>4</td>
+<td>0.9975</td>
+<td></td>
+</tr>
+<tr>
+<td>M3</td>
+<td>unit_age_scramble</td>
+<td>20</td>
+<td>20</td>
+<td>20</td>
+<td>0.4845</td>
+<td>0.010</td>
+</tr>
+<tr>
+<td>M3</td>
+<td>within_child_age_scramble</td>
+<td>20</td>
+<td>20</td>
+<td>20</td>
+<td>0.455</td>
+<td>0.010</td>
+</tr>
+<tr>
+<td>M4</td>
+<td>age_bin_group_scramble</td>
+<td>15</td>
+<td>15</td>
+<td>14</td>
+<td>0.5207</td>
+<td>0.020</td>
+</tr>
+<tr>
+<td>M4</td>
+<td>balanced_bootstrap</td>
+<td>15</td>
+<td>15</td>
+<td>4</td>
+<td>0.9807</td>
+<td></td>
+</tr>
+<tr>
+<td>M4</td>
+<td>unit_age_scramble</td>
+<td>15</td>
+<td>15</td>
+<td>15</td>
+<td>0.51</td>
+<td>0.010</td>
+</tr>
+<tr>
+<td>M4</td>
+<td>within_child_age_scramble</td>
+<td>15</td>
+<td>15</td>
+<td>15</td>
+<td>0.498</td>
+<td>0.010</td>
+</tr>
+<tr>
+<td>M5</td>
+<td>age_bin_group_scramble</td>
+<td>15</td>
+<td>15</td>
+<td>11</td>
+<td>0.5173</td>
+<td>0.030</td>
+</tr>
+<tr>
+<td>M5</td>
+<td>balanced_bootstrap</td>
+<td>15</td>
+<td>15</td>
+<td>2</td>
+<td>0.9693</td>
+<td></td>
+</tr>
+<tr>
+<td>M5</td>
+<td>unit_age_scramble</td>
+<td>15</td>
+<td>15</td>
+<td>15</td>
+<td>0.4973</td>
+<td>0.010</td>
+</tr>
+<tr>
+<td>M5</td>
+<td>within_child_age_scramble</td>
+<td>15</td>
+<td>15</td>
+<td>15</td>
+<td>0.4227</td>
+<td>0.010</td>
+</tr>
+<tr>
+<td>M6</td>
+<td>age_bin_group_scramble</td>
+<td>15</td>
+<td>15</td>
+<td>15</td>
+<td>0.5173</td>
+<td>0.010</td>
+</tr>
+<tr>
+<td>M6</td>
+<td>balanced_bootstrap</td>
+<td>15</td>
+<td>15</td>
+<td>0</td>
+<td>0.9767</td>
+<td></td>
+</tr>
+<tr>
+<td>M6</td>
+<td>unit_age_scramble</td>
+<td>15</td>
+<td>15</td>
+<td>15</td>
+<td>0.4893</td>
+<td>0.010</td>
+</tr>
+<tr>
+<td>M6</td>
+<td>within_child_age_scramble</td>
+<td>15</td>
+<td>15</td>
+<td>15</td>
+<td>0.5293</td>
+<td>0.010</td>
+</tr>
+</tbody></table>
+<p><strong>How to read this table.</strong> <code>outside_null_95</code> counts how many model/effort/context rows had a real observed age coefficient outside the 2.5%-97.5% interval of the bootstrap or scrambling distribution. Higher values mean the real age slope is less compatible with that null check. <code>same_sign_share</code> is most useful for the balanced bootstrap: values near 1 mean the age slope direction is stable under balanced age-bin resampling.</p>
+<h2>Model Cards</h2>
+<p>The line plots below are effect-line visualizations. The underlying data are not changed. Each line is anchored at the observed mean of the unit frame and uses the fitted age coefficient to show the age effect. This avoids arbitrary fixed-effect intercept choices while making the slope visually readable.</p>
+<h2>M1: Pooled age and effort</h2>
+<p><strong>Question.</strong> Does age predict total bits after controlling production effort, pooling children?</p>
+<p><strong>Formula.</strong> <code>mean_sum_bits ~ age + mean_effort</code></p>
+<p><strong>Plain-language test.</strong> The red line is the real age effect estimated from the model. The blue ribbon asks whether that line survives when every age bin is given equal influence. The purple/orange/green ribbons ask what kinds of lines we get after breaking the true age ordering. If the red line is clearly steeper or in a different direction than the scrambled ribbons, the developmental ordering is doing real work.</p>
+<img src="../figs/age_scrambling_robustness/m1_clear_robustness_regression_lines.png" alt="M1 clear robustness regression lines">
+<p><strong>Quick read.</strong> Across all fitted variants for this model, 10% of observed age slopes are negative, and 81% of model/effort/context/method checks put the observed slope outside the corresponding null 95% interval.</p>
+<p><strong>Compact result table.</strong></p>
+<table>
+<thead><tr>
+<th>context</th>
+<th>effort</th>
+<th>observed age slope</th>
+<th>balanced 95% slope interval</th>
+<th>balanced same-sign</th>
+<th>bin-label scramble p</th>
+<th>unit-age scramble p</th>
+<th>within-child scramble p</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>k0</td>
+<td>Morphemes</td>
+<td>-0.01707</td>
+<td>[-0.0556, -0.0122]</td>
+<td>1</td>
+<td>0.277</td>
+<td>0.010</td>
+<td>1.000</td>
+</tr>
+<tr>
+<td>k0</td>
+<td>Phonemes</td>
+<td>0.03861</td>
+<td>[-0.000219, 0.0277]</td>
+<td>0.97</td>
+<td>0.020</td>
+<td>0.010</td>
+<td>1.000</td>
+</tr>
+<tr>
+<td>k0</td>
+<td>Syllables: CMU/pkg</td>
+<td>0.02009</td>
+<td>[-0.0182, 0.014]</td>
+<td>0.45</td>
+<td>0.238</td>
+<td>0.010</td>
+<td>1.000</td>
+</tr>
+<tr>
+<td>k0</td>
+<td>Syllables: pkg</td>
+<td>0.02073</td>
+<td>[-0.0211, 0.0132]</td>
+<td>0.36</td>
+<td>0.129</td>
+<td>0.010</td>
+<td>1.000</td>
+</tr>
+<tr>
+<td>k0</td>
+<td>Words</td>
+<td>-0.04465</td>
+<td>[-0.0783, -0.0362]</td>
+<td>1</td>
+<td>0.010</td>
+<td>0.010</td>
+<td>0.010</td>
+</tr>
+<tr>
+<td>k3</td>
+<td>Morphemes</td>
+<td>0.08029</td>
+<td>[0.00708, 0.0663]</td>
+<td>0.99</td>
+<td>0.010</td>
+<td>0.010</td>
+<td>0.861</td>
+</tr>
+<tr>
+<td>k3</td>
+<td>Phonemes</td>
+<td>0.1236</td>
+<td>[0.055, 0.112]</td>
+<td>1</td>
+<td>0.010</td>
+<td>0.010</td>
+<td>0.020</td>
+</tr>
+<tr>
+<td>k3</td>
+<td>Syllables: CMU/pkg</td>
+<td>0.1067</td>
+<td>[0.0483, 0.0949]</td>
+<td>1</td>
+<td>0.010</td>
+<td>0.010</td>
+<td>0.020</td>
+</tr>
+<tr>
+<td>k3</td>
+<td>Syllables: pkg</td>
+<td>0.1067</td>
+<td>[0.0416, 0.0959]</td>
+<td>1</td>
+<td>0.010</td>
+<td>0.010</td>
+<td>0.020</td>
+</tr>
+<tr>
+<td>k3</td>
+<td>Words</td>
+<td>0.05422</td>
+<td>[-0.0144, 0.055]</td>
+<td>0.84</td>
+<td>0.040</td>
+<td>0.010</td>
+<td>1.000</td>
+</tr>
+</tbody></table>
+<p><strong>Table columns.</strong> <code>observed age slope</code> is the estimated change in mean total bits per additional month. Negative values mean lower predicted total bits with age after the model&#x27;s controls. <code>balanced 95% slope interval</code> is the 2.5%-97.5% range across equal-age-bin bootstrap refits. <code>balanced same-sign</code> is the share of bootstrap refits with the same slope direction as the observed model. The three <code>scramble p</code> columns are permutation-style checks: small values mean the observed slope is larger than expected after breaking the age structure.</p>
+<h2>M2: Age and effort with child identity</h2>
+<p><strong>Question.</strong> Does the age effect remain after controlling each child&#x27;s baseline?</p>
+<p><strong>Formula.</strong> <code>mean_sum_bits ~ age + mean_effort + child identity</code></p>
+<p><strong>Plain-language test.</strong> The red line is the real age effect estimated from the model. The blue ribbon asks whether that line survives when every age bin is given equal influence. The purple/orange/green ribbons ask what kinds of lines we get after breaking the true age ordering. If the red line is clearly steeper or in a different direction than the scrambled ribbons, the developmental ordering is doing real work.</p>
+<img src="../figs/age_scrambling_robustness/m2_clear_robustness_regression_lines.png" alt="M2 clear robustness regression lines">
+<p><strong>Quick read.</strong> Across all fitted variants for this model, 100% of observed age slopes are negative, and 76% of model/effort/context/method checks put the observed slope outside the corresponding null 95% interval.</p>
+<p><strong>Compact result table.</strong></p>
+<table>
+<thead><tr>
+<th>context</th>
+<th>effort</th>
+<th>observed age slope</th>
+<th>balanced 95% slope interval</th>
+<th>balanced same-sign</th>
+<th>bin-label scramble p</th>
+<th>unit-age scramble p</th>
+<th>within-child scramble p</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>k0</td>
+<td>Morphemes</td>
+<td>-0.1055</td>
+<td>[-0.178, -0.0902]</td>
+<td>1</td>
+<td>0.010</td>
+<td>0.010</td>
+<td>0.010</td>
+</tr>
+<tr>
+<td>k0</td>
+<td>Phonemes</td>
+<td>-0.09993</td>
+<td>[-0.164, -0.0892]</td>
+<td>1</td>
+<td>0.010</td>
+<td>0.010</td>
+<td>0.010</td>
+</tr>
+<tr>
+<td>k0</td>
+<td>Syllables: CMU/pkg</td>
+<td>-0.07624</td>
+<td>[-0.134, -0.0559]</td>
+<td>1</td>
+<td>0.010</td>
+<td>0.010</td>
+<td>0.010</td>
+</tr>
+<tr>
+<td>k0</td>
+<td>Syllables: pkg</td>
+<td>-0.07832</td>
+<td>[-0.139, -0.0808]</td>
+<td>1</td>
+<td>0.010</td>
+<td>0.010</td>
+<td>0.010</td>
+</tr>
+<tr>
+<td>k0</td>
+<td>Words</td>
+<td>-0.09487</td>
+<td>[-0.158, -0.082]</td>
+<td>1</td>
+<td>0.010</td>
+<td>0.010</td>
+<td>0.010</td>
+</tr>
+<tr>
+<td>k3</td>
+<td>Morphemes</td>
+<td>-0.04281</td>
+<td>[-0.178, -0.0289]</td>
+<td>0.99</td>
+<td>0.010</td>
+<td>0.010</td>
+<td>0.010</td>
+</tr>
+<tr>
+<td>k3</td>
+<td>Phonemes</td>
+<td>-0.04589</td>
+<td>[-0.175, -0.00246]</td>
+<td>0.97</td>
+<td>0.010</td>
+<td>0.010</td>
+<td>0.010</td>
+</tr>
+<tr>
+<td>k3</td>
+<td>Syllables: CMU/pkg</td>
+<td>-0.02933</td>
+<td>[-0.143, -0.00376]</td>
+<td>0.99</td>
+<td>0.050</td>
+<td>0.010</td>
+<td>0.010</td>
+</tr>
+<tr>
+<td>k3</td>
+<td>Syllables: pkg</td>
+<td>-0.03316</td>
+<td>[-0.152, -0.017]</td>
+<td>1</td>
+<td>0.010</td>
+<td>0.010</td>
+<td>0.010</td>
+</tr>
+<tr>
+<td>k3</td>
+<td>Words</td>
+<td>-0.03999</td>
+<td>[-0.168, -0.0357]</td>
+<td>1</td>
+<td>0.010</td>
+<td>0.010</td>
+<td>0.010</td>
+</tr>
+</tbody></table>
+<p><strong>Table columns.</strong> <code>observed age slope</code> is the estimated change in mean total bits per additional month. Negative values mean lower predicted total bits with age after the model&#x27;s controls. <code>balanced 95% slope interval</code> is the 2.5%-97.5% range across equal-age-bin bootstrap refits. <code>balanced same-sign</code> is the share of bootstrap refits with the same slope direction as the observed model. The three <code>scramble p</code> columns are permutation-style checks: small values mean the observed slope is larger than expected after breaking the age structure.</p>
+<h2>M3: Age by effort</h2>
+<p><strong>Question.</strong> Does the age effect change as production effort changes?</p>
+<p><strong>Formula.</strong> <code>mean_sum_bits ~ age * mean_effort + child identity</code></p>
+<p><strong>Plain-language test.</strong> The red line is the real age effect estimated from the model. The blue ribbon asks whether that line survives when every age bin is given equal influence. The purple/orange/green ribbons ask what kinds of lines we get after breaking the true age ordering. If the red line is clearly steeper or in a different direction than the scrambled ribbons, the developmental ordering is doing real work.</p>
+<img src="../figs/age_scrambling_robustness/m3_clear_robustness_regression_lines.png" alt="M3 clear robustness regression lines">
+<p><strong>Quick read.</strong> Across all fitted variants for this model, 100% of observed age slopes are negative, and 80% of model/effort/context/method checks put the observed slope outside the corresponding null 95% interval.</p>
+<p><strong>Compact result table.</strong></p>
+<table>
+<thead><tr>
+<th>context</th>
+<th>effort</th>
+<th>observed age slope</th>
+<th>balanced 95% slope interval</th>
+<th>balanced same-sign</th>
+<th>bin-label scramble p</th>
+<th>unit-age scramble p</th>
+<th>within-child scramble p</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>k0</td>
+<td>Morphemes</td>
+<td>-0.08293</td>
+<td>[-0.165, -0.0855]</td>
+<td>1</td>
+<td>0.010</td>
+<td>0.010</td>
+<td>0.010</td>
+</tr>
+<tr>
+<td>k0</td>
+<td>Phonemes</td>
+<td>-0.07797</td>
+<td>[-0.155, -0.0725]</td>
+<td>1</td>
+<td>0.010</td>
+<td>0.010</td>
+<td>0.010</td>
+</tr>
+<tr>
+<td>k0</td>
+<td>Syllables: CMU/pkg</td>
+<td>-0.04857</td>
+<td>[-0.13, -0.049]</td>
+<td>1</td>
+<td>0.030</td>
+<td>0.010</td>
+<td>0.010</td>
+</tr>
+<tr>
+<td>k0</td>
+<td>Syllables: pkg</td>
+<td>-0.05405</td>
+<td>[-0.138, -0.0674]</td>
+<td>1</td>
+<td>0.010</td>
+<td>0.010</td>
+<td>0.010</td>
+</tr>
+<tr>
+<td>k0</td>
+<td>Words</td>
+<td>-0.07253</td>
+<td>[-0.154, -0.0664]</td>
+<td>1</td>
+<td>0.010</td>
+<td>0.010</td>
+<td>0.010</td>
+</tr>
+<tr>
+<td>k3</td>
+<td>Morphemes</td>
+<td>-0.05223</td>
+<td>[-0.212, -0.0314]</td>
+<td>1</td>
+<td>0.010</td>
+<td>0.010</td>
+<td>0.010</td>
+</tr>
+<tr>
+<td>k3</td>
+<td>Phonemes</td>
+<td>-0.05302</td>
+<td>[-0.179, -0.0154]</td>
+<td>1</td>
+<td>0.010</td>
+<td>0.010</td>
+<td>0.010</td>
+</tr>
+<tr>
+<td>k3</td>
+<td>Syllables: CMU/pkg</td>
+<td>-0.03086</td>
+<td>[-0.145, -0.00672]</td>
+<td>0.98</td>
+<td>0.079</td>
+<td>0.010</td>
+<td>0.010</td>
+</tr>
+<tr>
+<td>k3</td>
+<td>Syllables: pkg</td>
+<td>-0.03834</td>
+<td>[-0.147, -0.0247]</td>
+<td>1</td>
+<td>0.030</td>
+<td>0.010</td>
+<td>0.010</td>
+</tr>
+<tr>
+<td>k3</td>
+<td>Words</td>
+<td>-0.05013</td>
+<td>[-0.186, -0.0224]</td>
+<td>0.99</td>
+<td>0.010</td>
+<td>0.010</td>
+<td>0.010</td>
+</tr>
+</tbody></table>
+<p><strong>Table columns.</strong> <code>observed age slope</code> is the estimated change in mean total bits per additional month. Negative values mean lower predicted total bits with age after the model&#x27;s controls. <code>balanced 95% slope interval</code> is the 2.5%-97.5% range across equal-age-bin bootstrap refits. <code>balanced same-sign</code> is the share of bootstrap refits with the same slope direction as the observed model. The three <code>scramble p</code> columns are permutation-style checks: small values mean the observed slope is larger than expected after breaking the age structure.</p>
+<h2>M4: Context entropy added</h2>
+<p><strong>Question.</strong> Does the age effect remain after effort, child identity, and context entropy are controlled?</p>
+<p><strong>Formula.</strong> <code>mean_sum_bits ~ age + mean_effort + mean_context_entropy + child identity</code></p>
+<p><strong>Plain-language test.</strong> The red line is the real age effect estimated from the model. The blue ribbon asks whether that line survives when every age bin is given equal influence. The purple/orange/green ribbons ask what kinds of lines we get after breaking the true age ordering. If the red line is clearly steeper or in a different direction than the scrambled ribbons, the developmental ordering is doing real work.</p>
+<img src="../figs/age_scrambling_robustness/m4_clear_robustness_regression_lines.png" alt="M4 clear robustness regression lines">
+<p><strong>Quick read.</strong> Across all fitted variants for this model, 100% of observed age slopes are negative, and 80% of model/effort/context/method checks put the observed slope outside the corresponding null 95% interval.</p>
+<p><strong>Compact result table.</strong></p>
+<table>
+<thead><tr>
+<th>context</th>
+<th>effort</th>
+<th>observed age slope</th>
+<th>balanced 95% slope interval</th>
+<th>balanced same-sign</th>
+<th>bin-label scramble p</th>
+<th>unit-age scramble p</th>
+<th>within-child scramble p</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>k3</td>
+<td>Morphemes</td>
+<td>-0.0417</td>
+<td>[-0.23, 0.00245]</td>
+<td>0.97</td>
+<td>0.040</td>
+<td>0.010</td>
+<td>0.010</td>
+</tr>
+<tr>
+<td>k3</td>
+<td>Phonemes</td>
+<td>-0.04311</td>
+<td>[-0.203, -0.00345]</td>
+<td>0.98</td>
+<td>0.030</td>
+<td>0.010</td>
+<td>0.010</td>
+</tr>
+<tr>
+<td>k3</td>
+<td>Syllables: CMU/pkg</td>
+<td>-0.02597</td>
+<td>[-0.202, 0.0217]</td>
+<td>0.88</td>
+<td>0.149</td>
+<td>0.010</td>
+<td>0.030</td>
+</tr>
+<tr>
+<td>k3</td>
+<td>Syllables: pkg</td>
+<td>-0.02994</td>
+<td>[-0.156, -0.00262]</td>
+<td>0.98</td>
+<td>0.040</td>
+<td>0.010</td>
+<td>0.010</td>
+</tr>
+<tr>
+<td>k3</td>
+<td>Words</td>
+<td>-0.03831</td>
+<td>[-0.186, 0.0285]</td>
+<td>0.91</td>
+<td>0.020</td>
+<td>0.010</td>
+<td>0.010</td>
+</tr>
+</tbody></table>
+<p><strong>Table columns.</strong> <code>observed age slope</code> is the estimated change in mean total bits per additional month. Negative values mean lower predicted total bits with age after the model&#x27;s controls. <code>balanced 95% slope interval</code> is the 2.5%-97.5% range across equal-age-bin bootstrap refits. <code>balanced same-sign</code> is the share of bootstrap refits with the same slope direction as the observed model. The three <code>scramble p</code> columns are permutation-style checks: small values mean the observed slope is larger than expected after breaking the age structure.</p>
+<h2>M5: Age by context entropy</h2>
+<p><strong>Question.</strong> Does the context-entropy association change over developmental time?</p>
+<p><strong>Formula.</strong> <code>mean_sum_bits ~ age * mean_context_entropy + mean_effort + child identity</code></p>
+<p><strong>Plain-language test.</strong> The red line is the real age effect estimated from the model. The blue ribbon asks whether that line survives when every age bin is given equal influence. The purple/orange/green ribbons ask what kinds of lines we get after breaking the true age ordering. If the red line is clearly steeper or in a different direction than the scrambled ribbons, the developmental ordering is doing real work.</p>
+<img src="../figs/age_scrambling_robustness/m5_clear_robustness_regression_lines.png" alt="M5 clear robustness regression lines">
+<p><strong>Quick read.</strong> Across all fitted variants for this model, 100% of observed age slopes are negative, and 72% of model/effort/context/method checks put the observed slope outside the corresponding null 95% interval.</p>
+<p><strong>Compact result table.</strong></p>
+<table>
+<thead><tr>
+<th>context</th>
+<th>effort</th>
+<th>observed age slope</th>
+<th>balanced 95% slope interval</th>
+<th>balanced same-sign</th>
+<th>bin-label scramble p</th>
+<th>unit-age scramble p</th>
+<th>within-child scramble p</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>k3</td>
+<td>Morphemes</td>
+<td>-0.03644</td>
+<td>[-0.226, 0.0273]</td>
+<td>0.94</td>
+<td>0.030</td>
+<td>0.010</td>
+<td>0.020</td>
+</tr>
+<tr>
+<td>k3</td>
+<td>Phonemes</td>
+<td>-0.03788</td>
+<td>[-0.206, 0.012]</td>
+<td>0.95</td>
+<td>0.050</td>
+<td>0.010</td>
+<td>0.010</td>
+</tr>
+<tr>
+<td>k3</td>
+<td>Syllables: CMU/pkg</td>
+<td>-0.0214</td>
+<td>[-0.169, 0.022]</td>
+<td>0.88</td>
+<td>0.297</td>
+<td>0.010</td>
+<td>0.050</td>
+</tr>
+<tr>
+<td>k3</td>
+<td>Syllables: pkg</td>
+<td>-0.02499</td>
+<td>[-0.172, 0.0205]</td>
+<td>0.91</td>
+<td>0.168</td>
+<td>0.010</td>
+<td>0.020</td>
+</tr>
+<tr>
+<td>k3</td>
+<td>Words</td>
+<td>-0.03307</td>
+<td>[-0.181, 0.0223]</td>
+<td>0.86</td>
+<td>0.059</td>
+<td>0.010</td>
+<td>0.010</td>
+</tr>
+</tbody></table>
+<p><strong>Table columns.</strong> <code>observed age slope</code> is the estimated change in mean total bits per additional month. Negative values mean lower predicted total bits with age after the model&#x27;s controls. <code>balanced 95% slope interval</code> is the 2.5%-97.5% range across equal-age-bin bootstrap refits. <code>balanced same-sign</code> is the share of bootstrap refits with the same slope direction as the observed model. The three <code>scramble p</code> columns are permutation-style checks: small values mean the observed slope is larger than expected after breaking the age structure.</p>
+<h2>M6: Interaction-rich stress test</h2>
+<p><strong>Question.</strong> Do age, effort, and context entropy interact when predicting total bits?</p>
+<p><strong>Formula.</strong> <code>mean_sum_bits ~ age * mean_effort + age * mean_context_entropy + mean_effort * mean_context_entropy + child identity</code></p>
+<p><strong>Plain-language test.</strong> The red line is the real age effect estimated from the model. The blue ribbon asks whether that line survives when every age bin is given equal influence. The purple/orange/green ribbons ask what kinds of lines we get after breaking the true age ordering. If the red line is clearly steeper or in a different direction than the scrambled ribbons, the developmental ordering is doing real work.</p>
+<img src="../figs/age_scrambling_robustness/m6_clear_robustness_regression_lines.png" alt="M6 clear robustness regression lines">
+<p><strong>Quick read.</strong> Across all fitted variants for this model, 100% of observed age slopes are negative, and 75% of model/effort/context/method checks put the observed slope outside the corresponding null 95% interval.</p>
+<p><strong>Compact result table.</strong></p>
+<table>
+<thead><tr>
+<th>context</th>
+<th>effort</th>
+<th>observed age slope</th>
+<th>balanced 95% slope interval</th>
+<th>balanced same-sign</th>
+<th>bin-label scramble p</th>
+<th>unit-age scramble p</th>
+<th>within-child scramble p</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>k3</td>
+<td>Morphemes</td>
+<td>-0.06312</td>
+<td>[-0.163, 0.0145]</td>
+<td>0.96</td>
+<td>0.030</td>
+<td>0.010</td>
+<td>0.010</td>
+</tr>
+<tr>
+<td>k3</td>
+<td>Phonemes</td>
+<td>-0.0569</td>
+<td>[-0.134, 0.0101]</td>
+<td>0.95</td>
+<td>0.020</td>
+<td>0.010</td>
+<td>0.010</td>
+</tr>
+<tr>
+<td>k3</td>
+<td>Syllables: CMU/pkg</td>
+<td>-0.03341</td>
+<td>[-0.101, 0.0406]</td>
+<td>0.87</td>
+<td>0.079</td>
+<td>0.010</td>
+<td>0.010</td>
+</tr>
+<tr>
+<td>k3</td>
+<td>Syllables: pkg</td>
+<td>-0.03902</td>
+<td>[-0.114, 0.00484]</td>
+<td>0.96</td>
+<td>0.050</td>
+<td>0.010</td>
+<td>0.010</td>
+</tr>
+<tr>
+<td>k3</td>
+<td>Words</td>
+<td>-0.05835</td>
+<td>[-0.113, 0.0204]</td>
+<td>0.93</td>
+<td>0.030</td>
+<td>0.010</td>
+<td>0.010</td>
+</tr>
+</tbody></table>
+<p><strong>Table columns.</strong> <code>observed age slope</code> is the estimated change in mean total bits per additional month. Negative values mean lower predicted total bits with age after the model&#x27;s controls. <code>balanced 95% slope interval</code> is the 2.5%-97.5% range across equal-age-bin bootstrap refits. <code>balanced same-sign</code> is the share of bootstrap refits with the same slope direction as the observed model. The three <code>scramble p</code> columns are permutation-style checks: small values mean the observed slope is larger than expected after breaking the age structure.</p>
+<h2>Diagnostic Appendix</h2>
+<p>The following two plots are compact diagnostics for checking all models at once. They are useful for debugging and overview, but the model-card plots above are the primary human-readable views.</p>
+<img src="../figs/age_scrambling_robustness/robustness_outside_null_heatmap.png" alt="robustness heatmap">
+<img src="../figs/age_scrambling_robustness/balanced_bootstrap_age_slope_ci.png" alt="balanced bootstrap age slope intervals">
+<h3>Compact Observed Model Rows</h3>
+<table>
+<thead><tr>
+<th>context_k</th>
+<th>model_id</th>
+<th>effort_label</th>
+<th>n_units</th>
+<th>n_children</th>
+<th>n_age_bins</th>
+<th>age_coef</th>
+<th>r2_observed_fitted</th>
+<th>status</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>k0</td>
+<td>M1</td>
+<td>Words</td>
+<td>983</td>
+<td>21</td>
+<td>8</td>
+<td>-0.04465</td>
+<td>0.9037</td>
+<td>fit</td>
+</tr>
+<tr>
+<td>k0</td>
+<td>M1</td>
+<td>Morphemes</td>
+<td>983</td>
+<td>21</td>
+<td>8</td>
+<td>-0.01707</td>
+<td>0.8926</td>
+<td>fit</td>
+</tr>
+<tr>
+<td>k0</td>
+<td>M1</td>
+<td>Syllables: CMU/pkg</td>
+<td>983</td>
+<td>21</td>
+<td>8</td>
+<td>0.02009</td>
+<td>0.9217</td>
+<td>fit</td>
+</tr>
+<tr>
+<td>k0</td>
+<td>M1</td>
+<td>Syllables: pkg</td>
+<td>983</td>
+<td>21</td>
+<td>8</td>
+<td>0.02073</td>
+<td>0.9209</td>
+<td>fit</td>
+</tr>
+<tr>
+<td>k0</td>
+<td>M1</td>
+<td>Phonemes</td>
+<td>983</td>
+<td>21</td>
+<td>8</td>
+<td>0.03861</td>
+<td>0.9179</td>
+<td>fit</td>
+</tr>
+<tr>
+<td>k0</td>
+<td>M2</td>
+<td>Words</td>
+<td>983</td>
+<td>21</td>
+<td>8</td>
+<td>-0.09487</td>
+<td>0.9397</td>
+<td>fit</td>
+</tr>
+<tr>
+<td>k0</td>
+<td>M2</td>
+<td>Morphemes</td>
+<td>983</td>
+<td>21</td>
+<td>8</td>
+<td>-0.1055</td>
+<td>0.9373</td>
+<td>fit</td>
+</tr>
+<tr>
+<td>k0</td>
+<td>M2</td>
+<td>Syllables: CMU/pkg</td>
+<td>983</td>
+<td>21</td>
+<td>8</td>
+<td>-0.07624</td>
+<td>0.9502</td>
+<td>fit</td>
+</tr>
+<tr>
+<td>k0</td>
+<td>M2</td>
+<td>Syllables: pkg</td>
+<td>983</td>
+<td>21</td>
+<td>8</td>
+<td>-0.07832</td>
+<td>0.9521</td>
+<td>fit</td>
+</tr>
+<tr>
+<td>k0</td>
+<td>M2</td>
+<td>Phonemes</td>
+<td>983</td>
+<td>21</td>
+<td>8</td>
+<td>-0.09993</td>
+<td>0.9541</td>
+<td>fit</td>
+</tr>
+<tr>
+<td>k0</td>
+<td>M3</td>
+<td>Words</td>
+<td>983</td>
+<td>21</td>
+<td>8</td>
+<td>-0.07253</td>
+<td>0.941</td>
+<td>fit</td>
+</tr>
+<tr>
+<td>k0</td>
+<td>M3</td>
+<td>Morphemes</td>
+<td>983</td>
+<td>21</td>
+<td>8</td>
+<td>-0.08293</td>
+<td>0.9385</td>
+<td>fit</td>
+</tr>
+<tr>
+<td>k0</td>
+<td>M3</td>
+<td>Syllables: CMU/pkg</td>
+<td>983</td>
+<td>21</td>
+<td>8</td>
+<td>-0.04857</td>
+<td>0.9527</td>
+<td>fit</td>
+</tr>
+<tr>
+<td>k0</td>
+<td>M3</td>
+<td>Syllables: pkg</td>
+<td>983</td>
+<td>21</td>
+<td>8</td>
+<td>-0.05405</td>
+<td>0.9541</td>
+<td>fit</td>
+</tr>
+<tr>
+<td>k0</td>
+<td>M3</td>
+<td>Phonemes</td>
+<td>983</td>
+<td>21</td>
+<td>8</td>
+<td>-0.07797</td>
+<td>0.9556</td>
+<td>fit</td>
+</tr>
+<tr>
+<td>k3</td>
+<td>M1</td>
+<td>Words</td>
+<td>983</td>
+<td>21</td>
+<td>8</td>
+<td>0.05422</td>
+<td>0.82</td>
+<td>fit</td>
+</tr>
+<tr>
+<td>k3</td>
+<td>M1</td>
+<td>Morphemes</td>
+<td>983</td>
+<td>21</td>
+<td>8</td>
+<td>0.08029</td>
+<td>0.805</td>
+<td>fit</td>
+</tr>
+<tr>
+<td>k3</td>
+<td>M1</td>
+<td>Syllables: CMU/pkg</td>
+<td>983</td>
+<td>21</td>
+<td>8</td>
+<td>0.1067</td>
+<td>0.8375</td>
+<td>fit</td>
+</tr>
+<tr>
+<td>k3</td>
+<td>M1</td>
+<td>Syllables: pkg</td>
+<td>983</td>
+<td>21</td>
+<td>8</td>
+<td>0.1067</td>
+<td>0.8383</td>
+<td>fit</td>
+</tr>
+<tr>
+<td>k3</td>
+<td>M1</td>
+<td>Phonemes</td>
+<td>983</td>
+<td>21</td>
+<td>8</td>
+<td>0.1236</td>
+<td>0.8311</td>
+<td>fit</td>
+</tr>
+<tr>
+<td>k3</td>
+<td>M2</td>
+<td>Words</td>
+<td>983</td>
+<td>21</td>
+<td>8</td>
+<td>-0.03999</td>
+<td>0.9004</td>
+<td>fit</td>
+</tr>
+<tr>
+<td>k3</td>
+<td>M2</td>
+<td>Morphemes</td>
+<td>983</td>
+<td>21</td>
+<td>8</td>
+<td>-0.04281</td>
+<td>0.8949</td>
+<td>fit</td>
+</tr>
+<tr>
+<td>k3</td>
+<td>M2</td>
+<td>Syllables: CMU/pkg</td>
+<td>983</td>
+<td>21</td>
+<td>8</td>
+<td>-0.02933</td>
+<td>0.9119</td>
+<td>fit</td>
+</tr>
+<tr>
+<td>k3</td>
+<td>M2</td>
+<td>Syllables: pkg</td>
+<td>983</td>
+<td>21</td>
+<td>8</td>
+<td>-0.03316</td>
+<td>0.9147</td>
+<td>fit</td>
+</tr>
+<tr>
+<td>k3</td>
+<td>M2</td>
+<td>Phonemes</td>
+<td>983</td>
+<td>21</td>
+<td>8</td>
+<td>-0.04589</td>
+<td>0.9124</td>
+<td>fit</td>
+</tr>
+<tr>
+<td>k3</td>
+<td>M3</td>
+<td>Words</td>
+<td>983</td>
+<td>21</td>
+<td>8</td>
+<td>-0.05013</td>
+<td>0.9006</td>
+<td>fit</td>
+</tr>
+<tr>
+<td>k3</td>
+<td>M3</td>
+<td>Morphemes</td>
+<td>983</td>
+<td>21</td>
+<td>8</td>
+<td>-0.05223</td>
+<td>0.8951</td>
+<td>fit</td>
+</tr>
+<tr>
+<td>k3</td>
+<td>M3</td>
+<td>Syllables: CMU/pkg</td>
+<td>983</td>
+<td>21</td>
+<td>8</td>
+<td>-0.03086</td>
+<td>0.9119</td>
+<td>fit</td>
+</tr>
+<tr>
+<td>k3</td>
+<td>M3</td>
+<td>Syllables: pkg</td>
+<td>983</td>
+<td>21</td>
+<td>8</td>
+<td>-0.03834</td>
+<td>0.9148</td>
+<td>fit</td>
+</tr>
+<tr>
+<td>k3</td>
+<td>M3</td>
+<td>Phonemes</td>
+<td>983</td>
+<td>21</td>
+<td>8</td>
+<td>-0.05302</td>
+<td>0.9126</td>
+<td>fit</td>
+</tr>
+<tr>
+<td>k3</td>
+<td>M4</td>
+<td>Words</td>
+<td>976</td>
+<td>21</td>
+<td>8</td>
+<td>-0.03831</td>
+<td>0.908</td>
+<td>fit</td>
+</tr>
+<tr>
+<td>k3</td>
+<td>M4</td>
+<td>Morphemes</td>
+<td>976</td>
+<td>21</td>
+<td>8</td>
+<td>-0.0417</td>
+<td>0.9026</td>
+<td>fit</td>
+</tr>
+<tr>
+<td>k3</td>
+<td>M4</td>
+<td>Syllables: CMU/pkg</td>
+<td>976</td>
+<td>21</td>
+<td>8</td>
+<td>-0.02597</td>
+<td>0.9185</td>
+<td>fit</td>
+</tr>
+<tr>
+<td>k3</td>
+<td>M4</td>
+<td>Syllables: pkg</td>
+<td>976</td>
+<td>21</td>
+<td>8</td>
+<td>-0.02994</td>
+<td>0.9218</td>
+<td>fit</td>
+</tr>
+<tr>
+<td>k3</td>
+<td>M4</td>
+<td>Phonemes</td>
+<td>976</td>
+<td>21</td>
+<td>8</td>
+<td>-0.04311</td>
+<td>0.9193</td>
+<td>fit</td>
+</tr>
+<tr>
+<td>k3</td>
+<td>M5</td>
+<td>Words</td>
+<td>976</td>
+<td>21</td>
+<td>8</td>
+<td>-0.03307</td>
+<td>0.9104</td>
+<td>fit</td>
+</tr>
+<tr>
+<td>k3</td>
+<td>M5</td>
+<td>Morphemes</td>
+<td>976</td>
+<td>21</td>
+<td>8</td>
+<td>-0.03644</td>
+<td>0.9052</td>
+<td>fit</td>
+</tr>
+<tr>
+<td>k3</td>
+<td>M5</td>
+<td>Syllables: CMU/pkg</td>
+<td>976</td>
+<td>21</td>
+<td>8</td>
+<td>-0.0214</td>
+<td>0.9214</td>
+<td>fit</td>
+</tr>
+<tr>
+<td>k3</td>
+<td>M5</td>
+<td>Syllables: pkg</td>
+<td>976</td>
+<td>21</td>
+<td>8</td>
+<td>-0.02499</td>
+<td>0.9241</td>
+<td>fit</td>
+</tr>
+<tr>
+<td>k3</td>
+<td>M5</td>
+<td>Phonemes</td>
+<td>976</td>
+<td>21</td>
+<td>8</td>
+<td>-0.03788</td>
+<td>0.9212</td>
+<td>fit</td>
+</tr>
+<tr>
+<td>k3</td>
+<td>M6</td>
+<td>Words</td>
+<td>976</td>
+<td>21</td>
+<td>8</td>
+<td>-0.05835</td>
+<td>0.9141</td>
+<td>fit</td>
+</tr>
+<tr>
+<td>k3</td>
+<td>M6</td>
+<td>Morphemes</td>
+<td>976</td>
+<td>21</td>
+<td>8</td>
+<td>-0.06312</td>
+<td>0.9084</td>
+<td>fit</td>
+</tr>
+<tr>
+<td>k3</td>
+<td>M6</td>
+<td>Syllables: CMU/pkg</td>
+<td>976</td>
+<td>21</td>
+<td>8</td>
+<td>-0.03341</td>
+<td>0.9236</td>
+<td>fit</td>
+</tr>
+<tr>
+<td>k3</td>
+<td>M6</td>
+<td>Syllables: pkg</td>
+<td>976</td>
+<td>21</td>
+<td>8</td>
+<td>-0.03902</td>
+<td>0.927</td>
+<td>fit</td>
+</tr>
+<tr>
+<td>k3</td>
+<td>M6</td>
+<td>Phonemes</td>
+<td>976</td>
+<td>21</td>
+<td>8</td>
+<td>-0.0569</td>
+<td>0.9248</td>
+<td>fit</td>
+</tr>
+</tbody></table>
+<p><strong>How to read this table.</strong> <code>age_coef</code> is the model&#x27;s age slope. <code>r2</code> is the share of unit-level variance explained by the fitted values in that model row. This table is intentionally compact; full replicate slopes are saved as CSV.</p>
+<h2>Files</h2>
+<ul>
+<li>Unit-level frame: <code>results/age_scrambling_robustness/age_scrambling_unit_frame.csv.gz</code></li>
+<li>Source-file audit: <code>results/age_scrambling_robustness/age_scrambling_source_file_audit.csv</code></li>
+<li>Observed fits: <code>results/age_scrambling_robustness/age_scrambling_observed_model_summary.csv</code></li>
+<li>Replicate slopes: <code>results/age_scrambling_robustness/age_scrambling_replicate_age_slopes.csv.gz</code></li>
+<li>Robustness summary: <code>results/age_scrambling_robustness/age_scrambling_robustness_summary.csv</code></li>
+<li>Figures: <code>figs/age_scrambling_robustness</code></li>
+</ul>
+</main>
+</body>
+</html>

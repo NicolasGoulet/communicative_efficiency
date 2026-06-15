@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Size-Controlled Information Trajectories</title>
+<style>
+:root {
+  color-scheme: light;
+  --ink: #1e2528;
+  --muted: #5e686d;
+  --line: #d9e0df;
+  --paper: #ffffff;
+  --soft: #f5f7f6;
+  --accent: #2f6f73;
+  --accent2: #c76f2c;
+}
+body {
+  margin: 0;
+  background: #eef2f1;
+  color: var(--ink);
+  font: 16px/1.58 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+main {
+  max-width: 980px;
+  margin: 34px auto 56px;
+  padding: 48px 58px;
+  background: var(--paper);
+  box-shadow: 0 18px 50px rgba(31, 45, 48, 0.12);
+}
+h1, h2, h3, h4 {
+  line-height: 1.18;
+  margin: 1.6em 0 0.55em;
+}
+h1 {
+  margin-top: 0;
+  font-size: 2.25rem;
+  border-bottom: 3px solid var(--accent);
+  padding-bottom: 0.45em;
+}
+h2 {
+  font-size: 1.55rem;
+  color: var(--accent);
+}
+h3 {
+  font-size: 1.18rem;
+}
+p {
+  margin: 0.75em 0;
+}
+a {
+  color: var(--accent);
+}
+blockquote {
+  border-left: 4px solid var(--accent2);
+  margin: 1.1em 0;
+  padding: 0.05em 1.1em;
+  color: var(--muted);
+  background: #fff8f2;
+}
+code {
+  background: var(--soft);
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  padding: 0.08em 0.3em;
+  font-family: "SFMono-Regular", Consolas, monospace;
+  font-size: 0.92em;
+}
+pre {
+  background: #f5f7f6;
+  color: var(--ink);
+  border: 1px solid var(--line);
+  padding: 1em;
+  overflow-x: auto;
+  border-radius: 7px;
+}
+pre code {
+  background: transparent;
+  border: 0;
+  padding: 0;
+  color: inherit;
+}
+table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 1.15em 0 1.45em;
+  font-size: 0.95em;
+}
+th, td {
+  border: 1px solid var(--line);
+  padding: 0.54em 0.68em;
+  vertical-align: top;
+}
+th {
+  background: #e7efed;
+  text-align: left;
+}
+tr:nth-child(even) td {
+  background: #fafbfb;
+}
+img {
+  max-width: 100%;
+  display: block;
+  margin: 1.1em auto 0.45em;
+}
+ul, ol {
+  padding-left: 1.4em;
+}
+.caption {
+  color: var(--muted);
+  font-size: 0.92em;
+  margin-top: -0.15em;
+}
+@media print {
+  body {
+    background: white;
+  }
+  main {
+    box-shadow: none;
+    margin: 0;
+    max-width: none;
+    padding: 28px;
+  }
+}
+</style>
+</head>
+<body>
+<main>
+<h1>Size-Controlled Information Trajectories</h1>
+<p>These plots are intentionally separate from the main report. They are quick meeting figures for checking whether developmental trends remain visible when utterances are restricted to the same exact or coarse effort range.</p>
+<p>Interpretation note: the exact-effort plots are the safest descriptive figures here. Each panel only includes utterances with exactly the displayed number of words, morphemes, syllables, or phonemes. The coarse <code>1-4</code> and <code>5-8</code> plots are only diagnostics.</p>
+<h2>Exact-Effort Plots</h2>
+<p>These are the plots to use when making a simple size-control claim. Each panel fixes the effort count exactly.</p>
+<h3>Exact Words</h3>
+<img src="../figs/meeting_size_controlled_plots/exact_words_1_4_child_real_random_trigram.png" alt="Exact 1-4 words: child real/random/trigram">
+<img src="../figs/meeting_size_controlled_plots/exact_words_5_8_child_real_random_trigram.png" alt="Exact 5-8 words: child real/random/trigram">
+<img src="../figs/meeting_size_controlled_plots/exact_words_1_4_child_vs_caretaker.png" alt="Exact 1-4 words: child/caretaker">
+<img src="../figs/meeting_size_controlled_plots/exact_words_5_8_child_vs_caretaker.png" alt="Exact 5-8 words: child/caretaker">
+<h3>Exact Morphemes</h3>
+<img src="../figs/meeting_size_controlled_plots/exact_morphemes_1_4_child_real_random_trigram.png" alt="Exact 1-4 morphemes: child real/random/trigram">
+<img src="../figs/meeting_size_controlled_plots/exact_morphemes_5_8_child_real_random_trigram.png" alt="Exact 5-8 morphemes: child real/random/trigram">
+<h3>Exact Syllables</h3>
+<img src="../figs/meeting_size_controlled_plots/exact_syllables_cmu_or_pkg_1_4_child_real_random_trigram.png" alt="Exact 1-4 syllables CMU/pkg: child real/random/trigram">
+<img src="../figs/meeting_size_controlled_plots/exact_syllables_cmu_or_pkg_5_8_child_real_random_trigram.png" alt="Exact 5-8 syllables CMU/pkg: child real/random/trigram">
+<img src="../figs/meeting_size_controlled_plots/exact_syllables_pkg_1_4_child_real_random_trigram.png" alt="Exact 1-4 syllables pkg: child real/random/trigram">
+<img src="../figs/meeting_size_controlled_plots/exact_syllables_pkg_5_8_child_real_random_trigram.png" alt="Exact 5-8 syllables pkg: child real/random/trigram">
+<h3>Exact Phonemes</h3>
+<img src="../figs/meeting_size_controlled_plots/exact_phonemes_1_4_child_real_random_trigram.png" alt="Exact 1-4 phonemes: child real/random/trigram">
+<img src="../figs/meeting_size_controlled_plots/exact_phonemes_5_8_child_real_random_trigram.png" alt="Exact 5-8 phonemes: child real/random/trigram">
+<img src="../figs/meeting_size_controlled_plots/exact_words_child_real_random_trigram.png" alt="Exact words: child real/random/trigram">
+<img src="../figs/meeting_size_controlled_plots/exact_words_child_vs_caretaker.png" alt="Exact words: child/caretaker">
+<img src="../figs/meeting_size_controlled_plots/exact_morphemes_child_real_random_trigram.png" alt="Exact morphemes: child real/random/trigram">
+<img src="../figs/meeting_size_controlled_plots/exact_syllables_cmu_or_pkg_child_real_random_trigram.png" alt="Exact syllables CMU/pkg: child real/random/trigram">
+<img src="../figs/meeting_size_controlled_plots/exact_phonemes_child_real_random_trigram.png" alt="Exact phonemes: child real/random/trigram">
+<h2>Coarse Word-Stratified Diagnostics</h2>
+<img src="../figs/meeting_size_controlled_plots/child_real_random_trigram_bits_per_word_by_size.png" alt="Child real/random/trigram bits per word">
+<img src="../figs/meeting_size_controlled_plots/child_real_random_trigram_all_effort_controls.png" alt="Child real/random/trigram all effort controls">
+<h2>Child vs Caretaker</h2>
+<img src="../figs/meeting_size_controlled_plots/child_vs_caretaker_bits_per_word_by_size.png" alt="Child/caretaker bits per word">
+<img src="../figs/meeting_size_controlled_plots/child_vs_caretaker_all_effort_controls.png" alt="Child/caretaker all effort controls">
+</main>
+</body>
+</html>

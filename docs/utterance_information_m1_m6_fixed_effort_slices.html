@@ -1,0 +1,1072 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>M1-M6 Fixed-Effort Slice Predictions</title>
+<style>
+:root {
+  color-scheme: light;
+  --ink: #1e2528;
+  --muted: #5e686d;
+  --line: #d9e0df;
+  --paper: #ffffff;
+  --soft: #f5f7f6;
+  --accent: #2f6f73;
+  --accent2: #c76f2c;
+}
+body {
+  margin: 0;
+  background: #eef2f1;
+  color: var(--ink);
+  font: 16px/1.58 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+main {
+  max-width: 980px;
+  margin: 34px auto 56px;
+  padding: 48px 58px;
+  background: var(--paper);
+  box-shadow: 0 18px 50px rgba(31, 45, 48, 0.12);
+}
+h1, h2, h3, h4 {
+  line-height: 1.18;
+  margin: 1.6em 0 0.55em;
+}
+h1 {
+  margin-top: 0;
+  font-size: 2.25rem;
+  border-bottom: 3px solid var(--accent);
+  padding-bottom: 0.45em;
+}
+h2 {
+  font-size: 1.55rem;
+  color: var(--accent);
+}
+h3 {
+  font-size: 1.18rem;
+}
+p {
+  margin: 0.75em 0;
+}
+a {
+  color: var(--accent);
+}
+blockquote {
+  border-left: 4px solid var(--accent2);
+  margin: 1.1em 0;
+  padding: 0.05em 1.1em;
+  color: var(--muted);
+  background: #fff8f2;
+}
+code {
+  background: var(--soft);
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  padding: 0.08em 0.3em;
+  font-family: "SFMono-Regular", Consolas, monospace;
+  font-size: 0.92em;
+}
+pre {
+  background: #f5f7f6;
+  color: var(--ink);
+  border: 1px solid var(--line);
+  padding: 1em;
+  overflow-x: auto;
+  border-radius: 7px;
+}
+pre code {
+  background: transparent;
+  border: 0;
+  padding: 0;
+  color: inherit;
+}
+table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 1.15em 0 1.45em;
+  font-size: 0.95em;
+}
+th, td {
+  border: 1px solid var(--line);
+  padding: 0.54em 0.68em;
+  vertical-align: top;
+}
+th {
+  background: #e7efed;
+  text-align: left;
+}
+tr:nth-child(even) td {
+  background: #fafbfb;
+}
+img {
+  max-width: 100%;
+  display: block;
+  margin: 1.1em auto 0.45em;
+}
+ul, ol {
+  padding-left: 1.4em;
+}
+.caption {
+  color: var(--muted);
+  font-size: 0.92em;
+  margin-top: -0.15em;
+}
+@media print {
+  body {
+    background: white;
+  }
+  main {
+    box-shadow: none;
+    margin: 0;
+    max-width: none;
+    padding: 28px;
+  }
+}
+</style>
+</head>
+<body>
+<main>
+<h1>M1-M6 Fixed-Effort Slice Predictions</h1>
+<p>This report replaces the insufficient median-only view. It repeats the M1-M6 continuous-effort prediction stage across many exact fixed effort values.</p>
+<p>Important: the models are still fit on all eligible real child utterances. The fixed values only define the prediction lines.</p>
+<p>Why the script refits: the previous reports saved coefficient CSVs and figures, but not serialized model objects. To generate new prediction grids, we refit the same formulas once per model/effort unit, then write new predictions. We do not fit separate models for each fixed effort value.</p>
+<h2>Outputs</h2>
+<pre><code>results/m1_m6_fixed_effort_slices/fixed_effort_model_summary.csv
+results/m1_m6_fixed_effort_slices/marginal_adjusted_predictions.csv
+results/m1_m6_fixed_effort_slices/fixed_effort_predictions.csv
+results/m1_m6_fixed_effort_slices/selected_fixed_effort_values.csv
+figs/m1_m6_fixed_effort_slices/</code></pre>
+<h2>Statistical Checkpoint</h2>
+<p>This follows the Advanced Data Analytics guidance checked on 2026-06-09:</p>
+<ul>
+<li>outcome is continuous (<code>sum_bits</code>);</li>
+<li>rows are repeated within children, so child identity must be handled in the</li>
+<p>model family or uncertainty structure;</p>
+<li>fitting and reporting are separated: run <code>--stage analysis</code> for models and</li>
+<p>predictions, and <code>--stage report</code> for Markdown/HTML only;</p>
+<li>the single global line is a <strong>marginal adjusted prediction</strong>, not a new</li>
+<p>inferential test;</p>
+<li>fixed-slice lines are conditional prediction views, not separate fitted</li>
+<p>models for each length.</p>
+</ul>
+<h2>Selected Fixed Values</h2>
+<table>
+<thead><tr>
+<th>plot_group</th>
+<th>effort</th>
+<th>values</th>
+<th>n_values</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>granular_primary</td>
+<td>Morphemes</td>
+<td>1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12</td>
+<td>12</td>
+</tr>
+<tr>
+<td>granular_primary</td>
+<td>Phonemes</td>
+<td>1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19</td>
+<td>19</td>
+</tr>
+<tr>
+<td>granular_primary</td>
+<td>Syllables: CMU/pkg</td>
+<td>1, 2, 3, 4, 5, 6, 7, 8</td>
+<td>8</td>
+</tr>
+<tr>
+<td>granular_primary</td>
+<td>Syllables: pkg</td>
+<td>1, 2, 3, 4, 5, 6, 7, 8</td>
+<td>8</td>
+</tr>
+<tr>
+<td>granular_primary</td>
+<td>Words</td>
+<td>1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12</td>
+<td>12</td>
+</tr>
+<tr>
+<td>primary_anchors_p25_p50_p75</td>
+<td>Morphemes</td>
+<td>1, 2, 4</td>
+<td>3</td>
+</tr>
+<tr>
+<td>primary_anchors_p25_p50_p75</td>
+<td>Phonemes</td>
+<td>3, 7, 11</td>
+<td>3</td>
+</tr>
+<tr>
+<td>primary_anchors_p25_p50_p75</td>
+<td>Syllables: CMU/pkg</td>
+<td>1, 3, 4</td>
+<td>3</td>
+</tr>
+<tr>
+<td>primary_anchors_p25_p50_p75</td>
+<td>Syllables: pkg</td>
+<td>1, 3, 5</td>
+<td>3</td>
+</tr>
+<tr>
+<td>primary_anchors_p25_p50_p75</td>
+<td>Words</td>
+<td>1, 2, 4</td>
+<td>3</td>
+</tr>
+<tr>
+<td>top_frequency_12</td>
+<td>Morphemes</td>
+<td>1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12</td>
+<td>12</td>
+</tr>
+<tr>
+<td>top_frequency_12</td>
+<td>Phonemes</td>
+<td>2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13</td>
+<td>12</td>
+</tr>
+<tr>
+<td>top_frequency_12</td>
+<td>Syllables: CMU/pkg</td>
+<td>1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12</td>
+<td>12</td>
+</tr>
+<tr>
+<td>top_frequency_12</td>
+<td>Syllables: pkg</td>
+<td>1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12</td>
+<td>12</td>
+</tr>
+<tr>
+<td>top_frequency_12</td>
+<td>Words</td>
+<td>1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12</td>
+<td>12</td>
+</tr>
+<tr>
+<td>wide_anchors_p10_p50_p90</td>
+<td>Morphemes</td>
+<td>1, 2, 6</td>
+<td>3</td>
+</tr>
+<tr>
+<td>wide_anchors_p10_p50_p90</td>
+<td>Phonemes</td>
+<td>2, 7, 16</td>
+<td>3</td>
+</tr>
+<tr>
+<td>wide_anchors_p10_p50_p90</td>
+<td>Syllables: CMU/pkg</td>
+<td>1, 3, 6</td>
+<td>3</td>
+</tr>
+<tr>
+<td>wide_anchors_p10_p50_p90</td>
+<td>Syllables: pkg</td>
+<td>1, 3, 7</td>
+<td>3</td>
+</tr>
+<tr>
+<td>wide_anchors_p10_p50_p90</td>
+<td>Words</td>
+<td>1, 2, 5</td>
+<td>3</td>
+</tr>
+</tbody></table>
+<h2>Plot Readability Rule</h2>
+<p>The model predictions are computed for all selected fixed values. The figures are capped for readability: dense granular panels display at most 8 representative values per effort unit. The full set remains in <code>fixed_effort_predictions.csv</code>.</p>
+<table>
+<thead><tr>
+<th>plot_group</th>
+<th>effort_label</th>
+<th>displayed_fixed_values</th>
+<th>n_displayed_values</th>
+<th>n_all_values</th>
+<th>display_note</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>granular_primary</td>
+<td>Morphemes</td>
+<td>1, 3, 4, 6, 7, 9, 10, 12</td>
+<td>8</td>
+<td>12</td>
+<td>full values saved in prediction CSV</td>
+</tr>
+<tr>
+<td>granular_primary</td>
+<td>Phonemes</td>
+<td>1, 4, 6, 9, 11, 14, 16, 19</td>
+<td>8</td>
+<td>19</td>
+<td>full values saved in prediction CSV</td>
+</tr>
+<tr>
+<td>granular_primary</td>
+<td>Syllables: CMU/pkg</td>
+<td>1, 2, 3, 4, 5, 6, 7, 8</td>
+<td>8</td>
+<td>8</td>
+<td>all values displayed</td>
+</tr>
+<tr>
+<td>granular_primary</td>
+<td>Syllables: pkg</td>
+<td>1, 2, 3, 4, 5, 6, 7, 8</td>
+<td>8</td>
+<td>8</td>
+<td>all values displayed</td>
+</tr>
+<tr>
+<td>granular_primary</td>
+<td>Words</td>
+<td>1, 3, 4, 6, 7, 9, 10, 12</td>
+<td>8</td>
+<td>12</td>
+<td>full values saved in prediction CSV</td>
+</tr>
+<tr>
+<td>primary_anchors_p25_p50_p75</td>
+<td>Morphemes</td>
+<td>1, 2, 4</td>
+<td>3</td>
+<td>3</td>
+<td>all values displayed</td>
+</tr>
+<tr>
+<td>primary_anchors_p25_p50_p75</td>
+<td>Phonemes</td>
+<td>3, 7, 11</td>
+<td>3</td>
+<td>3</td>
+<td>all values displayed</td>
+</tr>
+<tr>
+<td>primary_anchors_p25_p50_p75</td>
+<td>Syllables: CMU/pkg</td>
+<td>1, 3, 4</td>
+<td>3</td>
+<td>3</td>
+<td>all values displayed</td>
+</tr>
+<tr>
+<td>primary_anchors_p25_p50_p75</td>
+<td>Syllables: pkg</td>
+<td>1, 3, 5</td>
+<td>3</td>
+<td>3</td>
+<td>all values displayed</td>
+</tr>
+<tr>
+<td>primary_anchors_p25_p50_p75</td>
+<td>Words</td>
+<td>1, 2, 4</td>
+<td>3</td>
+<td>3</td>
+<td>all values displayed</td>
+</tr>
+<tr>
+<td>top_frequency_12</td>
+<td>Morphemes</td>
+<td>1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12</td>
+<td>12</td>
+<td>12</td>
+<td>all values displayed</td>
+</tr>
+<tr>
+<td>top_frequency_12</td>
+<td>Phonemes</td>
+<td>2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13</td>
+<td>12</td>
+<td>12</td>
+<td>all values displayed</td>
+</tr>
+<tr>
+<td>top_frequency_12</td>
+<td>Syllables: CMU/pkg</td>
+<td>1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12</td>
+<td>12</td>
+<td>12</td>
+<td>all values displayed</td>
+</tr>
+<tr>
+<td>top_frequency_12</td>
+<td>Syllables: pkg</td>
+<td>1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12</td>
+<td>12</td>
+<td>12</td>
+<td>all values displayed</td>
+</tr>
+<tr>
+<td>top_frequency_12</td>
+<td>Words</td>
+<td>1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12</td>
+<td>12</td>
+<td>12</td>
+<td>all values displayed</td>
+</tr>
+<tr>
+<td>wide_anchors_p10_p50_p90</td>
+<td>Morphemes</td>
+<td>1, 2, 6</td>
+<td>3</td>
+<td>3</td>
+<td>all values displayed</td>
+</tr>
+<tr>
+<td>wide_anchors_p10_p50_p90</td>
+<td>Phonemes</td>
+<td>2, 7, 16</td>
+<td>3</td>
+<td>3</td>
+<td>all values displayed</td>
+</tr>
+<tr>
+<td>wide_anchors_p10_p50_p90</td>
+<td>Syllables: CMU/pkg</td>
+<td>1, 3, 6</td>
+<td>3</td>
+<td>3</td>
+<td>all values displayed</td>
+</tr>
+<tr>
+<td>wide_anchors_p10_p50_p90</td>
+<td>Syllables: pkg</td>
+<td>1, 3, 7</td>
+<td>3</td>
+<td>3</td>
+<td>all values displayed</td>
+</tr>
+<tr>
+<td>wide_anchors_p10_p50_p90</td>
+<td>Words</td>
+<td>1, 2, 5</td>
+<td>3</td>
+<td>3</td>
+<td>all values displayed</td>
+</tr>
+</tbody></table>
+<h2>Model Summary</h2>
+<table>
+<thead><tr>
+<th>model_id</th>
+<th>effort_label</th>
+<th>n_obs</th>
+<th>n_children</th>
+<th>r2_observed_fitted</th>
+<th>age_coef</th>
+<th>age_p</th>
+<th>effort_coef</th>
+<th>effort_p</th>
+<th>entropy_coef</th>
+<th>entropy_p</th>
+<th>age_effort_coef</th>
+<th>age_effort_p</th>
+<th>age_entropy_coef</th>
+<th>age_entropy_p</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>M1</td>
+<td>Words</td>
+<td>446985</td>
+<td>21</td>
+<td>0.613</td>
+<td>0.000309</td>
+<td>0.993</td>
+<td>6.35</td>
+<td>0</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>M1</td>
+<td>Morphemes</td>
+<td>446985</td>
+<td>21</td>
+<td>0.598</td>
+<td>0.00902</td>
+<td>0.774</td>
+<td>5.45</td>
+<td>2.68e-300</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>M1</td>
+<td>Syllables: CMU/pkg</td>
+<td>446985</td>
+<td>21</td>
+<td>0.635</td>
+<td>0.0514</td>
+<td>0.0526</td>
+<td>5.21</td>
+<td>2.06e-264</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>M1</td>
+<td>Syllables: pkg</td>
+<td>446985</td>
+<td>21</td>
+<td>0.618</td>
+<td>0.069</td>
+<td>0.0118</td>
+<td>4.82</td>
+<td>2.3e-306</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>M1</td>
+<td>Phonemes</td>
+<td>446985</td>
+<td>21</td>
+<td>0.632</td>
+<td>0.0681</td>
+<td>0.0115</td>
+<td>2.07</td>
+<td>4.13e-239</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>M2</td>
+<td>Words</td>
+<td>446985</td>
+<td>21</td>
+<td>0.626</td>
+<td>-0.122</td>
+<td>4.42e-05</td>
+<td>6.37</td>
+<td>0</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>M2</td>
+<td>Morphemes</td>
+<td>446985</td>
+<td>21</td>
+<td>0.613</td>
+<td>-0.136</td>
+<td>0.000252</td>
+<td>5.49</td>
+<td>8.54e-271</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>M2</td>
+<td>Syllables: CMU/pkg</td>
+<td>446985</td>
+<td>21</td>
+<td>0.646</td>
+<td>-0.0633</td>
+<td>0.0177</td>
+<td>5.24</td>
+<td>4.14e-290</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>M2</td>
+<td>Syllables: pkg</td>
+<td>446985</td>
+<td>21</td>
+<td>0.63</td>
+<td>-0.0485</td>
+<td>0.0494</td>
+<td>4.83</td>
+<td>0</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>M2</td>
+<td>Phonemes</td>
+<td>446985</td>
+<td>21</td>
+<td>0.644</td>
+<td>-0.0649</td>
+<td>0.0135</td>
+<td>2.08</td>
+<td>8.23e-239</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>M3</td>
+<td>Words</td>
+<td>446985</td>
+<td>21</td>
+<td>0.626</td>
+<td>-0.122</td>
+<td>4.16e-05</td>
+<td>6.38</td>
+<td>0</td>
+<td></td>
+<td></td>
+<td>-0.00379</td>
+<td>0.515</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>M3</td>
+<td>Morphemes</td>
+<td>446985</td>
+<td>21</td>
+<td>0.613</td>
+<td>-0.136</td>
+<td>0.000311</td>
+<td>5.48</td>
+<td>3.37e-275</td>
+<td></td>
+<td></td>
+<td>0.00228</td>
+<td>0.727</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>M3</td>
+<td>Syllables: CMU/pkg</td>
+<td>446985</td>
+<td>21</td>
+<td>0.646</td>
+<td>-0.0659</td>
+<td>0.017</td>
+<td>5.22</td>
+<td>4.14e-298</td>
+<td></td>
+<td></td>
+<td>0.00703</td>
+<td>0.252</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>M3</td>
+<td>Syllables: pkg</td>
+<td>446985</td>
+<td>21</td>
+<td>0.63</td>
+<td>-0.0521</td>
+<td>0.0554</td>
+<td>4.81</td>
+<td>0</td>
+<td></td>
+<td></td>
+<td>0.00986</td>
+<td>0.0218</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>M3</td>
+<td>Phonemes</td>
+<td>446985</td>
+<td>21</td>
+<td>0.644</td>
+<td>-0.0672</td>
+<td>0.0169</td>
+<td>2.08</td>
+<td>5.97e-269</td>
+<td></td>
+<td></td>
+<td>0.00273</td>
+<td>0.22</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>M4</td>
+<td>Words</td>
+<td>441413</td>
+<td>21</td>
+<td>0.627</td>
+<td>-0.127</td>
+<td>3.29e-05</td>
+<td>6.37</td>
+<td>0</td>
+<td>-0.472</td>
+<td>8.14e-37</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>M4</td>
+<td>Morphemes</td>
+<td>441413</td>
+<td>21</td>
+<td>0.614</td>
+<td>-0.14</td>
+<td>0.000192</td>
+<td>5.49</td>
+<td>2.53e-258</td>
+<td>-0.512</td>
+<td>4.22e-43</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>M4</td>
+<td>Syllables: CMU/pkg</td>
+<td>441413</td>
+<td>21</td>
+<td>0.647</td>
+<td>-0.0645</td>
+<td>0.0133</td>
+<td>5.23</td>
+<td>1.92e-281</td>
+<td>-0.54</td>
+<td>7.26e-57</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>M4</td>
+<td>Syllables: pkg</td>
+<td>441413</td>
+<td>21</td>
+<td>0.63</td>
+<td>-0.048</td>
+<td>0.0384</td>
+<td>4.83</td>
+<td>0</td>
+<td>-0.541</td>
+<td>2.56e-59</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>M4</td>
+<td>Phonemes</td>
+<td>441413</td>
+<td>21</td>
+<td>0.645</td>
+<td>-0.0652</td>
+<td>0.0128</td>
+<td>2.08</td>
+<td>2.45e-231</td>
+<td>-0.581</td>
+<td>3.34e-70</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>M5</td>
+<td>Words</td>
+<td>441413</td>
+<td>21</td>
+<td>0.627</td>
+<td>-0.128</td>
+<td>4.34e-05</td>
+<td>6.37</td>
+<td>0</td>
+<td>-0.47</td>
+<td>2.15e-41</td>
+<td></td>
+<td></td>
+<td>0.00614</td>
+<td>0.284</td>
+</tr>
+<tr>
+<td>M5</td>
+<td>Morphemes</td>
+<td>441413</td>
+<td>21</td>
+<td>0.614</td>
+<td>-0.141</td>
+<td>0.000231</td>
+<td>5.49</td>
+<td>3.74e-258</td>
+<td>-0.511</td>
+<td>1.78e-47</td>
+<td></td>
+<td></td>
+<td>0.00471</td>
+<td>0.339</td>
+</tr>
+<tr>
+<td>M5</td>
+<td>Syllables: CMU/pkg</td>
+<td>441413</td>
+<td>21</td>
+<td>0.647</td>
+<td>-0.0649</td>
+<td>0.015</td>
+<td>5.23</td>
+<td>3.23e-281</td>
+<td>-0.539</td>
+<td>1.57e-62</td>
+<td></td>
+<td></td>
+<td>0.00396</td>
+<td>0.478</td>
+</tr>
+<tr>
+<td>M5</td>
+<td>Syllables: pkg</td>
+<td>441413</td>
+<td>21</td>
+<td>0.63</td>
+<td>-0.0485</td>
+<td>0.0422</td>
+<td>4.83</td>
+<td>0</td>
+<td>-0.54</td>
+<td>2.2e-65</td>
+<td></td>
+<td></td>
+<td>0.00395</td>
+<td>0.481</td>
+</tr>
+<tr>
+<td>M5</td>
+<td>Phonemes</td>
+<td>441413</td>
+<td>21</td>
+<td>0.645</td>
+<td>-0.0657</td>
+<td>0.0144</td>
+<td>2.08</td>
+<td>3.94e-231</td>
+<td>-0.581</td>
+<td>4.07e-81</td>
+<td></td>
+<td></td>
+<td>0.00465</td>
+<td>0.407</td>
+</tr>
+<tr>
+<td>M6</td>
+<td>Words</td>
+<td>441413</td>
+<td>21</td>
+<td>0.627</td>
+<td>-0.127</td>
+<td>4.76e-05</td>
+<td>6.38</td>
+<td>0</td>
+<td>-0.473</td>
+<td>4.91e-39</td>
+<td>-0.00244</td>
+<td>0.726</td>
+<td>0.00908</td>
+<td>0.111</td>
+</tr>
+<tr>
+<td>M6</td>
+<td>Morphemes</td>
+<td>441413</td>
+<td>21</td>
+<td>0.614</td>
+<td>-0.142</td>
+<td>0.000332</td>
+<td>5.48</td>
+<td>4.19e-280</td>
+<td>-0.517</td>
+<td>2.9e-42</td>
+<td>0.0039</td>
+<td>0.575</td>
+<td>0.0091</td>
+<td>0.0702</td>
+</tr>
+<tr>
+<td>M6</td>
+<td>Syllables: CMU/pkg</td>
+<td>441413</td>
+<td>21</td>
+<td>0.647</td>
+<td>-0.0679</td>
+<td>0.0161</td>
+<td>5.21</td>
+<td>4.14e-305</td>
+<td>-0.543</td>
+<td>8.61e-56</td>
+<td>0.00902</td>
+<td>0.154</td>
+<td>0.00658</td>
+<td>0.202</td>
+</tr>
+<tr>
+<td>M6</td>
+<td>Syllables: pkg</td>
+<td>441413</td>
+<td>21</td>
+<td>0.631</td>
+<td>-0.0523</td>
+<td>0.0526</td>
+<td>4.8</td>
+<td>0</td>
+<td>-0.544</td>
+<td>1.98e-59</td>
+<td>0.0121</td>
+<td>0.0173</td>
+<td>0.00518</td>
+<td>0.277</td>
+</tr>
+<tr>
+<td>M6</td>
+<td>Phonemes</td>
+<td>441413</td>
+<td>21</td>
+<td>0.646</td>
+<td>-0.0685</td>
+<td>0.0186</td>
+<td>2.08</td>
+<td>5.41e-278</td>
+<td>-0.585</td>
+<td>3.98e-65</td>
+<td>0.00355</td>
+<td>0.2</td>
+<td>0.00833</td>
+<td>0.0859</td>
+</tr>
+</tbody></table>
+<h2>M1: Pooled age and effort</h2>
+<p>Question: Pooling all children, does age predict total bits after controlling utterance effort?</p>
+<h3>Global adjusted trend</h3>
+<p>How to read: this is the single global age trend after accounting for effort and child/context composition by averaging predictions over observed rows. It is not restricted to one length.</p>
+<img src="../figs/m1_m6_fixed_effort_slices/m1_marginal_adjusted_global_trends.png" alt="M1 marginal adjusted trend">
+<p>How to read: each line is a prediction from the same fitted model, but at a different exact fixed effort value. The model was fit on all utterance lengths; only the prediction slice changes.</p>
+<h3>Top 12 most frequent exact effort sizes</h3>
+<img src="../figs/m1_m6_fixed_effort_slices/m1_top_frequency_12_fixed_effort_slices.png" alt="M1 top_frequency_12">
+<h3>Words/morphemes 1-12; syllables/phonemes data-supported dense core</h3>
+<img src="../figs/m1_m6_fixed_effort_slices/m1_granular_primary_fixed_effort_slices.png" alt="M1 granular_primary">
+<h3>Primary low/median/high fixed slices</h3>
+<img src="../figs/m1_m6_fixed_effort_slices/m1_primary_anchors_p25_p50_p75_fixed_effort_slices.png" alt="M1 primary_anchors_p25_p50_p75">
+<h3>Wide low/median/high fixed slices</h3>
+<img src="../figs/m1_m6_fixed_effort_slices/m1_wide_anchors_p10_p50_p90_fixed_effort_slices.png" alt="M1 wide_anchors_p10_p50_p90">
+<h2>M2: Age and effort with child identity</h2>
+<p>Question: Does the developmental age effect remain after child identity is controlled?</p>
+<h3>Global adjusted trend</h3>
+<p>How to read: this is the single global age trend after accounting for effort and child/context composition by averaging predictions over observed rows. It is not restricted to one length.</p>
+<img src="../figs/m1_m6_fixed_effort_slices/m2_marginal_adjusted_global_trends.png" alt="M2 marginal adjusted trend">
+<p>How to read: each line is a prediction from the same fitted model, but at a different exact fixed effort value. The model was fit on all utterance lengths; only the prediction slice changes.</p>
+<h3>Top 12 most frequent exact effort sizes</h3>
+<img src="../figs/m1_m6_fixed_effort_slices/m2_top_frequency_12_fixed_effort_slices.png" alt="M2 top_frequency_12">
+<h3>Words/morphemes 1-12; syllables/phonemes data-supported dense core</h3>
+<img src="../figs/m1_m6_fixed_effort_slices/m2_granular_primary_fixed_effort_slices.png" alt="M2 granular_primary">
+<h3>Primary low/median/high fixed slices</h3>
+<img src="../figs/m1_m6_fixed_effort_slices/m2_primary_anchors_p25_p50_p75_fixed_effort_slices.png" alt="M2 primary_anchors_p25_p50_p75">
+<h3>Wide low/median/high fixed slices</h3>
+<img src="../figs/m1_m6_fixed_effort_slices/m2_wide_anchors_p10_p50_p90_fixed_effort_slices.png" alt="M2 wide_anchors_p10_p50_p90">
+<h2>M3: Age by effort</h2>
+<p>Question: Does the relation between effort and total bits change with age?</p>
+<h3>Global adjusted trend</h3>
+<p>How to read: this is the single global age trend after accounting for effort and child/context composition by averaging predictions over observed rows. It is not restricted to one length.</p>
+<img src="../figs/m1_m6_fixed_effort_slices/m3_marginal_adjusted_global_trends.png" alt="M3 marginal adjusted trend">
+<p>How to read: each line is a prediction from the same fitted model, but at a different exact fixed effort value. The model was fit on all utterance lengths; only the prediction slice changes.</p>
+<h3>Top 12 most frequent exact effort sizes</h3>
+<img src="../figs/m1_m6_fixed_effort_slices/m3_top_frequency_12_fixed_effort_slices.png" alt="M3 top_frequency_12">
+<h3>Words/morphemes 1-12; syllables/phonemes data-supported dense core</h3>
+<img src="../figs/m1_m6_fixed_effort_slices/m3_granular_primary_fixed_effort_slices.png" alt="M3 granular_primary">
+<h3>Primary low/median/high fixed slices</h3>
+<img src="../figs/m1_m6_fixed_effort_slices/m3_primary_anchors_p25_p50_p75_fixed_effort_slices.png" alt="M3 primary_anchors_p25_p50_p75">
+<h3>Wide low/median/high fixed slices</h3>
+<img src="../figs/m1_m6_fixed_effort_slices/m3_wide_anchors_p10_p50_p90_fixed_effort_slices.png" alt="M3 wide_anchors_p10_p50_p90">
+<h2>M4: Context entropy added</h2>
+<p>Question: Does context entropy add predictive information beyond age, effort, and child identity?</p>
+<h3>Global adjusted trend</h3>
+<p>How to read: this is the single global age trend after accounting for effort and child/context composition by averaging predictions over observed rows. It is not restricted to one length.</p>
+<img src="../figs/m1_m6_fixed_effort_slices/m4_marginal_adjusted_global_trends.png" alt="M4 marginal adjusted trend">
+<p>How to read: each line is a prediction from the same fitted model, but at a different exact fixed effort value. The model was fit on all utterance lengths; only the prediction slice changes.</p>
+<h3>Top 12 most frequent exact effort sizes</h3>
+<img src="../figs/m1_m6_fixed_effort_slices/m4_top_frequency_12_fixed_effort_slices.png" alt="M4 top_frequency_12">
+<h3>Words/morphemes 1-12; syllables/phonemes data-supported dense core</h3>
+<img src="../figs/m1_m6_fixed_effort_slices/m4_granular_primary_fixed_effort_slices.png" alt="M4 granular_primary">
+<h3>Primary low/median/high fixed slices</h3>
+<img src="../figs/m1_m6_fixed_effort_slices/m4_primary_anchors_p25_p50_p75_fixed_effort_slices.png" alt="M4 primary_anchors_p25_p50_p75">
+<h3>Wide low/median/high fixed slices</h3>
+<img src="../figs/m1_m6_fixed_effort_slices/m4_wide_anchors_p10_p50_p90_fixed_effort_slices.png" alt="M4 wide_anchors_p10_p50_p90">
+<h2>M5: Age by context entropy</h2>
+<p>Question: Does the context-entropy effect on total bits change over development?</p>
+<h3>Global adjusted trend</h3>
+<p>How to read: this is the single global age trend after accounting for effort and child/context composition by averaging predictions over observed rows. It is not restricted to one length.</p>
+<img src="../figs/m1_m6_fixed_effort_slices/m5_marginal_adjusted_global_trends.png" alt="M5 marginal adjusted trend">
+<p>How to read: each line is a prediction from the same fitted model, but at a different exact fixed effort value. The model was fit on all utterance lengths; only the prediction slice changes.</p>
+<h3>Top 12 most frequent exact effort sizes</h3>
+<img src="../figs/m1_m6_fixed_effort_slices/m5_top_frequency_12_fixed_effort_slices.png" alt="M5 top_frequency_12">
+<h3>Words/morphemes 1-12; syllables/phonemes data-supported dense core</h3>
+<img src="../figs/m1_m6_fixed_effort_slices/m5_granular_primary_fixed_effort_slices.png" alt="M5 granular_primary">
+<h3>Primary low/median/high fixed slices</h3>
+<img src="../figs/m1_m6_fixed_effort_slices/m5_primary_anchors_p25_p50_p75_fixed_effort_slices.png" alt="M5 primary_anchors_p25_p50_p75">
+<h3>Wide low/median/high fixed slices</h3>
+<img src="../figs/m1_m6_fixed_effort_slices/m5_wide_anchors_p10_p50_p90_fixed_effort_slices.png" alt="M5 wide_anchors_p10_p50_p90">
+<h2>M6: Interaction-rich exploratory model</h2>
+<p>Question: Do age, effort, and context entropy interact when predicting total bits?</p>
+<h3>Global adjusted trend</h3>
+<p>How to read: this is the single global age trend after accounting for effort and child/context composition by averaging predictions over observed rows. It is not restricted to one length.</p>
+<img src="../figs/m1_m6_fixed_effort_slices/m6_marginal_adjusted_global_trends.png" alt="M6 marginal adjusted trend">
+<p>How to read: each line is a prediction from the same fitted model, but at a different exact fixed effort value. The model was fit on all utterance lengths; only the prediction slice changes.</p>
+<h3>Top 12 most frequent exact effort sizes</h3>
+<img src="../figs/m1_m6_fixed_effort_slices/m6_top_frequency_12_fixed_effort_slices.png" alt="M6 top_frequency_12">
+<h3>Words/morphemes 1-12; syllables/phonemes data-supported dense core</h3>
+<img src="../figs/m1_m6_fixed_effort_slices/m6_granular_primary_fixed_effort_slices.png" alt="M6 granular_primary">
+<h3>Primary low/median/high fixed slices</h3>
+<img src="../figs/m1_m6_fixed_effort_slices/m6_primary_anchors_p25_p50_p75_fixed_effort_slices.png" alt="M6 primary_anchors_p25_p50_p75">
+<h3>Wide low/median/high fixed slices</h3>
+<img src="../figs/m1_m6_fixed_effort_slices/m6_wide_anchors_p10_p50_p90_fixed_effort_slices.png" alt="M6 wide_anchors_p10_p50_p90">
+</main>
+</body>
+</html>

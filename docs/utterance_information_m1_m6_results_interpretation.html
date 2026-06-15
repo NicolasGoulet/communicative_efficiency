@@ -1,0 +1,954 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Interpretation Notes: M1-M6 Utterance Information Results</title>
+<style>
+:root {
+  color-scheme: light;
+  --ink: #1e2528;
+  --muted: #5e686d;
+  --line: #d9e0df;
+  --paper: #ffffff;
+  --soft: #f5f7f6;
+  --accent: #2f6f73;
+  --accent2: #c76f2c;
+}
+body {
+  margin: 0;
+  background: #eef2f1;
+  color: var(--ink);
+  font: 16px/1.58 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+main {
+  max-width: 980px;
+  margin: 34px auto 56px;
+  padding: 48px 58px;
+  background: var(--paper);
+  box-shadow: 0 18px 50px rgba(31, 45, 48, 0.12);
+}
+h1, h2, h3, h4 {
+  line-height: 1.18;
+  margin: 1.6em 0 0.55em;
+}
+h1 {
+  margin-top: 0;
+  font-size: 2.25rem;
+  border-bottom: 3px solid var(--accent);
+  padding-bottom: 0.45em;
+}
+h2 {
+  font-size: 1.55rem;
+  color: var(--accent);
+}
+h3 {
+  font-size: 1.18rem;
+}
+p {
+  margin: 0.75em 0;
+}
+a {
+  color: var(--accent);
+}
+blockquote {
+  border-left: 4px solid var(--accent2);
+  margin: 1.1em 0;
+  padding: 0.05em 1.1em;
+  color: var(--muted);
+  background: #fff8f2;
+}
+code {
+  background: var(--soft);
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  padding: 0.08em 0.3em;
+  font-family: "SFMono-Regular", Consolas, monospace;
+  font-size: 0.92em;
+}
+pre {
+  background: #f5f7f6;
+  color: var(--ink);
+  border: 1px solid var(--line);
+  padding: 1em;
+  overflow-x: auto;
+  border-radius: 7px;
+}
+pre code {
+  background: transparent;
+  border: 0;
+  padding: 0;
+  color: inherit;
+}
+table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 1.15em 0 1.45em;
+  font-size: 0.95em;
+}
+th, td {
+  border: 1px solid var(--line);
+  padding: 0.54em 0.68em;
+  vertical-align: top;
+}
+th {
+  background: #e7efed;
+  text-align: left;
+}
+tr:nth-child(even) td {
+  background: #fafbfb;
+}
+img {
+  max-width: 100%;
+  display: block;
+  margin: 1.1em auto 0.45em;
+}
+ul, ol {
+  padding-left: 1.4em;
+}
+.caption {
+  color: var(--muted);
+  font-size: 0.92em;
+  margin-top: -0.15em;
+}
+@media print {
+  body {
+    background: white;
+  }
+  main {
+    box-shadow: none;
+    margin: 0;
+    max-width: none;
+    padding: 28px;
+  }
+}
+</style>
+</head>
+<body>
+<main>
+<h1>Interpretation Notes: M1-M6 Utterance Information Results</h1>
+<p>This document interprets the compact M1-M6 results in <code>docs/utterance_information_m1_m6_quick_share.html</code>. It is separate from the supervisor-facing report and is meant as a thinking document: what the current models suggest, what they do not yet establish, and how they connect to the communicative-efficiency questions motivating the project.</p>
+<p>The current run used 446,985 real child utterance rows, 21 children, context window <code>k3</code>, and produced 60 fitted model rows.</p>
+<h2>Scientific Question</h2>
+<p>The project is about communicative efficiency in child language: how children package information while managing the amount of linguistic material they produce. The current M1-M6 analyses focus on the <strong>informativeness side</strong> of that question:</p>
+<pre><code>Given a child utterance and its preceding caretaker context, does total
+utterance surprisal change with age after controlling production effort?</code></pre>
+<p>Here, total information is <code>sum_bits</code>; effort is operationalized separately as words, surface morphemes, two syllable estimates, and phonemes.</p>
+<p>This is close to the first question Professor Xu articulated: whether children optimize informativeness in their speech when utterance length or effort is constrained. It is <strong>not yet</strong> the full second question: whether context predictability causes children to shorten or lengthen their utterances. That second question needs models where effort itself is the outcome, preferably using response-level context entropy sampled from possible model responses.</p>
+<h2>Main Takeaways</h2>
+<ol>
+<li><strong>Child identity is essential.</strong> M1 pools children and gives weak or positive</li>
+<p>age patterns. M2 adds child identity and the continuous-effort versions show negative age effects across all five effort controls.</p>
+</ol>
+<ol>
+<li><strong>The safest current result is the continuous-effort child-adjusted pattern.</strong></li>
+<p>In M2, M4, M5, and M6, the continuous-effort versions generally show that older children have lower predicted total bits for utterances with the same modeled effort.</p>
+</ol>
+<ol>
+<li>**Low/mid/high effort groups are useful diagnostics, but not a replacement</li>
+<p>for exact effort control.** The effort-level models often reverse the M2-M5 age direction. This likely happens because a low/mid/high group is coarse: utterances inside the same category can still differ substantially in exact words, morphemes, syllables, or phonemes.</p>
+</ol>
+<ol>
+<li><strong>Current next-token context entropy behaves unexpectedly.</strong> In M4-M6, the</li>
+<p>context-entropy coefficient is negative across all effort versions. This means that higher next-token entropy is associated with lower total child utterance bits after controls. This should not be overinterpreted as the final contextual-information result because this feature only measures uncertainty about the next token, not uncertainty over complete possible responses.</p>
+</ol>
+<ol>
+<li><strong>The age-by-context interaction is weak in the continuous models.</strong> M5 and</li>
+<p>M6 do not show a stable continuous-effort age-by-context-entropy interaction. This suggests that the current next-token entropy feature is not yet giving the developmental interaction that the larger efficiency hypothesis needs.</p>
+</ol>
+<ol>
+<li>**M6 supports the broad robustness of the downward child-adjusted</li>
+<p>continuous-effort trend.** Even after adding multiple interactions, the continuous M6 age coefficients remain negative across all effort units, though not every one is significant.</p>
+</ol>
+<h2>Results At A Glance</h2>
+<p>Age-effect signs by model and effort strategy:</p>
+<table>
+<thead><tr>
+<th>model</th>
+<th>effort_strategy</th>
+<th>coefficient</th>
+<th>negative</th>
+<th>positive</th>
+<th>p&lt;.05</th>
+<th>tested_effort_versions</th>
+<th>coef_min</th>
+<th>coef_max</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>M1</td>
+<td>continuous</td>
+<td>age_coef</td>
+<td>0</td>
+<td>5</td>
+<td>2</td>
+<td>5</td>
+<td>0.0003087</td>
+<td>0.06904</td>
+</tr>
+<tr>
+<td>M1</td>
+<td>effort_level</td>
+<td>age_coef</td>
+<td>0</td>
+<td>5</td>
+<td>5</td>
+<td>5</td>
+<td>0.1334</td>
+<td>0.1672</td>
+</tr>
+<tr>
+<td>M2</td>
+<td>continuous</td>
+<td>age_coef</td>
+<td>5</td>
+<td>0</td>
+<td>5</td>
+<td>5</td>
+<td>-0.1355</td>
+<td>-0.04846</td>
+</tr>
+<tr>
+<td>M2</td>
+<td>effort_level</td>
+<td>age_coef</td>
+<td>0</td>
+<td>5</td>
+<td>5</td>
+<td>5</td>
+<td>0.07177</td>
+<td>0.117</td>
+</tr>
+<tr>
+<td>M3</td>
+<td>continuous</td>
+<td>age_coef</td>
+<td>5</td>
+<td>0</td>
+<td>4</td>
+<td>5</td>
+<td>-0.1362</td>
+<td>-0.05214</td>
+</tr>
+<tr>
+<td>M3</td>
+<td>effort_level</td>
+<td>age_coef</td>
+<td>5</td>
+<td>0</td>
+<td>3</td>
+<td>5</td>
+<td>-0.07701</td>
+<td>-0.05571</td>
+</tr>
+<tr>
+<td>M4</td>
+<td>continuous</td>
+<td>age_coef</td>
+<td>5</td>
+<td>0</td>
+<td>5</td>
+<td>5</td>
+<td>-0.1401</td>
+<td>-0.04803</td>
+</tr>
+<tr>
+<td>M4</td>
+<td>effort_level</td>
+<td>age_coef</td>
+<td>0</td>
+<td>5</td>
+<td>5</td>
+<td>5</td>
+<td>0.07374</td>
+<td>0.1197</td>
+</tr>
+<tr>
+<td>M5</td>
+<td>continuous</td>
+<td>age_coef</td>
+<td>5</td>
+<td>0</td>
+<td>5</td>
+<td>5</td>
+<td>-0.1406</td>
+<td>-0.04848</td>
+</tr>
+<tr>
+<td>M5</td>
+<td>effort_level</td>
+<td>age_coef</td>
+<td>0</td>
+<td>5</td>
+<td>5</td>
+<td>5</td>
+<td>0.07276</td>
+<td>0.1181</td>
+</tr>
+<tr>
+<td>M6</td>
+<td>continuous</td>
+<td>age_coef</td>
+<td>5</td>
+<td>0</td>
+<td>4</td>
+<td>5</td>
+<td>-0.1417</td>
+<td>-0.05233</td>
+</tr>
+<tr>
+<td>M6</td>
+<td>effort_level</td>
+<td>age_coef</td>
+<td>5</td>
+<td>0</td>
+<td>4</td>
+<td>5</td>
+<td>-0.08116</td>
+<td>-0.05867</td>
+</tr>
+</tbody></table>
+<p>Context-entropy signs in the context models:</p>
+<table>
+<thead><tr>
+<th>model</th>
+<th>effort_strategy</th>
+<th>coefficient</th>
+<th>negative</th>
+<th>positive</th>
+<th>p&lt;.05</th>
+<th>tested_effort_versions</th>
+<th>coef_min</th>
+<th>coef_max</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>M4</td>
+<td>continuous</td>
+<td>entropy_coef</td>
+<td>5</td>
+<td>0</td>
+<td>5</td>
+<td>5</td>
+<td>-0.5814</td>
+<td>-0.4716</td>
+</tr>
+<tr>
+<td>M4</td>
+<td>effort_level</td>
+<td>entropy_coef</td>
+<td>5</td>
+<td>0</td>
+<td>5</td>
+<td>5</td>
+<td>-0.5842</td>
+<td>-0.4785</td>
+</tr>
+<tr>
+<td>M5</td>
+<td>continuous</td>
+<td>entropy_coef</td>
+<td>5</td>
+<td>0</td>
+<td>5</td>
+<td>5</td>
+<td>-0.5805</td>
+<td>-0.4704</td>
+</tr>
+<tr>
+<td>M5</td>
+<td>effort_level</td>
+<td>entropy_coef</td>
+<td>5</td>
+<td>0</td>
+<td>5</td>
+<td>5</td>
+<td>-0.5823</td>
+<td>-0.4758</td>
+</tr>
+<tr>
+<td>M6</td>
+<td>continuous</td>
+<td>entropy_coef</td>
+<td>5</td>
+<td>0</td>
+<td>5</td>
+<td>5</td>
+<td>-0.5854</td>
+<td>-0.4729</td>
+</tr>
+<tr>
+<td>M6</td>
+<td>effort_level</td>
+<td>entropy_coef</td>
+<td>5</td>
+<td>0</td>
+<td>5</td>
+<td>5</td>
+<td>-0.3802</td>
+<td>-0.3338</td>
+</tr>
+</tbody></table>
+<p>Interaction summaries:</p>
+<table>
+<thead><tr>
+<th>model</th>
+<th>effort_strategy</th>
+<th>coefficient</th>
+<th>negative</th>
+<th>positive</th>
+<th>p&lt;.05</th>
+<th>tested_effort_versions</th>
+<th>coef_min</th>
+<th>coef_max</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>M3</td>
+<td>continuous</td>
+<td>age_effort_coef</td>
+<td>1</td>
+<td>4</td>
+<td>1</td>
+<td>5</td>
+<td>-0.003787</td>
+<td>0.009859</td>
+</tr>
+<tr>
+<td>M3</td>
+<td>effort_level</td>
+<td>age_effort_coef</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>M6</td>
+<td>continuous</td>
+<td>age_effort_coef</td>
+<td>1</td>
+<td>4</td>
+<td>1</td>
+<td>5</td>
+<td>-0.002441</td>
+<td>0.01209</td>
+</tr>
+<tr>
+<td>M6</td>
+<td>effort_level</td>
+<td>age_effort_coef</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td></td>
+<td></td>
+</tr>
+</tbody></table>
+<table>
+<thead><tr>
+<th>model</th>
+<th>effort_strategy</th>
+<th>coefficient</th>
+<th>negative</th>
+<th>positive</th>
+<th>p&lt;.05</th>
+<th>tested_effort_versions</th>
+<th>coef_min</th>
+<th>coef_max</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>M5</td>
+<td>continuous</td>
+<td>age_entropy_coef</td>
+<td>0</td>
+<td>5</td>
+<td>0</td>
+<td>5</td>
+<td>0.003946</td>
+<td>0.006141</td>
+</tr>
+<tr>
+<td>M5</td>
+<td>effort_level</td>
+<td>age_entropy_coef</td>
+<td>0</td>
+<td>5</td>
+<td>2</td>
+<td>5</td>
+<td>0.008078</td>
+<td>0.01404</td>
+</tr>
+<tr>
+<td>M6</td>
+<td>continuous</td>
+<td>age_entropy_coef</td>
+<td>0</td>
+<td>5</td>
+<td>0</td>
+<td>5</td>
+<td>0.005176</td>
+<td>0.009103</td>
+</tr>
+<tr>
+<td>M6</td>
+<td>effort_level</td>
+<td>age_entropy_coef</td>
+<td>0</td>
+<td>5</td>
+<td>0</td>
+<td>5</td>
+<td>0.002937</td>
+<td>0.008538</td>
+</tr>
+</tbody></table>
+<h2>Model-by-Model Interpretation</h2>
+<h3>M1: pooled age plus effort</h3>
+<p>M1 asks the simplest question: if all child utterances are pooled together, does age predict total bits after effort is controlled? The answer is not the one we should treat as developmental evidence. The pooled continuous models are weak or positive, and the effort-level versions are positive. This is exactly why M1 is useful: it shows the danger of ignoring which children contribute data at which ages.</p>
+<p>Interpretation: M1 is a baseline sanity check, not the primary model.</p>
+<h3>M2: age plus effort plus child identity</h3>
+<p>M2 is the first serious developmental model in this set. It asks whether age predicts total bits after controlling effort and giving each child their own baseline.</p>
+<p>The continuous-effort M2 versions are the clearest result: age coefficients are negative for words, morphemes, both syllable estimates, and phonemes. This means that, for the same modeled amount of linguistic material, older children produce utterances that Mistral finds more predictable in context.</p>
+<p>Compact M2 continuous-effort results:</p>
+<table>
+<thead><tr>
+<th>effort_label</th>
+<th>r2_observed_fitted</th>
+<th>age_coef</th>
+<th>age_p</th>
+<th>effort_coef</th>
+<th>effort_p</th>
+<th>entropy_coef</th>
+<th>entropy_p</th>
+<th>age_effort_coef</th>
+<th>age_effort_p</th>
+<th>age_entropy_coef</th>
+<th>age_entropy_p</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>Words</td>
+<td>0.6259</td>
+<td>-0.1225</td>
+<td>&lt;.001</td>
+<td>6.367</td>
+<td>&lt;.001</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>Morphemes</td>
+<td>0.6131</td>
+<td>-0.1355</td>
+<td>&lt;.001</td>
+<td>5.489</td>
+<td>&lt;.001</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>Syllables: CMU/pkg</td>
+<td>0.6459</td>
+<td>-0.06326</td>
+<td>0.018</td>
+<td>5.236</td>
+<td>&lt;.001</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>Syllables: pkg</td>
+<td>0.6296</td>
+<td>-0.04846</td>
+<td>0.049</td>
+<td>4.831</td>
+<td>&lt;.001</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>Phonemes</td>
+<td>0.6443</td>
+<td>-0.06486</td>
+<td>0.013</td>
+<td>2.084</td>
+<td>&lt;.001</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+</tbody></table>
+<p>Interpretation: this is consistent with a developmental shift toward more contextually predictable, conventional, or efficiently recoverable utterances. It should not be phrased as &quot;children communicate less information&quot; without the effort and context caveats.</p>
+<h3>M3: age by effort</h3>
+<p>M3 asks whether the relation between effort and total bits changes with age. The continuous interaction term is not robust across effort units. The only continuous age-by-effort interaction below p&lt;.05 is:</p>
+<pre><code>Syllables: pkg (0.00986)</code></pre>
+<p>Interpretation: there is not strong evidence yet that the information gained per additional unit of effort changes systematically with age. The larger developmental effect seems to be the age effect after effort control, not a stable age-by-effort interaction.</p>
+<h3>M4: adding context entropy</h3>
+<p>M4 adds current context entropy to the M2 structure. The intended question is whether context predictability helps explain total utterance information after age, effort, and child identity are controlled.</p>
+<p>The continuous M4 models keep the M2 age pattern: age remains negative across all effort units. Context entropy is also negative across all effort units.</p>
+<p>Compact M4 continuous-effort results:</p>
+<table>
+<thead><tr>
+<th>effort_label</th>
+<th>r2_observed_fitted</th>
+<th>age_coef</th>
+<th>age_p</th>
+<th>effort_coef</th>
+<th>effort_p</th>
+<th>entropy_coef</th>
+<th>entropy_p</th>
+<th>age_effort_coef</th>
+<th>age_effort_p</th>
+<th>age_entropy_coef</th>
+<th>age_entropy_p</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>Words</td>
+<td>0.6266</td>
+<td>-0.1269</td>
+<td>&lt;.001</td>
+<td>6.367</td>
+<td>&lt;.001</td>
+<td>-0.4716</td>
+<td>&lt;.001</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>Morphemes</td>
+<td>0.6136</td>
+<td>-0.1401</td>
+<td>&lt;.001</td>
+<td>5.488</td>
+<td>&lt;.001</td>
+<td>-0.5123</td>
+<td>&lt;.001</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>Syllables: CMU/pkg</td>
+<td>0.6468</td>
+<td>-0.06446</td>
+<td>0.013</td>
+<td>5.234</td>
+<td>&lt;.001</td>
+<td>-0.5398</td>
+<td>&lt;.001</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>Syllables: pkg</td>
+<td>0.6304</td>
+<td>-0.04803</td>
+<td>0.038</td>
+<td>4.828</td>
+<td>&lt;.001</td>
+<td>-0.541</td>
+<td>&lt;.001</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>Phonemes</td>
+<td>0.6453</td>
+<td>-0.06517</td>
+<td>0.013</td>
+<td>2.084</td>
+<td>&lt;.001</td>
+<td>-0.5814</td>
+<td>&lt;.001</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+</tbody></table>
+<p>Interpretation: the downward child-adjusted age pattern is not explained away by the current next-token entropy feature. However, the entropy coefficient itself is not straightforward. If this were a perfect measure of response-level context uncertainty, one might expect higher entropy to predict higher utterance information or more effort. Instead, the negative coefficient tells us that this next-token entropy feature is probably capturing something more local and should be treated as provisional.</p>
+<h3>M5: age by context entropy</h3>
+<p>M5 tests whether the context-entropy association changes over development. In the continuous-effort versions, the age-by-context interaction is not significant for any effort unit:</p>
+<pre><code>none</code></pre>
+<p>Compact M5 continuous-effort results:</p>
+<table>
+<thead><tr>
+<th>effort_label</th>
+<th>r2_observed_fitted</th>
+<th>age_coef</th>
+<th>age_p</th>
+<th>effort_coef</th>
+<th>effort_p</th>
+<th>entropy_coef</th>
+<th>entropy_p</th>
+<th>age_effort_coef</th>
+<th>age_effort_p</th>
+<th>age_entropy_coef</th>
+<th>age_entropy_p</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>Words</td>
+<td>0.6266</td>
+<td>-0.1276</td>
+<td>&lt;.001</td>
+<td>6.367</td>
+<td>&lt;.001</td>
+<td>-0.4704</td>
+<td>&lt;.001</td>
+<td></td>
+<td></td>
+<td>0.006141</td>
+<td>0.284</td>
+</tr>
+<tr>
+<td>Morphemes</td>
+<td>0.6136</td>
+<td>-0.1406</td>
+<td>&lt;.001</td>
+<td>5.488</td>
+<td>&lt;.001</td>
+<td>-0.5113</td>
+<td>&lt;.001</td>
+<td></td>
+<td></td>
+<td>0.004709</td>
+<td>0.339</td>
+</tr>
+<tr>
+<td>Syllables: CMU/pkg</td>
+<td>0.6468</td>
+<td>-0.06492</td>
+<td>0.015</td>
+<td>5.234</td>
+<td>&lt;.001</td>
+<td>-0.5391</td>
+<td>&lt;.001</td>
+<td></td>
+<td></td>
+<td>0.003955</td>
+<td>0.478</td>
+</tr>
+<tr>
+<td>Syllables: pkg</td>
+<td>0.6304</td>
+<td>-0.04848</td>
+<td>0.042</td>
+<td>4.829</td>
+<td>&lt;.001</td>
+<td>-0.5403</td>
+<td>&lt;.001</td>
+<td></td>
+<td></td>
+<td>0.003946</td>
+<td>0.481</td>
+</tr>
+<tr>
+<td>Phonemes</td>
+<td>0.6453</td>
+<td>-0.06571</td>
+<td>0.014</td>
+<td>2.084</td>
+<td>&lt;.001</td>
+<td>-0.5805</td>
+<td>&lt;.001</td>
+<td></td>
+<td></td>
+<td>0.00465</td>
+<td>0.407</td>
+</tr>
+</tbody></table>
+<p>Interpretation: with the current next-token entropy feature, we do not yet have strong evidence that the context-information relation changes with age. This is a key reason to build the response-level entropy feature discussed after the meeting.</p>
+<h3>M6: interaction-rich stress test</h3>
+<p>M6 asks whether the main conclusions survive a more flexible model with age-by-effort, age-by-context, and effort-by-context interactions. This is not the cleanest primary model, but it is useful as a stress test.</p>
+<p>Compact M6 continuous-effort results:</p>
+<table>
+<thead><tr>
+<th>effort_label</th>
+<th>r2_observed_fitted</th>
+<th>age_coef</th>
+<th>age_p</th>
+<th>effort_coef</th>
+<th>effort_p</th>
+<th>entropy_coef</th>
+<th>entropy_p</th>
+<th>age_effort_coef</th>
+<th>age_effort_p</th>
+<th>age_entropy_coef</th>
+<th>age_entropy_p</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>Words</td>
+<td>0.6266</td>
+<td>-0.1273</td>
+<td>&lt;.001</td>
+<td>6.376</td>
+<td>&lt;.001</td>
+<td>-0.4729</td>
+<td>&lt;.001</td>
+<td>-0.002441</td>
+<td>0.726</td>
+<td>0.009085</td>
+<td>0.111</td>
+</tr>
+<tr>
+<td>Morphemes</td>
+<td>0.6137</td>
+<td>-0.1417</td>
+<td>&lt;.001</td>
+<td>5.479</td>
+<td>&lt;.001</td>
+<td>-0.5165</td>
+<td>&lt;.001</td>
+<td>0.003897</td>
+<td>0.575</td>
+<td>0.009103</td>
+<td>0.070</td>
+</tr>
+<tr>
+<td>Syllables: CMU/pkg</td>
+<td>0.6469</td>
+<td>-0.0679</td>
+<td>0.016</td>
+<td>5.213</td>
+<td>&lt;.001</td>
+<td>-0.5431</td>
+<td>&lt;.001</td>
+<td>0.009024</td>
+<td>0.154</td>
+<td>0.00658</td>
+<td>0.202</td>
+</tr>
+<tr>
+<td>Syllables: pkg</td>
+<td>0.6307</td>
+<td>-0.05233</td>
+<td>0.053</td>
+<td>4.799</td>
+<td>&lt;.001</td>
+<td>-0.5436</td>
+<td>&lt;.001</td>
+<td>0.01209</td>
+<td>0.017</td>
+<td>0.005176</td>
+<td>0.277</td>
+</tr>
+<tr>
+<td>Phonemes</td>
+<td>0.6455</td>
+<td>-0.06846</td>
+<td>0.019</td>
+<td>2.076</td>
+<td>&lt;.001</td>
+<td>-0.5854</td>
+<td>&lt;.001</td>
+<td>0.003548</td>
+<td>0.200</td>
+<td>0.00833</td>
+<td>0.086</td>
+</tr>
+</tbody></table>
+<p>Interpretation: the continuous-effort M6 models still show negative age coefficients across all five effort measures. This supports the robustness of the child-adjusted continuous-effort result. At the same time, the interaction terms are not stable enough to carry the central scientific claim.</p>
+<h2>How This Relates To Communicative Efficiency</h2>
+<p>The current results speak to one side of communicative efficiency: the information associated with the produced utterance once production effort is controlled. The strongest current pattern is:</p>
+<pre><code>older age + same modeled effort + same child baseline
+    -&gt; lower predicted total surprisal</code></pre>
+<p>Scientifically, this can be interpreted in several compatible ways:</p>
+<ul>
+<li>older children may produce utterances that are more conventional or expected</li>
+<p>in local conversational context;</p>
+<li>older children may rely more on context, producing utterances that carry less</li>
+<p>model-surprisal per controlled unit of surface material;</p>
+<li>the Mistral scorer may find older children&#x27;s forms easier to predict because</li>
+<p>they are more adult-like or less noisy;</p>
+<li>the result is not, by itself, proof that children are &quot;more efficient,&quot;</li>
+<p>because efficiency depends on both information and effort in relation to communicative need.</p>
+</ul>
+<p>The experimental work on communicative efficiency in children motivates asking whether children become more adult-like in adapting message length to the communicative situation. The learner-directed speech literature also reminds us that more redundancy can be efficient when the listener or context requires it. Therefore, lower or higher surprisal is not automatically good or bad; it has to be interpreted relative to effort, context, and communicative recoverability.</p>
+<p>The current M1-M6 results should therefore be framed as:</p>
+<pre><code>evidence for developmental change in utterance-level information after effort
+control, with child identity controlled</code></pre>
+<p>not yet as:</p>
+<pre><code>complete evidence that children optimize production effort based on contextual
+predictability</code></pre>
+<h2>What This Suggests For The Next Analyses</h2>
+<ol>
+<li>Keep the continuous-effort child-adjusted models as the primary</li>
+<p>utterance-information evidence.</p>
+</ol>
+<ol>
+<li>Treat low/mid/high effort-group models as robustness checks and visual</li>
+<p>diagnostics, not as the main effort control.</p>
+</ol>
+<ol>
+<li>Use the next-token context entropy results only provisionally. They are</li>
+<p>useful because they show that adding a context-predictability feature does not remove the age effect, but they are not the final answer to the contextual-efficiency question.</p>
+</ol>
+<ol>
+<li>Build response-level context entropy from sampled possible responses. This</li>
+<p>better matches the supervisor discussion: given a caretaker context, how many plausible complete responses does the model see?</p>
+</ol>
+<ol>
+<li>Add models where effort is the outcome:</li>
+</ol>
+<pre><code>effort ~ age + response_entropy + context_length + question_type + child identity</code></pre>
+<p>This directly tests the production-effort prediction: children should produce longer or more effortful utterances when the context leaves more uncertainty about the appropriate response.</p>
+<ol>
+<li>Compare children against baselines and caretakers after effort control. The</li>
+<p>current M1-M6 report is about real child utterances only; the broader efficiency interpretation needs child-vs-baseline and child-vs-caretaker comparisons.</p>
+</ol>
+<h2>Literature Anchors</h2>
+<ul>
+<li>Tal, Smith, Arnon, and Culbertson (2023) motivate the developmental question:</li>
+<p>communicative-efficiency behavior is present in young children and becomes more adult-like with age.</p>
+<li>Tal, Grossman, Rohde, and Arnon (2023) motivate the effort/redundancy side:</li>
+<p>speakers can efficiently produce more linguistic material when listeners are learners or comprehension difficulty is higher.</p>
+<li>Wang, Yu, and Shao (2026) motivate interaction-style models: efficient form</li>
+<p>choice can be shaped jointly by multiple surprisal sources, so context, effort, and age interactions are theoretically meaningful.</p>
+<li>The current response-level entropy note in this repo formalizes the next</li>
+<p>project step: sample possible full responses from a model and estimate the entropy of the response distribution.</p>
+</ul>
+<h2>References</h2>
+<ul>
+<li>Tal, S., Smith, K., Arnon, I., &amp; Culbertson, J. (2023). Communicative</li>
+<p>efficiency is present in young children and becomes more adult-like with age. Proceedings of the Annual Meeting of the Cognitive Science Society, 45. https://escholarship.org/uc/item/7mm0z6fk</p>
+<li>Tal, S., Grossman, E., Rohde, H., &amp; Arnon, I. (2023). Speakers use more</li>
+<p>redundant references with language learners: Evidence for communicatively-efficient referential choice. Journal of Memory and Language, 128, 104378. https://doi.org/10.1016/j.jml.2022.104378</p>
+<li>Wang, G., Yu, M., &amp; Shao, B. (2026). Efficient Communication in Word</li>
+<p>Formation: How Syntactic and Lexical Surprisal Jointly Shape English Conversion Over the Past Century. Cognitive Science. https://doi.org/10.1111/cogs.70202</p>
+</ul>
+</main>
+</body>
+</html>

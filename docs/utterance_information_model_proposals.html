@@ -1,0 +1,1578 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Utterance-Level Information: Model Proposal Review</title>
+<style>
+:root {
+  color-scheme: light;
+  --ink: #1e2528;
+  --muted: #5e686d;
+  --line: #d9e0df;
+  --paper: #ffffff;
+  --soft: #f5f7f6;
+  --accent: #2f6f73;
+  --accent2: #c76f2c;
+}
+body {
+  margin: 0;
+  background: #eef2f1;
+  color: var(--ink);
+  font: 16px/1.58 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+main {
+  max-width: 980px;
+  margin: 34px auto 56px;
+  padding: 48px 58px;
+  background: var(--paper);
+  box-shadow: 0 18px 50px rgba(31, 45, 48, 0.12);
+}
+h1, h2, h3, h4 {
+  line-height: 1.18;
+  margin: 1.6em 0 0.55em;
+}
+h1 {
+  margin-top: 0;
+  font-size: 2.25rem;
+  border-bottom: 3px solid var(--accent);
+  padding-bottom: 0.45em;
+}
+h2 {
+  font-size: 1.55rem;
+  color: var(--accent);
+}
+h3 {
+  font-size: 1.18rem;
+}
+p {
+  margin: 0.75em 0;
+}
+a {
+  color: var(--accent);
+}
+blockquote {
+  border-left: 4px solid var(--accent2);
+  margin: 1.1em 0;
+  padding: 0.05em 1.1em;
+  color: var(--muted);
+  background: #fff8f2;
+}
+code {
+  background: var(--soft);
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  padding: 0.08em 0.3em;
+  font-family: "SFMono-Regular", Consolas, monospace;
+  font-size: 0.92em;
+}
+pre {
+  background: #f5f7f6;
+  color: var(--ink);
+  border: 1px solid var(--line);
+  padding: 1em;
+  overflow-x: auto;
+  border-radius: 7px;
+}
+pre code {
+  background: transparent;
+  border: 0;
+  padding: 0;
+  color: inherit;
+}
+table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 1.15em 0 1.45em;
+  font-size: 0.95em;
+}
+th, td {
+  border: 1px solid var(--line);
+  padding: 0.54em 0.68em;
+  vertical-align: top;
+}
+th {
+  background: #e7efed;
+  text-align: left;
+}
+tr:nth-child(even) td {
+  background: #fafbfb;
+}
+img {
+  max-width: 100%;
+  display: block;
+  margin: 1.1em auto 0.45em;
+}
+ul, ol {
+  padding-left: 1.4em;
+}
+.caption {
+  color: var(--muted);
+  font-size: 0.92em;
+  margin-top: -0.15em;
+}
+@media print {
+  body {
+    background: white;
+  }
+  main {
+    box-shadow: none;
+    margin: 0;
+    max-width: none;
+    padding: 28px;
+  }
+}
+</style>
+</head>
+<body>
+<main>
+<h1>Utterance-Level Information: Model Proposal Review</h1>
+<p>Working modeling packet, generated 2026-06-04.</p>
+<p>This is a separate review document. It is not the supervisor-facing report. The goal is to compare candidate model forms before deciding what belongs in the main document.</p>
+<h2>Modeling Principles Used</h2>
+<p>The model set follows the Advanced Data Analytics course guidance:</p>
+<ul>
+<li>start from the response variable and data-generating structure;</li>
+<li>audit predictor correlations and multicollinearity before interpreting</li>
+<p>regression coefficients;</p>
+<li>begin with a simple baseline model;</li>
+<li>respect repeated observations within children using clustered standard</li>
+<p>errors, mixed models, or GEE;</p>
+<li>treat flexible or more complex models as additions only when they answer a</li>
+<p>real scientific question.</p>
+</ul>
+<h2>Current Data Extract</h2>
+<table>
+<thead><tr>
+<th>table</th>
+<th>rows</th>
+<th>children</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>real_rows_all_contexts</td>
+<td>1787940</td>
+<td>21</td>
+</tr>
+<tr>
+<td>baseline_k3_rows</td>
+<td>2233017</td>
+<td>21</td>
+</tr>
+<tr>
+<td>real_sample</td>
+<td>93600</td>
+<td>21</td>
+</tr>
+<tr>
+<td>baseline_sample</td>
+<td>62400</td>
+<td>21</td>
+</tr>
+<tr>
+<td>caretaker_k3_rows</td>
+<td>668903</td>
+<td>21</td>
+</tr>
+<tr>
+<td>caretaker_sample</td>
+<td>12480</td>
+<td>21</td>
+</tr>
+<tr>
+<td>context_entropy_sample</td>
+<td>57556</td>
+<td>21</td>
+</tr>
+</tbody></table>
+<p>The working rows come from the scored PBM utterance-information long table. Preliminary fits use deterministic stratified samples so that model forms can be checked quickly without treating a 6GB CSV as the day-to-day modeling object. Final analysis tables should be materialized as compact Parquet/DuckDB tables or smaller CSVs.</p>
+<h2>Unit Labels</h2>
+<p><code>dataset</code> means the source corpus or collection: Brown, Manchester, or Providence. It is not a child identifier. <code>child_id</code> is the individual child. The primary proposal below does <strong>not</strong> center dataset/corpus fixed effects, because the first scientific question is developmental and child-level rather than corpus-comparison. Dataset/corpus can still be added later as a robustness check if the timeline differences across Brown, Manchester, and Providence look like they are driving an apparent developmental trend.</p>
+<h2>Source-File Sanity Check</h2>
+<p>The scored long table is checked against the symlinked scored CSV tree before the plots and models are interpreted. Source comparison status: <strong>matched</strong>.</p>
+<table>
+<thead><tr>
+<th>check</th>
+<th>value</th>
+<th>status</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>scored_csv_files</td>
+<td>504</td>
+<td>ok</td>
+</tr>
+<tr>
+<td>source_scored_rows</td>
+<td>11607680</td>
+<td>ok</td>
+</tr>
+<tr>
+<td>source_raw_rows</td>
+<td>11615312</td>
+<td>ok</td>
+</tr>
+<tr>
+<td>source_unscored_or_blank_rows</td>
+<td>7632</td>
+<td>documented</td>
+</tr>
+<tr>
+<td>long_table_rows</td>
+<td>11607680</td>
+<td>ok</td>
+</tr>
+<tr>
+<td>source_vs_long_mismatched_groups</td>
+<td>0</td>
+<td>ok</td>
+</tr>
+<tr>
+<td>context_entropy_feature_rows</td>
+<td>1675520</td>
+<td>ok</td>
+</tr>
+</tbody></table>
+<p>The source tree contains a small set of raw placeholder rows that have no generated target and no finite surprisal. These are documented above as <code>source_unscored_or_blank_rows</code>; they are not analysis rows and are not counted as mismatches.</p>
+<p>Context entropy source files:</p>
+<table>
+<thead><tr>
+<th>file</th>
+<th>exists</th>
+<th>rows</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>results/external/compute_surprisal_mila/context_entropy_mistral/context_entropy_manifest.csv.gz</td>
+<td>True</td>
+<td>1675520</td>
+</tr>
+<tr>
+<td>results/external/compute_surprisal_mila/context_entropy_mistral/context_entropy_features.csv.gz</td>
+<td>True</td>
+<td>1675520</td>
+</tr>
+</tbody></table>
+<p>Context entropy join status for real child rows:</p>
+<table>
+<thead><tr>
+<th>role</th>
+<th>target_variant</th>
+<th>context_k</th>
+<th>context_entropy_join_status</th>
+<th>rows</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>child</td>
+<td>real</td>
+<td>k1</td>
+<td>empty_context</td>
+<td>2660</td>
+</tr>
+<tr>
+<td>child</td>
+<td>real</td>
+<td>k1</td>
+<td>matched</td>
+<td>442220</td>
+</tr>
+<tr>
+<td>child</td>
+<td>real</td>
+<td>k1</td>
+<td>missing_entropy</td>
+<td>2105</td>
+</tr>
+<tr>
+<td>child</td>
+<td>real</td>
+<td>k2</td>
+<td>empty_context</td>
+<td>2660</td>
+</tr>
+<tr>
+<td>child</td>
+<td>real</td>
+<td>k2</td>
+<td>matched</td>
+<td>440538</td>
+</tr>
+<tr>
+<td>child</td>
+<td>real</td>
+<td>k2</td>
+<td>matched_text_fallback</td>
+<td>923</td>
+</tr>
+<tr>
+<td>child</td>
+<td>real</td>
+<td>k2</td>
+<td>missing_entropy</td>
+<td>2864</td>
+</tr>
+<tr>
+<td>child</td>
+<td>real</td>
+<td>k3</td>
+<td>empty_context</td>
+<td>2660</td>
+</tr>
+<tr>
+<td>child</td>
+<td>real</td>
+<td>k3</td>
+<td>matched</td>
+<td>439259</td>
+</tr>
+<tr>
+<td>child</td>
+<td>real</td>
+<td>k3</td>
+<td>matched_text_fallback</td>
+<td>2154</td>
+</tr>
+<tr>
+<td>child</td>
+<td>real</td>
+<td>k3</td>
+<td>missing_entropy</td>
+<td>2912</td>
+</tr>
+</tbody></table>
+<p>Source/long-table mismatches, if any:</p>
+<p>_No rows._</p>
+<h2>Predictor Correlation and Multicollinearity</h2>
+<img src="../figs/utterance_information_model_proposals/predictor_correlation_heatmap.png" alt="Predictor correlation heatmap">
+<p>Main VIF warning: <strong>nb_syllables_cmu_or_pkg, nb_morphemes, nb_syllables_pkg, nb_words, nb_phonemes</strong>.</p>
+<table>
+<thead><tr>
+<th>predictor</th>
+<th>r_squared_from_other_predictors</th>
+<th>vif</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>nb_syllables_cmu_or_pkg</td>
+<td>0.972</td>
+<td>35.382</td>
+</tr>
+<tr>
+<td>nb_morphemes</td>
+<td>0.961</td>
+<td>25.752</td>
+</tr>
+<tr>
+<td>nb_syllables_pkg</td>
+<td>0.960</td>
+<td>25.028</td>
+</tr>
+<tr>
+<td>nb_words</td>
+<td>0.960</td>
+<td>24.771</td>
+</tr>
+<tr>
+<td>nb_phonemes</td>
+<td>0.958</td>
+<td>23.952</td>
+</tr>
+<tr>
+<td>n_eval_tokens</td>
+<td>0.883</td>
+<td>8.564</td>
+</tr>
+<tr>
+<td>age_months</td>
+<td>0.086</td>
+<td>1.094</td>
+</tr>
+<tr>
+<td>context_entropy_bits</td>
+<td>0.005</td>
+<td>1.005</td>
+</tr>
+</tbody></table>
+<p>The effort predictors are intentionally redundant: words, morphemes, syllables, phonemes, and tokenizer tokens all measure related aspects of utterance size. The safest strategy is not to put all effort measures into a single inferential model. Instead, use one primary effort scale, then run parallel sensitivity models with alternative denominators.</p>
+<p>The sensitivity analyses below therefore ask the same utterance-level question several times, swapping the effort control one at a time: words, surface morphemes, two syllable estimates, and phonemes.</p>
+<p>Frequency predictors are not yet present in the current utterance-information table. The recommended next addition is a target-level or utterance-level frequency summary from the same additive age-bin vocabulary used by the baselines, such as mean log word frequency or mean negative log frequency.</p>
+<h2>Descriptive Plots</h2>
+<p>These plots are descriptive summaries, not final inferential controls. In particular, the mean total-bits plot does <strong>not</strong> control for utterance size: it shows how much information is in the whole utterance as utterances actually occur. Because children produce longer utterances as they age, this plot can mix developmental change in information with developmental change in utterance length. The controlled/model-based plots below fix or adjust for length using <code>nb_words</code> or <code>log_nb_words</code>.</p>
+<img src="../figs/utterance_information_model_proposals/real_child_bits_per_word_by_age_context.png" alt="Real child bits per word by age and context">
+<img src="../figs/utterance_information_model_proposals/real_child_sum_bits_by_age_context.png" alt="Real child total bits by age and context">
+<img src="../figs/utterance_information_model_proposals/baseline_bits_per_word_by_age.png" alt="Real versus generated baselines">
+<img src="../figs/utterance_information_model_proposals/context_entropy_vs_bits_per_word.png" alt="Context entropy and target information">
+<h2>Five Candidate Models</h2>
+<h3>Model 1: Simple OLS Baseline</h3>
+<p>Formula:</p>
+<pre><code>sum_bits ~ age_scaled + nb_words</code></pre>
+<p>Use: first sanity check for total information while controlling the most direct length measure. Standard errors are clustered by child. This model does not include context; it uses the no-context <code>k0</code> scoring condition as a baseline.</p>
+<img src="../figs/utterance_information_model_proposals/model1_adjusted_total_bits_by_age.png" alt="M1 adjusted total bits">
+<h3>Model 2: Effort-Controlled OLS</h3>
+<p>Formula:</p>
+<pre><code>bits_per_word ~ age_scaled + age_scaled_sq + log_nb_words</code></pre>
+<p>Use: interpretable developmental curve for information per word with a minimal residual word-length control. This fixes the scoring context to <code>k3</code>, so context window is held constant by design.</p>
+<img src="../figs/utterance_information_model_proposals/model2_adjusted_bits_per_word.png" alt="M2 adjusted bits per word">
+<h3>Model 3: Linear Mixed Model With Child Random Intercepts</h3>
+<p>Formula:</p>
+<pre><code>bits_per_word ~ age_scaled + log_nb_words
+random: 1 | child_id</code></pre>
+<p>Use: same fixed effects as Model 2, but child baselines are allowed to differ. This addresses repeated utterances within the same child.</p>
+<img src="../figs/utterance_information_model_proposals/model3_child_random_intercepts.png" alt="M3 child random intercepts">
+<p>If statsmodels reports a singular random-effect covariance for this model, that does not mean child differences should be ignored. It means this random-effect parameterization is unstable for the current pilot specification. The child-control ladder below therefore includes child fixed effects and GEE grouping by child as stable alternatives.</p>
+<h3>Model 4: Linear Mixed Model With Child-Specific Age Slopes</h3>
+<p>Formula:</p>
+<pre><code>bits_per_word ~ age_scaled + log_nb_words
+random: 1 + age_scaled | child_id</code></pre>
+<p>Use: tests whether developmental trajectories differ across children, not just their overall levels. The current pilot fit did not converge, so this plot is a diagnostic proposal rather than an interpretable result.</p>
+<img src="../figs/utterance_information_model_proposals/model4_random_slope_pilot.png" alt="M4 random slope pilot">
+<h3>Model 5: Correlated-Data GLM/GEE Baseline Comparison</h3>
+<p>Formula:</p>
+<pre><code>sum_bits ~ age_scaled * C(target_variant) + nb_words
+family: Gamma(log), child-level exchangeable correlation</code></pre>
+<p>Use: compares real child utterances against random, unigram, bigram, and trigram baselines while respecting child-level clustering. This is a population-averaged GLM/GEE version of the GLMM question; if supervisors want subject-specific random effects for this positive outcome, the final version can be fit as a Gamma GLMM in R/glmmTMB.</p>
+<img src="../figs/utterance_information_model_proposals/model5_adjusted_baseline_predictions.png" alt="M5 adjusted baseline predictions">
+<h2>Context Extension</h2>
+<p>The context-only entropy feature is available for most child-context rows and is measured in bits. The remaining missing context rows are isolated for patch scoring; until that patch is merged, context-entropy models should use matched or text-fallback matched rows only. A natural extension is:</p>
+<pre><code>bits_per_word ~ age_scaled + log_nb_words + context_entropy_bits + C(context_k)
+cluster: child_id</code></pre>
+<p>This asks whether more uncertain contexts elicit child utterances with different information density.</p>
+<img src="../figs/utterance_information_model_proposals/candidate_model_fitted_age_curves.png" alt="Candidate fitted developmental curves">
+<h2>Preliminary Fit Status</h2>
+<table>
+<thead><tr>
+<th>model</th>
+<th>status</th>
+<th>n_obs</th>
+<th>n_children</th>
+<th>r_squared</th>
+<th>aic</th>
+<th>bic</th>
+<th>formula</th>
+<th>log_likelihood</th>
+<th>random_effects</th>
+<th>sample_note</th>
+<th>qic</th>
+<th>family</th>
+<th>cov_struct</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>M1 OLS total bits</td>
+<td>fit</td>
+<td>23400</td>
+<td>21</td>
+<td>0.745</td>
+<td>167056.951</td>
+<td>167081.133</td>
+<td>sum_bits ~ age_scaled + nb_words</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>M2 OLS efficiency controls</td>
+<td>fit</td>
+<td>23400</td>
+<td>21</td>
+<td>0.251</td>
+<td>140569.331</td>
+<td>140601.573</td>
+<td>bits_per_word ~ age_scaled + age_scaled_sq + log_nb_words</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>M3 LMM child random intercept</td>
+<td>fit_converged</td>
+<td>23400</td>
+<td>21</td>
+<td></td>
+<td>-inf</td>
+<td>-inf</td>
+<td>bits_per_word ~ age_scaled + log_nb_words</td>
+<td>inf</td>
+<td>1</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>M4 LMM child random intercept + age slope</td>
+<td>fit_not_converged</td>
+<td>9360</td>
+<td>21</td>
+<td></td>
+<td>56210.441</td>
+<td>56260.451</td>
+<td>bits_per_word ~ age_scaled + log_nb_words</td>
+<td>-28098.221</td>
+<td>1 + age_scaled</td>
+<td>balanced 120 rows per child-age-bin where available</td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>M5 Gamma GEE baseline comparison</td>
+<td>fit</td>
+<td>62400</td>
+<td>21</td>
+<td></td>
+<td></td>
+<td></td>
+<td>sum_bits ~ age_scaled * C(target_variant) + nb_words</td>
+<td></td>
+<td></td>
+<td></td>
+<td>298154217102.593</td>
+<td>Gamma</td>
+<td>Exchangeable</td>
+</tr>
+<tr>
+<td>Context extension Gaussian GEE</td>
+<td>fit</td>
+<td>57556</td>
+<td>21</td>
+<td></td>
+<td></td>
+<td></td>
+<td>bits_per_word ~ age_scaled + log_nb_words + context_entropy_bits + C(context_k)</td>
+<td></td>
+<td></td>
+<td></td>
+<td>57174.635</td>
+<td>Gaussian</td>
+<td>Exchangeable</td>
+</tr>
+</tbody></table>
+<h2>Selected Coefficients</h2>
+<table>
+<thead><tr>
+<th>model</th>
+<th>term</th>
+<th>estimate</th>
+<th>std_error</th>
+<th>p_value</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>M1 OLS total bits</td>
+<td>Intercept</td>
+<td>21.288</td>
+<td>0.283</td>
+<td>0.000</td>
+</tr>
+<tr>
+<td>M1 OLS total bits</td>
+<td>age_scaled</td>
+<td>-0.478</td>
+<td>0.102</td>
+<td>0.000</td>
+</tr>
+<tr>
+<td>M1 OLS total bits</td>
+<td>nb_words</td>
+<td>7.079</td>
+<td>0.090</td>
+<td>0.000</td>
+</tr>
+<tr>
+<td>M2 OLS efficiency controls</td>
+<td>Intercept</td>
+<td>14.645</td>
+<td>0.248</td>
+<td>0.000</td>
+</tr>
+<tr>
+<td>M2 OLS efficiency controls</td>
+<td>age_scaled</td>
+<td>-0.373</td>
+<td>0.148</td>
+<td>0.012</td>
+</tr>
+<tr>
+<td>M2 OLS efficiency controls</td>
+<td>age_scaled_sq</td>
+<td>0.154</td>
+<td>0.056</td>
+<td>0.006</td>
+</tr>
+<tr>
+<td>M2 OLS efficiency controls</td>
+<td>log_nb_words</td>
+<td>-3.994</td>
+<td>0.147</td>
+<td>0.000</td>
+</tr>
+<tr>
+<td>M3 LMM child random intercept</td>
+<td>Intercept</td>
+<td>-0.000</td>
+<td>515595.489</td>
+<td>1.000</td>
+</tr>
+<tr>
+<td>M3 LMM child random intercept</td>
+<td>age_scaled</td>
+<td>-0.372</td>
+<td>0.037</td>
+<td>0.000</td>
+</tr>
+<tr>
+<td>M3 LMM child random intercept</td>
+<td>log_nb_words</td>
+<td>-4.077</td>
+<td>0.050</td>
+<td>0.000</td>
+</tr>
+<tr>
+<td>M3 LMM child random intercept</td>
+<td>Group Var</td>
+<td>0.000</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>M4 LMM child random intercept + age slope</td>
+<td>Intercept</td>
+<td>14.626</td>
+<td>0.264</td>
+<td>0.000</td>
+</tr>
+<tr>
+<td>M4 LMM child random intercept + age slope</td>
+<td>age_scaled</td>
+<td>-0.810</td>
+<td>0.235</td>
+<td>0.001</td>
+</tr>
+<tr>
+<td>M4 LMM child random intercept + age slope</td>
+<td>log_nb_words</td>
+<td>-4.108</td>
+<td>0.081</td>
+<td>0.000</td>
+</tr>
+<tr>
+<td>M4 LMM child random intercept + age slope</td>
+<td>Group Var</td>
+<td>0.054</td>
+<td>0.124</td>
+<td>0.664</td>
+</tr>
+<tr>
+<td>M4 LMM child random intercept + age slope</td>
+<td>Group x age_scaled Cov</td>
+<td>-0.002</td>
+<td>0.024</td>
+<td>0.927</td>
+</tr>
+<tr>
+<td>M4 LMM child random intercept + age slope</td>
+<td>age_scaled Var</td>
+<td>0.040</td>
+<td>0.016</td>
+<td>0.011</td>
+</tr>
+<tr>
+<td>M5 Gamma GEE baseline comparison</td>
+<td>Intercept</td>
+<td>2.530</td>
+<td>0.026</td>
+<td>0.000</td>
+</tr>
+<tr>
+<td>M5 Gamma GEE baseline comparison</td>
+<td>C(target_variant)[T.random]</td>
+<td>0.749</td>
+<td>0.017</td>
+<td>0.000</td>
+</tr>
+<tr>
+<td>M5 Gamma GEE baseline comparison</td>
+<td>C(target_variant)[T.unigram]</td>
+<td>0.396</td>
+<td>0.016</td>
+<td>0.000</td>
+</tr>
+<tr>
+<td>M5 Gamma GEE baseline comparison</td>
+<td>C(target_variant)[T.bigram]</td>
+<td>0.275</td>
+<td>0.015</td>
+<td>0.000</td>
+</tr>
+<tr>
+<td>M5 Gamma GEE baseline comparison</td>
+<td>C(target_variant)[T.trigram]</td>
+<td>0.196</td>
+<td>0.012</td>
+<td>0.000</td>
+</tr>
+<tr>
+<td>M5 Gamma GEE baseline comparison</td>
+<td>C(target_variant)[T.caretaker]</td>
+<td>0.000</td>
+<td>0.000</td>
+<td>0.000</td>
+</tr>
+<tr>
+<td>M5 Gamma GEE baseline comparison</td>
+<td>age_scaled</td>
+<td>-0.034</td>
+<td>0.008</td>
+<td>0.000</td>
+</tr>
+<tr>
+<td>M5 Gamma GEE baseline comparison</td>
+<td>age_scaled:C(target_variant)[T.random]</td>
+<td>0.073</td>
+<td>0.011</td>
+<td>0.000</td>
+</tr>
+<tr>
+<td>M5 Gamma GEE baseline comparison</td>
+<td>age_scaled:C(target_variant)[T.unigram]</td>
+<td>0.040</td>
+<td>0.008</td>
+<td>0.000</td>
+</tr>
+<tr>
+<td>M5 Gamma GEE baseline comparison</td>
+<td>age_scaled:C(target_variant)[T.bigram]</td>
+<td>0.035</td>
+<td>0.008</td>
+<td>0.000</td>
+</tr>
+<tr>
+<td>M5 Gamma GEE baseline comparison</td>
+<td>age_scaled:C(target_variant)[T.trigram]</td>
+<td>0.035</td>
+<td>0.007</td>
+<td>0.000</td>
+</tr>
+<tr>
+<td>M5 Gamma GEE baseline comparison</td>
+<td>age_scaled:C(target_variant)[T.caretaker]</td>
+<td>0.000</td>
+<td>0.000</td>
+<td></td>
+</tr>
+<tr>
+<td>M5 Gamma GEE baseline comparison</td>
+<td>nb_words</td>
+<td>0.247</td>
+<td>0.009</td>
+<td>0.000</td>
+</tr>
+<tr>
+<td>Context extension Gaussian GEE</td>
+<td>Intercept</td>
+<td>13.849</td>
+<td>1351267.878</td>
+<td>1.000</td>
+</tr>
+<tr>
+<td>Context extension Gaussian GEE</td>
+<td>C(context_k)[T.k1]</td>
+<td>4.533</td>
+<td>1116226.993</td>
+<td>1.000</td>
+</tr>
+<tr>
+<td>Context extension Gaussian GEE</td>
+<td>C(context_k)[T.k2]</td>
+<td>3.146</td>
+<td>1612205.874</td>
+<td>1.000</td>
+</tr>
+<tr>
+<td>Context extension Gaussian GEE</td>
+<td>C(context_k)[T.k3]</td>
+<td>2.346</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>Context extension Gaussian GEE</td>
+<td>age_scaled</td>
+<td>-0.393</td>
+<td>0.113</td>
+<td>0.000</td>
+</tr>
+<tr>
+<td>Context extension Gaussian GEE</td>
+<td>log_nb_words</td>
+<td>-4.732</td>
+<td>0.156</td>
+<td>0.000</td>
+</tr>
+<tr>
+<td>Context extension Gaussian GEE</td>
+<td>context_entropy_bits</td>
+<td>-0.147</td>
+<td>0.030</td>
+<td>0.000</td>
+</tr>
+</tbody></table>
+<h2>Compact Model Statistics</h2>
+<p>Short version:</p>
+<table>
+<thead><tr>
+<th>model</th>
+<th>status</th>
+<th>r2</th>
+<th>r2_type</th>
+<th>p_age</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>M1 OLS total bits</td>
+<td>fit</td>
+<td>0.745</td>
+<td>OLS R2</td>
+<td>0.000</td>
+</tr>
+<tr>
+<td>M2 OLS efficiency controls</td>
+<td>fit</td>
+<td>0.251</td>
+<td>OLS R2</td>
+<td>0.012</td>
+</tr>
+<tr>
+<td>M3 LMM child random intercept</td>
+<td>fit_converged</td>
+<td></td>
+<td>descriptive fitted-observed R2</td>
+<td>0.000</td>
+</tr>
+<tr>
+<td>M4 LMM child random intercept + age slope</td>
+<td>fit_not_converged</td>
+<td>0.282</td>
+<td>descriptive fitted-observed R2</td>
+<td>0.001</td>
+</tr>
+<tr>
+<td>M5 Gamma GEE baseline comparison</td>
+<td>fit</td>
+<td>0.016</td>
+<td>descriptive fitted-observed R2</td>
+<td>0.000</td>
+</tr>
+<tr>
+<td>Context extension Gaussian GEE</td>
+<td>fit</td>
+<td>0.339</td>
+<td>descriptive fitted-observed R2</td>
+<td>0.000</td>
+</tr>
+</tbody></table>
+<p>Full version:</p>
+<table>
+<thead><tr>
+<th>model_key</th>
+<th>model</th>
+<th>outcome</th>
+<th>controlled_for</th>
+<th>context</th>
+<th>status</th>
+<th>r2</th>
+<th>r2_type</th>
+<th>p_age_scaled</th>
+<th>p_age_scaled_sq</th>
+<th>p_nb_words</th>
+<th>p_log_nb_words</th>
+<th>p_context_entropy_bits</th>
+<th>min_p_target_variant</th>
+<th>min_p_age_by_variant</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>m1</td>
+<td>M1 OLS total bits</td>
+<td>sum_bits</td>
+<td>nb_words</td>
+<td>k0/no context</td>
+<td>fit</td>
+<td>0.745</td>
+<td>OLS R2</td>
+<td>0.000</td>
+<td></td>
+<td>0.000</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>m2</td>
+<td>M2 OLS efficiency controls</td>
+<td>bits_per_word</td>
+<td>log_nb_words</td>
+<td>k3 fixed</td>
+<td>fit</td>
+<td>0.251</td>
+<td>OLS R2</td>
+<td>0.012</td>
+<td>0.006</td>
+<td></td>
+<td>0.000</td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>m3</td>
+<td>M3 LMM child random intercept</td>
+<td>bits_per_word</td>
+<td>log_nb_words + child random intercept</td>
+<td>k3 fixed</td>
+<td>fit_converged</td>
+<td></td>
+<td>descriptive fitted-observed R2</td>
+<td>0.000</td>
+<td></td>
+<td></td>
+<td>0.000</td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>m4</td>
+<td>M4 LMM child random intercept + age slope</td>
+<td>bits_per_word</td>
+<td>log_nb_words + child random intercept/slope</td>
+<td>k3 fixed</td>
+<td>fit_not_converged</td>
+<td>0.282</td>
+<td>descriptive fitted-observed R2</td>
+<td>0.001</td>
+<td></td>
+<td></td>
+<td>0.000</td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>m5</td>
+<td>M5 Gamma GEE baseline comparison</td>
+<td>sum_bits</td>
+<td>nb_words + target variant + child-clustered correlation</td>
+<td>k3 fixed</td>
+<td>fit</td>
+<td>0.016</td>
+<td>descriptive fitted-observed R2</td>
+<td>0.000</td>
+<td></td>
+<td>0.000</td>
+<td></td>
+<td></td>
+<td>0.000</td>
+<td>0.000</td>
+</tr>
+<tr>
+<td>context_extension</td>
+<td>Context extension Gaussian GEE</td>
+<td>bits_per_word</td>
+<td>log_nb_words + context_entropy_bits + context_k</td>
+<td>k1/k2/k3 matched entropy rows</td>
+<td>fit</td>
+<td>0.339</td>
+<td>descriptive fitted-observed R2</td>
+<td>0.000</td>
+<td></td>
+<td></td>
+<td>0.000</td>
+<td>0.000</td>
+<td></td>
+<td></td>
+</tr>
+</tbody></table>
+<h2>Child-Control Ladder</h2>
+<p>Because individual children can differ systematically, the primary developmental question should be checked in both simple and child-controlled forms. This ladder uses real child utterances only, keeps age in every model, and controls for one effort measure at a time:</p>
+<ul>
+<li><code>OLS: age + effort</code>: simple length-controlled model, child-clustered standard</li>
+<p>errors but no child term;</p>
+<li><code>OLS: age + effort + child fixed effects</code>: directly controls for each</li>
+<p>child&#x27;s baseline level;</p>
+<li><code>GEE: age + effort grouped by child</code>: population-averaged model with</li>
+<p>child-level correlation.</p>
+</ul>
+<img src="../figs/utterance_information_model_proposals/child_control_ladder_r2_age_pvalues.png" alt="Child control ladder">
+<table>
+<thead><tr>
+<th>effort_control</th>
+<th>effort_label</th>
+<th>child_control</th>
+<th>child_control_label</th>
+<th>status</th>
+<th>n_obs</th>
+<th>n_children</th>
+<th>r2</th>
+<th>r2_type</th>
+<th>p_age</th>
+<th>p_effort</th>
+<th>formula</th>
+<th>interpretation</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>nb_words</td>
+<td>Words</td>
+<td>length_age_only</td>
+<td>OLS: age + effort</td>
+<td>fit</td>
+<td>23400</td>
+<td>21</td>
+<td>0.631</td>
+<td>OLS R2</td>
+<td>0.711</td>
+<td>0.000</td>
+<td>sum_bits ~ age_scaled + effort_value</td>
+<td>no child term; child-clustered SE</td>
+</tr>
+<tr>
+<td>nb_words</td>
+<td>Words</td>
+<td>child_fixed_effects</td>
+<td>OLS: age + effort + child fixed effects</td>
+<td>fit</td>
+<td>23400</td>
+<td>21</td>
+<td>0.642</td>
+<td>OLS R2</td>
+<td>0.020</td>
+<td>0.000</td>
+<td>sum_bits ~ age_scaled + effort_value + C(child_id)</td>
+<td>child fixed effects; child-clustered SE</td>
+</tr>
+<tr>
+<td>nb_words</td>
+<td>Words</td>
+<td>gee_child_exchangeable</td>
+<td>GEE: age + effort grouped by child</td>
+<td>fit</td>
+<td>23400</td>
+<td>21</td>
+<td>0.629</td>
+<td>descriptive fitted-observed R2</td>
+<td>0.016</td>
+<td>0.000</td>
+<td>sum_bits ~ age_scaled + effort_value</td>
+<td>child exchangeable correlation</td>
+</tr>
+<tr>
+<td>nb_morphemes</td>
+<td>Morphemes</td>
+<td>length_age_only</td>
+<td>OLS: age + effort</td>
+<td>fit</td>
+<td>23400</td>
+<td>21</td>
+<td>0.617</td>
+<td>OLS R2</td>
+<td>0.834</td>
+<td>0.000</td>
+<td>sum_bits ~ age_scaled + effort_value</td>
+<td>no child term; child-clustered SE</td>
+</tr>
+<tr>
+<td>nb_morphemes</td>
+<td>Morphemes</td>
+<td>child_fixed_effects</td>
+<td>OLS: age + effort + child fixed effects</td>
+<td>fit</td>
+<td>23400</td>
+<td>21</td>
+<td>0.631</td>
+<td>OLS R2</td>
+<td>0.029</td>
+<td>0.000</td>
+<td>sum_bits ~ age_scaled + effort_value + C(child_id)</td>
+<td>child fixed effects; child-clustered SE</td>
+</tr>
+<tr>
+<td>nb_morphemes</td>
+<td>Morphemes</td>
+<td>gee_child_exchangeable</td>
+<td>GEE: age + effort grouped by child</td>
+<td>fit</td>
+<td>23400</td>
+<td>21</td>
+<td>0.615</td>
+<td>descriptive fitted-observed R2</td>
+<td>0.024</td>
+<td>0.000</td>
+<td>sum_bits ~ age_scaled + effort_value</td>
+<td>child exchangeable correlation</td>
+</tr>
+<tr>
+<td>nb_syllables_cmu_or_pkg</td>
+<td>Syllables: CMU/pkg</td>
+<td>length_age_only</td>
+<td>OLS: age + effort</td>
+<td>fit</td>
+<td>23400</td>
+<td>21</td>
+<td>0.647</td>
+<td>OLS R2</td>
+<td>0.384</td>
+<td>0.000</td>
+<td>sum_bits ~ age_scaled + effort_value</td>
+<td>no child term; child-clustered SE</td>
+</tr>
+<tr>
+<td>nb_syllables_cmu_or_pkg</td>
+<td>Syllables: CMU/pkg</td>
+<td>child_fixed_effects</td>
+<td>OLS: age + effort + child fixed effects</td>
+<td>fit</td>
+<td>23400</td>
+<td>21</td>
+<td>0.659</td>
+<td>OLS R2</td>
+<td>0.162</td>
+<td>0.000</td>
+<td>sum_bits ~ age_scaled + effort_value + C(child_id)</td>
+<td>child fixed effects; child-clustered SE</td>
+</tr>
+<tr>
+<td>nb_syllables_cmu_or_pkg</td>
+<td>Syllables: CMU/pkg</td>
+<td>gee_child_exchangeable</td>
+<td>GEE: age + effort grouped by child</td>
+<td>fit</td>
+<td>23400</td>
+<td>21</td>
+<td>0.646</td>
+<td>descriptive fitted-observed R2</td>
+<td>0.150</td>
+<td>0.000</td>
+<td>sum_bits ~ age_scaled + effort_value</td>
+<td>child exchangeable correlation</td>
+</tr>
+<tr>
+<td>nb_syllables_pkg</td>
+<td>Syllables: pkg</td>
+<td>length_age_only</td>
+<td>OLS: age + effort</td>
+<td>fit</td>
+<td>23400</td>
+<td>21</td>
+<td>0.629</td>
+<td>OLS R2</td>
+<td>0.089</td>
+<td>0.000</td>
+<td>sum_bits ~ age_scaled + effort_value</td>
+<td>no child term; child-clustered SE</td>
+</tr>
+<tr>
+<td>nb_syllables_pkg</td>
+<td>Syllables: pkg</td>
+<td>child_fixed_effects</td>
+<td>OLS: age + effort + child fixed effects</td>
+<td>fit</td>
+<td>23400</td>
+<td>21</td>
+<td>0.641</td>
+<td>OLS R2</td>
+<td>0.286</td>
+<td>0.000</td>
+<td>sum_bits ~ age_scaled + effort_value + C(child_id)</td>
+<td>child fixed effects; child-clustered SE</td>
+</tr>
+<tr>
+<td>nb_syllables_pkg</td>
+<td>Syllables: pkg</td>
+<td>gee_child_exchangeable</td>
+<td>GEE: age + effort grouped by child</td>
+<td>fit</td>
+<td>23400</td>
+<td>21</td>
+<td>0.627</td>
+<td>descriptive fitted-observed R2</td>
+<td>0.275</td>
+<td>0.000</td>
+<td>sum_bits ~ age_scaled + effort_value</td>
+<td>child exchangeable correlation</td>
+</tr>
+<tr>
+<td>nb_phonemes</td>
+<td>Phonemes</td>
+<td>length_age_only</td>
+<td>OLS: age + effort</td>
+<td>fit</td>
+<td>23400</td>
+<td>21</td>
+<td>0.643</td>
+<td>OLS R2</td>
+<td>0.202</td>
+<td>0.000</td>
+<td>sum_bits ~ age_scaled + effort_value</td>
+<td>no child term; child-clustered SE</td>
+</tr>
+<tr>
+<td>nb_phonemes</td>
+<td>Phonemes</td>
+<td>child_fixed_effects</td>
+<td>OLS: age + effort + child fixed effects</td>
+<td>fit</td>
+<td>23400</td>
+<td>21</td>
+<td>0.655</td>
+<td>OLS R2</td>
+<td>0.098</td>
+<td>0.000</td>
+<td>sum_bits ~ age_scaled + effort_value + C(child_id)</td>
+<td>child fixed effects; child-clustered SE</td>
+</tr>
+<tr>
+<td>nb_phonemes</td>
+<td>Phonemes</td>
+<td>gee_child_exchangeable</td>
+<td>GEE: age + effort grouped by child</td>
+<td>fit</td>
+<td>23400</td>
+<td>21</td>
+<td>0.640</td>
+<td>descriptive fitted-observed R2</td>
+<td>0.089</td>
+<td>0.000</td>
+<td>sum_bits ~ age_scaled + effort_value</td>
+<td>child exchangeable correlation</td>
+</tr>
+</tbody></table>
+<h2>Effort-Control Sensitivity At The Utterance Level</h2>
+<p>These plots use total utterance bits as the outcome and control for only one effort measure at a time. This avoids putting highly collinear measures in the same model while still showing whether the age trajectory depends on the chosen effort granularity.</p>
+<p>Child real utterances and generated baselines only:</p>
+<img src="../figs/utterance_information_model_proposals/effort_sensitivity_child_real_and_baselines_short.png" alt="Effort sensitivity child short">
+<img src="../figs/utterance_information_model_proposals/effort_sensitivity_child_real_and_baselines_full.png" alt="Effort sensitivity child full">
+<p>Child real utterances, generated baselines, and caretakers:</p>
+<img src="../figs/utterance_information_model_proposals/effort_sensitivity_child_real_baselines_and_caretaker_short.png" alt="Effort sensitivity with caretakers short">
+<img src="../figs/utterance_information_model_proposals/effort_sensitivity_child_real_baselines_and_caretaker_full.png" alt="Effort sensitivity with caretakers full">
+<p>Short effort-control statistics:</p>
+<table>
+<thead><tr>
+<th>scope_label</th>
+<th>effort_label</th>
+<th>status</th>
+<th>r2</th>
+<th>p_age</th>
+<th>p_effort</th>
+<th>min_p_group</th>
+<th>min_p_age_by_group</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>Child real + generated baselines</td>
+<td>Words</td>
+<td>fit</td>
+<td>0.822</td>
+<td>0.000</td>
+<td>0.000</td>
+<td>0.000</td>
+<td>0.000</td>
+</tr>
+<tr>
+<td>Child real + generated baselines</td>
+<td>Morphemes</td>
+<td>fit</td>
+<td>0.828</td>
+<td>0.000</td>
+<td>0.000</td>
+<td>0.000</td>
+<td>0.000</td>
+</tr>
+<tr>
+<td>Child real + generated baselines</td>
+<td>Syllables: CMU/pkg</td>
+<td>fit</td>
+<td>0.867</td>
+<td>0.000</td>
+<td>0.000</td>
+<td>0.000</td>
+<td>0.000</td>
+</tr>
+<tr>
+<td>Child real + generated baselines</td>
+<td>Syllables: pkg</td>
+<td>fit</td>
+<td>0.858</td>
+<td>0.000</td>
+<td>0.000</td>
+<td>0.000</td>
+<td>0.000</td>
+</tr>
+<tr>
+<td>Child real + generated baselines</td>
+<td>Phonemes</td>
+<td>fit</td>
+<td>0.879</td>
+<td>0.000</td>
+<td>0.000</td>
+<td>0.000</td>
+<td>0.000</td>
+</tr>
+<tr>
+<td>Child real + generated baselines + caretakers</td>
+<td>Words</td>
+<td>fit</td>
+<td>0.741</td>
+<td>0.000</td>
+<td>0.000</td>
+<td>0.000</td>
+<td>0.000</td>
+</tr>
+<tr>
+<td>Child real + generated baselines + caretakers</td>
+<td>Morphemes</td>
+<td>fit</td>
+<td>0.750</td>
+<td>0.000</td>
+<td>0.000</td>
+<td>0.000</td>
+<td>0.000</td>
+</tr>
+<tr>
+<td>Child real + generated baselines + caretakers</td>
+<td>Syllables: CMU/pkg</td>
+<td>fit</td>
+<td>0.799</td>
+<td>0.000</td>
+<td>0.000</td>
+<td>0.000</td>
+<td>0.000</td>
+</tr>
+<tr>
+<td>Child real + generated baselines + caretakers</td>
+<td>Syllables: pkg</td>
+<td>fit</td>
+<td>0.790</td>
+<td>0.000</td>
+<td>0.000</td>
+<td>0.000</td>
+<td>0.000</td>
+</tr>
+<tr>
+<td>Child real + generated baselines + caretakers</td>
+<td>Phonemes</td>
+<td>fit</td>
+<td>0.809</td>
+<td>0.000</td>
+<td>0.000</td>
+<td>0.000</td>
+<td>0.000</td>
+</tr>
+</tbody></table>
+<p>Full effort-control statistics:</p>
+<table>
+<thead><tr>
+<th>scope</th>
+<th>scope_label</th>
+<th>effort_control</th>
+<th>effort_label</th>
+<th>status</th>
+<th>n_obs</th>
+<th>n_children</th>
+<th>r2</th>
+<th>r2_type</th>
+<th>p_age</th>
+<th>p_effort</th>
+<th>min_p_group</th>
+<th>min_p_age_by_group</th>
+<th>formula</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>child_real_and_baselines</td>
+<td>Child real + generated baselines</td>
+<td>nb_words</td>
+<td>Words</td>
+<td>fit</td>
+<td>62400</td>
+<td>21</td>
+<td>0.822</td>
+<td>OLS R2</td>
+<td>0.000</td>
+<td>0.000</td>
+<td>0.000</td>
+<td>0.000</td>
+<td>sum_bits ~ age_scaled * C(comparison_group) + effort_value</td>
+</tr>
+<tr>
+<td>child_real_and_baselines</td>
+<td>Child real + generated baselines</td>
+<td>nb_morphemes</td>
+<td>Morphemes</td>
+<td>fit</td>
+<td>62400</td>
+<td>21</td>
+<td>0.828</td>
+<td>OLS R2</td>
+<td>0.000</td>
+<td>0.000</td>
+<td>0.000</td>
+<td>0.000</td>
+<td>sum_bits ~ age_scaled * C(comparison_group) + effort_value</td>
+</tr>
+<tr>
+<td>child_real_and_baselines</td>
+<td>Child real + generated baselines</td>
+<td>nb_syllables_cmu_or_pkg</td>
+<td>Syllables: CMU/pkg</td>
+<td>fit</td>
+<td>62400</td>
+<td>21</td>
+<td>0.867</td>
+<td>OLS R2</td>
+<td>0.000</td>
+<td>0.000</td>
+<td>0.000</td>
+<td>0.000</td>
+<td>sum_bits ~ age_scaled * C(comparison_group) + effort_value</td>
+</tr>
+<tr>
+<td>child_real_and_baselines</td>
+<td>Child real + generated baselines</td>
+<td>nb_syllables_pkg</td>
+<td>Syllables: pkg</td>
+<td>fit</td>
+<td>62400</td>
+<td>21</td>
+<td>0.858</td>
+<td>OLS R2</td>
+<td>0.000</td>
+<td>0.000</td>
+<td>0.000</td>
+<td>0.000</td>
+<td>sum_bits ~ age_scaled * C(comparison_group) + effort_value</td>
+</tr>
+<tr>
+<td>child_real_and_baselines</td>
+<td>Child real + generated baselines</td>
+<td>nb_phonemes</td>
+<td>Phonemes</td>
+<td>fit</td>
+<td>62400</td>
+<td>21</td>
+<td>0.879</td>
+<td>OLS R2</td>
+<td>0.000</td>
+<td>0.000</td>
+<td>0.000</td>
+<td>0.000</td>
+<td>sum_bits ~ age_scaled * C(comparison_group) + effort_value</td>
+</tr>
+<tr>
+<td>child_real_baselines_and_caretaker</td>
+<td>Child real + generated baselines + caretakers</td>
+<td>nb_words</td>
+<td>Words</td>
+<td>fit</td>
+<td>74880</td>
+<td>21</td>
+<td>0.741</td>
+<td>OLS R2</td>
+<td>0.000</td>
+<td>0.000</td>
+<td>0.000</td>
+<td>0.000</td>
+<td>sum_bits ~ age_scaled * C(comparison_group) + effort_value</td>
+</tr>
+<tr>
+<td>child_real_baselines_and_caretaker</td>
+<td>Child real + generated baselines + caretakers</td>
+<td>nb_morphemes</td>
+<td>Morphemes</td>
+<td>fit</td>
+<td>74880</td>
+<td>21</td>
+<td>0.750</td>
+<td>OLS R2</td>
+<td>0.000</td>
+<td>0.000</td>
+<td>0.000</td>
+<td>0.000</td>
+<td>sum_bits ~ age_scaled * C(comparison_group) + effort_value</td>
+</tr>
+<tr>
+<td>child_real_baselines_and_caretaker</td>
+<td>Child real + generated baselines + caretakers</td>
+<td>nb_syllables_cmu_or_pkg</td>
+<td>Syllables: CMU/pkg</td>
+<td>fit</td>
+<td>74880</td>
+<td>21</td>
+<td>0.799</td>
+<td>OLS R2</td>
+<td>0.000</td>
+<td>0.000</td>
+<td>0.000</td>
+<td>0.000</td>
+<td>sum_bits ~ age_scaled * C(comparison_group) + effort_value</td>
+</tr>
+<tr>
+<td>child_real_baselines_and_caretaker</td>
+<td>Child real + generated baselines + caretakers</td>
+<td>nb_syllables_pkg</td>
+<td>Syllables: pkg</td>
+<td>fit</td>
+<td>74880</td>
+<td>21</td>
+<td>0.790</td>
+<td>OLS R2</td>
+<td>0.000</td>
+<td>0.000</td>
+<td>0.000</td>
+<td>0.000</td>
+<td>sum_bits ~ age_scaled * C(comparison_group) + effort_value</td>
+</tr>
+<tr>
+<td>child_real_baselines_and_caretaker</td>
+<td>Child real + generated baselines + caretakers</td>
+<td>nb_phonemes</td>
+<td>Phonemes</td>
+<td>fit</td>
+<td>74880</td>
+<td>21</td>
+<td>0.809</td>
+<td>OLS R2</td>
+<td>0.000</td>
+<td>0.000</td>
+<td>0.000</td>
+<td>0.000</td>
+<td>sum_bits ~ age_scaled * C(comparison_group) + effort_value</td>
+</tr>
+</tbody></table>
+<h2>What Should Go Into The Real Report?</h2>
+<p>Recommended first pass:</p>
+<ol>
+<li>Use Model 2 as the simple interpretive baseline.</li>
+<li>Use Model 3 as the first main child-aware model.</li>
+<li>Treat Model 4 as a developmental-trajectory candidate, but refit it more</li>
+<p>carefully before using it inferentially because the statsmodels pilot did not converge.</p>
+<li>Use Model 5 for real-versus-baseline comparisons.</li>
+<li>Keep context entropy as a follow-up once the small entropy patch is scored.</li>
+<li>Do not include all effort predictors in the same model because the VIF</li>
+<p>diagnostics show that they are measuring strongly overlapping quantities.</p>
+</ol>
+<p>Outputs written under:</p>
+<pre><code>results/utterance_information_model_proposals
+figs/utterance_information_model_proposals</code></pre>
+</main>
+</body>
+</html>

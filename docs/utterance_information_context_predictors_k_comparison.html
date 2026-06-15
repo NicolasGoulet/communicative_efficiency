@@ -1,0 +1,437 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Context Predictor Permutations: K0-K3 Comparison</title>
+<style>
+:root {
+  color-scheme: light;
+  --ink: #1e2528;
+  --muted: #5e686d;
+  --line: #d9e0df;
+  --paper: #ffffff;
+  --soft: #f5f7f6;
+  --accent: #2f6f73;
+  --accent2: #c76f2c;
+}
+body {
+  margin: 0;
+  background: #eef2f1;
+  color: var(--ink);
+  font: 16px/1.58 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+main {
+  max-width: 980px;
+  margin: 34px auto 56px;
+  padding: 48px 58px;
+  background: var(--paper);
+  box-shadow: 0 18px 50px rgba(31, 45, 48, 0.12);
+}
+h1, h2, h3, h4 {
+  line-height: 1.18;
+  margin: 1.6em 0 0.55em;
+}
+h1 {
+  margin-top: 0;
+  font-size: 2.25rem;
+  border-bottom: 3px solid var(--accent);
+  padding-bottom: 0.45em;
+}
+h2 {
+  font-size: 1.55rem;
+  color: var(--accent);
+}
+h3 {
+  font-size: 1.18rem;
+}
+p {
+  margin: 0.75em 0;
+}
+a {
+  color: var(--accent);
+}
+blockquote {
+  border-left: 4px solid var(--accent2);
+  margin: 1.1em 0;
+  padding: 0.05em 1.1em;
+  color: var(--muted);
+  background: #fff8f2;
+}
+code {
+  background: var(--soft);
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  padding: 0.08em 0.3em;
+  font-family: "SFMono-Regular", Consolas, monospace;
+  font-size: 0.92em;
+}
+pre {
+  background: #f5f7f6;
+  color: var(--ink);
+  border: 1px solid var(--line);
+  padding: 1em;
+  overflow-x: auto;
+  border-radius: 7px;
+}
+pre code {
+  background: transparent;
+  border: 0;
+  padding: 0;
+  color: inherit;
+}
+table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 1.15em 0 1.45em;
+  font-size: 0.95em;
+}
+th, td {
+  border: 1px solid var(--line);
+  padding: 0.54em 0.68em;
+  vertical-align: top;
+}
+th {
+  background: #e7efed;
+  text-align: left;
+}
+tr:nth-child(even) td {
+  background: #fafbfb;
+}
+img {
+  max-width: 100%;
+  display: block;
+  margin: 1.1em auto 0.45em;
+}
+ul, ol {
+  padding-left: 1.4em;
+}
+.caption {
+  color: var(--muted);
+  font-size: 0.92em;
+  margin-top: -0.15em;
+}
+@media print {
+  body {
+    background: white;
+  }
+  main {
+    box-shadow: none;
+    margin: 0;
+    max-width: none;
+    padding: 28px;
+  }
+}
+</style>
+</head>
+<body>
+<main>
+<h1>Context Predictor Permutations: K0-K3 Comparison</h1>
+<p>This report compares the four scoring-context settings. It does not replace the older M1-M6 reports; it is a new context-predictor sensitivity report.</p>
+<h2>How To Read The Comparison</h2>
+<ul>
+<li><code>k0</code> is the no-context scorer condition. It can fit the baseline controls but</li>
+<p>cannot fit context entropy or context-size models because there is no context.</p>
+<li><code>k1</code>, <code>k2</code>, and <code>k3</code> use increasingly larger preceding caretaker context</li>
+<p>windows.</p>
+<li><code>mean_delta_r2</code> is the average added in-sample R2 relative to the no-context</li>
+<p>predictor baseline with the same target effort control.</p>
+<li>These are not held-out predictive scores; they are fit diagnostics and</li>
+<p>inferential screens for the current model family.</p>
+</ul>
+<p>Implementation for all rows in this report:</p>
+<pre><code>Estimator: linear OLS regression
+Library: statsmodels.formula.api.ols
+Uncertainty: child-cluster robust standard errors, cov_type=&#x27;cluster&#x27;
+Cluster unit: child_id</code></pre>
+<p>So these are linear child-clustered OLS screens, not GEE/GLM/mixed-model fits.</p>
+<h2>Fit Summary By K</h2>
+<table>
+<thead><tr>
+<th>context_k</th>
+<th>model_label</th>
+<th>fitted_rows</th>
+<th>mean_r2</th>
+<th>mean_delta_r2</th>
+<th>significant_entropy</th>
+<th>significant_context_size</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>k0</td>
+<td>Baseline controls</td>
+<td>5</td>
+<td>0.736</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+</tr>
+<tr>
+<td>k1</td>
+<td>Baseline controls</td>
+<td>5</td>
+<td>0.6586</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+</tr>
+<tr>
+<td>k1</td>
+<td>Context size only</td>
+<td>25</td>
+<td>0.6597</td>
+<td>0.001151</td>
+<td>0</td>
+<td>25</td>
+</tr>
+<tr>
+<td>k1</td>
+<td>Entropy only</td>
+<td>5</td>
+<td>0.6585</td>
+<td>-0.0001005</td>
+<td>0</td>
+<td>0</td>
+</tr>
+<tr>
+<td>k1</td>
+<td>Entropy plus context size</td>
+<td>25</td>
+<td>0.6593</td>
+<td>0.0007084</td>
+<td>0</td>
+<td>25</td>
+</tr>
+<tr>
+<td>k2</td>
+<td>Baseline controls</td>
+<td>5</td>
+<td>0.6408</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+</tr>
+<tr>
+<td>k2</td>
+<td>Context size only</td>
+<td>25</td>
+<td>0.6417</td>
+<td>0.0009782</td>
+<td>0</td>
+<td>25</td>
+</tr>
+<tr>
+<td>k2</td>
+<td>Entropy only</td>
+<td>5</td>
+<td>0.6413</td>
+<td>0.0005263</td>
+<td>5</td>
+<td>0</td>
+</tr>
+<tr>
+<td>k2</td>
+<td>Entropy plus context size</td>
+<td>25</td>
+<td>0.6415</td>
+<td>0.0007674</td>
+<td>25</td>
+<td>25</td>
+</tr>
+<tr>
+<td>k3</td>
+<td>Baseline controls</td>
+<td>5</td>
+<td>0.6318</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+</tr>
+<tr>
+<td>k3</td>
+<td>Context size only</td>
+<td>25</td>
+<td>0.6329</td>
+<td>0.001178</td>
+<td>0</td>
+<td>25</td>
+</tr>
+<tr>
+<td>k3</td>
+<td>Entropy only</td>
+<td>5</td>
+<td>0.6325</td>
+<td>0.0007722</td>
+<td>5</td>
+<td>0</td>
+</tr>
+<tr>
+<td>k3</td>
+<td>Entropy plus context size</td>
+<td>25</td>
+<td>0.6327</td>
+<td>0.0009097</td>
+<td>25</td>
+<td>25</td>
+</tr>
+</tbody></table>
+<h2>Context Predictor Magnitudes By K</h2>
+<table>
+<thead><tr>
+<th>context_k</th>
+<th>measure_col</th>
+<th>measure_label</th>
+<th>rows</th>
+<th>mean</th>
+<th>median</th>
+<th>p75</th>
+<th>p90</th>
+<th>max</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>k0</td>
+<td>context_nb_words</td>
+<td>Context words</td>
+<td>446985</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+</tr>
+<tr>
+<td>k0</td>
+<td>context_nb_phonemes</td>
+<td>Context phonemes</td>
+<td>446985</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+</tr>
+<tr>
+<td>k0</td>
+<td>context_entropy_bits</td>
+<td>Context entropy bits</td>
+<td>0</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>k1</td>
+<td>context_nb_words</td>
+<td>Context words</td>
+<td>446985</td>
+<td>4.46</td>
+<td>4</td>
+<td>6</td>
+<td>9</td>
+<td>109</td>
+</tr>
+<tr>
+<td>k1</td>
+<td>context_nb_phonemes</td>
+<td>Context phonemes</td>
+<td>446985</td>
+<td>13.7</td>
+<td>12</td>
+<td>19</td>
+<td>26</td>
+<td>326</td>
+</tr>
+<tr>
+<td>k1</td>
+<td>context_entropy_bits</td>
+<td>Context entropy bits</td>
+<td>442220</td>
+<td>5.71</td>
+<td>5.67</td>
+<td>6.49</td>
+<td>7.32</td>
+<td>11.2</td>
+</tr>
+<tr>
+<td>k2</td>
+<td>context_nb_words</td>
+<td>Context words</td>
+<td>446985</td>
+<td>8.74</td>
+<td>8</td>
+<td>11</td>
+<td>15</td>
+<td>114</td>
+</tr>
+<tr>
+<td>k2</td>
+<td>context_nb_phonemes</td>
+<td>Context phonemes</td>
+<td>446985</td>
+<td>26.8</td>
+<td>24</td>
+<td>34</td>
+<td>46</td>
+<td>341</td>
+</tr>
+<tr>
+<td>k2</td>
+<td>context_entropy_bits</td>
+<td>Context entropy bits</td>
+<td>441461</td>
+<td>6</td>
+<td>6</td>
+<td>6.64</td>
+<td>7.25</td>
+<td>11.3</td>
+</tr>
+<tr>
+<td>k3</td>
+<td>context_nb_words</td>
+<td>Context words</td>
+<td>446985</td>
+<td>13</td>
+<td>12</td>
+<td>16</td>
+<td>21</td>
+<td>122</td>
+</tr>
+<tr>
+<td>k3</td>
+<td>context_nb_phonemes</td>
+<td>Context phonemes</td>
+<td>446985</td>
+<td>39.8</td>
+<td>37</td>
+<td>50</td>
+<td>64</td>
+<td>381</td>
+</tr>
+<tr>
+<td>k3</td>
+<td>context_entropy_bits</td>
+<td>Context entropy bits</td>
+<td>441413</td>
+<td>6.34</td>
+<td>6.38</td>
+<td>6.92</td>
+<td>7.42</td>
+<td>11</td>
+</tr>
+</tbody></table>
+<h2>Cross-K Plots</h2>
+<p>How to read: the first plot asks whether adding context predictors increases fit differently for k1/k2/k3. The second plot asks whether entropy and size coefficients change as the context window grows. The third plot confirms that context windows mechanically grow from k1 to k3.</p>
+<img src="../figs/context_predictor_permutations/compare_k_model_family_r2.png" alt="R2 comparison">
+<img src="../figs/context_predictor_permutations/compare_k_context_coefficients.png" alt="Coefficient comparison">
+<img src="../figs/context_predictor_permutations/compare_k_context_predictor_distributions.png" alt="Context predictor distribution comparison">
+<h2>Saved Outputs</h2>
+<pre><code>results/context_predictor_permutations/context_predictor_model_summary.csv
+results/context_predictor_permutations/context_predictor_distribution.csv
+results/context_predictor_permutations/context_predictors_by_age.csv
+figs/context_predictor_permutations/</code></pre>
+</main>
+</body>
+</html>

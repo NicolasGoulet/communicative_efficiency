@@ -740,3 +740,1650 @@ results/lstm_baselines/pbm_additive_merged_006_023_k3_k4_k5_same_length/
   as the dedicated handoff for the scoring agent.
 - Reminder: this repository does not score the LSTM utterances. Scoring happens
   in `/home/alkan/Portelance/compute_surprisal_mila`.
+
+## 2026-06-04 PBM Utterance-Information Modeling Proposal Packet
+
+- Added `src/build_utterance_information_model_proposals.py` to build a
+  separate model-review packet without modifying the supervisor-facing
+  `docs/predicting_utterance_level_information_report.md`.
+- Added focused tests in
+  `tests/test_build_utterance_information_model_proposals.py` for source CSV
+  row counting, scored-file path parsing, source-vs-long-table audit logic, and
+  deterministic stratified sampling.
+- Installed analysis dependencies in this repo with `uv add statsmodels seaborn
+  duckdb`.
+- Generated:
+  - `docs/utterance_information_model_proposals.md`
+  - `docs/utterance_information_model_proposals.html`
+  - `notebooks/utterance_information_model_proposals.ipynb`
+  - `results/utterance_information_model_proposals/`
+  - `figs/utterance_information_model_proposals/`
+- Build command:
+
+```bash
+env MPLCONFIGDIR=/tmp/matplotlib .venv/bin/python \
+  src/build_utterance_information_model_proposals.py
+```
+
+- Source audit:
+  - scorer tree: 504 CSV files;
+  - source scored rows: 11,607,680;
+  - long-table rows: 11,607,680;
+  - source/long mismatched groups: 0;
+  - raw unscored/blank source rows documented and excluded: 7,632;
+  - context entropy feature rows available: 1,675,520.
+- Predictor diagnostics:
+  effort measures are strongly collinear. VIFs exceed 10 for
+  syllables, morphemes, words, and phonemes, so final inferential models should
+  not include all effort measures simultaneously.
+- Pilot model status:
+  OLS, child-clustered OLS, child random-intercept LMM, Gamma GEE baseline
+  comparison, and context-entropy Gaussian GEE fit successfully. The child
+  random-intercept plus random-age-slope LMM fit but did not converge, so it is
+  documented as a candidate requiring a more stable final fitting strategy
+  before interpretation.
+- Verification:
+
+```bash
+.venv/bin/python -m py_compile src/build_utterance_information_model_proposals.py
+.venv/bin/python -m unittest tests.test_build_utterance_information_model_proposals
+```
+
+Both checks passed on 2026-06-04.
+
+### 2026-06-04 Modeling Proposal Revision: Controlled Plots
+
+- Clarified in `docs/utterance_information_model_proposals.md` that the raw
+  mean total-bits age plot is descriptive and does not control for utterance
+  size. It should be read alongside adjusted/model-based plots.
+- Added a `Unit Labels` section: `dataset` refers to the corpus/source
+  collection (`Brown`, `Manchester`, `Providence`), not the individual child;
+  individual children are represented by `child_id`.
+- Added one result plot per candidate model:
+  - `model1_adjusted_total_bits_by_age.*`: total-bit predictions at fixed word
+    counts;
+  - `model2_adjusted_bits_per_word_by_dataset.*`: bits-per-word predictions by
+    corpus at fixed length and `k3` context;
+  - `model3_child_random_intercepts.*`: child-specific random intercepts;
+  - `model4_random_slope_pilot.*`: random intercept/slope diagnostic for the
+    non-converged random-slope pilot;
+  - `model5_adjusted_baseline_predictions.*`: adjusted Gamma-GEE predictions
+    for real/random/unigram/bigram/trigram targets at fixed length.
+- Regenerated `docs/utterance_information_model_proposals.html`.
+- Verification:
+
+```bash
+env UV_CACHE_DIR=/tmp/uv-cache MPLCONFIGDIR=/tmp/matplotlib \
+  .venv/bin/python -m unittest discover -s tests
+```
+
+passed with 196 tests.
+
+### 2026-06-08 M1/M2/M3 Utterance-Information Deep Dive
+
+- Added M3 age-by-effort interaction model families to
+  `src/build_m1_m2_utterance_information_deep_dive.py`, while keeping words,
+  morphemes, both syllable estimates, and phonemes as separate effort-control
+  versions.
+- M3 formula family: `sum_bits ~ age * effort`, with pooled, child-clustered,
+  child fixed-effect, GEE, Gamma/log, and mixed-model sensitivity versions.
+- Regenerated the internal review report:
+  `docs/utterance_information_m1_m2_deep_dive.html`.
+- Added plain-language report scaffolding:
+  - model vocabulary for OLS, child-clustered SE, GLM, Gamma/log link, GEE,
+    mixed models, and fixed-median prediction lines;
+  - one "question / controls / interpretation" block per model-family
+    subsection;
+  - explicit discussion of why M1 pooled age effects can differ from M2
+    child-adjusted developmental effects in unbalanced longitudinal data.
+- Added M3 outputs:
+  - `results/m1_m2_utterance_information_deep_dive/m3_interaction_adjusted_age_predictions.csv`;
+  - `figs/m1_m2_utterance_information_deep_dive/m3_expanded_interaction_coefficients.png`;
+  - one low/median/high effort interaction-line plot per M3 model family.
+- Verification:
+
+```bash
+MPLCONFIGDIR=/tmp/matplotlib .venv/bin/python \
+  -m unittest tests.test_build_m1_m2_utterance_information_deep_dive
+
+MPLCONFIGDIR=/tmp/matplotlib .venv/bin/python \
+  -m unittest discover -s tests
+```
+
+Focused tests passed, and the full suite passed with 212 tests.
+
+### 2026-06-08 Route 1 Two-Report Analysis Suite
+
+- Added `src/build_route1_model_report_suite.py` and
+  `tests/test_build_route1_model_report_suite.py`.
+- The builder creates two internal reports:
+  - `docs/utterance_information_m123_extended.html`
+  - `docs/utterance_information_research_model_zoo.html`
+- The extended M1/M2/M3 report uses the already fitted M1/M2/M3 outputs and
+  clarifies:
+  - the M1 pooled versus M2 child-adjusted sign reversal;
+  - why fixed-median prediction lines are a visualization/control decision;
+  - how to interpret M3 age-by-effort interaction coefficients.
+- The exploratory model zoo streams the Route 1 long table, derives bounded
+  samples plus row-matched baseline deltas, and creates predictors for:
+  - caretaker context length;
+  - next-token context entropy and certainty;
+  - rule-based context question type;
+  - fallback-quality flags;
+  - real-minus-random/unigram/bigram/trigram deltas.
+- Full build command:
+
+```bash
+MPLCONFIGDIR=/tmp/matplotlib .venv/bin/python \
+  src/build_route1_model_report_suite.py
+```
+
+- Real build outputs:
+  - `results/utterance_information_research_model_zoo/model_zoo_summary.csv`
+  - `results/utterance_information_research_model_zoo/model_zoo_coefficients.csv`
+  - `results/utterance_information_research_model_zoo/baseline_delta_table.csv.gz`
+  - `figs/utterance_information_research_model_zoo/`
+- Real model-zoo status on 2026-06-08:
+  - 11 candidate models fit successfully;
+  - row-matched baseline-delta model used 1,786,032 real-minus-baseline rows;
+  - response-level entropy features were not yet present, so the report uses
+    next-token context entropy as a provisional context-predictability measure.
+- Verification:
+
+```bash
+MPLCONFIGDIR=/tmp/matplotlib .venv/bin/python \
+  -m unittest tests.test_build_route1_model_report_suite
+
+MPLCONFIGDIR=/tmp/matplotlib .venv/bin/python \
+  -m unittest discover -s tests
+```
+
+Focused tests passed, and the full suite passed with 216 tests.
+
+### 2026-06-08 Internal Child/Baseline/Caretaker Comparison Report Revision
+
+- Reworked `docs/utterance_information_research_model_zoo.html` from a broad
+  model-zoo scratchpad into a question-first comparison report.
+- The report is now organized around:
+  - child versus random;
+  - child versus unigram;
+  - child versus bigram;
+  - child versus trigram;
+  - children versus caretakers;
+  - context predictability and child effort.
+- Added full streamed aggregate tables:
+  - `results/utterance_information_research_model_zoo/baseline_trends.csv.gz`
+  - `results/utterance_information_research_model_zoo/role_trends.csv.gz`
+- Added explicit comparison-model outputs:
+  - `results/utterance_information_research_model_zoo/comparison_model_summary.csv`
+  - `results/utterance_information_research_model_zoo/comparison_model_coefficients.csv`
+- Added dashboard plots:
+  - `figs/utterance_information_research_model_zoo/child_vs_random_dashboard.png`
+  - `figs/utterance_information_research_model_zoo/child_vs_unigram_dashboard.png`
+  - `figs/utterance_information_research_model_zoo/child_vs_bigram_dashboard.png`
+  - `figs/utterance_information_research_model_zoo/child_vs_trigram_dashboard.png`
+  - `figs/utterance_information_research_model_zoo/child_vs_caretaker_dashboard.png`
+- Real build check on 2026-06-08:
+  - `comparison_model_summary.csv`: 14 fitted comparison models;
+  - `baseline_trends.csv.gz`: 40 full aggregate age-bin/variant rows;
+  - `role_trends.csv.gz`: 16 full aggregate age-bin/speaker rows.
+- Verification:
+
+```bash
+MPLCONFIGDIR=/tmp/matplotlib .venv/bin/python \
+  -m unittest tests.test_build_route1_model_report_suite
+
+MPLCONFIGDIR=/tmp/matplotlib .venv/bin/python \
+  src/build_route1_model_report_suite.py
+
+MPLCONFIGDIR=/tmp/matplotlib .venv/bin/python \
+  -m unittest discover -s tests
+```
+
+Focused tests passed, the real report build completed, and the full suite
+passed with 217 tests.
+
+### 2026-06-08 M1-M4 Model-Ladder Report Revision
+
+- Reworked `docs/utterance_information_m1_m2_deep_dive.html` so it follows a
+  clean model-ladder structure instead of dumping all model-family tables.
+- The report now has one readable section per model:
+  - M1: pooled `sum_bits ~ age + effort`;
+  - M2: child-adjusted `sum_bits ~ age + effort + child identity`;
+  - M3: `sum_bits ~ age * effort`;
+  - M4: context entropy as a predictor of effort and information.
+- Each model section now includes:
+  - question asked;
+  - formula;
+  - how to read the plot;
+  - compact primary table;
+  - short takeaway;
+  - compact sensitivity snapshot where relevant.
+- Added M4 context-entropy machinery to
+  `src/build_m1_m2_utterance_information_deep_dive.py`:
+  - M4a: `nb_words ~ age * context_entropy + context_length`;
+  - M4b: `nb_phonemes ~ age * context_entropy + context_length`;
+  - M4c: `sum_bits ~ age + nb_words + context_entropy + C(child_id)`;
+  - M4d: `bits_per_word ~ age * context_entropy + log_nb_words`.
+- M4a/M4b use Gaussian GEE rather than Poisson GEE in this internal report
+  because Poisson GEE produced NaN coefficients on the full real-data run. The
+  report labels this as a stable first-pass model; final effort-count models can
+  still use a count GLMM or negative-binomial specification in a confirmatory
+  analysis.
+- New M4 outputs:
+  - `results/m1_m2_utterance_information_deep_dive/m4_context_entropy_model_summary.csv`
+  - `results/m1_m2_utterance_information_deep_dive/m4_context_entropy_coefficients.csv`
+  - `results/m1_m2_utterance_information_deep_dive/m4_context_entropy_adjusted_predictions.csv`
+  - `figs/m1_m2_utterance_information_deep_dive/m4_context_entropy_descriptive_bins.png`
+  - `figs/m1_m2_utterance_information_deep_dive/m4_context_entropy_adjusted_predictions.png`
+  - `figs/m1_m2_utterance_information_deep_dive/m4_context_entropy_coefficients.png`
+- Real M4 build check:
+  - 441,413 child k3 real rows with context entropy;
+  - 21 children;
+  - all four M4 rows fit with nonmissing context-entropy coefficients.
+- Verification:
+
+```bash
+MPLCONFIGDIR=/tmp/matplotlib .venv/bin/python \
+  -m unittest tests.test_build_m1_m2_utterance_information_deep_dive
+
+MPLCONFIGDIR=/tmp/matplotlib .venv/bin/python \
+  src/build_m1_m2_utterance_information_deep_dive.py
+
+MPLCONFIGDIR=/tmp/matplotlib .venv/bin/python \
+  -m unittest discover -s tests
+```
+
+Focused tests passed, the real M1-M4 report build completed, and the full suite
+passed with 218 tests.
+
+### 2026-06-08 Expanded Model-Atlas Plot Explanation Revision
+
+- Reworked `src/build_route1_model_report_suite.py` so
+  `docs/utterance_information_research_model_zoo.md` and `.html` now read as an
+  expanded internal model atlas instead of a table-heavy dump.
+- Added structured Z1-Z11 model cards to the report generator. Each card now
+  includes:
+  - the question asked by the model;
+  - the exact formula stored in the model summary;
+  - why the model belongs in the expanded atlas rather than the compact M1-M4
+    ladder;
+  - a local "How to read this plot" paragraph immediately before the plot;
+  - a compact result sentence and small coefficient table.
+- Added direct card plots for:
+  - Z1 child information with child identity;
+  - Z2 nonlinear information density;
+  - Z3 context entropy predicting effort;
+  - Z4 context entropy predicting information density;
+  - Z5 scoring context-window sensitivity;
+  - Z6 question-type effort;
+  - Z7 real children versus all matched baselines;
+  - Z8 children versus caretakers;
+  - Z9 information per phoneme;
+  - Z10 context certainty predicting effort;
+  - Z11 real-minus-baseline delta.
+- Added explicit plot-reading paragraphs beside the omnibus baseline plots,
+  pairwise child-vs-baseline dashboards, child-vs-caretaker dashboard, context
+  entropy plots, question-type plot, predictor-correlation heatmap, and
+  coefficient overview.
+- Audit after regeneration:
+
+```bash
+.venv/bin/python -c "from pathlib import Path; text=Path('docs/utterance_information_research_model_zoo.md').read_text(); print('images', text.count('![')); print('how_to_read', text.count('How to read this plot')); print('z_cards', sum(1 for line in text.splitlines() if line.startswith('## Z')))"
+```
+
+returned:
+
+```text
+images 24
+how_to_read 24
+z_cards 11
+```
+
+- Verification:
+
+```bash
+MPLCONFIGDIR=/tmp/matplotlib .venv/bin/python \
+  -m unittest tests.test_build_route1_model_report_suite
+
+MPLCONFIGDIR=/tmp/matplotlib .venv/bin/python \
+  src/build_route1_model_report_suite.py
+
+MPLCONFIGDIR=/tmp/matplotlib .venv/bin/python \
+  -m unittest discover -s tests
+```
+
+Focused tests passed, the real report build completed, and the full suite passed
+with 220 tests.
+
+### 2026-06-08 M4/M5/M6 And Effort-Controlled Model-Zoo Revision
+
+- Corrected the internal model-ladder report after review:
+  - M4 now asks the same information-outcome question as M1/M2/M3 while adding
+    context entropy as an additional predictor.
+  - The core M4 formula family is:
+
+```text
+sum_bits ~ age + effort + context_entropy + child identity
+```
+
+  - M4 is repeated across the same five effort controls used elsewhere:
+    words, morphemes, CMU/pkg syllables, package syllables, and phonemes.
+  - M4 sensitivity versions include GEE, Gamma/log GEE, an age-by-context
+    entropy version, and an M3-plus-context version.
+- Added M5 and M6 to `src/build_m1_m2_utterance_information_deep_dive.py`:
+  - M5 is an all-main-effects model with age, all effort measures, context
+    entropy, context length, and child fixed effects.
+  - M6 is a theory-rich interaction model with age-by-effort, age-by-context,
+    context-by-word, and context-by-phoneme interactions plus child fixed
+    effects.
+  - Both are explicitly documented as saturated exploratory stress tests, not
+    cleaner primary evidence, because the effort measures are highly
+    collinear.
+- Added an explicit uneven-child-age-coverage section to the M1-M6 report:
+  child-clustered standard errors handle within-child dependence but do not by
+  themselves solve unbalanced longitudinal coverage; child fixed effects,
+  child-specific age slopes, random-slope sensitivity models, and model
+  comparisons are the relevant safeguards.
+- New M1-M6 outputs:
+
+```text
+results/m1_m2_utterance_information_deep_dive/m5_m6_saturated_model_summary.csv
+results/m1_m2_utterance_information_deep_dive/m5_m6_saturated_coefficients.csv
+results/m1_m2_utterance_information_deep_dive/m5_m6_saturated_adjusted_age_predictions.csv
+figs/m1_m2_utterance_information_deep_dive/m5_m6_saturated_adjusted_age_predictions.png
+figs/m1_m2_utterance_information_deep_dive/m5_m6_saturated_selected_coefficients.png
+```
+
+- Updated the expanded model zoo so baseline and caretaker comparisons are
+  effort-controlled rather than word-only:
+  - child vs random;
+  - child vs unigram;
+  - child vs bigram;
+  - child vs trigram;
+  - child vs caretaker.
+- Each comparison is repeated with one effort control at a time:
+
+```text
+Words
+Morphemes
+Syllables: CMU/pkg
+Syllables: pkg
+Phonemes
+```
+
+- Real model-zoo audit after regeneration:
+
+```text
+comparison_model_summary.csv rows: 45
+models with explicit effort sweeps: 45
+all effort-sweep comparison rows status: fit
+model-zoo Markdown images: 26
+model-zoo "How to read this plot" paragraphs: 26
+Z model cards: 11
+```
+
+- New model-zoo plots:
+
+```text
+figs/utterance_information_research_model_zoo/effort_controlled_comparison_model_r2.png
+figs/utterance_information_research_model_zoo/effort_controlled_comparison_age_coefficients.png
+```
+
+- Regenerated:
+
+```text
+docs/utterance_information_m1_m2_deep_dive.html
+docs/utterance_information_research_model_zoo.html
+```
+
+- Verification:
+
+```bash
+MPLCONFIGDIR=/tmp/matplotlib .venv/bin/python \
+  -m unittest tests.test_build_m1_m2_utterance_information_deep_dive
+
+MPLCONFIGDIR=/tmp/matplotlib .venv/bin/python \
+  -m unittest tests.test_build_route1_model_report_suite
+
+MPLCONFIGDIR=/tmp/matplotlib .venv/bin/python \
+  -m unittest discover -s tests
+```
+
+Focused tests passed, both real reports regenerated, and the full suite passed
+with 221 tests.
+
+### 2026-06-08 Analysis/Report Stage Split For Internal Modeling Reports
+
+- Split the two internal report builders into separate analysis and rendering
+  stages so wording/layout changes do not refit every model:
+
+```bash
+MPLCONFIGDIR=/tmp/matplotlib .venv/bin/python \
+  src/build_m1_m2_utterance_information_deep_dive.py --stage report
+
+MPLCONFIGDIR=/tmp/matplotlib .venv/bin/python \
+  src/build_route1_model_report_suite.py --stage report
+```
+
+- Use `--stage report` when only Markdown/HTML text, section ordering, table
+  inclusion, or explanatory wording needs to change.
+- Use `--stage analysis` when the scored data, predictors, formulas, model
+  families, or figures that depend on fitted model outputs change.
+- Use `--stage all` when intentionally rebuilding both model outputs and the
+  rendered reports from scratch.
+- Added regression tests proving report-only rebuilds can run from the saved
+  tables/figures after the raw analysis input has been removed.
+- Verification:
+
+```bash
+MPLCONFIGDIR=/tmp/matplotlib .venv/bin/python \
+  src/build_m1_m2_utterance_information_deep_dive.py --stage report
+
+MPLCONFIGDIR=/tmp/matplotlib .venv/bin/python \
+  src/build_route1_model_report_suite.py --stage report
+
+MPLCONFIGDIR=/tmp/matplotlib .venv/bin/python \
+  -m unittest discover -s tests
+```
+
+The report-only commands completed successfully, and the full suite passed with
+222 tests.
+
+### 2026-06-08 M1-M6 Report Rework And Effort-Level Models
+
+- Reworked `src/build_m1_m2_utterance_information_deep_dive.py` so the
+  internal M1-M6 report is more readable:
+  - each model section now states the question, formula, plot interpretation,
+    table-column meaning, compact result table, and takeaway;
+  - the report no longer dumps multiple sensitivity tables inside each main
+    model section;
+  - plots included in the report have nearby "how to read" explanations.
+- Removed the previous M5/M6 continuous-all-efforts stress-test logic from the
+  main model ladder. It violated the cleaner one-effort-at-a-time rule because
+  words, morphemes, syllables, and phonemes are highly collinear.
+- New M5/M6 logic:
+
+```text
+M5: sum_bits ~ age + context_entropy + C(effort_level) + C(child_id)
+M6: sum_bits ~ age * context_entropy
+              + age * C(effort_level)
+              + context_entropy * C(effort_level)
+              + C(child_id)
+```
+
+- `effort_level` is low/mid/high, defined by tertiles within one effort unit at
+  a time. The words version uses word-count tertiles, the phoneme version uses
+  phoneme-count tertiles, and so on. The models remain effort-separated.
+- Added a targeted analysis stage so M5/M6 can be refit without rerunning all
+  M1-M4 sensitivity models:
+
+```bash
+MPLCONFIGDIR=/tmp/matplotlib .venv/bin/python \
+  src/build_m1_m2_utterance_information_deep_dive.py --stage m5m6
+
+MPLCONFIGDIR=/tmp/matplotlib .venv/bin/python \
+  src/build_m1_m2_utterance_information_deep_dive.py --stage report
+```
+
+- Regenerated the real M1-M6 report and effort-level plots:
+
+```text
+docs/utterance_information_m1_m2_deep_dive.html
+docs/utterance_information_m1_m2_deep_dive.md
+figs/m1_m2_utterance_information_deep_dive/m5_effort_level_adjusted_age_predictions.png
+figs/m1_m2_utterance_information_deep_dive/m6_effort_level_adjusted_age_predictions.png
+```
+
+- Real M5/M6 outputs were refreshed under:
+
+```text
+results/m1_m2_utterance_information_deep_dive/m5_m6_saturated_model_summary.csv
+results/m1_m2_utterance_information_deep_dive/m5_m6_saturated_coefficients.csv
+results/m1_m2_utterance_information_deep_dive/m5_m6_saturated_adjusted_age_predictions.csv
+```
+
+- Verification:
+
+```bash
+MPLCONFIGDIR=/tmp/matplotlib .venv/bin/python \
+  -m unittest tests.test_build_m1_m2_utterance_information_deep_dive
+```
+
+passed with 10 tests. The real `--stage m5m6` and `--stage report` commands
+completed successfully.
+
+Full-suite verification:
+
+```bash
+MPLCONFIGDIR=/tmp/matplotlib .venv/bin/python -m unittest discover -s tests
+```
+
+passed with 224 tests.
+
+### 2026-06-08 M1-M6 Subvariant And Diagnostic-View Cleanup
+
+- Clarified the internal M1-M6 report language:
+  - a **subvariant** is now explicitly defined as a real model change, such as
+    a different formula, estimator, link, child-dependence structure, or effort
+    source;
+  - a **diagnostic view** is explicitly not a new model, only the same fitted
+    subvariant plotted with different reference values.
+- Wired the existing M1-M3 expanded-family renderer into
+  `docs/utterance_information_m1_m2_deep_dive.md/html`, so the report now has
+  its own visible subsection for each OLS/clustered-OLS/GLM/GEE/mixed/fixed
+  effect subvariant. Each subsection includes:
+  - the question asked;
+  - the formula;
+  - how to read the coefficients;
+  - a compact effort-by-effort result table;
+  - the relevant adjusted regression-line figure.
+- Updated M4 plotting so it no longer only shows M4a. The line-variant stage
+  now writes one context-entropy prediction plot for each M4 subvariant:
+
+```text
+figs/m1_m2_utterance_information_deep_dive/m4_m4a_context_entropy_adjusted_predictions.png
+figs/m1_m2_utterance_information_deep_dive/m4_m4b_context_entropy_adjusted_predictions.png
+figs/m1_m2_utterance_information_deep_dive/m4_m4c_context_entropy_adjusted_predictions.png
+figs/m1_m2_utterance_information_deep_dive/m4_m4d_context_entropy_adjusted_predictions.png
+figs/m1_m2_utterance_information_deep_dive/m4_m4e_context_entropy_adjusted_predictions.png
+```
+
+- Updated M5/M6 report text so the low/mid/high effort split is not the only
+  displayed evidence. The report now separates:
+  - effort-source subvariants: words, morphemes, both syllable measures, and
+    phonemes;
+  - diagnostic views: low/mid/high effort lines and averaged effort-level
+    lines.
+- Commands run:
+
+```bash
+MPLCONFIGDIR=/tmp/matplotlib .venv/bin/python \
+  src/build_m1_m2_utterance_information_deep_dive.py --stage line_variants
+
+MPLCONFIGDIR=/tmp/matplotlib .venv/bin/python \
+  src/build_m1_m2_utterance_information_deep_dive.py --stage report
+
+MPLCONFIGDIR=/tmp/matplotlib .venv/bin/python \
+  -m unittest tests.test_build_m1_m2_utterance_information_deep_dive
+
+MPLCONFIGDIR=/tmp/matplotlib .venv/bin/python \
+  -m unittest discover -s tests
+```
+
+- Verification:
+  - focused M1-M6 report tests passed with 11 tests;
+  - full suite passed with 225 tests;
+  - regenerated report paths:
+
+```text
+docs/utterance_information_m1_m2_deep_dive.html
+docs/utterance_information_m1_m2_deep_dive.md
+```
+
+### 2026-06-08 M1-M3 Clustered-SE Plot Correction
+
+- User flagged that M1 clustered and non-clustered plots looked suspiciously
+  identical. Audit confirmed the fitted mean lines are supposed to be identical
+  for OLS versus child-clustered OLS when the formula is the same:
+
+```text
+M1 ols vs ols_cluster: rows=450 max_abs_diff=0 mean_abs_diff=0
+M3 ols_interaction vs ols_cluster_interaction: rows=450 max_abs_diff=0 mean_abs_diff=0
+```
+
+- The report presentation was still misleading because it plotted only the
+  mean line. For covariance-only variants, the scientific difference is in the
+  uncertainty and p-values, not the fitted mean.
+- Added model-based 95% confidence ribbons to M1-M3 expanded subvariant plots
+  whenever `statsmodels` exposes prediction intervals. The regenerated M1 audit
+  now shows identical fitted lines but different confidence bands:
+
+```text
+Words: line max diff=0, ci_low max diff=2.0187, ci_high max diff=2.0187
+Morphemes: line max diff=0, ci_low max diff=1.8833, ci_high max diff=1.8833
+Syllables: CMU/pkg: line max diff=0, ci_low max diff=1.7114, ci_high max diff=1.7114
+Syllables: pkg: line max diff=0, ci_low max diff=1.81635, ci_high max diff=1.81635
+Phonemes: line max diff=0, ci_low max diff=1.72725, ci_high max diff=1.72725
+```
+
+- Added a targeted stage for refreshing only the M1-M3 expanded subvariant
+  plots and tables:
+
+```bash
+MPLCONFIGDIR=/tmp/matplotlib .venv/bin/python \
+  src/build_m1_m2_utterance_information_deep_dive.py --stage expanded_plots
+```
+
+- Regenerated the report:
+
+```bash
+MPLCONFIGDIR=/tmp/matplotlib .venv/bin/python \
+  src/build_m1_m2_utterance_information_deep_dive.py --stage report
+```
+
+- Verification:
+
+```bash
+MPLCONFIGDIR=/tmp/matplotlib .venv/bin/python \
+  -m unittest tests.test_build_m1_m2_utterance_information_deep_dive
+
+MPLCONFIGDIR=/tmp/matplotlib .venv/bin/python \
+  -m unittest discover -s tests
+```
+
+Focused tests passed with 12 tests. Full suite passed with 226 tests.
+
+### 2026-06-08 Expanded Research Model Zoo Family/Subvariant Rebuild
+
+- Reworked `src/build_route1_model_report_suite.py` so the larger exploratory
+  model zoo follows the same logic as the M1-M6 internal report:
+  - each Z-family has a scientific question family;
+  - each real subvariant has its own subsection with question, formula,
+    estimator, compact fit table, and key coefficients;
+  - alternate plots are described as diagnostic views rather than being treated
+    as separate models.
+- Decoupled the workflow more explicitly:
+  - `--stage extract`: refresh bounded samples and aggregate tables from the
+    large Route 1 long table;
+  - `--stage model`: refit models and regenerate plots from the saved bounded
+    samples only;
+  - `--stage report`: rebuild Markdown/HTML from existing CSV/figure outputs.
+- Replaced the earlier all-effort formulas in the expanded zoo with
+  effort-separated variants. Words, morphemes, both syllable estimates, and
+  phonemes are no longer combined in the same zoo formula.
+- The real regenerated zoo now contains:
+  - `results/utterance_information_research_model_zoo/model_zoo_summary.csv`
+    with 56 fitted Z-family subvariants;
+  - `results/utterance_information_research_model_zoo/comparison_model_summary.csv`
+    with 45 fitted effort-controlled comparison models;
+  - `results/utterance_information_research_model_zoo/zoo_model_variant_manifest.csv`
+    with one row per Z-family subvariant;
+  - family-level coefficient plots:
+    `figs/utterance_information_research_model_zoo/z1_family_coefficients.png`
+    through `z11_family_coefficients.png`.
+- Regenerated:
+
+```text
+docs/utterance_information_research_model_zoo.md
+docs/utterance_information_research_model_zoo.html
+docs/utterance_information_m123_extended.md
+docs/utterance_information_m123_extended.html
+```
+
+- Commands run:
+
+```bash
+env MPLCONFIGDIR=/tmp/matplotlib UV_CACHE_DIR=/tmp/uv-cache \
+  uv run python src/build_route1_model_report_suite.py --stage model
+
+env MPLCONFIGDIR=/tmp/matplotlib UV_CACHE_DIR=/tmp/uv-cache \
+  uv run python src/build_route1_model_report_suite.py --stage report
+
+MPLCONFIGDIR=/tmp/matplotlib .venv/bin/python \
+  -m unittest tests.test_build_route1_model_report_suite
+
+MPLCONFIGDIR=/tmp/matplotlib .venv/bin/python \
+  -m unittest discover -s tests
+```
+
+- Verification:
+  - real model-zoo summary: 56/56 Z-family subvariants fit;
+  - real comparison summary: 45/45 effort-controlled comparison models fit;
+  - focused suite passed with 8 tests;
+  - full suite passed with 226 tests.
+
+### 2026-06-09 Compact M1-M6 Quick-Share Report
+
+- Added `src/build_m1_m6_quick_share_report.py`, a lightweight renderer that
+  reads the already-generated M1-M6 analysis outputs and does not refit any
+  models.
+- Added `tests/test_build_m1_m6_quick_share_report.py` with fake output tables
+  to protect the compact report structure.
+- Generated:
+
+```text
+docs/utterance_information_m1_m6_quick_share.md
+docs/utterance_information_m1_m6_quick_share.html
+```
+
+- The report is intentionally short:
+  - one section each for M1-M6;
+  - one best plot per model;
+  - formula, quick takeaway, and "how to read the plot" text near each plot;
+  - a tiny M1-vs-M2 coefficient overview;
+  - no model refitting and no supervisor-facing report edits.
+- Build command:
+
+```bash
+MPLCONFIGDIR=/tmp/matplotlib .venv/bin/python \
+  src/build_m1_m6_quick_share_report.py
+```
+
+- Focused verification:
+
+```bash
+MPLCONFIGDIR=/tmp/matplotlib .venv/bin/python \
+  -m unittest tests.test_build_m1_m6_quick_share_report
+```
+
+Focused test passed with 1 test.
+
+### 2026-06-09 Dual-Effort Compact M1-M6 Quick-Share Revision
+
+- Added a separate fitting/plotting stage:
+
+```bash
+MPLCONFIGDIR=/tmp/matplotlib .venv/bin/python \
+  src/fit_m1_m6_dual_effort_quick_models.py
+```
+
+- This stage fits every M1-M6 family with two effort strategies:
+  - `continuous`: utterance effort is kept as the exact numeric count and
+    controlled directly;
+  - `effort_level`: the same effort unit is converted to low/mid/high tertile
+    groups and entered categorically.
+- Each model is repeated separately for the five effort units: words,
+  morphemes, CMU/pkg syllables, package syllables, and phonemes.
+- The dual-effort analysis outputs are:
+
+```text
+results/m1_m6_dual_effort_quick_share/dual_model_summary.csv
+results/m1_m6_dual_effort_quick_share/dual_model_predictions.csv
+results/m1_m6_dual_effort_quick_share/dual_model_audit.csv
+figs/m1_m6_dual_effort_quick_share/m1_dual_effort_predictions.png
+figs/m1_m6_dual_effort_quick_share/m2_dual_effort_predictions.png
+figs/m1_m6_dual_effort_quick_share/m3_dual_effort_predictions.png
+figs/m1_m6_dual_effort_quick_share/m4_dual_effort_predictions.png
+figs/m1_m6_dual_effort_quick_share/m5_dual_effort_predictions.png
+figs/m1_m6_dual_effort_quick_share/m6_dual_effort_predictions.png
+```
+
+- The real run produced 60 fitted model rows:
+  `6 models * 5 effort units * 2 effort strategies`; all rows have
+  `status=fit`.
+- Updated `src/build_m1_m6_quick_share_report.py` so it is report-only again:
+  it reads the saved dual-effort CSV/PNG artifacts and renders:
+
+```text
+docs/utterance_information_m1_m6_quick_share.md
+docs/utterance_information_m1_m6_quick_share.html
+```
+
+- Focused verification:
+
+```bash
+MPLCONFIGDIR=/tmp/matplotlib .venv/bin/python \
+  -m unittest tests.test_build_m1_m6_quick_share_report
+```
+
+Focused test passed with 2 tests.
+
+- Full verification after the dual-effort quick-share revision:
+
+```bash
+MPLCONFIGDIR=/tmp/matplotlib .venv/bin/python -m unittest discover -s tests
+```
+
+Full suite passed with 228 tests. The console emitted the expected statsmodels
+warnings from synthetic mixed/GLM test fixtures, but there were no failures.
+
+### 2026-06-09 M1-M6 Results Interpretation Notes
+
+- Added `src/build_m1_m6_results_interpretation_report.py`, a report-only
+  renderer that reads the saved dual-effort M1-M6 outputs and writes narrative
+  interpretation notes. It does not refit models.
+- Generated:
+
+```text
+docs/utterance_information_m1_m6_results_interpretation.md
+docs/utterance_information_m1_m6_results_interpretation.html
+```
+
+- The document interprets the compact M1-M6 report in relation to the
+  communicative-efficiency questions:
+  - M1-M6 currently answer the informativeness side:
+    `sum_bits ~ age + effort (+ child identity/context/interactions)`;
+  - the strongest current result is the continuous-effort, child-adjusted
+    downward age pattern in M2/M4/M5/M6;
+  - low/mid/high effort-level models are useful diagnostics but are coarser
+    than exact effort control;
+  - next-token context entropy is treated as provisional because the stronger
+    supervisor-facing context-predictability question needs response-level
+    entropy sampled over complete possible responses;
+  - the next planned model family should use effort as the outcome:
+    `effort ~ age + response_entropy + context_length + question_type + child`.
+- Literature anchors included in the report:
+  - Tal, Smith, Arnon, and Culbertson (2023), child communicative efficiency;
+  - Tal, Grossman, Rohde, and Arnon (2023), efficient redundancy with learners;
+  - Wang, Yu, and Shao (2026), joint surprisal/efficiency framing.
+- Commands run:
+
+```bash
+MPLCONFIGDIR=/tmp/matplotlib .venv/bin/python \
+  src/build_m1_m6_results_interpretation_report.py
+
+MPLCONFIGDIR=/tmp/matplotlib .venv/bin/python \
+  -m unittest tests.test_build_m1_m6_results_interpretation_report
+
+MPLCONFIGDIR=/tmp/matplotlib .venv/bin/python \
+  -m unittest discover -s tests
+```
+
+- Verification:
+  - focused interpretation-report tests passed with 3 tests;
+  - full suite passed with 231 tests;
+  - statsmodels emitted expected warnings from synthetic model-test fixtures,
+    with no failures.
+
+### 2026-06-09 Fixed-Effort Slice Audit And M1-M6 Replot
+
+- Problem corrected: the previous continuous-effort plots used a single median
+  effort value. That is only one conditional slice of a model fit on all
+  lengths, so it is not enough as the main visual evidence.
+- Checked the local Advanced Data Analytics course context at:
+
+```text
+/home/apaixonada/school_agent/knowledge_base/courses/advanced-data-analytics/
+```
+
+- Relevant course constraints applied:
+  - `sum_bits` is continuous;
+  - rows are repeated within children, so child identity/dependence must be
+    handled in the model family or uncertainty structure;
+  - prediction summaries and inferential coefficients should not be confused;
+  - fitting/prediction stages should be separated from report rendering.
+- Added the effort distribution audit:
+
+```text
+src/build_effort_slice_audit_report.py
+docs/utterance_effort_slice_audit.md
+docs/utterance_effort_slice_audit.html
+results/effort_slice_audit/effort_quantile_summary.csv
+results/effort_slice_audit/effort_value_distribution.csv
+results/effort_slice_audit/effort_by_age_bin_distribution.csv
+results/effort_slice_audit/effort_level_definitions.csv
+results/effort_slice_audit/proposed_fixed_effort_slices.csv
+figs/effort_slice_audit/effort_value_distributions.png
+```
+
+- Real Route 1 child/k3 effort quantiles:
+
+```text
+Words: mean=2.66, p25=1, p50=2, p75=4, p90=5, p95=6, p99=10, max=70
+Morphemes: mean=2.96, p25=1, p50=2, p75=4, p90=6, p95=7, p99=11, max=98
+Syllables CMU/pkg: mean=3.24, p25=1, p50=3, p75=4, p90=6, p95=8, p99=12, max=84
+Syllables pkg: mean=3.43, p25=1, p50=3, p75=5, p90=7, p95=8, p99=12, max=84
+Phonemes: mean=8.04, p25=3, p50=7, p75=11, p90=16, p95=19, p99=29, max=266
+```
+
+- Low/mid/high effort groups are defined separately for each effort unit using
+  empirical tertiles:
+
+```text
+low effort  = value <= p33
+high effort = value >= p66
+mid effort  = values between p33 and p66
+```
+
+  Because effort counts are integer-valued and heavily skewed, low/mid/high
+  groups are diagnostic coarse categories, not a replacement for exact fixed
+  effort slices.
+- Added the fixed-effort M1-M6 workflow:
+
+```text
+src/fit_m1_m6_fixed_effort_slice_models.py
+docs/utterance_information_m1_m6_fixed_effort_slices.md
+docs/utterance_information_m1_m6_fixed_effort_slices.html
+results/m1_m6_fixed_effort_slices/fixed_effort_model_summary.csv
+results/m1_m6_fixed_effort_slices/marginal_adjusted_predictions.csv
+results/m1_m6_fixed_effort_slices/fixed_effort_predictions.csv
+results/m1_m6_fixed_effort_slices/selected_fixed_effort_values.csv
+results/m1_m6_fixed_effort_slices/displayed_fixed_effort_values.csv
+figs/m1_m6_fixed_effort_slices/
+```
+
+- Fixed-slice workflow stages:
+
+```bash
+MPLCONFIGDIR=/tmp/matplotlib .venv/bin/python \
+  src/fit_m1_m6_fixed_effort_slice_models.py --stage analysis
+
+MPLCONFIGDIR=/tmp/matplotlib .venv/bin/python \
+  src/fit_m1_m6_fixed_effort_slice_models.py --stage report
+```
+
+- Why this script refits models: previous outputs saved coefficient CSVs and
+  figures, but not serialized statsmodels objects. The script refits the same
+  M1-M6 formulas once per effort unit to produce new prediction grids. It does
+  **not** fit separate models for each fixed effort value.
+- Fixed values used:
+  - words: exact values 1-12 saved;
+  - morphemes: exact values 1-12 saved;
+  - CMU/pkg syllables: data-supported dense core 1-8;
+  - pkg syllables: data-supported dense core 1-8;
+  - phonemes: data-supported dense core 1-19;
+  - compact anchors also saved for p25/p50/p75 and p10/p50/p90.
+- Readability rule:
+  - all fixed values are kept in `fixed_effort_predictions.csv`;
+  - dense plotted panels show at most 8 representative values per effort unit;
+  - anchor plots show all 3 lines.
+- Added marginal adjusted global trends:
+  - one line per M1-M6 model and effort unit;
+  - at each age, predictions are averaged over a standardization sample of
+    observed rows, preserving the observed effort, child, and context
+    distribution;
+  - these are global prediction summaries, not new inferential tests and not
+    restricted to one utterance length.
+- Real fixed-slice run audit:
+
+```text
+rows: 446,985
+children: 21
+selected fixed value rows: 89
+fitted model rows: 30
+marginal prediction rows: 2,700
+fixed-slice prediction rows: 48,060
+```
+
+- Focused verification:
+
+```bash
+MPLCONFIGDIR=/tmp/matplotlib .venv/bin/python \
+  -m py_compile src/build_effort_slice_audit_report.py \
+                src/fit_m1_m6_fixed_effort_slice_models.py
+
+MPLCONFIGDIR=/tmp/matplotlib .venv/bin/python \
+  -m unittest tests.test_effort_slice_audit_and_fixed_models
+```
+
+Focused tests passed with 4 tests.
+
+### 2026-06-04 Modeling Proposal Revision: Effort and Child-Control Sensitivity
+
+- Extended `src/build_utterance_information_model_proposals.py` with
+  utterance-level effort-control sensitivity models. These use total
+  utterance bits as the outcome and swap exactly one effort control at a time:
+  words, surface morphemes, CMU/pkg syllables, package syllables, or phonemes.
+  This avoids putting highly collinear effort measures in the same regression.
+- Added two comparison scopes:
+  - child real utterances plus generated baselines;
+  - child real utterances plus generated baselines plus caretakers.
+- Added both short and full versions of the effort-sensitivity plots:
+  - `effort_sensitivity_child_real_and_baselines_short.*`
+  - `effort_sensitivity_child_real_and_baselines_full.*`
+  - `effort_sensitivity_child_real_baselines_and_caretaker_short.*`
+  - `effort_sensitivity_child_real_baselines_and_caretaker_full.*`
+- Added the real-child-only child-control ladder:
+  - OLS with age + effort only, using child-clustered standard errors;
+  - OLS with age + effort + child fixed effects;
+  - Gaussian GEE with child-level exchangeable correlation.
+- Added `child_control_ladder_r2_age_pvalues.*` plus
+  `results/utterance_information_model_proposals/child_control_ladder_stats.csv`.
+- Clarified in the proposal report that a singular random-effect covariance in
+  the statsmodels mixed model is an estimation warning, not a reason to ignore
+  child-level variation. Stable child-control alternatives are child fixed
+  effects and GEE grouped by child.
+- Regenerated `docs/utterance_information_model_proposals.html`.
+- Verification:
+
+```bash
+env UV_CACHE_DIR=/tmp/uv-cache MPLCONFIGDIR=/tmp/matplotlib \
+  .venv/bin/python -m unittest discover -s tests
+```
+
+passed with 196 tests.
+
+### 2026-06-09 Exhaustive Fixed-Effort M1-M6 Atlas
+
+- Added an internal atlas report for the exact fixed-effort question:
+
+```text
+src/build_m1_m6_fixed_effort_atlas_report.py
+tests/test_build_m1_m6_fixed_effort_atlas_report.py
+docs/utterance_information_m1_m6_fixed_effort_atlas.md
+docs/utterance_information_m1_m6_fixed_effort_atlas.html
+results/m1_m6_fixed_effort_atlas/
+figs/m1_m6_fixed_effort_atlas/
+```
+
+- The atlas report is report/plotting-only. It reads the saved M1-M6
+  continuous-effort outputs from `results/m1_m6_fixed_effort_slices/` and does
+  not refit models.
+- Regenerated the effort-slice audit so `proposed_fixed_effort_slices.csv`
+  includes `top_frequency_12`, the 12 most frequent exact values per effort
+  unit.
+- Regenerated the fixed-slice model/prediction stage from saved code:
+
+```bash
+MPLCONFIGDIR=/tmp/matplotlib .venv/bin/python \
+  src/build_effort_slice_audit_report.py
+
+MPLCONFIGDIR=/tmp/matplotlib .venv/bin/python \
+  src/fit_m1_m6_fixed_effort_slice_models.py --stage analysis
+
+MPLCONFIGDIR=/tmp/matplotlib .venv/bin/python \
+  src/fit_m1_m6_fixed_effort_slice_models.py --stage report
+
+MPLCONFIGDIR=/tmp/matplotlib .venv/bin/python \
+  src/build_m1_m6_fixed_effort_atlas_report.py
+```
+
+- Real fixed-slice run audit after adding top-frequency slices:
+
+```text
+input: results/route1_analysis_dataset/route1_scored_utterance_effort_context_entropy_long.csv.gz
+context_k: k3
+rows: 446,985
+children: 21
+selected fixed value rows: 149
+fitted model rows: 30
+marginal adjusted prediction rows: 2,700
+fixed-slice prediction rows: 80,460
+```
+
+- Atlas figure manifest:
+
+```text
+results/m1_m6_fixed_effort_atlas/atlas_figure_manifest.csv
+30 model-by-effort fixed-slice figures
+2 row-support distribution figures
+32 PNG figures total in figs/m1_m6_fixed_effort_atlas/
+```
+
+- Atlas effort-bin logic:
+  - words: exact fixed values 1-4, 5-8, 9-12;
+  - morphemes: exact fixed values 1-4, 5-8, 9-12;
+  - CMU/pkg syllables: top-12 observed values split into 1-4, 5-8, 9-12;
+  - pkg syllables: top-12 observed values split into 1-4, 5-8, 9-12;
+  - phonemes: top-12 observed values split into 2-5, 6-9, 10-13.
+- Added saved atlas summaries:
+
+```text
+results/m1_m6_fixed_effort_atlas/atlas_effort_bin_definitions.csv
+results/m1_m6_fixed_effort_atlas/atlas_effort_bin_distribution.csv
+results/m1_m6_fixed_effort_atlas/atlas_effort_bin_distribution_by_age.csv
+results/m1_m6_fixed_effort_atlas/atlas_model_fit_summary.csv
+results/m1_m6_fixed_effort_atlas/atlas_predictor_significance_summary.csv
+results/m1_m6_fixed_effort_atlas/atlas_fixed_slice_slopes.csv
+results/m1_m6_fixed_effort_atlas/atlas_figure_manifest.csv
+```
+
+- Important numeric summaries from the atlas:
+  - M1 pooled age+effort has 0/5 negative age slopes and 2/5 significant age
+    slopes;
+  - M2 child-identity model has 5/5 negative age slopes and 5/5 significant
+    age slopes;
+  - M3-M6 all have 5/5 negative age slopes, with 4/5 or 5/5 significant age
+    slopes depending on the interaction model;
+  - mean in-sample R2 across effort units ranges from 0.619 for M1 to 0.633
+    for M6;
+  - context entropy is significant in 15/15 model-effort rows where it is
+    included, with negative coefficients in this current next-token entropy
+    implementation.
+- Interpretation guardrails written into the report:
+  - coefficient tables provide inferential slopes and p-values;
+  - fixed-slice slope tables are descriptive slopes from plotted prediction
+    lines, not separate inferential models;
+  - shaded ribbons are model-confidence bands for fitted mean lines, not the
+    full observed data spread;
+  - exact fixed effort values change only the prediction slice, not the fitted
+    data used by the model.
+- Verification:
+
+```bash
+MPLCONFIGDIR=/tmp/matplotlib .venv/bin/python \
+  -m unittest tests.test_effort_slice_audit_and_fixed_models \
+              tests.test_build_m1_m6_fixed_effort_atlas_report
+```
+
+passed with 7 tests.
+
+```bash
+MPLCONFIGDIR=/tmp/matplotlib .venv/bin/python -m unittest discover -s tests
+```
+
+passed with 238 tests. Statsmodels emitted expected warnings from synthetic
+mixed/GLM fixtures, with no failures.
+
+## 2026-06-09 - Context-Predictor Permutation Memory Fix
+
+- The first real run of `src/build_context_predictor_permutation_reports.py`
+  was stopped because memory use was far too high for a report-building
+  workflow.
+- Root causes identified:
+  - all `k0`-`k3` child-real rows were being loaded and measured in one frame;
+  - context counts were attached with a large dataframe merge;
+  - fitted statsmodels result objects were kept in memory until all models had
+    finished, which also retained large design matrices.
+- Fix implemented:
+  - process one context window at a time;
+  - map context-count checkpoint rows by `context_text` instead of merging a
+    giant context table;
+  - write measured rows as per-`k` files plus
+    `route1_real_child_context_measures_manifest.csv`;
+  - extract coefficients, p-values, R2, RMSE, MAE, AIC, and BIC immediately
+    after each fit, then discard the heavy model result object.
+  - add `--context-count-checkpoint` so a scratch smoke run can reuse the
+    existing context-count checkpoint without writing into the main output
+    directory.
+- Verification:
+
+```bash
+MPLCONFIGDIR=/tmp/matplotlib .venv/bin/python \
+  -m unittest tests.test_build_context_predictor_permutation_reports
+```
+
+passed with 3 tests.
+
+## 2026-06-15 - Pawar-Style Age-Trajectory Robustness Report
+
+- Added a complementary robustness workflow for Route 1 real child utterance
+  analyses:
+
+```text
+src/build_age_scrambling_robustness_report.py
+tests/test_build_age_scrambling_robustness_report.py
+docs/utterance_information_age_scrambling_robustness.md
+docs/utterance_information_age_scrambling_robustness.html
+```
+
+- Important implementation correction: the default source is now the split
+  scored-result tree, not the 11M-row long table. The script streams only real
+  child scored files:
+
+```text
+results/external/compute_surprisal_mila/raw_surprisal_cleaned_mistral_patched_006_023/
+```
+
+- It recomputes effort counts from `chi_utterance_clean`, attaches context
+  entropy from:
+
+```text
+results/external/compute_surprisal_mila/context_entropy_mistral/context_entropy_features.csv.gz
+```
+
+  and immediately aggregates to child-session-context units. This avoids
+  keeping utterance-level rows in memory for the robustness analysis.
+
+- Full real run command:
+
+```bash
+env MPLCONFIGDIR=/tmp/matplotlib .venv/bin/python \
+  src/build_age_scrambling_robustness_report.py \
+  --stage full \
+  --n-reps 100 \
+  --balanced-units-per-bin 50
+```
+
+- Audit:
+
+```text
+source files read: 84
+source rows read: 1,787,940
+source rows kept: 1,787,940
+source rows dropped: 0
+unit rows: 3,932
+children: 21
+datasets: 3
+child sessions: 983
+context windows: k0,k1,k2,k3
+observed model rows fit: 105
+replicate model rows: 42,000
+summary rows: 420
+```
+
+- Entropy attachment audit by context window:
+
+```text
+k0 rows kept: 446,985; entropy matched: 0; entropy missing: 446,985
+k1 rows kept: 446,985; entropy matched: 442,220; entropy missing: 4,765
+k2 rows kept: 446,985; entropy matched: 441,461; entropy missing: 5,524
+k3 rows kept: 446,985; entropy matched: 441,413; entropy missing: 5,572
+```
+
+  The k0 entropy gaps are intentional because k0 has no context. The k1-k3
+  gaps are carried as missing entropy in the source audit; M4-M6 naturally use
+  complete unit rows for entropy models.
+
+- Saved outputs:
+
+```text
+results/age_scrambling_robustness/age_scrambling_unit_frame.csv.gz
+results/age_scrambling_robustness/age_scrambling_source_file_audit.csv
+results/age_scrambling_robustness/age_scrambling_observed_model_summary.csv
+results/age_scrambling_robustness/age_scrambling_replicate_age_slopes.csv.gz
+results/age_scrambling_robustness/age_scrambling_robustness_summary.csv
+figs/age_scrambling_robustness/
+```
+
+- Future fast refit mode:
+
+```bash
+env MPLCONFIGDIR=/tmp/matplotlib .venv/bin/python \
+  src/build_age_scrambling_robustness_report.py \
+  --stage analysis \
+  --source unit-frame \
+  --unit-frame-input results/age_scrambling_robustness/age_scrambling_unit_frame.csv.gz
+```
+
+  Use this when changing model/scrambling logic but not the underlying scored
+  data or effort-count definitions.
+
+- Verification:
+
+```bash
+env MPLCONFIGDIR=/tmp/matplotlib .venv/bin/python \
+  -m unittest tests.test_build_age_scrambling_robustness_report
+
+env MPLCONFIGDIR=/tmp/matplotlib .venv/bin/python \
+  -m unittest tests.test_build_route1_analysis_dataset \
+              tests.test_attach_context_entropy_to_route1_dataset
+
+.venv/bin/python -m py_compile src/build_age_scrambling_robustness_report.py
+```
+
+  passed with 3 focused robustness tests, 14 adjacent Route 1/context-entropy
+  tests, and a successful syntax compile.
+
+- Reworked the rendered report after review because the first version was too
+  table-heavy to be useful. The revised document is organized as M1-M6 model
+  cards. Each card contains the question, formula, plain-language robustness
+  interpretation, a regression-line plot, and one compact result table. The new
+  line plots are:
+
+```text
+figs/age_scrambling_robustness/m1_clear_robustness_regression_lines.png
+figs/age_scrambling_robustness/m2_clear_robustness_regression_lines.png
+figs/age_scrambling_robustness/m3_clear_robustness_regression_lines.png
+figs/age_scrambling_robustness/m4_clear_robustness_regression_lines.png
+figs/age_scrambling_robustness/m5_clear_robustness_regression_lines.png
+figs/age_scrambling_robustness/m6_clear_robustness_regression_lines.png
+```
+
+- The regression-line plots use the saved unit frame and saved slope
+  summaries; report-only regeneration does not refit models. The red line is
+  the observed age effect, the blue ribbon is the balanced-bootstrap slope
+  interval, and the purple/orange/green ribbons are age-scrambled null
+  intervals.
+
+## 2026-06-15 - Response-Space Entropy Pilot Grid Framework
+
+- Added a peer-review-oriented pilot framework for sampled full-response
+  context entropy:
+
+```text
+src/build_response_entropy_pilot_grid.py
+configs/response_entropy_pilot_grid.json
+tests/test_build_response_entropy_pilot_grid.py
+docs/response_entropy_pilot_grid_design.md
+docs/response_entropy_pilot_grid_design.html
+```
+
+- The manifest stage streams the split scored tree and does not use the 11M-row
+  Route 1 long table. Current source:
+
+```text
+results/external/compute_surprisal_mila/raw_surprisal_cleaned_mistral_patched_006_023
+```
+
+- Real manifest command run:
+
+```bash
+env MPLCONFIGDIR=/tmp/matplotlib .venv/bin/python \
+  src/build_response_entropy_pilot_grid.py \
+  --stage manifest \
+  --sample-per-age-bin-context-k 20 \
+  --temperatures 0.3,0.5,0.7,1.0,1.3,1.6 \
+  --samples-per-context 100 \
+  --max-new-tokens 24 \
+  --top-p 0.95 \
+  --top-k 0
+```
+
+- Resulting pilot design:
+
+```text
+selected stratum rows: 480
+deduplicated generation contexts: 480
+temperatures: 6
+samples per context per temperature: 100
+planned generated responses: 288,000
+```
+
+- Strata are balanced as:
+
+```text
+8 age bins x 3 context windows x 20 contexts = 480 selected context strata
+```
+
+- Saved outputs:
+
+```text
+results/response_entropy_pilot_grid/pilot_eligible_context_strata.csv.gz
+results/response_entropy_pilot_grid/pilot_selected_context_strata.csv
+results/response_entropy_pilot_grid/pilot_generation_manifest.csv
+results/response_entropy_pilot_grid/pilot_manifest_audit.csv
+results/response_entropy_pilot_grid/pilot_source_file_audit.csv
+results/response_entropy_pilot_grid/pilot_method_spec.json
+docs/response_entropy_pilot_grid_design.html
+```
+
+- GPU generation command is embedded in
+  `docs/response_entropy_pilot_grid_design.html`. The command uses base
+  Mistral, temperatures `{0.3,0.5,0.7,1.0,1.3,1.6}`,
+  `samples_per_context=100`, `max_new_tokens=24`, `top_p=0.95`, and `top_k=0`.
+
+- Updated `src/sample_context_responses.py` so samples include:
+
+```text
+raw_generated_text
+sampled_response_text
+generated_token_count
+hit_max_new_tokens
+stopped_by_speaker_boundary
+speaker_boundary_marker
+empty_response
+top_p
+top_k
+seed_used
+```
+
+- The diagnostics stage, to run after GPU generation, will write:
+
+```text
+results/response_entropy_pilot_grid/pilot_context_temperature_features.csv
+results/response_entropy_pilot_grid/pilot_quality_by_temperature.csv
+results/response_entropy_pilot_grid/pilot_split_half_reliability.csv
+results/response_entropy_pilot_grid/pilot_downsample_stability.csv
+results/response_entropy_pilot_grid/pilot_temperature_rank_correlations.csv
+docs/response_entropy_pilot_grid_diagnostics.html
+```
+
+- Diagnostics include output-quality rates by temperature, split-half
+  reliability, downsample stability for M=25/50/75/100, and temperature
+  rank-correlation matrices.
+
+- Verification:
+
+```bash
+env MPLCONFIGDIR=/tmp/matplotlib .venv/bin/python \
+  -m unittest tests.test_build_response_entropy_pilot_grid \
+              tests.test_response_level_context_entropy
+
+.venv/bin/python -m py_compile \
+  src/build_response_entropy_pilot_grid.py \
+  src/sample_context_responses.py \
+  src/summarize_response_entropy_samples.py
+```
+
+  passed with 9 focused tests. The only console warning came from Seaborn's
+  internal pending deprecation in the toy plotting test.
+
+## 2026-06-15 Pawar and Cychosz 2025 Paper Summary
+
+- Read local PDF:
+
+```text
+papers/Frequency and informativity.pdf
+```
+
+- Added future-agent summary:
+
+```text
+docs/paper_summary_pawar_cychosz_2025_frequency_informativity.md
+```
+
+- Key correction recorded: the paper did not sample 100 utterances per age bin.
+  It sampled 100 bootstrap samples per age bin, each containing 81,000 phones,
+  preserving complete utterance lines so that utterances were not split.
+- The summary highlights two methods we can borrow:
+  - stability-based sample-size choice, analogous to selecting the number of
+    LLM response samples per context/temperature;
+  - scrambling controls, including group-level age-bin shuffling and
+    sample-level age-label shuffling, plus proposed context-entropy shuffles for
+    our response-space entropy predictor.
+
+## 2026-06-15 Response-Space Entropy DeepThink Handoff
+
+- Added `docs/deepthink_response_entropy_temperature_handoff.md`.
+- Purpose: give ChatGPT DeepThink a self-contained methods packet for the new
+  supervisor-requested response-space context entropy feature.
+- The document records the distinction between:
+  - current Mistral next-token context entropy:
+
+```text
+H(next token | caregiver context)
+```
+
+  - proposed sampled full-response entropy:
+
+```text
+H(sampled child-like response | caregiver context, model, prompt, temperature)
+```
+
+- It summarizes the 2026-06-04 transcript evidence that the supervisors wanted
+  repeated sampling from a language model, not real-child lookup, and that
+  temperature is a core measurement parameter.
+- Current recommendation recorded in the handoff:
+  - primary model: `mistralai/Mistral-7B-v0.3`;
+  - robustness model: `mistralai/Mistral-7B-Instruct-v0.3`;
+  - pilot temperatures: `{0.3, 0.5, 0.7, 1.0, 1.3, 1.6}`;
+  - likely main temperatures after pilot: `{0.7, 1.0, 1.3}`;
+  - samples: 100 responses per context per temperature;
+  - decoding: `top_p=0.95`, hard `max_new_tokens` cap, stop at EOS or speaker
+    boundary.
+
+## 2026-06-09 - Context Fixed-Effort Atlas
+
+- Added `src/build_context_fixed_effort_atlas_report.py` to fill the missing
+  fixed-effort slice views for context-predictor models.
+- Scope:
+  - all context windows: `k0`, `k1`, `k2`, `k3`;
+  - all context model families:
+    - `CF0`: `sum_bits ~ age + target effort + child identity`;
+    - `CF1`: add context entropy;
+    - `CF2`: add matched context-window size;
+    - `CF3`: add both context entropy and matched context-window size;
+  - all target effort units: words, morphemes, CMU/pkg syllables, pkg
+    syllables, and phonemes.
+- Fixed-slice logic:
+  - words and morphemes use exact requested panels `1-4`, `5-8`, `9-12`;
+  - syllables and phonemes use the 12 most frequent observed exact values,
+    split into three ordered representative groups, matching the earlier
+    fixed-effort atlas logic.
+- Context-size models use the matched context-size unit for readability:
+  target words use context words, target phonemes use context phonemes, etc.
+  The broader context coefficient report still contains the exhaustive
+  cross-unit context-size permutations.
+- Real run:
+
+```bash
+/usr/bin/time -v env MPLCONFIGDIR=/tmp/matplotlib \
+  .venv/bin/python src/build_context_fixed_effort_atlas_report.py \
+  --stage analysis \
+  --context-ks k0 k1 k2 k3
+```
+
+completed in 3:57.68 wall time with maximum resident set size 1,476,432 KB.
+Audit:
+
+```text
+model_rows: 80
+fitted_model_rows: 65
+prediction_rows: 54,600
+figure_rows: 65
+```
+
+- The 15 skipped rows are expected: `k0` has no context entropy or context-size
+  predictors, so only `CF0` fits for `k0`.
+- Report rendered:
+
+```text
+docs/utterance_information_context_fixed_effort_atlas.html
+```
+
+- Saved outputs:
+
+```text
+results/context_fixed_effort_atlas/context_fixed_effort_audit.csv
+results/context_fixed_effort_atlas/context_fixed_effort_model_summary.csv
+results/context_fixed_effort_atlas/context_fixed_effort_bin_definitions.csv
+results/context_fixed_effort_atlas/context_fixed_effort_predictions.csv.gz
+results/context_fixed_effort_atlas/context_fixed_effort_slice_slopes.csv
+results/context_fixed_effort_atlas/context_fixed_effort_figure_manifest.csv
+figs/context_fixed_effort_atlas/
+```
+
+- Verification:
+
+```bash
+MPLCONFIGDIR=/tmp/matplotlib .venv/bin/python \
+  -m unittest tests.test_build_context_fixed_effort_atlas_report \
+              tests.test_build_context_predictor_permutation_reports
+```
+
+passed with 5 tests.
+
+## 2026-06-09 - Exhaustive M1-M6 Context Fixed-Effort Atlas
+
+- Added `src/build_context_m1_m6_fixed_effort_atlas_report.py`.
+- This is the long internal report that combines:
+  - `k0`, `k1`, `k2`, `k3`;
+  - the M1-M6 model ladder;
+  - entropy-only, matched context-size-only, and entropy+size variants for
+    M4-M6;
+  - fixed-effort slice panels for every effort unit.
+- Model inventory:
+  - `M1`: `sum_bits ~ age_c + target_effort_c`;
+  - `M2`: `sum_bits ~ age_c + target_effort_c + C(child_id)`;
+  - `M3`: `sum_bits ~ age_c * target_effort_c + C(child_id)`;
+  - `M4E`: `sum_bits ~ age_c + target_effort_c + context_entropy_c + C(child_id)`;
+  - `M4S`: `sum_bits ~ age_c + target_effort_c + context_size_c + C(child_id)`;
+  - `M4ES`: `sum_bits ~ age_c + target_effort_c + context_entropy_c + context_size_c + C(child_id)`;
+  - `M5E`: `sum_bits ~ age_c * context_entropy_c + target_effort_c + C(child_id)`;
+  - `M5S`: `sum_bits ~ age_c * context_size_c + target_effort_c + C(child_id)`;
+  - `M5ES`: `sum_bits ~ age_c * context_entropy_c + age_c * context_size_c + target_effort_c + C(child_id)`;
+  - `M6E`: `sum_bits ~ age_c * target_effort_c + age_c * context_entropy_c + target_effort_c * context_entropy_c + C(child_id)`;
+  - `M6S`: `sum_bits ~ age_c * target_effort_c + age_c * context_size_c + target_effort_c * context_size_c + C(child_id)`;
+  - `M6ES`: `sum_bits ~ age_c * target_effort_c + age_c * context_entropy_c + target_effort_c * context_entropy_c + age_c * context_size_c + target_effort_c * context_size_c + context_entropy_c * context_size_c + C(child_id)`.
+- Estimator for all fitted rows:
+  - linear OLS via `statsmodels.formula.api.ols`;
+  - child-cluster robust standard errors with `cov_type='cluster'`,
+    cluster unit `child_id`.
+- Fixed-slice logic:
+  - words and morphemes use exact panels `1-4`, `5-8`, `9-12`;
+  - syllables and phonemes use the top 12 observed exact values split into
+    three ordered representative panels.
+- Real run:
+
+```bash
+/usr/bin/time -v env MPLCONFIGDIR=/tmp/matplotlib \
+  .venv/bin/python src/build_context_m1_m6_fixed_effort_atlas_report.py \
+  --stage analysis \
+  --context-ks k0 k1 k2 k3
+```
+
+completed in 11:23.89 wall time with maximum resident set size 1,690,664 KB.
+Audit:
+
+```text
+model_rows: 240
+fitted_model_rows: 195
+prediction_rows: 140,400
+figure_rows: 195
+```
+
+- The 45 skipped rows are expected: `k0` has no context entropy or context
+  size, so M4-M6 context variants cannot fit for `k0`.
+- Report rendered:
+
+```text
+docs/utterance_information_context_m1_m6_fixed_effort_atlas.html
+```
+
+- Saved outputs:
+
+```text
+results/context_m1_m6_fixed_effort_atlas/context_m1_m6_audit.csv
+results/context_m1_m6_fixed_effort_atlas/context_m1_m6_model_summary.csv
+results/context_m1_m6_fixed_effort_atlas/context_m1_m6_bin_definitions.csv
+results/context_m1_m6_fixed_effort_atlas/context_m1_m6_predictions.csv.gz
+results/context_m1_m6_fixed_effort_atlas/context_m1_m6_slice_slopes.csv
+results/context_m1_m6_fixed_effort_atlas/context_m1_m6_figure_manifest.csv
+figs/context_m1_m6_fixed_effort_atlas/
+```
+
+- Verification:
+
+```bash
+MPLCONFIGDIR=/tmp/matplotlib .venv/bin/python \
+  -m unittest tests.test_build_context_m1_m6_fixed_effort_atlas_report \
+              tests.test_build_context_fixed_effort_atlas_report \
+              tests.test_build_context_predictor_permutation_reports
+```
+
+passed with 7 tests.
+
+- Real `k1` smoke test after the memory fix:
+
+```bash
+/usr/bin/time -v env MPLCONFIGDIR=/tmp/matplotlib \
+  .venv/bin/python src/build_context_predictor_permutation_reports.py \
+  --stage analysis \
+  --context-ks k1 \
+  --context-count-checkpoint results/context_predictor_permutations/unique_context_measurements.checkpoint.csv \
+  --output-dir results/context_predictor_permutations_smoke_k1 \
+  --fig-dir figs/context_predictor_permutations_smoke_k1
+```
+
+completed successfully in 3:36.85 wall time with maximum resident set size
+2,561,600 KB. Audit: 446,985 rows, 175,142 unique `k1` context strings, 60/60
+model rows fit, 6 figures written.
+
+- The full context-predictor reports still need to be regenerated after this
+  memory fix.
+- Full `k0`-`k3` analysis after the memory fix:
+
+```bash
+/usr/bin/time -v env MPLCONFIGDIR=/tmp/matplotlib \
+  .venv/bin/python src/build_context_predictor_permutation_reports.py \
+  --stage analysis \
+  --context-ks k0 k1 k2 k3 \
+  --context-count-checkpoint results/context_predictor_permutations/unique_context_measurements.checkpoint.csv \
+  --output-dir results/context_predictor_permutations \
+  --fig-dir figs/context_predictor_permutations
+```
+
+completed successfully in 12:35.19 wall time with maximum resident set size
+2,522,520 KB. Audit:
+
+```text
+rows: 1,787,940
+unique_context_texts_by_k_sum: 701,880
+model_rows: 240
+fitted_model_rows: 185
+figure_rows: 27
+```
+
+- Skipped model rows:
+  - 55 skipped rows are expected and limited to `k0`, because `k0` has no
+    context text, context entropy, or context size. Its baseline rows still fit.
+- Reports rendered:
+
+```text
+docs/utterance_information_context_predictors_k0.html
+docs/utterance_information_context_predictors_k1.html
+docs/utterance_information_context_predictors_k2.html
+docs/utterance_information_context_predictors_k3.html
+docs/utterance_information_context_predictors_k_comparison.html
+```
+
+- Verification after report rendering:
+
+```bash
+MPLCONFIGDIR=/tmp/matplotlib .venv/bin/python \
+  -m unittest tests.test_build_context_predictor_permutation_reports
+```
+
+passed with 3 tests.

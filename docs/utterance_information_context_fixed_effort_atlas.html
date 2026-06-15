@@ -1,0 +1,3908 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Context Predictors: Fixed-Effort Atlas</title>
+<style>
+:root {
+  color-scheme: light;
+  --ink: #1e2528;
+  --muted: #5e686d;
+  --line: #d9e0df;
+  --paper: #ffffff;
+  --soft: #f5f7f6;
+  --accent: #2f6f73;
+  --accent2: #c76f2c;
+}
+body {
+  margin: 0;
+  background: #eef2f1;
+  color: var(--ink);
+  font: 16px/1.58 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+main {
+  max-width: 980px;
+  margin: 34px auto 56px;
+  padding: 48px 58px;
+  background: var(--paper);
+  box-shadow: 0 18px 50px rgba(31, 45, 48, 0.12);
+}
+h1, h2, h3, h4 {
+  line-height: 1.18;
+  margin: 1.6em 0 0.55em;
+}
+h1 {
+  margin-top: 0;
+  font-size: 2.25rem;
+  border-bottom: 3px solid var(--accent);
+  padding-bottom: 0.45em;
+}
+h2 {
+  font-size: 1.55rem;
+  color: var(--accent);
+}
+h3 {
+  font-size: 1.18rem;
+}
+p {
+  margin: 0.75em 0;
+}
+a {
+  color: var(--accent);
+}
+blockquote {
+  border-left: 4px solid var(--accent2);
+  margin: 1.1em 0;
+  padding: 0.05em 1.1em;
+  color: var(--muted);
+  background: #fff8f2;
+}
+code {
+  background: var(--soft);
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  padding: 0.08em 0.3em;
+  font-family: "SFMono-Regular", Consolas, monospace;
+  font-size: 0.92em;
+}
+pre {
+  background: #f5f7f6;
+  color: var(--ink);
+  border: 1px solid var(--line);
+  padding: 1em;
+  overflow-x: auto;
+  border-radius: 7px;
+}
+pre code {
+  background: transparent;
+  border: 0;
+  padding: 0;
+  color: inherit;
+}
+table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 1.15em 0 1.45em;
+  font-size: 0.95em;
+}
+th, td {
+  border: 1px solid var(--line);
+  padding: 0.54em 0.68em;
+  vertical-align: top;
+}
+th {
+  background: #e7efed;
+  text-align: left;
+}
+tr:nth-child(even) td {
+  background: #fafbfb;
+}
+img {
+  max-width: 100%;
+  display: block;
+  margin: 1.1em auto 0.45em;
+}
+ul, ol {
+  padding-left: 1.4em;
+}
+.caption {
+  color: var(--muted);
+  font-size: 0.92em;
+  margin-top: -0.15em;
+}
+@media print {
+  body {
+    background: white;
+  }
+  main {
+    box-shadow: none;
+    margin: 0;
+    max-width: none;
+    padding: 28px;
+  }
+}
+</style>
+</head>
+<body>
+<main>
+<h1>Context Predictors: Fixed-Effort Atlas</h1>
+<p>This internal report adds the fixed-effort slice views that were missing from the context-predictor reports. The models are fit on all eligible utterances. The fixed effort values only define the plotted prediction slices.</p>
+<h2>Model Families</h2>
+<table>
+<thead><tr>
+<th>id</th>
+<th>question</th>
+<th>formula</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>CF0</td>
+<td>What is the age trajectory at fixed target effort, before adding context predictors?</td>
+<td><code>sum_bits ~ age_c + target_effort_c + C(child_id)</code></td>
+</tr>
+<tr>
+<td>CF1</td>
+<td>Does the fixed-effort age trajectory remain after controlling context entropy?</td>
+<td><code>sum_bits ~ age_c + target_effort_c + context_entropy_c + C(child_id)</code></td>
+</tr>
+<tr>
+<td>CF2</td>
+<td>Does the fixed-effort age trajectory remain after controlling the matching context-size unit?</td>
+<td><code>sum_bits ~ age_c + target_effort_c + context_size_c + C(child_id)</code></td>
+</tr>
+<tr>
+<td>CF3</td>
+<td>Does the fixed-effort age trajectory remain after controlling both context entropy and matching context size?</td>
+<td><code>sum_bits ~ age_c + target_effort_c + context_entropy_c + context_size_c + C(child_id)</code></td>
+</tr>
+</tbody></table>
+<p>Implementation for all fitted rows: linear OLS via <code>statsmodels.formula.api.ols</code>, with child-cluster robust standard errors (<code>cov_type=&#x27;cluster&#x27;</code>, cluster unit <code>child_id</code>). Context-size models use the context-size unit that matches the target effort unit: target words use context words, target phonemes use context phonemes, and so on. The broader coefficient report still contains every cross-unit context-size permutation.</p>
+<h2>Fixed-Effort Slice Definitions</h2>
+<p>For words and morphemes, the panels are exact fixed values 1-4, 5-8, and 9-12. For syllables and phonemes, the panels are the 12 most frequent exact values split into three ordered groups of four, matching the earlier fixed-effort atlas logic.</p>
+<table>
+<thead><tr>
+<th>context_k</th>
+<th>effort_label</th>
+<th>atlas_bin</th>
+<th>fixed_values</th>
+<th>support_rows</th>
+<th>support_children</th>
+<th>rule</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>k0</td>
+<td>Words</td>
+<td>1-4</td>
+<td>1, 2, 3, 4</td>
+<td>381557</td>
+<td>21</td>
+<td>Exact requested fixed values 1-4.</td>
+</tr>
+<tr>
+<td>k0</td>
+<td>Words</td>
+<td>5-8</td>
+<td>5, 6, 7, 8</td>
+<td>58263</td>
+<td>21</td>
+<td>Exact requested fixed values 5-8.</td>
+</tr>
+<tr>
+<td>k0</td>
+<td>Words</td>
+<td>9-12</td>
+<td>9, 10, 11, 12</td>
+<td>5737</td>
+<td>21</td>
+<td>Exact requested fixed values 9-12.</td>
+</tr>
+<tr>
+<td>k0</td>
+<td>Morphemes</td>
+<td>1-4</td>
+<td>1, 2, 3, 4</td>
+<td>357854</td>
+<td>21</td>
+<td>Exact requested fixed values 1-4.</td>
+</tr>
+<tr>
+<td>k0</td>
+<td>Morphemes</td>
+<td>5-8</td>
+<td>5, 6, 7, 8</td>
+<td>77357</td>
+<td>21</td>
+<td>Exact requested fixed values 5-8.</td>
+</tr>
+<tr>
+<td>k0</td>
+<td>Morphemes</td>
+<td>9-12</td>
+<td>9, 10, 11, 12</td>
+<td>9409</td>
+<td>21</td>
+<td>Exact requested fixed values 9-12.</td>
+</tr>
+<tr>
+<td>k0</td>
+<td>Syllables: CMU/pkg</td>
+<td>1-4 representative ranks</td>
+<td>1, 2, 3, 4</td>
+<td>344589</td>
+<td>21</td>
+<td>Ordered split of the 12 most frequent observed exact values.</td>
+</tr>
+<tr>
+<td>k0</td>
+<td>Syllables: CMU/pkg</td>
+<td>5-8 representative ranks</td>
+<td>5, 6, 7, 8</td>
+<td>86468</td>
+<td>21</td>
+<td>Ordered split of the 12 most frequent observed exact values.</td>
+</tr>
+<tr>
+<td>k0</td>
+<td>Syllables: CMU/pkg</td>
+<td>9-12 representative ranks</td>
+<td>9, 10, 11, 12</td>
+<td>12662</td>
+<td>21</td>
+<td>Ordered split of the 12 most frequent observed exact values.</td>
+</tr>
+<tr>
+<td>k0</td>
+<td>Syllables: pkg</td>
+<td>1-4 representative ranks</td>
+<td>1, 2, 3, 4</td>
+<td>329972</td>
+<td>21</td>
+<td>Ordered split of the 12 most frequent observed exact values.</td>
+</tr>
+<tr>
+<td>k0</td>
+<td>Syllables: pkg</td>
+<td>5-8 representative ranks</td>
+<td>5, 6, 7, 8</td>
+<td>97554</td>
+<td>21</td>
+<td>Ordered split of the 12 most frequent observed exact values.</td>
+</tr>
+<tr>
+<td>k0</td>
+<td>Syllables: pkg</td>
+<td>9-12 representative ranks</td>
+<td>9, 10, 11, 12</td>
+<td>15357</td>
+<td>21</td>
+<td>Ordered split of the 12 most frequent observed exact values.</td>
+</tr>
+<tr>
+<td>k0</td>
+<td>Phonemes</td>
+<td>1-4 representative ranks</td>
+<td>2, 3, 4, 5</td>
+<td>175070</td>
+<td>21</td>
+<td>Ordered split of the 12 most frequent observed exact values.</td>
+</tr>
+<tr>
+<td>k0</td>
+<td>Phonemes</td>
+<td>5-8 representative ranks</td>
+<td>6, 7, 8, 9</td>
+<td>118913</td>
+<td>21</td>
+<td>Ordered split of the 12 most frequent observed exact values.</td>
+</tr>
+<tr>
+<td>k0</td>
+<td>Phonemes</td>
+<td>9-12 representative ranks</td>
+<td>10, 11, 12, 13</td>
+<td>73995</td>
+<td>21</td>
+<td>Ordered split of the 12 most frequent observed exact values.</td>
+</tr>
+<tr>
+<td>k1</td>
+<td>Words</td>
+<td>1-4</td>
+<td>1, 2, 3, 4</td>
+<td>381557</td>
+<td>21</td>
+<td>Exact requested fixed values 1-4.</td>
+</tr>
+<tr>
+<td>k1</td>
+<td>Words</td>
+<td>5-8</td>
+<td>5, 6, 7, 8</td>
+<td>58263</td>
+<td>21</td>
+<td>Exact requested fixed values 5-8.</td>
+</tr>
+<tr>
+<td>k1</td>
+<td>Words</td>
+<td>9-12</td>
+<td>9, 10, 11, 12</td>
+<td>5737</td>
+<td>21</td>
+<td>Exact requested fixed values 9-12.</td>
+</tr>
+<tr>
+<td>k1</td>
+<td>Morphemes</td>
+<td>1-4</td>
+<td>1, 2, 3, 4</td>
+<td>357854</td>
+<td>21</td>
+<td>Exact requested fixed values 1-4.</td>
+</tr>
+<tr>
+<td>k1</td>
+<td>Morphemes</td>
+<td>5-8</td>
+<td>5, 6, 7, 8</td>
+<td>77357</td>
+<td>21</td>
+<td>Exact requested fixed values 5-8.</td>
+</tr>
+<tr>
+<td>k1</td>
+<td>Morphemes</td>
+<td>9-12</td>
+<td>9, 10, 11, 12</td>
+<td>9409</td>
+<td>21</td>
+<td>Exact requested fixed values 9-12.</td>
+</tr>
+<tr>
+<td>k1</td>
+<td>Syllables: CMU/pkg</td>
+<td>1-4 representative ranks</td>
+<td>1, 2, 3, 4</td>
+<td>344589</td>
+<td>21</td>
+<td>Ordered split of the 12 most frequent observed exact values.</td>
+</tr>
+<tr>
+<td>k1</td>
+<td>Syllables: CMU/pkg</td>
+<td>5-8 representative ranks</td>
+<td>5, 6, 7, 8</td>
+<td>86468</td>
+<td>21</td>
+<td>Ordered split of the 12 most frequent observed exact values.</td>
+</tr>
+<tr>
+<td>k1</td>
+<td>Syllables: CMU/pkg</td>
+<td>9-12 representative ranks</td>
+<td>9, 10, 11, 12</td>
+<td>12662</td>
+<td>21</td>
+<td>Ordered split of the 12 most frequent observed exact values.</td>
+</tr>
+<tr>
+<td>k1</td>
+<td>Syllables: pkg</td>
+<td>1-4 representative ranks</td>
+<td>1, 2, 3, 4</td>
+<td>329972</td>
+<td>21</td>
+<td>Ordered split of the 12 most frequent observed exact values.</td>
+</tr>
+<tr>
+<td>k1</td>
+<td>Syllables: pkg</td>
+<td>5-8 representative ranks</td>
+<td>5, 6, 7, 8</td>
+<td>97554</td>
+<td>21</td>
+<td>Ordered split of the 12 most frequent observed exact values.</td>
+</tr>
+<tr>
+<td>k1</td>
+<td>Syllables: pkg</td>
+<td>9-12 representative ranks</td>
+<td>9, 10, 11, 12</td>
+<td>15357</td>
+<td>21</td>
+<td>Ordered split of the 12 most frequent observed exact values.</td>
+</tr>
+<tr>
+<td>k1</td>
+<td>Phonemes</td>
+<td>1-4 representative ranks</td>
+<td>2, 3, 4, 5</td>
+<td>175070</td>
+<td>21</td>
+<td>Ordered split of the 12 most frequent observed exact values.</td>
+</tr>
+<tr>
+<td>k1</td>
+<td>Phonemes</td>
+<td>5-8 representative ranks</td>
+<td>6, 7, 8, 9</td>
+<td>118913</td>
+<td>21</td>
+<td>Ordered split of the 12 most frequent observed exact values.</td>
+</tr>
+<tr>
+<td>k1</td>
+<td>Phonemes</td>
+<td>9-12 representative ranks</td>
+<td>10, 11, 12, 13</td>
+<td>73995</td>
+<td>21</td>
+<td>Ordered split of the 12 most frequent observed exact values.</td>
+</tr>
+<tr>
+<td>k2</td>
+<td>Words</td>
+<td>1-4</td>
+<td>1, 2, 3, 4</td>
+<td>381557</td>
+<td>21</td>
+<td>Exact requested fixed values 1-4.</td>
+</tr>
+<tr>
+<td>k2</td>
+<td>Words</td>
+<td>5-8</td>
+<td>5, 6, 7, 8</td>
+<td>58263</td>
+<td>21</td>
+<td>Exact requested fixed values 5-8.</td>
+</tr>
+<tr>
+<td>k2</td>
+<td>Words</td>
+<td>9-12</td>
+<td>9, 10, 11, 12</td>
+<td>5737</td>
+<td>21</td>
+<td>Exact requested fixed values 9-12.</td>
+</tr>
+<tr>
+<td>k2</td>
+<td>Morphemes</td>
+<td>1-4</td>
+<td>1, 2, 3, 4</td>
+<td>357854</td>
+<td>21</td>
+<td>Exact requested fixed values 1-4.</td>
+</tr>
+<tr>
+<td>k2</td>
+<td>Morphemes</td>
+<td>5-8</td>
+<td>5, 6, 7, 8</td>
+<td>77357</td>
+<td>21</td>
+<td>Exact requested fixed values 5-8.</td>
+</tr>
+<tr>
+<td>k2</td>
+<td>Morphemes</td>
+<td>9-12</td>
+<td>9, 10, 11, 12</td>
+<td>9409</td>
+<td>21</td>
+<td>Exact requested fixed values 9-12.</td>
+</tr>
+<tr>
+<td>k2</td>
+<td>Syllables: CMU/pkg</td>
+<td>1-4 representative ranks</td>
+<td>1, 2, 3, 4</td>
+<td>344589</td>
+<td>21</td>
+<td>Ordered split of the 12 most frequent observed exact values.</td>
+</tr>
+<tr>
+<td>k2</td>
+<td>Syllables: CMU/pkg</td>
+<td>5-8 representative ranks</td>
+<td>5, 6, 7, 8</td>
+<td>86468</td>
+<td>21</td>
+<td>Ordered split of the 12 most frequent observed exact values.</td>
+</tr>
+<tr>
+<td>k2</td>
+<td>Syllables: CMU/pkg</td>
+<td>9-12 representative ranks</td>
+<td>9, 10, 11, 12</td>
+<td>12662</td>
+<td>21</td>
+<td>Ordered split of the 12 most frequent observed exact values.</td>
+</tr>
+<tr>
+<td>k2</td>
+<td>Syllables: pkg</td>
+<td>1-4 representative ranks</td>
+<td>1, 2, 3, 4</td>
+<td>329972</td>
+<td>21</td>
+<td>Ordered split of the 12 most frequent observed exact values.</td>
+</tr>
+<tr>
+<td>k2</td>
+<td>Syllables: pkg</td>
+<td>5-8 representative ranks</td>
+<td>5, 6, 7, 8</td>
+<td>97554</td>
+<td>21</td>
+<td>Ordered split of the 12 most frequent observed exact values.</td>
+</tr>
+<tr>
+<td>k2</td>
+<td>Syllables: pkg</td>
+<td>9-12 representative ranks</td>
+<td>9, 10, 11, 12</td>
+<td>15357</td>
+<td>21</td>
+<td>Ordered split of the 12 most frequent observed exact values.</td>
+</tr>
+<tr>
+<td>k2</td>
+<td>Phonemes</td>
+<td>1-4 representative ranks</td>
+<td>2, 3, 4, 5</td>
+<td>175070</td>
+<td>21</td>
+<td>Ordered split of the 12 most frequent observed exact values.</td>
+</tr>
+<tr>
+<td>k2</td>
+<td>Phonemes</td>
+<td>5-8 representative ranks</td>
+<td>6, 7, 8, 9</td>
+<td>118913</td>
+<td>21</td>
+<td>Ordered split of the 12 most frequent observed exact values.</td>
+</tr>
+<tr>
+<td>k2</td>
+<td>Phonemes</td>
+<td>9-12 representative ranks</td>
+<td>10, 11, 12, 13</td>
+<td>73995</td>
+<td>21</td>
+<td>Ordered split of the 12 most frequent observed exact values.</td>
+</tr>
+<tr>
+<td>k3</td>
+<td>Words</td>
+<td>1-4</td>
+<td>1, 2, 3, 4</td>
+<td>381557</td>
+<td>21</td>
+<td>Exact requested fixed values 1-4.</td>
+</tr>
+<tr>
+<td>k3</td>
+<td>Words</td>
+<td>5-8</td>
+<td>5, 6, 7, 8</td>
+<td>58263</td>
+<td>21</td>
+<td>Exact requested fixed values 5-8.</td>
+</tr>
+<tr>
+<td>k3</td>
+<td>Words</td>
+<td>9-12</td>
+<td>9, 10, 11, 12</td>
+<td>5737</td>
+<td>21</td>
+<td>Exact requested fixed values 9-12.</td>
+</tr>
+<tr>
+<td>k3</td>
+<td>Morphemes</td>
+<td>1-4</td>
+<td>1, 2, 3, 4</td>
+<td>357854</td>
+<td>21</td>
+<td>Exact requested fixed values 1-4.</td>
+</tr>
+<tr>
+<td>k3</td>
+<td>Morphemes</td>
+<td>5-8</td>
+<td>5, 6, 7, 8</td>
+<td>77357</td>
+<td>21</td>
+<td>Exact requested fixed values 5-8.</td>
+</tr>
+<tr>
+<td>k3</td>
+<td>Morphemes</td>
+<td>9-12</td>
+<td>9, 10, 11, 12</td>
+<td>9409</td>
+<td>21</td>
+<td>Exact requested fixed values 9-12.</td>
+</tr>
+<tr>
+<td>k3</td>
+<td>Syllables: CMU/pkg</td>
+<td>1-4 representative ranks</td>
+<td>1, 2, 3, 4</td>
+<td>344589</td>
+<td>21</td>
+<td>Ordered split of the 12 most frequent observed exact values.</td>
+</tr>
+<tr>
+<td>k3</td>
+<td>Syllables: CMU/pkg</td>
+<td>5-8 representative ranks</td>
+<td>5, 6, 7, 8</td>
+<td>86468</td>
+<td>21</td>
+<td>Ordered split of the 12 most frequent observed exact values.</td>
+</tr>
+<tr>
+<td>k3</td>
+<td>Syllables: CMU/pkg</td>
+<td>9-12 representative ranks</td>
+<td>9, 10, 11, 12</td>
+<td>12662</td>
+<td>21</td>
+<td>Ordered split of the 12 most frequent observed exact values.</td>
+</tr>
+<tr>
+<td>k3</td>
+<td>Syllables: pkg</td>
+<td>1-4 representative ranks</td>
+<td>1, 2, 3, 4</td>
+<td>329972</td>
+<td>21</td>
+<td>Ordered split of the 12 most frequent observed exact values.</td>
+</tr>
+<tr>
+<td>k3</td>
+<td>Syllables: pkg</td>
+<td>5-8 representative ranks</td>
+<td>5, 6, 7, 8</td>
+<td>97554</td>
+<td>21</td>
+<td>Ordered split of the 12 most frequent observed exact values.</td>
+</tr>
+<tr>
+<td>k3</td>
+<td>Syllables: pkg</td>
+<td>9-12 representative ranks</td>
+<td>9, 10, 11, 12</td>
+<td>15357</td>
+<td>21</td>
+<td>Ordered split of the 12 most frequent observed exact values.</td>
+</tr>
+<tr>
+<td>k3</td>
+<td>Phonemes</td>
+<td>1-4 representative ranks</td>
+<td>2, 3, 4, 5</td>
+<td>175070</td>
+<td>21</td>
+<td>Ordered split of the 12 most frequent observed exact values.</td>
+</tr>
+<tr>
+<td>k3</td>
+<td>Phonemes</td>
+<td>5-8 representative ranks</td>
+<td>6, 7, 8, 9</td>
+<td>118913</td>
+<td>21</td>
+<td>Ordered split of the 12 most frequent observed exact values.</td>
+</tr>
+<tr>
+<td>k3</td>
+<td>Phonemes</td>
+<td>9-12 representative ranks</td>
+<td>10, 11, 12, 13</td>
+<td>73995</td>
+<td>21</td>
+<td>Ordered split of the 12 most frequent observed exact values.</td>
+</tr>
+</tbody></table>
+<h2>Model Overview</h2>
+<p>How to read: <code>negative_age_coef_rows</code> counts how many effort-unit rows have a negative fitted age coefficient. <code>significant_age_rows</code> counts how many have p&lt;.05 for age. R2 is in-sample fitted-versus-observed fit.</p>
+<table>
+<thead><tr>
+<th>context_k</th>
+<th>model_id</th>
+<th>model_label</th>
+<th>fitted_rows</th>
+<th>mean_r2</th>
+<th>negative_age_coef_rows</th>
+<th>significant_age_rows</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>k0</td>
+<td>CF0</td>
+<td>Baseline controls</td>
+<td>5</td>
+<td>0.736</td>
+<td>5</td>
+<td>5</td>
+</tr>
+<tr>
+<td>k1</td>
+<td>CF0</td>
+<td>Baseline controls</td>
+<td>5</td>
+<td>0.6586</td>
+<td>5</td>
+<td>5</td>
+</tr>
+<tr>
+<td>k1</td>
+<td>CF1</td>
+<td>Entropy only</td>
+<td>5</td>
+<td>0.6585</td>
+<td>5</td>
+<td>5</td>
+</tr>
+<tr>
+<td>k1</td>
+<td>CF2</td>
+<td>Matched context size only</td>
+<td>5</td>
+<td>0.6599</td>
+<td>5</td>
+<td>5</td>
+</tr>
+<tr>
+<td>k1</td>
+<td>CF3</td>
+<td>Entropy plus matched context size</td>
+<td>5</td>
+<td>0.6594</td>
+<td>5</td>
+<td>5</td>
+</tr>
+<tr>
+<td>k2</td>
+<td>CF0</td>
+<td>Baseline controls</td>
+<td>5</td>
+<td>0.6408</td>
+<td>5</td>
+<td>5</td>
+</tr>
+<tr>
+<td>k2</td>
+<td>CF1</td>
+<td>Entropy only</td>
+<td>5</td>
+<td>0.6413</td>
+<td>5</td>
+<td>5</td>
+</tr>
+<tr>
+<td>k2</td>
+<td>CF2</td>
+<td>Matched context size only</td>
+<td>5</td>
+<td>0.6418</td>
+<td>5</td>
+<td>5</td>
+</tr>
+<tr>
+<td>k2</td>
+<td>CF3</td>
+<td>Entropy plus matched context size</td>
+<td>5</td>
+<td>0.6416</td>
+<td>5</td>
+<td>5</td>
+</tr>
+<tr>
+<td>k3</td>
+<td>CF0</td>
+<td>Baseline controls</td>
+<td>5</td>
+<td>0.6318</td>
+<td>5</td>
+<td>5</td>
+</tr>
+<tr>
+<td>k3</td>
+<td>CF1</td>
+<td>Entropy only</td>
+<td>5</td>
+<td>0.6325</td>
+<td>5</td>
+<td>5</td>
+</tr>
+<tr>
+<td>k3</td>
+<td>CF2</td>
+<td>Matched context size only</td>
+<td>5</td>
+<td>0.633</td>
+<td>5</td>
+<td>5</td>
+</tr>
+<tr>
+<td>k3</td>
+<td>CF3</td>
+<td>Entropy plus matched context size</td>
+<td>5</td>
+<td>0.6327</td>
+<td>5</td>
+<td>4</td>
+</tr>
+</tbody></table>
+<h2>Coefficient Table</h2>
+<p>How to read: coefficients are in Mistral bits. <code>age_coef</code> is bits per month after the listed controls. <code>target_effort_coef</code> is bits per added target effort unit. <code>context_entropy_coef</code> is bits per additional entropy bit. <code>context_size_coef</code> is bits per additional matched context-size unit.</p>
+<table>
+<thead><tr>
+<th>context_k</th>
+<th>model_id</th>
+<th>model_label</th>
+<th>effort_label</th>
+<th>context_size_label</th>
+<th>n_obs</th>
+<th>n_children</th>
+<th>r2_observed_fitted</th>
+<th>age_coef</th>
+<th>age_p</th>
+<th>target_effort_coef</th>
+<th>target_effort_p</th>
+<th>context_entropy_coef</th>
+<th>context_entropy_p</th>
+<th>context_size_coef</th>
+<th>context_size_p</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>k0</td>
+<td>CF0</td>
+<td>Baseline controls</td>
+<td>Words</td>
+<td></td>
+<td>4.47e+05</td>
+<td>21</td>
+<td>0.7252</td>
+<td>-0.1582</td>
+<td>&lt;.001</td>
+<td>7.127</td>
+<td>&lt;.001</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>k0</td>
+<td>CF0</td>
+<td>Baseline controls</td>
+<td>Morphemes</td>
+<td></td>
+<td>4.47e+05</td>
+<td>21</td>
+<td>0.7204</td>
+<td>-0.1784</td>
+<td>&lt;.001</td>
+<td>6.195</td>
+<td>&lt;.001</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>k0</td>
+<td>CF0</td>
+<td>Baseline controls</td>
+<td>Syllables: CMU/pkg</td>
+<td></td>
+<td>4.47e+05</td>
+<td>21</td>
+<td>0.7461</td>
+<td>-0.0907</td>
+<td>0.003</td>
+<td>5.848</td>
+<td>&lt;.001</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>k0</td>
+<td>CF0</td>
+<td>Baseline controls</td>
+<td>Syllables: pkg</td>
+<td></td>
+<td>4.47e+05</td>
+<td>21</td>
+<td>0.7303</td>
+<td>-0.07571</td>
+<td>0.009</td>
+<td>5.411</td>
+<td>&lt;.001</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>k0</td>
+<td>CF0</td>
+<td>Baseline controls</td>
+<td>Phonemes</td>
+<td></td>
+<td>4.47e+05</td>
+<td>21</td>
+<td>0.7578</td>
+<td>-0.09847</td>
+<td>0.001</td>
+<td>2.352</td>
+<td>&lt;.001</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>k1</td>
+<td>CF0</td>
+<td>Baseline controls</td>
+<td>Words</td>
+<td></td>
+<td>4.47e+05</td>
+<td>21</td>
+<td>0.6495</td>
+<td>-0.1431</td>
+<td>&lt;.001</td>
+<td>6.677</td>
+<td>&lt;.001</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>k1</td>
+<td>CF1</td>
+<td>Entropy only</td>
+<td>Words</td>
+<td></td>
+<td>4.422e+05</td>
+<td>21</td>
+<td>0.6495</td>
+<td>-0.1481</td>
+<td>&lt;.001</td>
+<td>6.68</td>
+<td>&lt;.001</td>
+<td>0.05917</td>
+<td>0.274</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>k1</td>
+<td>CF2</td>
+<td>Matched context size only</td>
+<td>Words</td>
+<td>Context words</td>
+<td>4.443e+05</td>
+<td>21</td>
+<td>0.651</td>
+<td>-0.1402</td>
+<td>&lt;.001</td>
+<td>6.671</td>
+<td>&lt;.001</td>
+<td></td>
+<td></td>
+<td>-0.175</td>
+<td>&lt;.001</td>
+</tr>
+<tr>
+<td>k1</td>
+<td>CF3</td>
+<td>Entropy plus matched context size</td>
+<td>Words</td>
+<td>Context words</td>
+<td>4.422e+05</td>
+<td>21</td>
+<td>0.6506</td>
+<td>-0.1414</td>
+<td>&lt;.001</td>
+<td>6.679</td>
+<td>&lt;.001</td>
+<td>-0.06001</td>
+<td>0.247</td>
+<td>-0.1813</td>
+<td>&lt;.001</td>
+</tr>
+<tr>
+<td>k1</td>
+<td>CF0</td>
+<td>Baseline controls</td>
+<td>Morphemes</td>
+<td></td>
+<td>4.47e+05</td>
+<td>21</td>
+<td>0.639</td>
+<td>-0.1585</td>
+<td>&lt;.001</td>
+<td>5.772</td>
+<td>&lt;.001</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>k1</td>
+<td>CF1</td>
+<td>Entropy only</td>
+<td>Morphemes</td>
+<td></td>
+<td>4.422e+05</td>
+<td>21</td>
+<td>0.6388</td>
+<td>-0.1636</td>
+<td>&lt;.001</td>
+<td>5.773</td>
+<td>&lt;.001</td>
+<td>0.06736</td>
+<td>0.206</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>k1</td>
+<td>CF2</td>
+<td>Matched context size only</td>
+<td>Morphemes</td>
+<td>Context morphemes</td>
+<td>4.443e+05</td>
+<td>21</td>
+<td>0.6403</td>
+<td>-0.1562</td>
+<td>&lt;.001</td>
+<td>5.767</td>
+<td>&lt;.001</td>
+<td></td>
+<td></td>
+<td>-0.1421</td>
+<td>&lt;.001</td>
+</tr>
+<tr>
+<td>k1</td>
+<td>CF3</td>
+<td>Entropy plus matched context size</td>
+<td>Morphemes</td>
+<td>Context morphemes</td>
+<td>4.422e+05</td>
+<td>21</td>
+<td>0.6397</td>
+<td>-0.1576</td>
+<td>&lt;.001</td>
+<td>5.772</td>
+<td>&lt;.001</td>
+<td>-0.0464</td>
+<td>0.357</td>
+<td>-0.1462</td>
+<td>&lt;.001</td>
+</tr>
+<tr>
+<td>k1</td>
+<td>CF0</td>
+<td>Baseline controls</td>
+<td>Syllables: CMU/pkg</td>
+<td></td>
+<td>4.47e+05</td>
+<td>21</td>
+<td>0.6729</td>
+<td>-0.08207</td>
+<td>&lt;.001</td>
+<td>5.502</td>
+<td>&lt;.001</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>k1</td>
+<td>CF1</td>
+<td>Entropy only</td>
+<td>Syllables: CMU/pkg</td>
+<td></td>
+<td>4.422e+05</td>
+<td>21</td>
+<td>0.6728</td>
+<td>-0.08435</td>
+<td>&lt;.001</td>
+<td>5.502</td>
+<td>&lt;.001</td>
+<td>0.06356</td>
+<td>0.204</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>k1</td>
+<td>CF2</td>
+<td>Matched context size only</td>
+<td>Syllables: CMU/pkg</td>
+<td>Context syllables: CMU/pkg</td>
+<td>4.443e+05</td>
+<td>21</td>
+<td>0.6741</td>
+<td>-0.07966</td>
+<td>&lt;.001</td>
+<td>5.497</td>
+<td>&lt;.001</td>
+<td></td>
+<td></td>
+<td>-0.1263</td>
+<td>&lt;.001</td>
+</tr>
+<tr>
+<td>k1</td>
+<td>CF3</td>
+<td>Entropy plus matched context size</td>
+<td>Syllables: CMU/pkg</td>
+<td>Context syllables: CMU/pkg</td>
+<td>4.422e+05</td>
+<td>21</td>
+<td>0.6737</td>
+<td>-0.07842</td>
+<td>&lt;.001</td>
+<td>5.501</td>
+<td>&lt;.001</td>
+<td>-0.03417</td>
+<td>0.477</td>
+<td>-0.1285</td>
+<td>&lt;.001</td>
+</tr>
+<tr>
+<td>k1</td>
+<td>CF0</td>
+<td>Baseline controls</td>
+<td>Syllables: pkg</td>
+<td></td>
+<td>4.47e+05</td>
+<td>21</td>
+<td>0.6572</td>
+<td>-0.06724</td>
+<td>0.001</td>
+<td>5.084</td>
+<td>&lt;.001</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>k1</td>
+<td>CF1</td>
+<td>Entropy only</td>
+<td>Syllables: pkg</td>
+<td></td>
+<td>4.422e+05</td>
+<td>21</td>
+<td>0.6571</td>
+<td>-0.06823</td>
+<td>&lt;.001</td>
+<td>5.083</td>
+<td>&lt;.001</td>
+<td>0.04786</td>
+<td>0.346</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>k1</td>
+<td>CF2</td>
+<td>Matched context size only</td>
+<td>Syllables: pkg</td>
+<td>Context syllables: pkg</td>
+<td>4.443e+05</td>
+<td>21</td>
+<td>0.6585</td>
+<td>-0.06479</td>
+<td>0.002</td>
+<td>5.078</td>
+<td>&lt;.001</td>
+<td></td>
+<td></td>
+<td>-0.1208</td>
+<td>&lt;.001</td>
+</tr>
+<tr>
+<td>k1</td>
+<td>CF3</td>
+<td>Entropy plus matched context size</td>
+<td>Syllables: pkg</td>
+<td>Context syllables: pkg</td>
+<td>4.422e+05</td>
+<td>21</td>
+<td>0.658</td>
+<td>-0.06222</td>
+<td>0.002</td>
+<td>5.081</td>
+<td>&lt;.001</td>
+<td>-0.05367</td>
+<td>0.281</td>
+<td>-0.1244</td>
+<td>&lt;.001</td>
+</tr>
+<tr>
+<td>k1</td>
+<td>CF0</td>
+<td>Baseline controls</td>
+<td>Phonemes</td>
+<td></td>
+<td>4.47e+05</td>
+<td>21</td>
+<td>0.6743</td>
+<td>-0.08519</td>
+<td>&lt;.001</td>
+<td>2.196</td>
+<td>&lt;.001</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>k1</td>
+<td>CF1</td>
+<td>Entropy only</td>
+<td>Phonemes</td>
+<td></td>
+<td>4.422e+05</td>
+<td>21</td>
+<td>0.6743</td>
+<td>-0.08687</td>
+<td>&lt;.001</td>
+<td>2.196</td>
+<td>&lt;.001</td>
+<td>0.02783</td>
+<td>0.548</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>k1</td>
+<td>CF2</td>
+<td>Matched context size only</td>
+<td>Phonemes</td>
+<td>Context phonemes</td>
+<td>4.443e+05</td>
+<td>21</td>
+<td>0.6755</td>
+<td>-0.08311</td>
+<td>&lt;.001</td>
+<td>2.194</td>
+<td>&lt;.001</td>
+<td></td>
+<td></td>
+<td>-0.04665</td>
+<td>&lt;.001</td>
+</tr>
+<tr>
+<td>k1</td>
+<td>CF3</td>
+<td>Entropy plus matched context size</td>
+<td>Phonemes</td>
+<td>Context phonemes</td>
+<td>4.422e+05</td>
+<td>21</td>
+<td>0.6751</td>
+<td>-0.08125</td>
+<td>&lt;.001</td>
+<td>2.195</td>
+<td>&lt;.001</td>
+<td>-0.06489</td>
+<td>0.143</td>
+<td>-0.04865</td>
+<td>&lt;.001</td>
+</tr>
+<tr>
+<td>k2</td>
+<td>CF0</td>
+<td>Baseline controls</td>
+<td>Words</td>
+<td></td>
+<td>4.47e+05</td>
+<td>21</td>
+<td>0.6338</td>
+<td>-0.1287</td>
+<td>&lt;.001</td>
+<td>6.468</td>
+<td>&lt;.001</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>k2</td>
+<td>CF1</td>
+<td>Entropy only</td>
+<td>Words</td>
+<td></td>
+<td>4.415e+05</td>
+<td>21</td>
+<td>0.6343</td>
+<td>-0.1318</td>
+<td>&lt;.001</td>
+<td>6.47</td>
+<td>&lt;.001</td>
+<td>-0.4107</td>
+<td>&lt;.001</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>k2</td>
+<td>CF2</td>
+<td>Matched context size only</td>
+<td>Words</td>
+<td>Context words</td>
+<td>4.443e+05</td>
+<td>21</td>
+<td>0.635</td>
+<td>-0.1289</td>
+<td>&lt;.001</td>
+<td>6.464</td>
+<td>&lt;.001</td>
+<td></td>
+<td></td>
+<td>-0.07164</td>
+<td>&lt;.001</td>
+</tr>
+<tr>
+<td>k2</td>
+<td>CF3</td>
+<td>Entropy plus matched context size</td>
+<td>Words</td>
+<td>Context words</td>
+<td>4.415e+05</td>
+<td>21</td>
+<td>0.6347</td>
+<td>-0.1273</td>
+<td>&lt;.001</td>
+<td>6.47</td>
+<td>&lt;.001</td>
+<td>-0.4087</td>
+<td>&lt;.001</td>
+<td>-0.06994</td>
+<td>&lt;.001</td>
+</tr>
+<tr>
+<td>k2</td>
+<td>CF0</td>
+<td>Baseline controls</td>
+<td>Morphemes</td>
+<td></td>
+<td>4.47e+05</td>
+<td>21</td>
+<td>0.6217</td>
+<td>-0.1425</td>
+<td>&lt;.001</td>
+<td>5.581</td>
+<td>&lt;.001</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>k2</td>
+<td>CF1</td>
+<td>Entropy only</td>
+<td>Morphemes</td>
+<td></td>
+<td>4.415e+05</td>
+<td>21</td>
+<td>0.622</td>
+<td>-0.1458</td>
+<td>&lt;.001</td>
+<td>5.582</td>
+<td>&lt;.001</td>
+<td>-0.4256</td>
+<td>&lt;.001</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>k2</td>
+<td>CF2</td>
+<td>Matched context size only</td>
+<td>Morphemes</td>
+<td>Context morphemes</td>
+<td>4.443e+05</td>
+<td>21</td>
+<td>0.6227</td>
+<td>-0.1433</td>
+<td>&lt;.001</td>
+<td>5.577</td>
+<td>&lt;.001</td>
+<td></td>
+<td></td>
+<td>-0.05554</td>
+<td>&lt;.001</td>
+</tr>
+<tr>
+<td>k2</td>
+<td>CF3</td>
+<td>Entropy plus matched context size</td>
+<td>Morphemes</td>
+<td>Context morphemes</td>
+<td>4.415e+05</td>
+<td>21</td>
+<td>0.6223</td>
+<td>-0.142</td>
+<td>&lt;.001</td>
+<td>5.582</td>
+<td>&lt;.001</td>
+<td>-0.4253</td>
+<td>&lt;.001</td>
+<td>-0.05438</td>
+<td>&lt;.001</td>
+</tr>
+<tr>
+<td>k2</td>
+<td>CF0</td>
+<td>Baseline controls</td>
+<td>Syllables: CMU/pkg</td>
+<td></td>
+<td>4.47e+05</td>
+<td>21</td>
+<td>0.6551</td>
+<td>-0.06903</td>
+<td>0.007</td>
+<td>5.323</td>
+<td>&lt;.001</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>k2</td>
+<td>CF1</td>
+<td>Entropy only</td>
+<td>Syllables: CMU/pkg</td>
+<td></td>
+<td>4.415e+05</td>
+<td>21</td>
+<td>0.6557</td>
+<td>-0.06891</td>
+<td>0.006</td>
+<td>5.324</td>
+<td>&lt;.001</td>
+<td>-0.4558</td>
+<td>&lt;.001</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>k2</td>
+<td>CF2</td>
+<td>Matched context size only</td>
+<td>Syllables: CMU/pkg</td>
+<td>Context syllables: CMU/pkg</td>
+<td>4.443e+05</td>
+<td>21</td>
+<td>0.6561</td>
+<td>-0.06963</td>
+<td>0.007</td>
+<td>5.319</td>
+<td>&lt;.001</td>
+<td></td>
+<td></td>
+<td>-0.04898</td>
+<td>&lt;.001</td>
+</tr>
+<tr>
+<td>k2</td>
+<td>CF3</td>
+<td>Entropy plus matched context size</td>
+<td>Syllables: CMU/pkg</td>
+<td>Context syllables: CMU/pkg</td>
+<td>4.415e+05</td>
+<td>21</td>
+<td>0.656</td>
+<td>-0.06519</td>
+<td>0.009</td>
+<td>5.324</td>
+<td>&lt;.001</td>
+<td>-0.4521</td>
+<td>&lt;.001</td>
+<td>-0.04709</td>
+<td>&lt;.001</td>
+</tr>
+<tr>
+<td>k2</td>
+<td>CF0</td>
+<td>Baseline controls</td>
+<td>Syllables: pkg</td>
+<td></td>
+<td>4.47e+05</td>
+<td>21</td>
+<td>0.639</td>
+<td>-0.0542</td>
+<td>0.021</td>
+<td>4.914</td>
+<td>&lt;.001</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>k2</td>
+<td>CF1</td>
+<td>Entropy only</td>
+<td>Syllables: pkg</td>
+<td></td>
+<td>4.415e+05</td>
+<td>21</td>
+<td>0.6396</td>
+<td>-0.05248</td>
+<td>0.017</td>
+<td>4.913</td>
+<td>&lt;.001</td>
+<td>-0.4543</td>
+<td>&lt;.001</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>k2</td>
+<td>CF2</td>
+<td>Matched context size only</td>
+<td>Syllables: pkg</td>
+<td>Context syllables: pkg</td>
+<td>4.443e+05</td>
+<td>21</td>
+<td>0.64</td>
+<td>-0.05479</td>
+<td>0.021</td>
+<td>4.909</td>
+<td>&lt;.001</td>
+<td></td>
+<td></td>
+<td>-0.04671</td>
+<td>&lt;.001</td>
+</tr>
+<tr>
+<td>k2</td>
+<td>CF3</td>
+<td>Entropy plus matched context size</td>
+<td>Syllables: pkg</td>
+<td>Context syllables: pkg</td>
+<td>4.415e+05</td>
+<td>21</td>
+<td>0.6399</td>
+<td>-0.04875</td>
+<td>0.027</td>
+<td>4.913</td>
+<td>&lt;.001</td>
+<td>-0.4506</td>
+<td>&lt;.001</td>
+<td>-0.04487</td>
+<td>&lt;.001</td>
+</tr>
+<tr>
+<td>k2</td>
+<td>CF0</td>
+<td>Baseline controls</td>
+<td>Phonemes</td>
+<td></td>
+<td>4.47e+05</td>
+<td>21</td>
+<td>0.6542</td>
+<td>-0.07096</td>
+<td>0.005</td>
+<td>2.12</td>
+<td>&lt;.001</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>k2</td>
+<td>CF1</td>
+<td>Entropy only</td>
+<td>Phonemes</td>
+<td></td>
+<td>4.415e+05</td>
+<td>21</td>
+<td>0.6549</td>
+<td>-0.06995</td>
+<td>0.006</td>
+<td>2.12</td>
+<td>&lt;.001</td>
+<td>-0.4942</td>
+<td>&lt;.001</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>k2</td>
+<td>CF2</td>
+<td>Matched context size only</td>
+<td>Phonemes</td>
+<td>Context phonemes</td>
+<td>4.443e+05</td>
+<td>21</td>
+<td>0.6552</td>
+<td>-0.0717</td>
+<td>0.005</td>
+<td>2.118</td>
+<td>&lt;.001</td>
+<td></td>
+<td></td>
+<td>-0.01841</td>
+<td>&lt;.001</td>
+</tr>
+<tr>
+<td>k2</td>
+<td>CF3</td>
+<td>Entropy plus matched context size</td>
+<td>Phonemes</td>
+<td>Context phonemes</td>
+<td>4.415e+05</td>
+<td>21</td>
+<td>0.6551</td>
+<td>-0.0665</td>
+<td>0.008</td>
+<td>2.12</td>
+<td>&lt;.001</td>
+<td>-0.4898</td>
+<td>&lt;.001</td>
+<td>-0.01751</td>
+<td>&lt;.001</td>
+</tr>
+<tr>
+<td>k3</td>
+<td>CF0</td>
+<td>Baseline controls</td>
+<td>Words</td>
+<td></td>
+<td>4.47e+05</td>
+<td>21</td>
+<td>0.6259</td>
+<td>-0.1225</td>
+<td>&lt;.001</td>
+<td>6.367</td>
+<td>&lt;.001</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>k3</td>
+<td>CF1</td>
+<td>Entropy only</td>
+<td>Words</td>
+<td></td>
+<td>4.414e+05</td>
+<td>21</td>
+<td>0.6266</td>
+<td>-0.1269</td>
+<td>&lt;.001</td>
+<td>6.367</td>
+<td>&lt;.001</td>
+<td>-0.4716</td>
+<td>&lt;.001</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>k3</td>
+<td>CF2</td>
+<td>Matched context size only</td>
+<td>Words</td>
+<td>Context words</td>
+<td>4.443e+05</td>
+<td>21</td>
+<td>0.6272</td>
+<td>-0.1239</td>
+<td>&lt;.001</td>
+<td>6.363</td>
+<td>&lt;.001</td>
+<td></td>
+<td></td>
+<td>-0.04386</td>
+<td>&lt;.001</td>
+</tr>
+<tr>
+<td>k3</td>
+<td>CF3</td>
+<td>Entropy plus matched context size</td>
+<td>Words</td>
+<td>Context words</td>
+<td>4.414e+05</td>
+<td>21</td>
+<td>0.6268</td>
+<td>-0.123</td>
+<td>&lt;.001</td>
+<td>6.368</td>
+<td>&lt;.001</td>
+<td>-0.4699</td>
+<td>&lt;.001</td>
+<td>-0.0427</td>
+<td>&lt;.001</td>
+</tr>
+<tr>
+<td>k3</td>
+<td>CF0</td>
+<td>Baseline controls</td>
+<td>Morphemes</td>
+<td></td>
+<td>4.47e+05</td>
+<td>21</td>
+<td>0.6131</td>
+<td>-0.1355</td>
+<td>&lt;.001</td>
+<td>5.489</td>
+<td>&lt;.001</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>k3</td>
+<td>CF1</td>
+<td>Entropy only</td>
+<td>Morphemes</td>
+<td></td>
+<td>4.414e+05</td>
+<td>21</td>
+<td>0.6136</td>
+<td>-0.1401</td>
+<td>&lt;.001</td>
+<td>5.488</td>
+<td>&lt;.001</td>
+<td>-0.5123</td>
+<td>&lt;.001</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>k3</td>
+<td>CF2</td>
+<td>Matched context size only</td>
+<td>Morphemes</td>
+<td>Context morphemes</td>
+<td>4.443e+05</td>
+<td>21</td>
+<td>0.6142</td>
+<td>-0.1375</td>
+<td>&lt;.001</td>
+<td>5.485</td>
+<td>&lt;.001</td>
+<td></td>
+<td></td>
+<td>-0.03407</td>
+<td>&lt;.001</td>
+</tr>
+<tr>
+<td>k3</td>
+<td>CF3</td>
+<td>Entropy plus matched context size</td>
+<td>Morphemes</td>
+<td>Context morphemes</td>
+<td>4.414e+05</td>
+<td>21</td>
+<td>0.6138</td>
+<td>-0.1369</td>
+<td>&lt;.001</td>
+<td>5.489</td>
+<td>&lt;.001</td>
+<td>-0.5111</td>
+<td>&lt;.001</td>
+<td>-0.03298</td>
+<td>&lt;.001</td>
+</tr>
+<tr>
+<td>k3</td>
+<td>CF0</td>
+<td>Baseline controls</td>
+<td>Syllables: CMU/pkg</td>
+<td></td>
+<td>4.47e+05</td>
+<td>21</td>
+<td>0.6459</td>
+<td>-0.06326</td>
+<td>0.018</td>
+<td>5.236</td>
+<td>&lt;.001</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>k3</td>
+<td>CF1</td>
+<td>Entropy only</td>
+<td>Syllables: CMU/pkg</td>
+<td></td>
+<td>4.414e+05</td>
+<td>21</td>
+<td>0.6468</td>
+<td>-0.06446</td>
+<td>0.013</td>
+<td>5.234</td>
+<td>&lt;.001</td>
+<td>-0.5398</td>
+<td>&lt;.001</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>k3</td>
+<td>CF2</td>
+<td>Matched context size only</td>
+<td>Syllables: CMU/pkg</td>
+<td>Context syllables: CMU/pkg</td>
+<td>4.443e+05</td>
+<td>21</td>
+<td>0.6471</td>
+<td>-0.06497</td>
+<td>0.016</td>
+<td>5.232</td>
+<td>&lt;.001</td>
+<td></td>
+<td></td>
+<td>-0.02985</td>
+<td>&lt;.001</td>
+</tr>
+<tr>
+<td>k3</td>
+<td>CF3</td>
+<td>Entropy plus matched context size</td>
+<td>Syllables: CMU/pkg</td>
+<td>Context syllables: CMU/pkg</td>
+<td>4.414e+05</td>
+<td>21</td>
+<td>0.6469</td>
+<td>-0.06126</td>
+<td>0.018</td>
+<td>5.235</td>
+<td>&lt;.001</td>
+<td>-0.5362</td>
+<td>&lt;.001</td>
+<td>-0.02838</td>
+<td>&lt;.001</td>
+</tr>
+<tr>
+<td>k3</td>
+<td>CF0</td>
+<td>Baseline controls</td>
+<td>Syllables: pkg</td>
+<td></td>
+<td>4.47e+05</td>
+<td>21</td>
+<td>0.6296</td>
+<td>-0.04846</td>
+<td>0.049</td>
+<td>4.831</td>
+<td>&lt;.001</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>k3</td>
+<td>CF1</td>
+<td>Entropy only</td>
+<td>Syllables: pkg</td>
+<td></td>
+<td>4.414e+05</td>
+<td>21</td>
+<td>0.6304</td>
+<td>-0.04803</td>
+<td>0.038</td>
+<td>4.828</td>
+<td>&lt;.001</td>
+<td>-0.541</td>
+<td>&lt;.001</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>k3</td>
+<td>CF2</td>
+<td>Matched context size only</td>
+<td>Syllables: pkg</td>
+<td>Context syllables: pkg</td>
+<td>4.443e+05</td>
+<td>21</td>
+<td>0.6308</td>
+<td>-0.05014</td>
+<td>0.044</td>
+<td>4.827</td>
+<td>&lt;.001</td>
+<td></td>
+<td></td>
+<td>-0.0288</td>
+<td>&lt;.001</td>
+</tr>
+<tr>
+<td>k3</td>
+<td>CF3</td>
+<td>Entropy plus matched context size</td>
+<td>Syllables: pkg</td>
+<td>Context syllables: pkg</td>
+<td>4.414e+05</td>
+<td>21</td>
+<td>0.6306</td>
+<td>-0.04483</td>
+<td>0.052</td>
+<td>4.829</td>
+<td>&lt;.001</td>
+<td>-0.537</td>
+<td>&lt;.001</td>
+<td>-0.02722</td>
+<td>&lt;.001</td>
+</tr>
+<tr>
+<td>k3</td>
+<td>CF0</td>
+<td>Baseline controls</td>
+<td>Phonemes</td>
+<td></td>
+<td>4.47e+05</td>
+<td>21</td>
+<td>0.6443</td>
+<td>-0.06486</td>
+<td>0.013</td>
+<td>2.084</td>
+<td>&lt;.001</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>k3</td>
+<td>CF1</td>
+<td>Entropy only</td>
+<td>Phonemes</td>
+<td></td>
+<td>4.414e+05</td>
+<td>21</td>
+<td>0.6453</td>
+<td>-0.06517</td>
+<td>0.013</td>
+<td>2.084</td>
+<td>&lt;.001</td>
+<td>-0.5814</td>
+<td>&lt;.001</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>k3</td>
+<td>CF2</td>
+<td>Matched context size only</td>
+<td>Phonemes</td>
+<td>Context phonemes</td>
+<td>4.443e+05</td>
+<td>21</td>
+<td>0.6455</td>
+<td>-0.06667</td>
+<td>0.013</td>
+<td>2.082</td>
+<td>&lt;.001</td>
+<td></td>
+<td></td>
+<td>-0.01139</td>
+<td>&lt;.001</td>
+</tr>
+<tr>
+<td>k3</td>
+<td>CF3</td>
+<td>Entropy plus matched context size</td>
+<td>Phonemes</td>
+<td>Context phonemes</td>
+<td>4.414e+05</td>
+<td>21</td>
+<td>0.6455</td>
+<td>-0.06221</td>
+<td>0.016</td>
+<td>2.084</td>
+<td>&lt;.001</td>
+<td>-0.577</td>
+<td>&lt;.001</td>
+<td>-0.0106</td>
+<td>&lt;.001</td>
+</tr>
+</tbody></table>
+<h2>Fixed-Effort Slope Summary</h2>
+<p>How to read: these slopes are descriptive summaries of the plotted prediction lines, not separate inferential models. Inference comes from the coefficient table above.</p>
+<table>
+<thead><tr>
+<th>context_k</th>
+<th>model_id</th>
+<th>model_label</th>
+<th>effort_label</th>
+<th>atlas_bin</th>
+<th>n_fixed_slices</th>
+<th>negative_slices</th>
+<th>positive_slices</th>
+<th>mean_slope_bits_per_month</th>
+<th>min_slope_bits_per_month</th>
+<th>max_slope_bits_per_month</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>k0</td>
+<td>CF0</td>
+<td>Baseline controls</td>
+<td>Morphemes</td>
+<td>1-4</td>
+<td>4</td>
+<td>4</td>
+<td>0</td>
+<td>-0.1784</td>
+<td>-0.1784</td>
+<td>-0.1784</td>
+</tr>
+<tr>
+<td>k0</td>
+<td>CF0</td>
+<td>Baseline controls</td>
+<td>Morphemes</td>
+<td>5-8</td>
+<td>4</td>
+<td>4</td>
+<td>0</td>
+<td>-0.1784</td>
+<td>-0.1784</td>
+<td>-0.1784</td>
+</tr>
+<tr>
+<td>k0</td>
+<td>CF0</td>
+<td>Baseline controls</td>
+<td>Morphemes</td>
+<td>9-12</td>
+<td>4</td>
+<td>4</td>
+<td>0</td>
+<td>-0.1784</td>
+<td>-0.1784</td>
+<td>-0.1784</td>
+</tr>
+<tr>
+<td>k0</td>
+<td>CF0</td>
+<td>Baseline controls</td>
+<td>Phonemes</td>
+<td>1-4 representative ranks</td>
+<td>4</td>
+<td>4</td>
+<td>0</td>
+<td>-0.09847</td>
+<td>-0.09847</td>
+<td>-0.09847</td>
+</tr>
+<tr>
+<td>k0</td>
+<td>CF0</td>
+<td>Baseline controls</td>
+<td>Phonemes</td>
+<td>5-8 representative ranks</td>
+<td>4</td>
+<td>4</td>
+<td>0</td>
+<td>-0.09847</td>
+<td>-0.09847</td>
+<td>-0.09847</td>
+</tr>
+<tr>
+<td>k0</td>
+<td>CF0</td>
+<td>Baseline controls</td>
+<td>Phonemes</td>
+<td>9-12 representative ranks</td>
+<td>4</td>
+<td>4</td>
+<td>0</td>
+<td>-0.09847</td>
+<td>-0.09847</td>
+<td>-0.09847</td>
+</tr>
+<tr>
+<td>k0</td>
+<td>CF0</td>
+<td>Baseline controls</td>
+<td>Syllables: CMU/pkg</td>
+<td>1-4 representative ranks</td>
+<td>4</td>
+<td>4</td>
+<td>0</td>
+<td>-0.0907</td>
+<td>-0.0907</td>
+<td>-0.0907</td>
+</tr>
+<tr>
+<td>k0</td>
+<td>CF0</td>
+<td>Baseline controls</td>
+<td>Syllables: CMU/pkg</td>
+<td>5-8 representative ranks</td>
+<td>4</td>
+<td>4</td>
+<td>0</td>
+<td>-0.0907</td>
+<td>-0.0907</td>
+<td>-0.0907</td>
+</tr>
+<tr>
+<td>k0</td>
+<td>CF0</td>
+<td>Baseline controls</td>
+<td>Syllables: CMU/pkg</td>
+<td>9-12 representative ranks</td>
+<td>4</td>
+<td>4</td>
+<td>0</td>
+<td>-0.0907</td>
+<td>-0.0907</td>
+<td>-0.0907</td>
+</tr>
+<tr>
+<td>k0</td>
+<td>CF0</td>
+<td>Baseline controls</td>
+<td>Syllables: pkg</td>
+<td>1-4 representative ranks</td>
+<td>4</td>
+<td>4</td>
+<td>0</td>
+<td>-0.07571</td>
+<td>-0.07571</td>
+<td>-0.07571</td>
+</tr>
+<tr>
+<td>k0</td>
+<td>CF0</td>
+<td>Baseline controls</td>
+<td>Syllables: pkg</td>
+<td>5-8 representative ranks</td>
+<td>4</td>
+<td>4</td>
+<td>0</td>
+<td>-0.07571</td>
+<td>-0.07571</td>
+<td>-0.07571</td>
+</tr>
+<tr>
+<td>k0</td>
+<td>CF0</td>
+<td>Baseline controls</td>
+<td>Syllables: pkg</td>
+<td>9-12 representative ranks</td>
+<td>4</td>
+<td>4</td>
+<td>0</td>
+<td>-0.07571</td>
+<td>-0.07571</td>
+<td>-0.07571</td>
+</tr>
+<tr>
+<td>k0</td>
+<td>CF0</td>
+<td>Baseline controls</td>
+<td>Words</td>
+<td>1-4</td>
+<td>4</td>
+<td>4</td>
+<td>0</td>
+<td>-0.1582</td>
+<td>-0.1582</td>
+<td>-0.1582</td>
+</tr>
+<tr>
+<td>k0</td>
+<td>CF0</td>
+<td>Baseline controls</td>
+<td>Words</td>
+<td>5-8</td>
+<td>4</td>
+<td>4</td>
+<td>0</td>
+<td>-0.1582</td>
+<td>-0.1582</td>
+<td>-0.1582</td>
+</tr>
+<tr>
+<td>k0</td>
+<td>CF0</td>
+<td>Baseline controls</td>
+<td>Words</td>
+<td>9-12</td>
+<td>4</td>
+<td>4</td>
+<td>0</td>
+<td>-0.1582</td>
+<td>-0.1582</td>
+<td>-0.1582</td>
+</tr>
+<tr>
+<td>k1</td>
+<td>CF0</td>
+<td>Baseline controls</td>
+<td>Morphemes</td>
+<td>1-4</td>
+<td>4</td>
+<td>4</td>
+<td>0</td>
+<td>-0.1585</td>
+<td>-0.1585</td>
+<td>-0.1585</td>
+</tr>
+<tr>
+<td>k1</td>
+<td>CF0</td>
+<td>Baseline controls</td>
+<td>Morphemes</td>
+<td>5-8</td>
+<td>4</td>
+<td>4</td>
+<td>0</td>
+<td>-0.1585</td>
+<td>-0.1585</td>
+<td>-0.1585</td>
+</tr>
+<tr>
+<td>k1</td>
+<td>CF0</td>
+<td>Baseline controls</td>
+<td>Morphemes</td>
+<td>9-12</td>
+<td>4</td>
+<td>4</td>
+<td>0</td>
+<td>-0.1585</td>
+<td>-0.1585</td>
+<td>-0.1585</td>
+</tr>
+<tr>
+<td>k1</td>
+<td>CF0</td>
+<td>Baseline controls</td>
+<td>Phonemes</td>
+<td>1-4 representative ranks</td>
+<td>4</td>
+<td>4</td>
+<td>0</td>
+<td>-0.08519</td>
+<td>-0.08519</td>
+<td>-0.08519</td>
+</tr>
+<tr>
+<td>k1</td>
+<td>CF0</td>
+<td>Baseline controls</td>
+<td>Phonemes</td>
+<td>5-8 representative ranks</td>
+<td>4</td>
+<td>4</td>
+<td>0</td>
+<td>-0.08519</td>
+<td>-0.08519</td>
+<td>-0.08519</td>
+</tr>
+<tr>
+<td>k1</td>
+<td>CF0</td>
+<td>Baseline controls</td>
+<td>Phonemes</td>
+<td>9-12 representative ranks</td>
+<td>4</td>
+<td>4</td>
+<td>0</td>
+<td>-0.08519</td>
+<td>-0.08519</td>
+<td>-0.08519</td>
+</tr>
+<tr>
+<td>k1</td>
+<td>CF0</td>
+<td>Baseline controls</td>
+<td>Syllables: CMU/pkg</td>
+<td>1-4 representative ranks</td>
+<td>4</td>
+<td>4</td>
+<td>0</td>
+<td>-0.08207</td>
+<td>-0.08207</td>
+<td>-0.08207</td>
+</tr>
+<tr>
+<td>k1</td>
+<td>CF0</td>
+<td>Baseline controls</td>
+<td>Syllables: CMU/pkg</td>
+<td>5-8 representative ranks</td>
+<td>4</td>
+<td>4</td>
+<td>0</td>
+<td>-0.08207</td>
+<td>-0.08207</td>
+<td>-0.08207</td>
+</tr>
+<tr>
+<td>k1</td>
+<td>CF0</td>
+<td>Baseline controls</td>
+<td>Syllables: CMU/pkg</td>
+<td>9-12 representative ranks</td>
+<td>4</td>
+<td>4</td>
+<td>0</td>
+<td>-0.08207</td>
+<td>-0.08207</td>
+<td>-0.08207</td>
+</tr>
+<tr>
+<td>k1</td>
+<td>CF0</td>
+<td>Baseline controls</td>
+<td>Syllables: pkg</td>
+<td>1-4 representative ranks</td>
+<td>4</td>
+<td>4</td>
+<td>0</td>
+<td>-0.06724</td>
+<td>-0.06724</td>
+<td>-0.06724</td>
+</tr>
+<tr>
+<td>k1</td>
+<td>CF0</td>
+<td>Baseline controls</td>
+<td>Syllables: pkg</td>
+<td>5-8 representative ranks</td>
+<td>4</td>
+<td>4</td>
+<td>0</td>
+<td>-0.06724</td>
+<td>-0.06724</td>
+<td>-0.06724</td>
+</tr>
+<tr>
+<td>k1</td>
+<td>CF0</td>
+<td>Baseline controls</td>
+<td>Syllables: pkg</td>
+<td>9-12 representative ranks</td>
+<td>4</td>
+<td>4</td>
+<td>0</td>
+<td>-0.06724</td>
+<td>-0.06724</td>
+<td>-0.06724</td>
+</tr>
+<tr>
+<td>k1</td>
+<td>CF0</td>
+<td>Baseline controls</td>
+<td>Words</td>
+<td>1-4</td>
+<td>4</td>
+<td>4</td>
+<td>0</td>
+<td>-0.1431</td>
+<td>-0.1431</td>
+<td>-0.1431</td>
+</tr>
+<tr>
+<td>k1</td>
+<td>CF0</td>
+<td>Baseline controls</td>
+<td>Words</td>
+<td>5-8</td>
+<td>4</td>
+<td>4</td>
+<td>0</td>
+<td>-0.1431</td>
+<td>-0.1431</td>
+<td>-0.1431</td>
+</tr>
+<tr>
+<td>k1</td>
+<td>CF0</td>
+<td>Baseline controls</td>
+<td>Words</td>
+<td>9-12</td>
+<td>4</td>
+<td>4</td>
+<td>0</td>
+<td>-0.1431</td>
+<td>-0.1431</td>
+<td>-0.1431</td>
+</tr>
+<tr>
+<td>k1</td>
+<td>CF1</td>
+<td>Entropy only</td>
+<td>Morphemes</td>
+<td>1-4</td>
+<td>4</td>
+<td>4</td>
+<td>0</td>
+<td>-0.1636</td>
+<td>-0.1636</td>
+<td>-0.1636</td>
+</tr>
+<tr>
+<td>k1</td>
+<td>CF1</td>
+<td>Entropy only</td>
+<td>Morphemes</td>
+<td>5-8</td>
+<td>4</td>
+<td>4</td>
+<td>0</td>
+<td>-0.1636</td>
+<td>-0.1636</td>
+<td>-0.1636</td>
+</tr>
+<tr>
+<td>k1</td>
+<td>CF1</td>
+<td>Entropy only</td>
+<td>Morphemes</td>
+<td>9-12</td>
+<td>4</td>
+<td>4</td>
+<td>0</td>
+<td>-0.1636</td>
+<td>-0.1636</td>
+<td>-0.1636</td>
+</tr>
+<tr>
+<td>k1</td>
+<td>CF1</td>
+<td>Entropy only</td>
+<td>Phonemes</td>
+<td>1-4 representative ranks</td>
+<td>4</td>
+<td>4</td>
+<td>0</td>
+<td>-0.08687</td>
+<td>-0.08687</td>
+<td>-0.08687</td>
+</tr>
+<tr>
+<td>k1</td>
+<td>CF1</td>
+<td>Entropy only</td>
+<td>Phonemes</td>
+<td>5-8 representative ranks</td>
+<td>4</td>
+<td>4</td>
+<td>0</td>
+<td>-0.08687</td>
+<td>-0.08687</td>
+<td>-0.08687</td>
+</tr>
+<tr>
+<td>k1</td>
+<td>CF1</td>
+<td>Entropy only</td>
+<td>Phonemes</td>
+<td>9-12 representative ranks</td>
+<td>4</td>
+<td>4</td>
+<td>0</td>
+<td>-0.08687</td>
+<td>-0.08687</td>
+<td>-0.08687</td>
+</tr>
+<tr>
+<td>k1</td>
+<td>CF1</td>
+<td>Entropy only</td>
+<td>Syllables: CMU/pkg</td>
+<td>1-4 representative ranks</td>
+<td>4</td>
+<td>4</td>
+<td>0</td>
+<td>-0.08435</td>
+<td>-0.08435</td>
+<td>-0.08435</td>
+</tr>
+<tr>
+<td>k1</td>
+<td>CF1</td>
+<td>Entropy only</td>
+<td>Syllables: CMU/pkg</td>
+<td>5-8 representative ranks</td>
+<td>4</td>
+<td>4</td>
+<td>0</td>
+<td>-0.08435</td>
+<td>-0.08435</td>
+<td>-0.08435</td>
+</tr>
+<tr>
+<td>k1</td>
+<td>CF1</td>
+<td>Entropy only</td>
+<td>Syllables: CMU/pkg</td>
+<td>9-12 representative ranks</td>
+<td>4</td>
+<td>4</td>
+<td>0</td>
+<td>-0.08435</td>
+<td>-0.08435</td>
+<td>-0.08435</td>
+</tr>
+<tr>
+<td>k1</td>
+<td>CF1</td>
+<td>Entropy only</td>
+<td>Syllables: pkg</td>
+<td>1-4 representative ranks</td>
+<td>4</td>
+<td>4</td>
+<td>0</td>
+<td>-0.06823</td>
+<td>-0.06823</td>
+<td>-0.06823</td>
+</tr>
+<tr>
+<td>k1</td>
+<td>CF1</td>
+<td>Entropy only</td>
+<td>Syllables: pkg</td>
+<td>5-8 representative ranks</td>
+<td>4</td>
+<td>4</td>
+<td>0</td>
+<td>-0.06823</td>
+<td>-0.06823</td>
+<td>-0.06823</td>
+</tr>
+<tr>
+<td>k1</td>
+<td>CF1</td>
+<td>Entropy only</td>
+<td>Syllables: pkg</td>
+<td>9-12 representative ranks</td>
+<td>4</td>
+<td>4</td>
+<td>0</td>
+<td>-0.06823</td>
+<td>-0.06823</td>
+<td>-0.06823</td>
+</tr>
+<tr>
+<td>k1</td>
+<td>CF1</td>
+<td>Entropy only</td>
+<td>Words</td>
+<td>1-4</td>
+<td>4</td>
+<td>4</td>
+<td>0</td>
+<td>-0.1481</td>
+<td>-0.1481</td>
+<td>-0.1481</td>
+</tr>
+<tr>
+<td>k1</td>
+<td>CF1</td>
+<td>Entropy only</td>
+<td>Words</td>
+<td>5-8</td>
+<td>4</td>
+<td>4</td>
+<td>0</td>
+<td>-0.1481</td>
+<td>-0.1481</td>
+<td>-0.1481</td>
+</tr>
+<tr>
+<td>k1</td>
+<td>CF1</td>
+<td>Entropy only</td>
+<td>Words</td>
+<td>9-12</td>
+<td>4</td>
+<td>4</td>
+<td>0</td>
+<td>-0.1481</td>
+<td>-0.1481</td>
+<td>-0.1481</td>
+</tr>
+<tr>
+<td>k1</td>
+<td>CF2</td>
+<td>Matched context size only</td>
+<td>Morphemes</td>
+<td>1-4</td>
+<td>4</td>
+<td>4</td>
+<td>0</td>
+<td>-0.1562</td>
+<td>-0.1562</td>
+<td>-0.1562</td>
+</tr>
+<tr>
+<td>k1</td>
+<td>CF2</td>
+<td>Matched context size only</td>
+<td>Morphemes</td>
+<td>5-8</td>
+<td>4</td>
+<td>4</td>
+<td>0</td>
+<td>-0.1562</td>
+<td>-0.1562</td>
+<td>-0.1562</td>
+</tr>
+<tr>
+<td>k1</td>
+<td>CF2</td>
+<td>Matched context size only</td>
+<td>Morphemes</td>
+<td>9-12</td>
+<td>4</td>
+<td>4</td>
+<td>0</td>
+<td>-0.1562</td>
+<td>-0.1562</td>
+<td>-0.1562</td>
+</tr>
+<tr>
+<td>k1</td>
+<td>CF2</td>
+<td>Matched context size only</td>
+<td>Phonemes</td>
+<td>1-4 representative ranks</td>
+<td>4</td>
+<td>4</td>
+<td>0</td>
+<td>-0.08311</td>
+<td>-0.08311</td>
+<td>-0.08311</td>
+</tr>
+<tr>
+<td>k1</td>
+<td>CF2</td>
+<td>Matched context size only</td>
+<td>Phonemes</td>
+<td>5-8 representative ranks</td>
+<td>4</td>
+<td>4</td>
+<td>0</td>
+<td>-0.08311</td>
+<td>-0.08311</td>
+<td>-0.08311</td>
+</tr>
+<tr>
+<td>k1</td>
+<td>CF2</td>
+<td>Matched context size only</td>
+<td>Phonemes</td>
+<td>9-12 representative ranks</td>
+<td>4</td>
+<td>4</td>
+<td>0</td>
+<td>-0.08311</td>
+<td>-0.08311</td>
+<td>-0.08311</td>
+</tr>
+<tr>
+<td>k1</td>
+<td>CF2</td>
+<td>Matched context size only</td>
+<td>Syllables: CMU/pkg</td>
+<td>1-4 representative ranks</td>
+<td>4</td>
+<td>4</td>
+<td>0</td>
+<td>-0.07966</td>
+<td>-0.07966</td>
+<td>-0.07966</td>
+</tr>
+<tr>
+<td>k1</td>
+<td>CF2</td>
+<td>Matched context size only</td>
+<td>Syllables: CMU/pkg</td>
+<td>5-8 representative ranks</td>
+<td>4</td>
+<td>4</td>
+<td>0</td>
+<td>-0.07966</td>
+<td>-0.07966</td>
+<td>-0.07966</td>
+</tr>
+<tr>
+<td>k1</td>
+<td>CF2</td>
+<td>Matched context size only</td>
+<td>Syllables: CMU/pkg</td>
+<td>9-12 representative ranks</td>
+<td>4</td>
+<td>4</td>
+<td>0</td>
+<td>-0.07966</td>
+<td>-0.07966</td>
+<td>-0.07966</td>
+</tr>
+<tr>
+<td>k1</td>
+<td>CF2</td>
+<td>Matched context size only</td>
+<td>Syllables: pkg</td>
+<td>1-4 representative ranks</td>
+<td>4</td>
+<td>4</td>
+<td>0</td>
+<td>-0.06479</td>
+<td>-0.06479</td>
+<td>-0.06479</td>
+</tr>
+<tr>
+<td>k1</td>
+<td>CF2</td>
+<td>Matched context size only</td>
+<td>Syllables: pkg</td>
+<td>5-8 representative ranks</td>
+<td>4</td>
+<td>4</td>
+<td>0</td>
+<td>-0.06479</td>
+<td>-0.06479</td>
+<td>-0.06479</td>
+</tr>
+<tr>
+<td>k1</td>
+<td>CF2</td>
+<td>Matched context size only</td>
+<td>Syllables: pkg</td>
+<td>9-12 representative ranks</td>
+<td>4</td>
+<td>4</td>
+<td>0</td>
+<td>-0.06479</td>
+<td>-0.06479</td>
+<td>-0.06479</td>
+</tr>
+<tr>
+<td>k1</td>
+<td>CF2</td>
+<td>Matched context size only</td>
+<td>Words</td>
+<td>1-4</td>
+<td>4</td>
+<td>4</td>
+<td>0</td>
+<td>-0.1402</td>
+<td>-0.1402</td>
+<td>-0.1402</td>
+</tr>
+<tr>
+<td>k1</td>
+<td>CF2</td>
+<td>Matched context size only</td>
+<td>Words</td>
+<td>5-8</td>
+<td>4</td>
+<td>4</td>
+<td>0</td>
+<td>-0.1402</td>
+<td>-0.1402</td>
+<td>-0.1402</td>
+</tr>
+<tr>
+<td>k1</td>
+<td>CF2</td>
+<td>Matched context size only</td>
+<td>Words</td>
+<td>9-12</td>
+<td>4</td>
+<td>4</td>
+<td>0</td>
+<td>-0.1402</td>
+<td>-0.1402</td>
+<td>-0.1402</td>
+</tr>
+<tr>
+<td>k1</td>
+<td>CF3</td>
+<td>Entropy plus matched context size</td>
+<td>Morphemes</td>
+<td>1-4</td>
+<td>4</td>
+<td>4</td>
+<td>0</td>
+<td>-0.1576</td>
+<td>-0.1576</td>
+<td>-0.1576</td>
+</tr>
+<tr>
+<td>k1</td>
+<td>CF3</td>
+<td>Entropy plus matched context size</td>
+<td>Morphemes</td>
+<td>5-8</td>
+<td>4</td>
+<td>4</td>
+<td>0</td>
+<td>-0.1576</td>
+<td>-0.1576</td>
+<td>-0.1576</td>
+</tr>
+<tr>
+<td>k1</td>
+<td>CF3</td>
+<td>Entropy plus matched context size</td>
+<td>Morphemes</td>
+<td>9-12</td>
+<td>4</td>
+<td>4</td>
+<td>0</td>
+<td>-0.1576</td>
+<td>-0.1576</td>
+<td>-0.1576</td>
+</tr>
+<tr>
+<td>k1</td>
+<td>CF3</td>
+<td>Entropy plus matched context size</td>
+<td>Phonemes</td>
+<td>1-4 representative ranks</td>
+<td>4</td>
+<td>4</td>
+<td>0</td>
+<td>-0.08125</td>
+<td>-0.08125</td>
+<td>-0.08125</td>
+</tr>
+<tr>
+<td>k1</td>
+<td>CF3</td>
+<td>Entropy plus matched context size</td>
+<td>Phonemes</td>
+<td>5-8 representative ranks</td>
+<td>4</td>
+<td>4</td>
+<td>0</td>
+<td>-0.08125</td>
+<td>-0.08125</td>
+<td>-0.08125</td>
+</tr>
+<tr>
+<td>k1</td>
+<td>CF3</td>
+<td>Entropy plus matched context size</td>
+<td>Phonemes</td>
+<td>9-12 representative ranks</td>
+<td>4</td>
+<td>4</td>
+<td>0</td>
+<td>-0.08125</td>
+<td>-0.08125</td>
+<td>-0.08125</td>
+</tr>
+<tr>
+<td>k1</td>
+<td>CF3</td>
+<td>Entropy plus matched context size</td>
+<td>Syllables: CMU/pkg</td>
+<td>1-4 representative ranks</td>
+<td>4</td>
+<td>4</td>
+<td>0</td>
+<td>-0.07842</td>
+<td>-0.07842</td>
+<td>-0.07842</td>
+</tr>
+<tr>
+<td>k1</td>
+<td>CF3</td>
+<td>Entropy plus matched context size</td>
+<td>Syllables: CMU/pkg</td>
+<td>5-8 representative ranks</td>
+<td>4</td>
+<td>4</td>
+<td>0</td>
+<td>-0.07842</td>
+<td>-0.07842</td>
+<td>-0.07842</td>
+</tr>
+<tr>
+<td>k1</td>
+<td>CF3</td>
+<td>Entropy plus matched context size</td>
+<td>Syllables: CMU/pkg</td>
+<td>9-12 representative ranks</td>
+<td>4</td>
+<td>4</td>
+<td>0</td>
+<td>-0.07842</td>
+<td>-0.07842</td>
+<td>-0.07842</td>
+</tr>
+<tr>
+<td>k1</td>
+<td>CF3</td>
+<td>Entropy plus matched context size</td>
+<td>Syllables: pkg</td>
+<td>1-4 representative ranks</td>
+<td>4</td>
+<td>4</td>
+<td>0</td>
+<td>-0.06222</td>
+<td>-0.06222</td>
+<td>-0.06222</td>
+</tr>
+<tr>
+<td>k1</td>
+<td>CF3</td>
+<td>Entropy plus matched context size</td>
+<td>Syllables: pkg</td>
+<td>5-8 representative ranks</td>
+<td>4</td>
+<td>4</td>
+<td>0</td>
+<td>-0.06222</td>
+<td>-0.06222</td>
+<td>-0.06222</td>
+</tr>
+<tr>
+<td>k1</td>
+<td>CF3</td>
+<td>Entropy plus matched context size</td>
+<td>Syllables: pkg</td>
+<td>9-12 representative ranks</td>
+<td>4</td>
+<td>4</td>
+<td>0</td>
+<td>-0.06222</td>
+<td>-0.06222</td>
+<td>-0.06222</td>
+</tr>
+<tr>
+<td>k1</td>
+<td>CF3</td>
+<td>Entropy plus matched context size</td>
+<td>Words</td>
+<td>1-4</td>
+<td>4</td>
+<td>4</td>
+<td>0</td>
+<td>-0.1414</td>
+<td>-0.1414</td>
+<td>-0.1414</td>
+</tr>
+<tr>
+<td>k1</td>
+<td>CF3</td>
+<td>Entropy plus matched context size</td>
+<td>Words</td>
+<td>5-8</td>
+<td>4</td>
+<td>4</td>
+<td>0</td>
+<td>-0.1414</td>
+<td>-0.1414</td>
+<td>-0.1414</td>
+</tr>
+<tr>
+<td>k1</td>
+<td>CF3</td>
+<td>Entropy plus matched context size</td>
+<td>Words</td>
+<td>9-12</td>
+<td>4</td>
+<td>4</td>
+<td>0</td>
+<td>-0.1414</td>
+<td>-0.1414</td>
+<td>-0.1414</td>
+</tr>
+<tr>
+<td>k2</td>
+<td>CF0</td>
+<td>Baseline controls</td>
+<td>Morphemes</td>
+<td>1-4</td>
+<td>4</td>
+<td>4</td>
+<td>0</td>
+<td>-0.1425</td>
+<td>-0.1425</td>
+<td>-0.1425</td>
+</tr>
+<tr>
+<td>k2</td>
+<td>CF0</td>
+<td>Baseline controls</td>
+<td>Morphemes</td>
+<td>5-8</td>
+<td>4</td>
+<td>4</td>
+<td>0</td>
+<td>-0.1425</td>
+<td>-0.1425</td>
+<td>-0.1425</td>
+</tr>
+<tr>
+<td>k2</td>
+<td>CF0</td>
+<td>Baseline controls</td>
+<td>Morphemes</td>
+<td>9-12</td>
+<td>4</td>
+<td>4</td>
+<td>0</td>
+<td>-0.1425</td>
+<td>-0.1425</td>
+<td>-0.1425</td>
+</tr>
+<tr>
+<td>k2</td>
+<td>CF0</td>
+<td>Baseline controls</td>
+<td>Phonemes</td>
+<td>1-4 representative ranks</td>
+<td>4</td>
+<td>4</td>
+<td>0</td>
+<td>-0.07096</td>
+<td>-0.07096</td>
+<td>-0.07096</td>
+</tr>
+<tr>
+<td>k2</td>
+<td>CF0</td>
+<td>Baseline controls</td>
+<td>Phonemes</td>
+<td>5-8 representative ranks</td>
+<td>4</td>
+<td>4</td>
+<td>0</td>
+<td>-0.07096</td>
+<td>-0.07096</td>
+<td>-0.07096</td>
+</tr>
+<tr>
+<td>k2</td>
+<td>CF0</td>
+<td>Baseline controls</td>
+<td>Phonemes</td>
+<td>9-12 representative ranks</td>
+<td>4</td>
+<td>4</td>
+<td>0</td>
+<td>-0.07096</td>
+<td>-0.07096</td>
+<td>-0.07096</td>
+</tr>
+<tr>
+<td>k2</td>
+<td>CF0</td>
+<td>Baseline controls</td>
+<td>Syllables: CMU/pkg</td>
+<td>1-4 representative ranks</td>
+<td>4</td>
+<td>4</td>
+<td>0</td>
+<td>-0.06903</td>
+<td>-0.06903</td>
+<td>-0.06903</td>
+</tr>
+<tr>
+<td>k2</td>
+<td>CF0</td>
+<td>Baseline controls</td>
+<td>Syllables: CMU/pkg</td>
+<td>5-8 representative ranks</td>
+<td>4</td>
+<td>4</td>
+<td>0</td>
+<td>-0.06903</td>
+<td>-0.06903</td>
+<td>-0.06903</td>
+</tr>
+<tr>
+<td>k2</td>
+<td>CF0</td>
+<td>Baseline controls</td>
+<td>Syllables: CMU/pkg</td>
+<td>9-12 representative ranks</td>
+<td>4</td>
+<td>4</td>
+<td>0</td>
+<td>-0.06903</td>
+<td>-0.06903</td>
+<td>-0.06903</td>
+</tr>
+<tr>
+<td>k2</td>
+<td>CF0</td>
+<td>Baseline controls</td>
+<td>Syllables: pkg</td>
+<td>1-4 representative ranks</td>
+<td>4</td>
+<td>4</td>
+<td>0</td>
+<td>-0.0542</td>
+<td>-0.0542</td>
+<td>-0.0542</td>
+</tr>
+<tr>
+<td>k2</td>
+<td>CF0</td>
+<td>Baseline controls</td>
+<td>Syllables: pkg</td>
+<td>5-8 representative ranks</td>
+<td>4</td>
+<td>4</td>
+<td>0</td>
+<td>-0.0542</td>
+<td>-0.0542</td>
+<td>-0.0542</td>
+</tr>
+<tr>
+<td>k2</td>
+<td>CF0</td>
+<td>Baseline controls</td>
+<td>Syllables: pkg</td>
+<td>9-12 representative ranks</td>
+<td>4</td>
+<td>4</td>
+<td>0</td>
+<td>-0.0542</td>
+<td>-0.0542</td>
+<td>-0.0542</td>
+</tr>
+<tr>
+<td>k2</td>
+<td>CF0</td>
+<td>Baseline controls</td>
+<td>Words</td>
+<td>1-4</td>
+<td>4</td>
+<td>4</td>
+<td>0</td>
+<td>-0.1287</td>
+<td>-0.1287</td>
+<td>-0.1287</td>
+</tr>
+<tr>
+<td>k2</td>
+<td>CF0</td>
+<td>Baseline controls</td>
+<td>Words</td>
+<td>5-8</td>
+<td>4</td>
+<td>4</td>
+<td>0</td>
+<td>-0.1287</td>
+<td>-0.1287</td>
+<td>-0.1287</td>
+</tr>
+<tr>
+<td>k2</td>
+<td>CF0</td>
+<td>Baseline controls</td>
+<td>Words</td>
+<td>9-12</td>
+<td>4</td>
+<td>4</td>
+<td>0</td>
+<td>-0.1287</td>
+<td>-0.1287</td>
+<td>-0.1287</td>
+</tr>
+<tr>
+<td>k2</td>
+<td>CF1</td>
+<td>Entropy only</td>
+<td>Morphemes</td>
+<td>1-4</td>
+<td>4</td>
+<td>4</td>
+<td>0</td>
+<td>-0.1458</td>
+<td>-0.1458</td>
+<td>-0.1458</td>
+</tr>
+<tr>
+<td>k2</td>
+<td>CF1</td>
+<td>Entropy only</td>
+<td>Morphemes</td>
+<td>5-8</td>
+<td>4</td>
+<td>4</td>
+<td>0</td>
+<td>-0.1458</td>
+<td>-0.1458</td>
+<td>-0.1458</td>
+</tr>
+<tr>
+<td>k2</td>
+<td>CF1</td>
+<td>Entropy only</td>
+<td>Morphemes</td>
+<td>9-12</td>
+<td>4</td>
+<td>4</td>
+<td>0</td>
+<td>-0.1458</td>
+<td>-0.1458</td>
+<td>-0.1458</td>
+</tr>
+<tr>
+<td>k2</td>
+<td>CF1</td>
+<td>Entropy only</td>
+<td>Phonemes</td>
+<td>1-4 representative ranks</td>
+<td>4</td>
+<td>4</td>
+<td>0</td>
+<td>-0.06995</td>
+<td>-0.06995</td>
+<td>-0.06995</td>
+</tr>
+<tr>
+<td>k2</td>
+<td>CF1</td>
+<td>Entropy only</td>
+<td>Phonemes</td>
+<td>5-8 representative ranks</td>
+<td>4</td>
+<td>4</td>
+<td>0</td>
+<td>-0.06995</td>
+<td>-0.06995</td>
+<td>-0.06995</td>
+</tr>
+<tr>
+<td>k2</td>
+<td>CF1</td>
+<td>Entropy only</td>
+<td>Phonemes</td>
+<td>9-12 representative ranks</td>
+<td>4</td>
+<td>4</td>
+<td>0</td>
+<td>-0.06995</td>
+<td>-0.06995</td>
+<td>-0.06995</td>
+</tr>
+<tr>
+<td>k2</td>
+<td>CF1</td>
+<td>Entropy only</td>
+<td>Syllables: CMU/pkg</td>
+<td>1-4 representative ranks</td>
+<td>4</td>
+<td>4</td>
+<td>0</td>
+<td>-0.06891</td>
+<td>-0.06891</td>
+<td>-0.06891</td>
+</tr>
+<tr>
+<td>k2</td>
+<td>CF1</td>
+<td>Entropy only</td>
+<td>Syllables: CMU/pkg</td>
+<td>5-8 representative ranks</td>
+<td>4</td>
+<td>4</td>
+<td>0</td>
+<td>-0.06891</td>
+<td>-0.06891</td>
+<td>-0.06891</td>
+</tr>
+<tr>
+<td>k2</td>
+<td>CF1</td>
+<td>Entropy only</td>
+<td>Syllables: CMU/pkg</td>
+<td>9-12 representative ranks</td>
+<td>4</td>
+<td>4</td>
+<td>0</td>
+<td>-0.06891</td>
+<td>-0.06891</td>
+<td>-0.06891</td>
+</tr>
+<tr>
+<td>k2</td>
+<td>CF1</td>
+<td>Entropy only</td>
+<td>Syllables: pkg</td>
+<td>1-4 representative ranks</td>
+<td>4</td>
+<td>4</td>
+<td>0</td>
+<td>-0.05248</td>
+<td>-0.05248</td>
+<td>-0.05248</td>
+</tr>
+<tr>
+<td>k2</td>
+<td>CF1</td>
+<td>Entropy only</td>
+<td>Syllables: pkg</td>
+<td>5-8 representative ranks</td>
+<td>4</td>
+<td>4</td>
+<td>0</td>
+<td>-0.05248</td>
+<td>-0.05248</td>
+<td>-0.05248</td>
+</tr>
+<tr>
+<td>k2</td>
+<td>CF1</td>
+<td>Entropy only</td>
+<td>Syllables: pkg</td>
+<td>9-12 representative ranks</td>
+<td>4</td>
+<td>4</td>
+<td>0</td>
+<td>-0.05248</td>
+<td>-0.05248</td>
+<td>-0.05248</td>
+</tr>
+<tr>
+<td>k2</td>
+<td>CF1</td>
+<td>Entropy only</td>
+<td>Words</td>
+<td>1-4</td>
+<td>4</td>
+<td>4</td>
+<td>0</td>
+<td>-0.1318</td>
+<td>-0.1318</td>
+<td>-0.1318</td>
+</tr>
+<tr>
+<td>k2</td>
+<td>CF1</td>
+<td>Entropy only</td>
+<td>Words</td>
+<td>5-8</td>
+<td>4</td>
+<td>4</td>
+<td>0</td>
+<td>-0.1318</td>
+<td>-0.1318</td>
+<td>-0.1318</td>
+</tr>
+<tr>
+<td>k2</td>
+<td>CF1</td>
+<td>Entropy only</td>
+<td>Words</td>
+<td>9-12</td>
+<td>4</td>
+<td>4</td>
+<td>0</td>
+<td>-0.1318</td>
+<td>-0.1318</td>
+<td>-0.1318</td>
+</tr>
+<tr>
+<td>k2</td>
+<td>CF2</td>
+<td>Matched context size only</td>
+<td>Morphemes</td>
+<td>1-4</td>
+<td>4</td>
+<td>4</td>
+<td>0</td>
+<td>-0.1433</td>
+<td>-0.1433</td>
+<td>-0.1433</td>
+</tr>
+<tr>
+<td>k2</td>
+<td>CF2</td>
+<td>Matched context size only</td>
+<td>Morphemes</td>
+<td>5-8</td>
+<td>4</td>
+<td>4</td>
+<td>0</td>
+<td>-0.1433</td>
+<td>-0.1433</td>
+<td>-0.1433</td>
+</tr>
+<tr>
+<td>k2</td>
+<td>CF2</td>
+<td>Matched context size only</td>
+<td>Morphemes</td>
+<td>9-12</td>
+<td>4</td>
+<td>4</td>
+<td>0</td>
+<td>-0.1433</td>
+<td>-0.1433</td>
+<td>-0.1433</td>
+</tr>
+<tr>
+<td>k2</td>
+<td>CF2</td>
+<td>Matched context size only</td>
+<td>Phonemes</td>
+<td>1-4 representative ranks</td>
+<td>4</td>
+<td>4</td>
+<td>0</td>
+<td>-0.0717</td>
+<td>-0.0717</td>
+<td>-0.0717</td>
+</tr>
+<tr>
+<td>k2</td>
+<td>CF2</td>
+<td>Matched context size only</td>
+<td>Phonemes</td>
+<td>5-8 representative ranks</td>
+<td>4</td>
+<td>4</td>
+<td>0</td>
+<td>-0.0717</td>
+<td>-0.0717</td>
+<td>-0.0717</td>
+</tr>
+<tr>
+<td>k2</td>
+<td>CF2</td>
+<td>Matched context size only</td>
+<td>Phonemes</td>
+<td>9-12 representative ranks</td>
+<td>4</td>
+<td>4</td>
+<td>0</td>
+<td>-0.0717</td>
+<td>-0.0717</td>
+<td>-0.0717</td>
+</tr>
+<tr>
+<td>k2</td>
+<td>CF2</td>
+<td>Matched context size only</td>
+<td>Syllables: CMU/pkg</td>
+<td>1-4 representative ranks</td>
+<td>4</td>
+<td>4</td>
+<td>0</td>
+<td>-0.06963</td>
+<td>-0.06963</td>
+<td>-0.06963</td>
+</tr>
+<tr>
+<td>k2</td>
+<td>CF2</td>
+<td>Matched context size only</td>
+<td>Syllables: CMU/pkg</td>
+<td>5-8 representative ranks</td>
+<td>4</td>
+<td>4</td>
+<td>0</td>
+<td>-0.06963</td>
+<td>-0.06963</td>
+<td>-0.06963</td>
+</tr>
+<tr>
+<td>k2</td>
+<td>CF2</td>
+<td>Matched context size only</td>
+<td>Syllables: CMU/pkg</td>
+<td>9-12 representative ranks</td>
+<td>4</td>
+<td>4</td>
+<td>0</td>
+<td>-0.06963</td>
+<td>-0.06963</td>
+<td>-0.06963</td>
+</tr>
+<tr>
+<td>k2</td>
+<td>CF2</td>
+<td>Matched context size only</td>
+<td>Syllables: pkg</td>
+<td>1-4 representative ranks</td>
+<td>4</td>
+<td>4</td>
+<td>0</td>
+<td>-0.05479</td>
+<td>-0.05479</td>
+<td>-0.05479</td>
+</tr>
+<tr>
+<td>k2</td>
+<td>CF2</td>
+<td>Matched context size only</td>
+<td>Syllables: pkg</td>
+<td>5-8 representative ranks</td>
+<td>4</td>
+<td>4</td>
+<td>0</td>
+<td>-0.05479</td>
+<td>-0.05479</td>
+<td>-0.05479</td>
+</tr>
+<tr>
+<td>k2</td>
+<td>CF2</td>
+<td>Matched context size only</td>
+<td>Syllables: pkg</td>
+<td>9-12 representative ranks</td>
+<td>4</td>
+<td>4</td>
+<td>0</td>
+<td>-0.05479</td>
+<td>-0.05479</td>
+<td>-0.05479</td>
+</tr>
+<tr>
+<td>k2</td>
+<td>CF2</td>
+<td>Matched context size only</td>
+<td>Words</td>
+<td>1-4</td>
+<td>4</td>
+<td>4</td>
+<td>0</td>
+<td>-0.1289</td>
+<td>-0.1289</td>
+<td>-0.1289</td>
+</tr>
+<tr>
+<td>k2</td>
+<td>CF2</td>
+<td>Matched context size only</td>
+<td>Words</td>
+<td>5-8</td>
+<td>4</td>
+<td>4</td>
+<td>0</td>
+<td>-0.1289</td>
+<td>-0.1289</td>
+<td>-0.1289</td>
+</tr>
+<tr>
+<td>k2</td>
+<td>CF2</td>
+<td>Matched context size only</td>
+<td>Words</td>
+<td>9-12</td>
+<td>4</td>
+<td>4</td>
+<td>0</td>
+<td>-0.1289</td>
+<td>-0.1289</td>
+<td>-0.1289</td>
+</tr>
+</tbody></table>
+<h2>Fixed-Effort Prediction Figures</h2>
+<p>How to read every figure: each colored line is one exact fixed effort value. The shaded ribbon is the model confidence band for the fitted mean line. The context predictors are held at their model-frame mean for the prediction slice, so the plot isolates age at fixed target effort under average context conditions.</p>
+<h3>K0</h3>
+<h4>CF0: Baseline controls</h4>
+<p><strong>Morphemes</strong></p>
+<img src="../figs/context_fixed_effort_atlas/k0_cf0_nb_morphemes_fixed_effort_atlas.png" alt="k0 CF0 Morphemes">
+<p><strong>Phonemes</strong></p>
+<img src="../figs/context_fixed_effort_atlas/k0_cf0_nb_phonemes_fixed_effort_atlas.png" alt="k0 CF0 Phonemes">
+<p><strong>Syllables: CMU/pkg</strong></p>
+<img src="../figs/context_fixed_effort_atlas/k0_cf0_nb_syllables_cmu_or_pkg_fixed_effort_atlas.png" alt="k0 CF0 Syllables: CMU/pkg">
+<p><strong>Syllables: pkg</strong></p>
+<img src="../figs/context_fixed_effort_atlas/k0_cf0_nb_syllables_pkg_fixed_effort_atlas.png" alt="k0 CF0 Syllables: pkg">
+<p><strong>Words</strong></p>
+<img src="../figs/context_fixed_effort_atlas/k0_cf0_nb_words_fixed_effort_atlas.png" alt="k0 CF0 Words">
+<h3>K1</h3>
+<h4>CF0: Baseline controls</h4>
+<p><strong>Morphemes</strong></p>
+<img src="../figs/context_fixed_effort_atlas/k1_cf0_nb_morphemes_fixed_effort_atlas.png" alt="k1 CF0 Morphemes">
+<p><strong>Phonemes</strong></p>
+<img src="../figs/context_fixed_effort_atlas/k1_cf0_nb_phonemes_fixed_effort_atlas.png" alt="k1 CF0 Phonemes">
+<p><strong>Syllables: CMU/pkg</strong></p>
+<img src="../figs/context_fixed_effort_atlas/k1_cf0_nb_syllables_cmu_or_pkg_fixed_effort_atlas.png" alt="k1 CF0 Syllables: CMU/pkg">
+<p><strong>Syllables: pkg</strong></p>
+<img src="../figs/context_fixed_effort_atlas/k1_cf0_nb_syllables_pkg_fixed_effort_atlas.png" alt="k1 CF0 Syllables: pkg">
+<p><strong>Words</strong></p>
+<img src="../figs/context_fixed_effort_atlas/k1_cf0_nb_words_fixed_effort_atlas.png" alt="k1 CF0 Words">
+<h4>CF1: Entropy only</h4>
+<p><strong>Morphemes</strong></p>
+<img src="../figs/context_fixed_effort_atlas/k1_cf1_nb_morphemes_fixed_effort_atlas.png" alt="k1 CF1 Morphemes">
+<p><strong>Phonemes</strong></p>
+<img src="../figs/context_fixed_effort_atlas/k1_cf1_nb_phonemes_fixed_effort_atlas.png" alt="k1 CF1 Phonemes">
+<p><strong>Syllables: CMU/pkg</strong></p>
+<img src="../figs/context_fixed_effort_atlas/k1_cf1_nb_syllables_cmu_or_pkg_fixed_effort_atlas.png" alt="k1 CF1 Syllables: CMU/pkg">
+<p><strong>Syllables: pkg</strong></p>
+<img src="../figs/context_fixed_effort_atlas/k1_cf1_nb_syllables_pkg_fixed_effort_atlas.png" alt="k1 CF1 Syllables: pkg">
+<p><strong>Words</strong></p>
+<img src="../figs/context_fixed_effort_atlas/k1_cf1_nb_words_fixed_effort_atlas.png" alt="k1 CF1 Words">
+<h4>CF2: Matched context size only</h4>
+<p><strong>Morphemes</strong></p>
+<img src="../figs/context_fixed_effort_atlas/k1_cf2_nb_morphemes_fixed_effort_atlas.png" alt="k1 CF2 Morphemes">
+<p><strong>Phonemes</strong></p>
+<img src="../figs/context_fixed_effort_atlas/k1_cf2_nb_phonemes_fixed_effort_atlas.png" alt="k1 CF2 Phonemes">
+<p><strong>Syllables: CMU/pkg</strong></p>
+<img src="../figs/context_fixed_effort_atlas/k1_cf2_nb_syllables_cmu_or_pkg_fixed_effort_atlas.png" alt="k1 CF2 Syllables: CMU/pkg">
+<p><strong>Syllables: pkg</strong></p>
+<img src="../figs/context_fixed_effort_atlas/k1_cf2_nb_syllables_pkg_fixed_effort_atlas.png" alt="k1 CF2 Syllables: pkg">
+<p><strong>Words</strong></p>
+<img src="../figs/context_fixed_effort_atlas/k1_cf2_nb_words_fixed_effort_atlas.png" alt="k1 CF2 Words">
+<h4>CF3: Entropy plus matched context size</h4>
+<p><strong>Morphemes</strong></p>
+<img src="../figs/context_fixed_effort_atlas/k1_cf3_nb_morphemes_fixed_effort_atlas.png" alt="k1 CF3 Morphemes">
+<p><strong>Phonemes</strong></p>
+<img src="../figs/context_fixed_effort_atlas/k1_cf3_nb_phonemes_fixed_effort_atlas.png" alt="k1 CF3 Phonemes">
+<p><strong>Syllables: CMU/pkg</strong></p>
+<img src="../figs/context_fixed_effort_atlas/k1_cf3_nb_syllables_cmu_or_pkg_fixed_effort_atlas.png" alt="k1 CF3 Syllables: CMU/pkg">
+<p><strong>Syllables: pkg</strong></p>
+<img src="../figs/context_fixed_effort_atlas/k1_cf3_nb_syllables_pkg_fixed_effort_atlas.png" alt="k1 CF3 Syllables: pkg">
+<p><strong>Words</strong></p>
+<img src="../figs/context_fixed_effort_atlas/k1_cf3_nb_words_fixed_effort_atlas.png" alt="k1 CF3 Words">
+<h3>K2</h3>
+<h4>CF0: Baseline controls</h4>
+<p><strong>Morphemes</strong></p>
+<img src="../figs/context_fixed_effort_atlas/k2_cf0_nb_morphemes_fixed_effort_atlas.png" alt="k2 CF0 Morphemes">
+<p><strong>Phonemes</strong></p>
+<img src="../figs/context_fixed_effort_atlas/k2_cf0_nb_phonemes_fixed_effort_atlas.png" alt="k2 CF0 Phonemes">
+<p><strong>Syllables: CMU/pkg</strong></p>
+<img src="../figs/context_fixed_effort_atlas/k2_cf0_nb_syllables_cmu_or_pkg_fixed_effort_atlas.png" alt="k2 CF0 Syllables: CMU/pkg">
+<p><strong>Syllables: pkg</strong></p>
+<img src="../figs/context_fixed_effort_atlas/k2_cf0_nb_syllables_pkg_fixed_effort_atlas.png" alt="k2 CF0 Syllables: pkg">
+<p><strong>Words</strong></p>
+<img src="../figs/context_fixed_effort_atlas/k2_cf0_nb_words_fixed_effort_atlas.png" alt="k2 CF0 Words">
+<h4>CF1: Entropy only</h4>
+<p><strong>Morphemes</strong></p>
+<img src="../figs/context_fixed_effort_atlas/k2_cf1_nb_morphemes_fixed_effort_atlas.png" alt="k2 CF1 Morphemes">
+<p><strong>Phonemes</strong></p>
+<img src="../figs/context_fixed_effort_atlas/k2_cf1_nb_phonemes_fixed_effort_atlas.png" alt="k2 CF1 Phonemes">
+<p><strong>Syllables: CMU/pkg</strong></p>
+<img src="../figs/context_fixed_effort_atlas/k2_cf1_nb_syllables_cmu_or_pkg_fixed_effort_atlas.png" alt="k2 CF1 Syllables: CMU/pkg">
+<p><strong>Syllables: pkg</strong></p>
+<img src="../figs/context_fixed_effort_atlas/k2_cf1_nb_syllables_pkg_fixed_effort_atlas.png" alt="k2 CF1 Syllables: pkg">
+<p><strong>Words</strong></p>
+<img src="../figs/context_fixed_effort_atlas/k2_cf1_nb_words_fixed_effort_atlas.png" alt="k2 CF1 Words">
+<h4>CF2: Matched context size only</h4>
+<p><strong>Morphemes</strong></p>
+<img src="../figs/context_fixed_effort_atlas/k2_cf2_nb_morphemes_fixed_effort_atlas.png" alt="k2 CF2 Morphemes">
+<p><strong>Phonemes</strong></p>
+<img src="../figs/context_fixed_effort_atlas/k2_cf2_nb_phonemes_fixed_effort_atlas.png" alt="k2 CF2 Phonemes">
+<p><strong>Syllables: CMU/pkg</strong></p>
+<img src="../figs/context_fixed_effort_atlas/k2_cf2_nb_syllables_cmu_or_pkg_fixed_effort_atlas.png" alt="k2 CF2 Syllables: CMU/pkg">
+<p><strong>Syllables: pkg</strong></p>
+<img src="../figs/context_fixed_effort_atlas/k2_cf2_nb_syllables_pkg_fixed_effort_atlas.png" alt="k2 CF2 Syllables: pkg">
+<p><strong>Words</strong></p>
+<img src="../figs/context_fixed_effort_atlas/k2_cf2_nb_words_fixed_effort_atlas.png" alt="k2 CF2 Words">
+<h4>CF3: Entropy plus matched context size</h4>
+<p><strong>Morphemes</strong></p>
+<img src="../figs/context_fixed_effort_atlas/k2_cf3_nb_morphemes_fixed_effort_atlas.png" alt="k2 CF3 Morphemes">
+<p><strong>Phonemes</strong></p>
+<img src="../figs/context_fixed_effort_atlas/k2_cf3_nb_phonemes_fixed_effort_atlas.png" alt="k2 CF3 Phonemes">
+<p><strong>Syllables: CMU/pkg</strong></p>
+<img src="../figs/context_fixed_effort_atlas/k2_cf3_nb_syllables_cmu_or_pkg_fixed_effort_atlas.png" alt="k2 CF3 Syllables: CMU/pkg">
+<p><strong>Syllables: pkg</strong></p>
+<img src="../figs/context_fixed_effort_atlas/k2_cf3_nb_syllables_pkg_fixed_effort_atlas.png" alt="k2 CF3 Syllables: pkg">
+<p><strong>Words</strong></p>
+<img src="../figs/context_fixed_effort_atlas/k2_cf3_nb_words_fixed_effort_atlas.png" alt="k2 CF3 Words">
+<h3>K3</h3>
+<h4>CF0: Baseline controls</h4>
+<p><strong>Morphemes</strong></p>
+<img src="../figs/context_fixed_effort_atlas/k3_cf0_nb_morphemes_fixed_effort_atlas.png" alt="k3 CF0 Morphemes">
+<p><strong>Phonemes</strong></p>
+<img src="../figs/context_fixed_effort_atlas/k3_cf0_nb_phonemes_fixed_effort_atlas.png" alt="k3 CF0 Phonemes">
+<p><strong>Syllables: CMU/pkg</strong></p>
+<img src="../figs/context_fixed_effort_atlas/k3_cf0_nb_syllables_cmu_or_pkg_fixed_effort_atlas.png" alt="k3 CF0 Syllables: CMU/pkg">
+<p><strong>Syllables: pkg</strong></p>
+<img src="../figs/context_fixed_effort_atlas/k3_cf0_nb_syllables_pkg_fixed_effort_atlas.png" alt="k3 CF0 Syllables: pkg">
+<p><strong>Words</strong></p>
+<img src="../figs/context_fixed_effort_atlas/k3_cf0_nb_words_fixed_effort_atlas.png" alt="k3 CF0 Words">
+<h4>CF1: Entropy only</h4>
+<p><strong>Morphemes</strong></p>
+<img src="../figs/context_fixed_effort_atlas/k3_cf1_nb_morphemes_fixed_effort_atlas.png" alt="k3 CF1 Morphemes">
+<p><strong>Phonemes</strong></p>
+<img src="../figs/context_fixed_effort_atlas/k3_cf1_nb_phonemes_fixed_effort_atlas.png" alt="k3 CF1 Phonemes">
+<p><strong>Syllables: CMU/pkg</strong></p>
+<img src="../figs/context_fixed_effort_atlas/k3_cf1_nb_syllables_cmu_or_pkg_fixed_effort_atlas.png" alt="k3 CF1 Syllables: CMU/pkg">
+<p><strong>Syllables: pkg</strong></p>
+<img src="../figs/context_fixed_effort_atlas/k3_cf1_nb_syllables_pkg_fixed_effort_atlas.png" alt="k3 CF1 Syllables: pkg">
+<p><strong>Words</strong></p>
+<img src="../figs/context_fixed_effort_atlas/k3_cf1_nb_words_fixed_effort_atlas.png" alt="k3 CF1 Words">
+<h4>CF2: Matched context size only</h4>
+<p><strong>Morphemes</strong></p>
+<img src="../figs/context_fixed_effort_atlas/k3_cf2_nb_morphemes_fixed_effort_atlas.png" alt="k3 CF2 Morphemes">
+<p><strong>Phonemes</strong></p>
+<img src="../figs/context_fixed_effort_atlas/k3_cf2_nb_phonemes_fixed_effort_atlas.png" alt="k3 CF2 Phonemes">
+<p><strong>Syllables: CMU/pkg</strong></p>
+<img src="../figs/context_fixed_effort_atlas/k3_cf2_nb_syllables_cmu_or_pkg_fixed_effort_atlas.png" alt="k3 CF2 Syllables: CMU/pkg">
+<p><strong>Syllables: pkg</strong></p>
+<img src="../figs/context_fixed_effort_atlas/k3_cf2_nb_syllables_pkg_fixed_effort_atlas.png" alt="k3 CF2 Syllables: pkg">
+<p><strong>Words</strong></p>
+<img src="../figs/context_fixed_effort_atlas/k3_cf2_nb_words_fixed_effort_atlas.png" alt="k3 CF2 Words">
+<h4>CF3: Entropy plus matched context size</h4>
+<p><strong>Morphemes</strong></p>
+<img src="../figs/context_fixed_effort_atlas/k3_cf3_nb_morphemes_fixed_effort_atlas.png" alt="k3 CF3 Morphemes">
+<p><strong>Phonemes</strong></p>
+<img src="../figs/context_fixed_effort_atlas/k3_cf3_nb_phonemes_fixed_effort_atlas.png" alt="k3 CF3 Phonemes">
+<p><strong>Syllables: CMU/pkg</strong></p>
+<img src="../figs/context_fixed_effort_atlas/k3_cf3_nb_syllables_cmu_or_pkg_fixed_effort_atlas.png" alt="k3 CF3 Syllables: CMU/pkg">
+<p><strong>Syllables: pkg</strong></p>
+<img src="../figs/context_fixed_effort_atlas/k3_cf3_nb_syllables_pkg_fixed_effort_atlas.png" alt="k3 CF3 Syllables: pkg">
+<p><strong>Words</strong></p>
+<img src="../figs/context_fixed_effort_atlas/k3_cf3_nb_words_fixed_effort_atlas.png" alt="k3 CF3 Words">
+<h2>Skipped Rows</h2>
+<p>These are expected mainly for <code>k0</code>, where there are no context predictors to fit.</p>
+<table>
+<thead><tr>
+<th>context_k</th>
+<th>model_id</th>
+<th>model_label</th>
+<th>effort_label</th>
+<th>status</th>
+<th>error</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>k0</td>
+<td>CF1</td>
+<td>Entropy only</td>
+<td>Words</td>
+<td>skipped</td>
+<td>k0 has no context predictors</td>
+</tr>
+<tr>
+<td>k0</td>
+<td>CF2</td>
+<td>Matched context size only</td>
+<td>Words</td>
+<td>skipped</td>
+<td>k0 has no context predictors</td>
+</tr>
+<tr>
+<td>k0</td>
+<td>CF3</td>
+<td>Entropy plus matched context size</td>
+<td>Words</td>
+<td>skipped</td>
+<td>k0 has no context predictors</td>
+</tr>
+<tr>
+<td>k0</td>
+<td>CF1</td>
+<td>Entropy only</td>
+<td>Morphemes</td>
+<td>skipped</td>
+<td>k0 has no context predictors</td>
+</tr>
+<tr>
+<td>k0</td>
+<td>CF2</td>
+<td>Matched context size only</td>
+<td>Morphemes</td>
+<td>skipped</td>
+<td>k0 has no context predictors</td>
+</tr>
+<tr>
+<td>k0</td>
+<td>CF3</td>
+<td>Entropy plus matched context size</td>
+<td>Morphemes</td>
+<td>skipped</td>
+<td>k0 has no context predictors</td>
+</tr>
+<tr>
+<td>k0</td>
+<td>CF1</td>
+<td>Entropy only</td>
+<td>Syllables: CMU/pkg</td>
+<td>skipped</td>
+<td>k0 has no context predictors</td>
+</tr>
+<tr>
+<td>k0</td>
+<td>CF2</td>
+<td>Matched context size only</td>
+<td>Syllables: CMU/pkg</td>
+<td>skipped</td>
+<td>k0 has no context predictors</td>
+</tr>
+<tr>
+<td>k0</td>
+<td>CF3</td>
+<td>Entropy plus matched context size</td>
+<td>Syllables: CMU/pkg</td>
+<td>skipped</td>
+<td>k0 has no context predictors</td>
+</tr>
+<tr>
+<td>k0</td>
+<td>CF1</td>
+<td>Entropy only</td>
+<td>Syllables: pkg</td>
+<td>skipped</td>
+<td>k0 has no context predictors</td>
+</tr>
+<tr>
+<td>k0</td>
+<td>CF2</td>
+<td>Matched context size only</td>
+<td>Syllables: pkg</td>
+<td>skipped</td>
+<td>k0 has no context predictors</td>
+</tr>
+<tr>
+<td>k0</td>
+<td>CF3</td>
+<td>Entropy plus matched context size</td>
+<td>Syllables: pkg</td>
+<td>skipped</td>
+<td>k0 has no context predictors</td>
+</tr>
+<tr>
+<td>k0</td>
+<td>CF1</td>
+<td>Entropy only</td>
+<td>Phonemes</td>
+<td>skipped</td>
+<td>k0 has no context predictors</td>
+</tr>
+<tr>
+<td>k0</td>
+<td>CF2</td>
+<td>Matched context size only</td>
+<td>Phonemes</td>
+<td>skipped</td>
+<td>k0 has no context predictors</td>
+</tr>
+<tr>
+<td>k0</td>
+<td>CF3</td>
+<td>Entropy plus matched context size</td>
+<td>Phonemes</td>
+<td>skipped</td>
+<td>k0 has no context predictors</td>
+</tr>
+</tbody></table>
+<h2>Saved Outputs</h2>
+<pre><code>results/context_fixed_effort_atlas/context_fixed_effort_model_summary.csv
+results/context_fixed_effort_atlas/context_fixed_effort_bin_definitions.csv
+results/context_fixed_effort_atlas/context_fixed_effort_predictions.csv.gz
+results/context_fixed_effort_atlas/context_fixed_effort_slice_slopes.csv
+results/context_fixed_effort_atlas/context_fixed_effort_figure_manifest.csv
+figs/context_fixed_effort_atlas/</code></pre>
+</main>
+</body>
+</html>
