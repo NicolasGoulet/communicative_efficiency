@@ -748,6 +748,63 @@ def temperature_rank_correlations(features: pd.DataFrame) -> pd.DataFrame:
     return corr.reset_index().rename(columns={"temperature": "temperature_row"})
 
 
+def completion_audit(
+    samples: pd.DataFrame,
+    *,
+    generation_manifest: Path | None,
+    expected_temperatures: Sequence[float] | None,
+    samples_per_context: int | None,
+) -> pd.DataFrame:
+    """Audit whether the sample file covers the intended pilot grid."""
+
+    observed_rows = int(len(samples))
+    observed_contexts = int(samples["context_id"].nunique()) if "context_id" in samples.columns else 0
+    observed_temperatures = sorted(pd.to_numeric(samples.get("temperature", pd.Series(dtype=float)), errors="coerce").dropna().unique())
+    out = {
+        "sample_rows_observed": observed_rows,
+        "unique_contexts_observed": observed_contexts,
+        "temperatures_observed": ",".join(str(float(t)) for t in observed_temperatures),
+        "expected_contexts": "",
+        "expected_temperatures": "",
+        "samples_per_context": samples_per_context if samples_per_context is not None else "",
+        "expected_rows": "",
+        "complete_context_temperature_pairs": "",
+        "expected_context_temperature_pairs": "",
+        "missing_or_incomplete_pairs": "",
+        "is_complete": "",
+    }
+    if generation_manifest is None or not generation_manifest.exists() or expected_temperatures is None or samples_per_context is None:
+        return pd.DataFrame([out])
+
+    manifest = pd.read_csv(generation_manifest, usecols=["context_id"], dtype=str, keep_default_na=False)
+    expected_context_ids = set(manifest["context_id"].astype(str))
+    temperatures = [float(t) for t in expected_temperatures]
+    expected_pairs = {(context_id, temperature) for context_id in expected_context_ids for temperature in temperatures}
+    grouped = (
+        samples.assign(temperature_num=pd.to_numeric(samples["temperature"], errors="coerce"))
+        .groupby(["context_id", "temperature_num"], dropna=False)["sample_index"]
+        .nunique()
+    )
+    complete_pairs = {
+        (str(context_id), float(temperature))
+        for (context_id, temperature), count in grouped.items()
+        if pd.notna(temperature) and int(count) >= int(samples_per_context)
+    }
+    missing_or_incomplete = expected_pairs - complete_pairs
+    out.update(
+        {
+            "expected_contexts": len(expected_context_ids),
+            "expected_temperatures": ",".join(str(t) for t in temperatures),
+            "expected_rows": len(expected_context_ids) * len(temperatures) * int(samples_per_context),
+            "complete_context_temperature_pairs": len(complete_pairs),
+            "expected_context_temperature_pairs": len(expected_pairs),
+            "missing_or_incomplete_pairs": len(missing_or_incomplete),
+            "is_complete": len(missing_or_incomplete) == 0,
+        }
+    )
+    return pd.DataFrame([out])
+
+
 def quality_by_temperature(features: pd.DataFrame) -> pd.DataFrame:
     """Summarize output quality and entropy by temperature."""
 
@@ -866,6 +923,7 @@ def image_md(path: str | Path, alt: str) -> str:
 def build_diagnostics_markdown(
     *,
     output_dir: Path,
+    completion: pd.DataFrame,
     quality: pd.DataFrame,
     split_half: pd.DataFrame,
     downsample: pd.DataFrame,
@@ -880,6 +938,15 @@ def build_diagnostics_markdown(
 This report audits the sampled-response pilot before any production-scale
 response entropy run. It focuses on output quality, entropy stability, and
 temperature sensitivity.
+
+## Completion Audit
+
+{markdown_table(completion, max_rows=5)}
+
+**How to read this table.** The pilot is final only if `is_complete` is true:
+all selected contexts must have all planned temperatures and all planned
+samples per context. If this is false, the report is a partial/debug report and
+should not be used to choose production settings.
 
 ## Output Quality By Temperature
 
@@ -934,6 +1001,7 @@ check: it changes the measurement object substantially.
 ## Files
 
 - Context-temperature features: `{output_dir / "pilot_context_temperature_features.csv"}`
+- Completion audit: `{output_dir / "pilot_completion_audit.csv"}`
 - Quality by temperature: `{output_dir / "pilot_quality_by_temperature.csv"}`
 - Split-half reliability: `{output_dir / "pilot_split_half_reliability.csv"}`
 - Downsample stability: `{output_dir / "pilot_downsample_stability.csv"}`
@@ -951,11 +1019,34 @@ def build_pilot_diagnostics(
     diagnostic_html: Path,
     normalization: str,
     downsample_sizes: Sequence[int],
+    generation_manifest: Path | None = None,
+    expected_temperatures: Sequence[float] | None = None,
+    samples_per_context: int | None = None,
+    allow_incomplete: bool = False,
 ) -> dict[str, Path]:
     """Build all post-generation pilot diagnostics."""
 
     output_dir.mkdir(parents=True, exist_ok=True)
     samples = pd.read_csv(samples_csv, dtype=str, keep_default_na=False, low_memory=False)
+    completion = completion_audit(
+        samples,
+        generation_manifest=generation_manifest,
+        expected_temperatures=expected_temperatures,
+        samples_per_context=samples_per_context,
+    )
+    if (
+        not allow_incomplete
+        and "is_complete" in completion.columns
+        and len(completion)
+        and str(completion["is_complete"].iloc[0]).lower() not in {"true", ""}
+    ):
+        row = completion.iloc[0].to_dict()
+        raise RuntimeError(
+            "Refusing to render final diagnostics from incomplete samples. "
+            f"Observed {row.get('sample_rows_observed')} rows; expected {row.get('expected_rows')}. "
+            f"Missing/incomplete context-temperature pairs: {row.get('missing_or_incomplete_pairs')}. "
+            "Wait for generation to finish or pass --allow-incomplete-diagnostics for a debug report."
+        )
     features = summarize_sample_groups(samples, normalization=normalization)
     quality = quality_by_temperature(features)
     split_half = split_half_reliability(samples, normalization=normalization)
@@ -971,6 +1062,7 @@ def build_pilot_diagnostics(
     )
     paths = {
         "features": output_dir / "pilot_context_temperature_features.csv",
+        "completion": output_dir / "pilot_completion_audit.csv",
         "quality": output_dir / "pilot_quality_by_temperature.csv",
         "split_half": output_dir / "pilot_split_half_reliability.csv",
         "downsample": output_dir / "pilot_downsample_stability.csv",
@@ -980,6 +1072,7 @@ def build_pilot_diagnostics(
         "diagnostic_html": diagnostic_html,
     }
     features.to_csv(paths["features"], index=False)
+    completion.to_csv(paths["completion"], index=False)
     quality.to_csv(paths["quality"], index=False)
     split_half.to_csv(paths["split_half"], index=False)
     downsample.to_csv(paths["downsample"], index=False)
@@ -987,6 +1080,7 @@ def build_pilot_diagnostics(
     figures.to_csv(paths["figures"], index=False)
     markdown = build_diagnostics_markdown(
         output_dir=output_dir,
+        completion=completion,
         quality=quality,
         split_half=split_half,
         downsample=downsample,
@@ -1027,8 +1121,14 @@ def build_cli() -> argparse.ArgumentParser:
     parser.add_argument("--dtype", default="bfloat16")
     parser.add_argument("--seed", type=int, default=DEFAULT_SEED)
     parser.add_argument("--samples", type=Path, default=DEFAULT_OUTPUT_DIR / "pilot_response_samples.csv.gz")
+    parser.add_argument("--generation-manifest", type=Path, default=DEFAULT_OUTPUT_DIR / "pilot_generation_manifest.csv")
     parser.add_argument("--normalization", choices=["exact", "casefold"], default="casefold")
     parser.add_argument("--downsample-sizes", default="25,50,75,100")
+    parser.add_argument(
+        "--allow-incomplete-diagnostics",
+        action="store_true",
+        help="Render diagnostics from a partial sample file for debugging. Final pilot diagnostics should not use this.",
+    )
     return parser
 
 
@@ -1070,6 +1170,10 @@ def main(argv: Sequence[str] | None = None) -> None:
             diagnostic_html=args.diagnostic_html,
             normalization=args.normalization,
             downsample_sizes=[int(x) for x in split_csv(args.downsample_sizes)],
+            generation_manifest=args.generation_manifest,
+            expected_temperatures=temperatures,
+            samples_per_context=args.samples_per_context,
+            allow_incomplete=args.allow_incomplete_diagnostics,
         )
     for label, path in paths.items():
         print(f"[OK] {label}: {path}")

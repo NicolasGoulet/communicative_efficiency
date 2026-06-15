@@ -1991,6 +1991,31 @@ env MPLCONFIGDIR=/tmp/matplotlib .venv/bin/python \
   --output-dir results/response_entropy_pilot_grid
 ```
 
+- A diagnostics command was run while generation was still in progress. That
+  partial run had only 6,600 rows, 66 contexts, and temperature `0.3` only, so
+  it is **not** a valid final pilot diagnostic report.
+- Added a completion audit to the diagnostics stage:
+  - writes `results/response_entropy_pilot_grid/pilot_completion_audit.csv`;
+  - checks the sample file against
+    `results/response_entropy_pilot_grid/pilot_generation_manifest.csv`,
+    expected temperatures, and `samples_per_context`;
+  - refuses to render final diagnostics unless all context-temperature pairs
+    are complete;
+  - `--allow-incomplete-diagnostics` exists only for explicit debugging.
+- Verification:
+
+```bash
+env MPLCONFIGDIR=/tmp/matplotlib .venv/bin/python \
+  -m unittest tests.test_build_response_entropy_pilot_grid \
+              tests.test_response_level_context_entropy
+
+.venv/bin/python -m py_compile \
+  src/build_response_entropy_pilot_grid.py \
+  src/sample_context_responses.py
+```
+
+passed with 12 focused tests.
+
 ## 2026-06-15 - Pawar-Style Age-Trajectory Robustness Report
 
 - Added a complementary robustness workflow for Route 1 real child utterance

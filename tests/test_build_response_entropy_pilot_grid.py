@@ -94,6 +94,29 @@ class ResponseEntropyPilotGridTests(unittest.TestCase):
             self.assertFalse(downsample.empty)
             self.assertTrue(paths["figures"].exists())
 
+    def test_diagnostics_stage_rejects_incomplete_final_pilot(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            samples = root / "samples.csv"
+            manifest = root / "manifest.csv"
+            write_sample_csv(samples)
+            pd.DataFrame({"context_id": ["c1", "c2", "c3"]}).to_csv(manifest, index=False)
+
+            with self.assertRaisesRegex(RuntimeError, "incomplete samples"):
+                build_pilot_diagnostics(
+                    samples_csv=samples,
+                    output_dir=root / "out",
+                    fig_dir=root / "figs",
+                    diagnostic_md=root / "diagnostics.md",
+                    diagnostic_html=root / "diagnostics.html",
+                    normalization="casefold",
+                    downsample_sizes=[2, 4],
+                    generation_manifest=manifest,
+                    expected_temperatures=[0.7, 1.0],
+                    samples_per_context=4,
+                    allow_incomplete=False,
+                )
+
 
 def toy_row(*, age: int, context_k: str, context: str) -> dict[str, str]:
     row = {
