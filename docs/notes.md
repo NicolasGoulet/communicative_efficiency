@@ -3816,3 +3816,78 @@ docs/response_entropy_final_generation_smoke.html
   Mila-scale generation should still wait until the entropy smoke confirms
   stable predictors, acceptable join coverage, and supervisor approval of the
   accepted-only entropy definition.
+
+## 2026-06-16 - Route 2 final entropy scoring smoke
+
+- Added the CPU-only Route 2 entropy scoring script:
+
+```text
+src/build_response_entropy_final_scoring_smoke.py
+tests/test_build_response_entropy_final_scoring_smoke.py
+```
+
+- The script consumes the final generation-smoke CSVs and does not generate
+  responses or call Mistral. It computes response-space entropy over accepted
+  sampled child-turn strings, with primary `casefold` response-type counting
+  plus exact and punctuation-stripped sensitivity columns.
+- The Route 2 join uses the existing real-child/context analysis frame only as
+  the source of real child effort outcomes and caregiver `context_text` values.
+  This is still Route 2 feature building, not a new Route 1 surprisal analysis.
+- Verification commands:
+
+```bash
+MPLCONFIGDIR=/tmp/matplotlib .venv/bin/python -m unittest \
+  tests.test_build_response_entropy_final_scoring_smoke
+
+MPLCONFIGDIR=/tmp/matplotlib .venv/bin/python \
+  src/build_response_entropy_final_scoring_smoke.py
+```
+
+- Focused tests passed: 5 tests.
+- Real final-smoke scoring outputs:
+
+```text
+docs/response_entropy_final_scoring_smoke.md
+docs/response_entropy_final_scoring_smoke.html
+results/response_entropy_final_scoring_smoke/context_response_entropy_features.csv
+results/response_entropy_final_scoring_smoke/context_response_entropy_stability.csv
+results/response_entropy_final_scoring_smoke/context_response_entropy_join_audit.csv
+results/response_entropy_final_scoring_smoke/context_response_entropy_temperature_correlations.csv
+results/response_entropy_final_scoring_smoke/context_response_entropy_prompt_correlations.csv
+results/response_entropy_final_scoring_smoke/route2_analysis_smoke_with_entropy.csv.gz
+results/response_entropy_final_scoring_smoke/route2_sanity_model_summary.csv
+results/response_entropy_final_scoring_smoke/manual_review_entropy_examples.csv
+figs/response_entropy_final_scoring_smoke/
+```
+
+- Output counts:
+
+```text
+feature rows: 480
+finite entropy rows: 478
+zero-accepted settings: 2
+settings below 20 accepted samples: 7
+stability rows: 480
+join-audit incomplete-setting rows: 7
+joined Route 2 smoke rows written: 6,228
+eligible real-child rows scanned for join audit: 1,332,975
+matched real-child rows: 519
+missing full-frame rows: 1,332,456
+```
+
+- Decision output from the smoke:
+  - The entropy script is ready to consume full Mila-scale sample artifacts as
+    a CPU feature builder.
+  - The final smoke cannot directly answer whether 100 accepted samples per
+    context are stable, because it targeted at most 20 accepted samples per
+    context/prompt/temperature setting.
+  - T=0.5 and T=0.7 give mostly similar context rankings in this smoke:
+    median within-prompt Spearman is 0.815.
+  - Prompt wording changes the predictor enough to keep prompt wording visible
+    as a design choice: median prompt-within-temperature Spearman is 0.693.
+  - Join gaps are explainable but not small for the full frame because this is
+    a 40-context smoke; within sampled contexts, the normalized context-text
+    hash join works and duplicate k1/k2/k3 text is deduplicated correctly.
+  - Suggested supervisor summary: the measurement pipeline works; final-smoke
+    entropy favors T=0.5 primary with T=0.7 sensitivity, but 20 samples cannot
+    certify 100-sample production stability.

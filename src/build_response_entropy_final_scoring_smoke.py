@@ -381,6 +381,7 @@ def compute_entropy_features(
             "mean_sample_syllables_pkg": float(effort["sample_syllable_count_pkg"].mean())
             if "sample_syllable_count_pkg" in effort.columns and len(effort)
             else math.nan,
+            "quality_flag_rates": quality_rates_json(quality_row),
             "quality_flag_rates_json": quality_rates_json(quality_row),
             "model_used": rej.get("model_used", ""),
             "max_new_tokens": rej.get("max_new_tokens", ""),
@@ -411,6 +412,7 @@ def compute_stability_rows(
     *,
     sample_sizes: Sequence[int],
     normalization: str,
+    all_settings: pd.DataFrame | None = None,
 ) -> pd.DataFrame:
     """Compute context-setting sample-size and split-half stability rows."""
 
@@ -459,7 +461,36 @@ def compute_stability_rows(
             row["split_half_second_n"] = 0
             row["split_half_abs_diff_bits"] = math.nan
         rows.append(row)
-    return pd.DataFrame(rows)
+    stability = pd.DataFrame(rows)
+    if all_settings is None or all_settings.empty:
+        return stability
+
+    observed_ids = set(stability["setting_id"].astype(str)) if not stability.empty else set()
+    missing = all_settings[~all_settings["setting_id"].astype(str).isin(observed_ids)].copy()
+    if missing.empty:
+        return stability
+    missing_rows: list[dict[str, object]] = []
+    for _, setting in missing.iterrows():
+        row = {
+            "setting_id": setting.get("setting_id", ""),
+            "context_id": setting.get("context_id", ""),
+            "prompt_variant": setting.get("prompt_variant", ""),
+            "temperature": coerce_float(setting.get("temperature", "")),
+            "accepted_sample_count": coerce_int(setting.get("accepted_sample_count", "")),
+            "entropy_full_bits": coerce_float(setting.get("miller_madow_entropy_bits", "")),
+            "stability_sample_sizes_requested": ",".join(str(size) for size in sample_sizes),
+            "stability_sample_sizes_available": "",
+            "split_half_first_entropy_bits": math.nan,
+            "split_half_second_entropy_bits": math.nan,
+            "split_half_first_n": 0,
+            "split_half_second_n": 0,
+            "split_half_abs_diff_bits": math.nan,
+        }
+        for size in sample_sizes:
+            row[f"entropy_first_{size}_bits"] = math.nan
+            row[f"sample_count_first_{size}"] = coerce_int(setting.get("accepted_sample_count", ""))
+        missing_rows.append(row)
+    return pd.concat([stability, pd.DataFrame(missing_rows)], ignore_index=True, sort=False)
 
 
 def sample_size_rank_correlations(stability: pd.DataFrame, *, sample_sizes: Sequence[int]) -> pd.DataFrame:
@@ -832,6 +863,28 @@ def build_join_audit(
                 "context_text": context_text_lookup.get(cid, ""),
             }
         )
+
+    incomplete = features[
+        pd.to_numeric(features.get("accepted_sample_count", pd.Series(dtype=float)), errors="coerce").lt(
+            pd.to_numeric(features.get("target_accepted_samples", pd.Series(dtype=float)), errors="coerce")
+        )
+    ].copy()
+    if not incomplete.empty:
+        for _, row in incomplete.sort_values(["temperature", "prompt_variant", "context_id"]).iterrows():
+            rows.append(
+                {
+                    "audit_type": "incomplete_entropy_setting",
+                    "context_id": row.get("context_id", ""),
+                    "context_text": row.get("context_text", ""),
+                    "prompt_variant": row.get("prompt_variant", ""),
+                    "temperature": row.get("temperature", ""),
+                    "accepted_sample_count": row.get("accepted_sample_count", ""),
+                    "target_accepted_samples": row.get("target_accepted_samples", ""),
+                    "attempt_count": row.get("attempt_count", ""),
+                    "rejection_rate": row.get("rejection_rate", ""),
+                    "finite_entropy": pd.notna(pd.to_numeric(row.get("miller_madow_entropy_bits", math.nan), errors="coerce")),
+                }
+            )
 
     join_features = prepare_features_for_join(features)
     feature_counts = join_features.groupby("join_context_id").agg(
@@ -1517,7 +1570,12 @@ def run_scoring_smoke(
     if not sample_sizes_used and max_accepted > 0:
         sample_sizes_used = [max_accepted]
 
-    stability = compute_stability_rows(accepted, sample_sizes=sample_sizes_used, normalization=normalization)
+    stability = compute_stability_rows(
+        accepted,
+        sample_sizes=sample_sizes_used,
+        normalization=normalization,
+        all_settings=features,
+    )
     sample_corr = sample_size_rank_correlations(stability, sample_sizes=sample_sizes_used)
     split_half = split_half_reliability_summary(stability)
     temp_corr = temperature_correlations(features)

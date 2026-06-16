@@ -1,0 +1,1676 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Route 2 Final Entropy Scoring Smoke</title>
+<style>
+:root {
+  color-scheme: light;
+  --ink: #1e2528;
+  --muted: #5e686d;
+  --line: #d9e0df;
+  --paper: #ffffff;
+  --soft: #f5f7f6;
+  --accent: #2f6f73;
+  --accent2: #c76f2c;
+}
+body {
+  margin: 0;
+  background: #eef2f1;
+  color: var(--ink);
+  font: 16px/1.58 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+main {
+  max-width: 980px;
+  margin: 34px auto 56px;
+  padding: 48px 58px;
+  background: var(--paper);
+  box-shadow: 0 18px 50px rgba(31, 45, 48, 0.12);
+}
+h1, h2, h3, h4 {
+  line-height: 1.18;
+  margin: 1.6em 0 0.55em;
+}
+h1 {
+  margin-top: 0;
+  font-size: 2.25rem;
+  border-bottom: 3px solid var(--accent);
+  padding-bottom: 0.45em;
+}
+h2 {
+  font-size: 1.55rem;
+  color: var(--accent);
+}
+h3 {
+  font-size: 1.18rem;
+}
+p {
+  margin: 0.75em 0;
+}
+a {
+  color: var(--accent);
+}
+blockquote {
+  border-left: 4px solid var(--accent2);
+  margin: 1.1em 0;
+  padding: 0.05em 1.1em;
+  color: var(--muted);
+  background: #fff8f2;
+}
+code {
+  background: var(--soft);
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  padding: 0.08em 0.3em;
+  font-family: "SFMono-Regular", Consolas, monospace;
+  font-size: 0.92em;
+}
+pre {
+  background: #f5f7f6;
+  color: var(--ink);
+  border: 1px solid var(--line);
+  padding: 1em;
+  overflow-x: auto;
+  border-radius: 7px;
+}
+pre code {
+  background: transparent;
+  border: 0;
+  padding: 0;
+  color: inherit;
+}
+table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 1.15em 0 1.45em;
+  font-size: 0.95em;
+}
+th, td {
+  border: 1px solid var(--line);
+  padding: 0.54em 0.68em;
+  vertical-align: top;
+}
+th {
+  background: #e7efed;
+  text-align: left;
+}
+tr:nth-child(even) td {
+  background: #fafbfb;
+}
+img {
+  max-width: 100%;
+  display: block;
+  margin: 1.1em auto 0.45em;
+}
+ul, ol {
+  padding-left: 1.4em;
+}
+.caption {
+  color: var(--muted);
+  font-size: 0.92em;
+  margin-top: -0.15em;
+}
+@media print {
+  body {
+    background: white;
+  }
+  main {
+    box-shadow: none;
+    margin: 0;
+    max-width: none;
+    padding: 28px;
+  }
+}
+</style>
+</head>
+<body>
+<main>
+<h1>Route 2 Final Entropy Scoring Smoke</h1>
+<p>Created: 2026-06-16</p>
+<p>This report scores the already generated final Route 2 response samples. No new responses were generated. The entropy predictors below are computed from accepted sampled child-turn strings, not from real child utterances.</p>
+<h2>What Was Generated Versus What Was Scored</h2>
+<p>The generation smoke produced candidate child responses from Mistral. This scoring smoke reads those artifacts, counts accepted response types, computes entropy features, and joins those features back to real child rows for a small plumbing model.</p>
+<table>
+<thead><tr>
+<th>artifact</th>
+<th>rows</th>
+<th>contexts</th>
+<th>settings</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>accepted_samples.csv.gz</td>
+<td>9512</td>
+<td>40</td>
+<td>478</td>
+</tr>
+<tr>
+<td>all_attempts.csv.gz</td>
+<td>1.02e+04</td>
+<td>40</td>
+<td>480</td>
+</tr>
+<tr>
+<td>rejection_summary_by_setting.csv</td>
+<td>480</td>
+<td>40</td>
+<td>480</td>
+</tr>
+</tbody></table>
+<h2>Entropy Formula</h2>
+<p>For each context, prompt variant, and temperature, accepted sampled responses are normalized into response types. The empirical response entropy is:</p>
+<pre><code>H(response | context) = - sum_r p_hat(r | c) log2 p_hat(r | c)
+p_hat(r | c) = count(response_type = r) / accepted_sample_count</code></pre>
+<p>The primary predictor reported here is Miller-Madow corrected entropy in bits. Settings with zero accepted samples remain in the feature table but have blank entropy values.</p>
+<h2>Normalization Choices</h2>
+<p>Primary type counting uses <code>casefold</code>: trim leading/trailing whitespace, collapse internal whitespace, and ignore case while preserving punctuation. The feature table also includes exact whitespace-normalized entropy and a punctuation-stripped casefold sensitivity column.</p>
+<h2>Entropy Features</h2>
+<table>
+<thead><tr>
+<th>temperature</th>
+<th>settings</th>
+<th>mean_entropy_bits</th>
+<th>mean_unique_responses</th>
+<th>mean_top_probability</th>
+<th>mean_sample_words</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>0.3</td>
+<td>118</td>
+<td>2.274</td>
+<td>7.356</td>
+<td>0.5133</td>
+<td>3.641</td>
+</tr>
+<tr>
+<td>0.5</td>
+<td>120</td>
+<td>3.326</td>
+<td>11.64</td>
+<td>0.3486</td>
+<td>3.787</td>
+</tr>
+<tr>
+<td>0.7</td>
+<td>120</td>
+<td>4.062</td>
+<td>15.08</td>
+<td>0.2322</td>
+<td>4.016</td>
+</tr>
+<tr>
+<td>1</td>
+<td>120</td>
+<td>4.766</td>
+<td>18.67</td>
+<td>0.1013</td>
+<td>5.122</td>
+</tr>
+</tbody></table>
+<img src="../figs/response_entropy_final_scoring_smoke/entropy_distribution_by_temperature.png" alt="entropy distribution by temperature">
+<img src="../figs/response_entropy_final_scoring_smoke/entropy_vs_mean_sample_length.png" alt="entropy versus mean sampled length">
+<h2>Sample-Size Stability</h2>
+<p>The final generation smoke targeted 20 accepted samples per setting, not 100. Therefore the requested first-25/first-50 checks were adapted to available prefix sizes:</p>
+<pre><code>5, 10, 20</code></pre>
+<table>
+<thead><tr>
+<th>comparison_family</th>
+<th>prompt_variant</th>
+<th>temperature</th>
+<th>sample_size</th>
+<th>shared_settings</th>
+<th>spearman_r</th>
+<th>pearson_r</th>
+<th>mean_abs_entropy_diff_bits</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>sample_size_vs_full</td>
+<td>Adult</td>
+<td>0.3</td>
+<td>5</td>
+<td>39</td>
+<td>0.907</td>
+<td>0.9015</td>
+<td>0.7074</td>
+</tr>
+<tr>
+<td>sample_size_vs_full</td>
+<td>Adult</td>
+<td>0.5</td>
+<td>5</td>
+<td>40</td>
+<td>0.8202</td>
+<td>0.8285</td>
+<td>1.122</td>
+</tr>
+<tr>
+<td>sample_size_vs_full</td>
+<td>Adult</td>
+<td>0.7</td>
+<td>5</td>
+<td>40</td>
+<td>0.6461</td>
+<td>0.777</td>
+<td>1.451</td>
+</tr>
+<tr>
+<td>sample_size_vs_full</td>
+<td>Adult</td>
+<td>1</td>
+<td>5</td>
+<td>40</td>
+<td>0.5687</td>
+<td>0.6339</td>
+<td>1.935</td>
+</tr>
+<tr>
+<td>sample_size_vs_full</td>
+<td>Caregiver</td>
+<td>0.3</td>
+<td>5</td>
+<td>39</td>
+<td>0.8601</td>
+<td>0.8825</td>
+<td>0.6984</td>
+</tr>
+<tr>
+<td>sample_size_vs_full</td>
+<td>Caregiver</td>
+<td>0.5</td>
+<td>5</td>
+<td>40</td>
+<td>0.7769</td>
+<td>0.775</td>
+<td>1.378</td>
+</tr>
+<tr>
+<td>sample_size_vs_full</td>
+<td>Caregiver</td>
+<td>0.7</td>
+<td>5</td>
+<td>40</td>
+<td>0.6674</td>
+<td>0.8564</td>
+<td>1.407</td>
+</tr>
+<tr>
+<td>sample_size_vs_full</td>
+<td>Caregiver</td>
+<td>1</td>
+<td>5</td>
+<td>40</td>
+<td>0.5105</td>
+<td>0.8027</td>
+<td>1.937</td>
+</tr>
+<tr>
+<td>sample_size_vs_full</td>
+<td>Parent</td>
+<td>0.3</td>
+<td>5</td>
+<td>39</td>
+<td>0.8279</td>
+<td>0.8449</td>
+<td>0.8077</td>
+</tr>
+<tr>
+<td>sample_size_vs_full</td>
+<td>Parent</td>
+<td>0.5</td>
+<td>5</td>
+<td>40</td>
+<td>0.698</td>
+<td>0.8173</td>
+<td>1.25</td>
+</tr>
+<tr>
+<td>sample_size_vs_full</td>
+<td>Parent</td>
+<td>0.7</td>
+<td>5</td>
+<td>40</td>
+<td>0.8552</td>
+<td>0.9652</td>
+<td>1.62</td>
+</tr>
+<tr>
+<td>sample_size_vs_full</td>
+<td>Parent</td>
+<td>1</td>
+<td>5</td>
+<td>40</td>
+<td>0.5294</td>
+<td>0.6272</td>
+<td>1.984</td>
+</tr>
+<tr>
+<td>sample_size_vs_full</td>
+<td>Adult</td>
+<td>0.3</td>
+<td>10</td>
+<td>39</td>
+<td>0.9755</td>
+<td>0.9708</td>
+<td>0.323</td>
+</tr>
+<tr>
+<td>sample_size_vs_full</td>
+<td>Adult</td>
+<td>0.5</td>
+<td>10</td>
+<td>39</td>
+<td>0.9516</td>
+<td>0.9542</td>
+<td>0.5764</td>
+</tr>
+<tr>
+<td>sample_size_vs_full</td>
+<td>Adult</td>
+<td>0.7</td>
+<td>10</td>
+<td>40</td>
+<td>0.8653</td>
+<td>0.932</td>
+<td>0.7276</td>
+</tr>
+<tr>
+<td>sample_size_vs_full</td>
+<td>Adult</td>
+<td>1</td>
+<td>10</td>
+<td>40</td>
+<td>0.9333</td>
+<td>0.9417</td>
+<td>0.9511</td>
+</tr>
+<tr>
+<td>sample_size_vs_full</td>
+<td>Caregiver</td>
+<td>0.3</td>
+<td>10</td>
+<td>39</td>
+<td>0.9368</td>
+<td>0.9518</td>
+<td>0.3277</td>
+</tr>
+<tr>
+<td>sample_size_vs_full</td>
+<td>Caregiver</td>
+<td>0.5</td>
+<td>10</td>
+<td>39</td>
+<td>0.9429</td>
+<td>0.9556</td>
+<td>0.6522</td>
+</tr>
+<tr>
+<td>sample_size_vs_full</td>
+<td>Caregiver</td>
+<td>0.7</td>
+<td>10</td>
+<td>40</td>
+<td>0.857</td>
+<td>0.9542</td>
+<td>0.6941</td>
+</tr>
+<tr>
+<td>sample_size_vs_full</td>
+<td>Caregiver</td>
+<td>1</td>
+<td>10</td>
+<td>40</td>
+<td>0.7865</td>
+<td>0.9826</td>
+<td>0.9297</td>
+</tr>
+<tr>
+<td>sample_size_vs_full</td>
+<td>Parent</td>
+<td>0.3</td>
+<td>10</td>
+<td>39</td>
+<td>0.9661</td>
+<td>0.9662</td>
+<td>0.3691</td>
+</tr>
+<tr>
+<td>sample_size_vs_full</td>
+<td>Parent</td>
+<td>0.5</td>
+<td>10</td>
+<td>40</td>
+<td>0.9217</td>
+<td>0.9577</td>
+<td>0.5387</td>
+</tr>
+<tr>
+<td>sample_size_vs_full</td>
+<td>Parent</td>
+<td>0.7</td>
+<td>10</td>
+<td>40</td>
+<td>0.9154</td>
+<td>0.9702</td>
+<td>0.8077</td>
+</tr>
+<tr>
+<td>sample_size_vs_full</td>
+<td>Parent</td>
+<td>1</td>
+<td>10</td>
+<td>40</td>
+<td>0.7649</td>
+<td>0.9754</td>
+<td>0.9626</td>
+</tr>
+<tr>
+<td>sample_size_vs_full</td>
+<td>Adult</td>
+<td>0.3</td>
+<td>20</td>
+<td>39</td>
+<td>1</td>
+<td>1</td>
+<td>0</td>
+</tr>
+<tr>
+<td>sample_size_vs_full</td>
+<td>Adult</td>
+<td>0.5</td>
+<td>20</td>
+<td>39</td>
+<td>1</td>
+<td>1</td>
+<td>0</td>
+</tr>
+<tr>
+<td>sample_size_vs_full</td>
+<td>Adult</td>
+<td>0.7</td>
+<td>20</td>
+<td>39</td>
+<td>1</td>
+<td>1</td>
+<td>0</td>
+</tr>
+<tr>
+<td>sample_size_vs_full</td>
+<td>Adult</td>
+<td>1</td>
+<td>20</td>
+<td>40</td>
+<td>1</td>
+<td>1</td>
+<td>0</td>
+</tr>
+<tr>
+<td>sample_size_vs_full</td>
+<td>Caregiver</td>
+<td>0.3</td>
+<td>20</td>
+<td>39</td>
+<td>1</td>
+<td>1</td>
+<td>0</td>
+</tr>
+<tr>
+<td>sample_size_vs_full</td>
+<td>Caregiver</td>
+<td>0.5</td>
+<td>20</td>
+<td>39</td>
+<td>1</td>
+<td>1</td>
+<td>0</td>
+</tr>
+<tr>
+<td>sample_size_vs_full</td>
+<td>Caregiver</td>
+<td>0.7</td>
+<td>20</td>
+<td>40</td>
+<td>1</td>
+<td>1</td>
+<td>0</td>
+</tr>
+<tr>
+<td>sample_size_vs_full</td>
+<td>Caregiver</td>
+<td>1</td>
+<td>20</td>
+<td>40</td>
+<td>1</td>
+<td>1</td>
+<td>0</td>
+</tr>
+<tr>
+<td>sample_size_vs_full</td>
+<td>Parent</td>
+<td>0.3</td>
+<td>20</td>
+<td>39</td>
+<td>1</td>
+<td>1</td>
+<td>0</td>
+</tr>
+<tr>
+<td>sample_size_vs_full</td>
+<td>Parent</td>
+<td>0.5</td>
+<td>20</td>
+<td>39</td>
+<td>1</td>
+<td>1</td>
+<td>0</td>
+</tr>
+<tr>
+<td>sample_size_vs_full</td>
+<td>Parent</td>
+<td>0.7</td>
+<td>20</td>
+<td>40</td>
+<td>1</td>
+<td>1</td>
+<td>0</td>
+</tr>
+<tr>
+<td>sample_size_vs_full</td>
+<td>Parent</td>
+<td>1</td>
+<td>20</td>
+<td>40</td>
+<td>1</td>
+<td>1</td>
+<td>0</td>
+</tr>
+</tbody></table>
+<table>
+<thead><tr>
+<th>prompt_variant</th>
+<th>temperature</th>
+<th>settings</th>
+<th>spearman_r</th>
+<th>pearson_r</th>
+<th>mean_abs_diff_bits</th>
+<th>median_abs_diff_bits</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>Adult</td>
+<td>0.3</td>
+<td>39</td>
+<td>0.8807</td>
+<td>0.8851</td>
+<td>0.427</td>
+<td>0.2721</td>
+</tr>
+<tr>
+<td>Adult</td>
+<td>0.5</td>
+<td>40</td>
+<td>0.8385</td>
+<td>0.8493</td>
+<td>0.4631</td>
+<td>0.3099</td>
+</tr>
+<tr>
+<td>Adult</td>
+<td>0.7</td>
+<td>40</td>
+<td>0.6307</td>
+<td>0.7613</td>
+<td>0.4164</td>
+<td>0.325</td>
+</tr>
+<tr>
+<td>Adult</td>
+<td>1</td>
+<td>40</td>
+<td>0.763</td>
+<td>0.8107</td>
+<td>0.07681</td>
+<td>0</td>
+</tr>
+<tr>
+<td>Caregiver</td>
+<td>0.3</td>
+<td>39</td>
+<td>0.8292</td>
+<td>0.8523</td>
+<td>0.4602</td>
+<td>0.2721</td>
+</tr>
+<tr>
+<td>Caregiver</td>
+<td>0.5</td>
+<td>40</td>
+<td>0.8119</td>
+<td>0.8528</td>
+<td>0.4265</td>
+<td>0.2721</td>
+</tr>
+<tr>
+<td>Caregiver</td>
+<td>0.7</td>
+<td>40</td>
+<td>0.6742</td>
+<td>0.8674</td>
+<td>0.3243</td>
+<td>0.2721</td>
+</tr>
+<tr>
+<td>Caregiver</td>
+<td>1</td>
+<td>40</td>
+<td>0.6546</td>
+<td>0.9694</td>
+<td>0.05631</td>
+<td>0</td>
+</tr>
+<tr>
+<td>Parent</td>
+<td>0.3</td>
+<td>39</td>
+<td>0.9187</td>
+<td>0.9128</td>
+<td>0.4016</td>
+<td>0.2781</td>
+</tr>
+<tr>
+<td>Parent</td>
+<td>0.5</td>
+<td>40</td>
+<td>0.7915</td>
+<td>0.8608</td>
+<td>0.3981</td>
+<td>0.2721</td>
+</tr>
+<tr>
+<td>Parent</td>
+<td>0.7</td>
+<td>40</td>
+<td>0.7592</td>
+<td>0.8862</td>
+<td>0.2984</td>
+<td>0.2721</td>
+</tr>
+<tr>
+<td>Parent</td>
+<td>1</td>
+<td>40</td>
+<td>0.6894</td>
+<td>0.9267</td>
+<td>0.06623</td>
+<td>0</td>
+</tr>
+</tbody></table>
+<img src="../figs/response_entropy_final_scoring_smoke/sample_size_stability.png" alt="sample-size stability plot">
+<h2>Temperature And Prompt Sensitivity</h2>
+<p>Temperature correlations compare context entropy rankings across temperatures within the same prompt wrapper. Prompt correlations compare wrappers within the same temperature.</p>
+<table>
+<thead><tr>
+<th>comparison_family</th>
+<th>prompt_variant</th>
+<th>temperature_a</th>
+<th>temperature_b</th>
+<th>shared_contexts</th>
+<th>spearman_r</th>
+<th>pearson_r</th>
+<th>mean_abs_entropy_diff_bits</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>temperature_within_prompt</td>
+<td>Adult</td>
+<td>0.3</td>
+<td>0.5</td>
+<td>39</td>
+<td>0.8555</td>
+<td>0.8408</td>
+<td>0.9811</td>
+</tr>
+<tr>
+<td>temperature_within_prompt</td>
+<td>Adult</td>
+<td>0.3</td>
+<td>0.7</td>
+<td>39</td>
+<td>0.6838</td>
+<td>0.6274</td>
+<td>1.955</td>
+</tr>
+<tr>
+<td>temperature_within_prompt</td>
+<td>Adult</td>
+<td>0.3</td>
+<td>1</td>
+<td>39</td>
+<td>0.3607</td>
+<td>0.3414</td>
+<td>2.702</td>
+</tr>
+<tr>
+<td>temperature_within_prompt</td>
+<td>Adult</td>
+<td>0.5</td>
+<td>0.7</td>
+<td>40</td>
+<td>0.812</td>
+<td>0.806</td>
+<td>1.042</td>
+</tr>
+<tr>
+<td>temperature_within_prompt</td>
+<td>Adult</td>
+<td>0.5</td>
+<td>1</td>
+<td>40</td>
+<td>0.5753</td>
+<td>0.5266</td>
+<td>1.745</td>
+</tr>
+<tr>
+<td>temperature_within_prompt</td>
+<td>Adult</td>
+<td>0.7</td>
+<td>1</td>
+<td>40</td>
+<td>0.7661</td>
+<td>0.7865</td>
+<td>0.7447</td>
+</tr>
+<tr>
+<td>temperature_within_prompt</td>
+<td>Caregiver</td>
+<td>0.3</td>
+<td>0.5</td>
+<td>39</td>
+<td>0.9088</td>
+<td>0.9216</td>
+<td>1.169</td>
+</tr>
+<tr>
+<td>temperature_within_prompt</td>
+<td>Caregiver</td>
+<td>0.3</td>
+<td>0.7</td>
+<td>39</td>
+<td>0.809</td>
+<td>0.7965</td>
+<td>1.77</td>
+</tr>
+<tr>
+<td>temperature_within_prompt</td>
+<td>Caregiver</td>
+<td>0.3</td>
+<td>1</td>
+<td>39</td>
+<td>0.5216</td>
+<td>0.4132</td>
+<td>2.435</td>
+</tr>
+<tr>
+<td>temperature_within_prompt</td>
+<td>Caregiver</td>
+<td>0.5</td>
+<td>0.7</td>
+<td>40</td>
+<td>0.8149</td>
+<td>0.8927</td>
+<td>0.6833</td>
+</tr>
+<tr>
+<td>temperature_within_prompt</td>
+<td>Caregiver</td>
+<td>0.5</td>
+<td>1</td>
+<td>40</td>
+<td>0.6143</td>
+<td>0.5746</td>
+<td>1.294</td>
+</tr>
+<tr>
+<td>temperature_within_prompt</td>
+<td>Caregiver</td>
+<td>0.7</td>
+<td>1</td>
+<td>40</td>
+<td>0.5614</td>
+<td>0.7128</td>
+<td>0.6877</td>
+</tr>
+<tr>
+<td>temperature_within_prompt</td>
+<td>Parent</td>
+<td>0.3</td>
+<td>0.5</td>
+<td>40</td>
+<td>0.9028</td>
+<td>0.8666</td>
+<td>1.059</td>
+</tr>
+<tr>
+<td>temperature_within_prompt</td>
+<td>Parent</td>
+<td>0.3</td>
+<td>0.7</td>
+<td>40</td>
+<td>0.7411</td>
+<td>0.7072</td>
+<td>1.626</td>
+</tr>
+<tr>
+<td>temperature_within_prompt</td>
+<td>Parent</td>
+<td>0.3</td>
+<td>1</td>
+<td>40</td>
+<td>0.5701</td>
+<td>0.4567</td>
+<td>2.329</td>
+</tr>
+<tr>
+<td>temperature_within_prompt</td>
+<td>Parent</td>
+<td>0.5</td>
+<td>0.7</td>
+<td>40</td>
+<td>0.8229</td>
+<td>0.8947</td>
+<td>0.6551</td>
+</tr>
+<tr>
+<td>temperature_within_prompt</td>
+<td>Parent</td>
+<td>0.5</td>
+<td>1</td>
+<td>40</td>
+<td>0.7035</td>
+<td>0.6695</td>
+<td>1.279</td>
+</tr>
+<tr>
+<td>temperature_within_prompt</td>
+<td>Parent</td>
+<td>0.7</td>
+<td>1</td>
+<td>40</td>
+<td>0.6963</td>
+<td>0.8113</td>
+<td>0.7085</td>
+</tr>
+</tbody></table>
+<img src="../figs/response_entropy_final_scoring_smoke/temperature_rank_correlation_heatmap.png" alt="temperature rank-correlation heatmap">
+<table>
+<thead><tr>
+<th>comparison_family</th>
+<th>temperature</th>
+<th>prompt_variant_a</th>
+<th>prompt_variant_b</th>
+<th>shared_contexts</th>
+<th>spearman_r</th>
+<th>pearson_r</th>
+<th>mean_abs_entropy_diff_bits</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>prompt_within_temperature</td>
+<td>0.3</td>
+<td>Adult</td>
+<td>Caregiver</td>
+<td>39</td>
+<td>0.605</td>
+<td>0.6216</td>
+<td>0.9223</td>
+</tr>
+<tr>
+<td>prompt_within_temperature</td>
+<td>0.3</td>
+<td>Adult</td>
+<td>Parent</td>
+<td>39</td>
+<td>0.4867</td>
+<td>0.5165</td>
+<td>1.069</td>
+</tr>
+<tr>
+<td>prompt_within_temperature</td>
+<td>0.3</td>
+<td>Caregiver</td>
+<td>Parent</td>
+<td>39</td>
+<td>0.6187</td>
+<td>0.617</td>
+<td>0.909</td>
+</tr>
+<tr>
+<td>prompt_within_temperature</td>
+<td>0.5</td>
+<td>Adult</td>
+<td>Caregiver</td>
+<td>40</td>
+<td>0.7439</td>
+<td>0.7319</td>
+<td>0.8365</td>
+</tr>
+<tr>
+<td>prompt_within_temperature</td>
+<td>0.5</td>
+<td>Adult</td>
+<td>Parent</td>
+<td>40</td>
+<td>0.7321</td>
+<td>0.7155</td>
+<td>0.8967</td>
+</tr>
+<tr>
+<td>prompt_within_temperature</td>
+<td>0.5</td>
+<td>Caregiver</td>
+<td>Parent</td>
+<td>40</td>
+<td>0.7674</td>
+<td>0.8208</td>
+<td>0.5416</td>
+</tr>
+<tr>
+<td>prompt_within_temperature</td>
+<td>0.7</td>
+<td>Adult</td>
+<td>Caregiver</td>
+<td>40</td>
+<td>0.7323</td>
+<td>0.7532</td>
+<td>0.537</td>
+</tr>
+<tr>
+<td>prompt_within_temperature</td>
+<td>0.7</td>
+<td>Adult</td>
+<td>Parent</td>
+<td>40</td>
+<td>0.7186</td>
+<td>0.7551</td>
+<td>0.5461</td>
+</tr>
+<tr>
+<td>prompt_within_temperature</td>
+<td>0.7</td>
+<td>Caregiver</td>
+<td>Parent</td>
+<td>40</td>
+<td>0.7869</td>
+<td>0.8236</td>
+<td>0.4273</td>
+</tr>
+<tr>
+<td>prompt_within_temperature</td>
+<td>1.0</td>
+<td>Adult</td>
+<td>Caregiver</td>
+<td>40</td>
+<td>0.5797</td>
+<td>0.2982</td>
+<td>0.29</td>
+</tr>
+<tr>
+<td>prompt_within_temperature</td>
+<td>1.0</td>
+<td>Adult</td>
+<td>Parent</td>
+<td>40</td>
+<td>0.6668</td>
+<td>0.4069</td>
+<td>0.2189</td>
+</tr>
+<tr>
+<td>prompt_within_temperature</td>
+<td>1.0</td>
+<td>Caregiver</td>
+<td>Parent</td>
+<td>40</td>
+<td>0.5916</td>
+<td>0.8992</td>
+<td>0.178</td>
+</tr>
+</tbody></table>
+<img src="../figs/response_entropy_final_scoring_smoke/prompt_variant_rank_correlation_heatmap.png" alt="prompt variant rank-correlation heatmap">
+<h2>Join Audit</h2>
+<p>The join uses the normalized context-text hash, not row position. The output analysis smoke writes only matched real-child rows expanded over prompt-temperature settings; the audit still counts the full eligible real child frame so unsampled contexts remain visible.</p>
+<table>
+<thead><tr>
+<th>metric</th>
+<th>value</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>eligible_real_child_rows</td>
+<td>1332975</td>
+</tr>
+<tr>
+<td>matched_real_child_rows</td>
+<td>519</td>
+</tr>
+<tr>
+<td>missing_real_child_rows</td>
+<td>1332456</td>
+</tr>
+<tr>
+<td>finite_entropy_source_rows</td>
+<td>519</td>
+</tr>
+<tr>
+<td>expanded_join_rows_written</td>
+<td>6228</td>
+</tr>
+<tr>
+<td>sampled_contexts_available</td>
+<td>40</td>
+</tr>
+<tr>
+<td>finite_entropy_contexts_available</td>
+<td>40</td>
+</tr>
+<tr>
+<td>unique_matched_contexts</td>
+<td>40</td>
+</tr>
+<tr>
+<td>unique_missing_contexts_observed</td>
+<td>700608</td>
+</tr>
+<tr>
+<td>output_truncated</td>
+<td>False</td>
+</tr>
+<tr>
+<td>output_csv</td>
+<td>results/response_entropy_final_scoring_smoke/route2_analysis_smoke_with_entropy.csv.gz</td>
+</tr>
+</tbody></table>
+<img src="../figs/response_entropy_final_scoring_smoke/joined_missing_entropy_audit.png" alt="joined versus missing entropy audit">
+<p>Duplicate context-window checks show whether identical text appearing as k1, k2, or k3 reused one deduplicated entropy feature set.</p>
+<table>
+<thead><tr>
+<th>audit_type</th>
+<th>metric</th>
+<th>value</th>
+<th>context_id</th>
+<th>real_child_rows</th>
+<th>context_k_values_observed</th>
+<th>context_text</th>
+<th>prompt_variant</th>
+<th>temperature</th>
+<th>accepted_sample_count</th>
+<th>target_accepted_samples</th>
+<th>attempt_count</th>
+<th>rejection_rate</th>
+<th>finite_entropy</th>
+<th>observed_context_k_count</th>
+<th>deduplicated_by_text</th>
+<th>feature_settings</th>
+<th>finite_entropy_settings</th>
+<th>prompt_variants</th>
+<th>temperatures</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>duplicate_context_window_check</td>
+<td></td>
+<td></td>
+<td>5159122a0ac41bf1eab0e9de</td>
+<td></td>
+<td>k1;k2;k3</td>
+<td>well.</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td>3</td>
+<td>True</td>
+<td>12</td>
+<td>12</td>
+<td>Adult;Caregiver;Parent</td>
+<td>0.3;0.5;0.7;1.0</td>
+</tr>
+</tbody></table>
+<h2>Tiny Downstream Sanity Model</h2>
+<p>This is a plumbing check, not final science:</p>
+<pre><code>real_child_words ~ response_entropy + mean_sample_words + context_word_count + age</code></pre>
+<p>The same smoke was attempted for morphemes, syllables, and phonemes when the joined frame had enough variation.</p>
+<table>
+<thead><tr>
+<th>prompt_variant</th>
+<th>temperature</th>
+<th>outcome</th>
+<th>n_rows</th>
+<th>estimate</th>
+<th>std_error</th>
+<th>p_value</th>
+<th>r_squared</th>
+<th>status</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>Adult</td>
+<td>0.3</td>
+<td>real_child_words</td>
+<td>517</td>
+<td>-0.4897</td>
+<td>0.1041</td>
+<td>3.261e-06</td>
+<td>0.1065</td>
+<td>fitted_smoke_only</td>
+</tr>
+<tr>
+<td>Adult</td>
+<td>0.3</td>
+<td>real_child_morphemes</td>
+<td>517</td>
+<td>-0.5643</td>
+<td>0.1158</td>
+<td>1.469e-06</td>
+<td>0.1127</td>
+<td>fitted_smoke_only</td>
+</tr>
+<tr>
+<td>Adult</td>
+<td>0.3</td>
+<td>real_child_syllables</td>
+<td>517</td>
+<td>-0.6237</td>
+<td>0.134</td>
+<td>4.164e-06</td>
+<td>0.08929</td>
+<td>fitted_smoke_only</td>
+</tr>
+<tr>
+<td>Adult</td>
+<td>0.3</td>
+<td>real_child_phonemes</td>
+<td>517</td>
+<td>-1.359</td>
+<td>0.3331</td>
+<td>5.238e-05</td>
+<td>0.07158</td>
+<td>fitted_smoke_only</td>
+</tr>
+<tr>
+<td>Adult</td>
+<td>0.5</td>
+<td>real_child_words</td>
+<td>519</td>
+<td>-0.5276</td>
+<td>0.1003</td>
+<td>2.093e-07</td>
+<td>0.1157</td>
+<td>fitted_smoke_only</td>
+</tr>
+<tr>
+<td>Adult</td>
+<td>0.5</td>
+<td>real_child_morphemes</td>
+<td>519</td>
+<td>-0.6004</td>
+<td>0.1116</td>
+<td>1.13e-07</td>
+<td>0.122</td>
+<td>fitted_smoke_only</td>
+</tr>
+<tr>
+<td>Adult</td>
+<td>0.5</td>
+<td>real_child_syllables</td>
+<td>519</td>
+<td>-0.6476</td>
+<td>0.1296</td>
+<td>7.955e-07</td>
+<td>0.09251</td>
+<td>fitted_smoke_only</td>
+</tr>
+<tr>
+<td>Adult</td>
+<td>0.5</td>
+<td>real_child_phonemes</td>
+<td>519</td>
+<td>-1.508</td>
+<td>0.3214</td>
+<td>3.46e-06</td>
+<td>0.07886</td>
+<td>fitted_smoke_only</td>
+</tr>
+<tr>
+<td>Adult</td>
+<td>0.7</td>
+<td>real_child_words</td>
+<td>519</td>
+<td>-0.1464</td>
+<td>0.09471</td>
+<td>0.1228</td>
+<td>0.07167</td>
+<td>fitted_smoke_only</td>
+</tr>
+<tr>
+<td>Adult</td>
+<td>0.7</td>
+<td>real_child_morphemes</td>
+<td>519</td>
+<td>-0.186</td>
+<td>0.1055</td>
+<td>0.07828</td>
+<td>0.07734</td>
+<td>fitted_smoke_only</td>
+</tr>
+<tr>
+<td>Adult</td>
+<td>0.7</td>
+<td>real_child_syllables</td>
+<td>519</td>
+<td>-0.1628</td>
+<td>0.1221</td>
+<td>0.1829</td>
+<td>0.05176</td>
+<td>fitted_smoke_only</td>
+</tr>
+<tr>
+<td>Adult</td>
+<td>0.7</td>
+<td>real_child_phonemes</td>
+<td>519</td>
+<td>-0.3714</td>
+<td>0.3021</td>
+<td>0.2195</td>
+<td>0.04217</td>
+<td>fitted_smoke_only</td>
+</tr>
+<tr>
+<td>Adult</td>
+<td>1</td>
+<td>real_child_words</td>
+<td>519</td>
+<td>-0.2844</td>
+<td>0.3219</td>
+<td>0.3774</td>
+<td>0.08173</td>
+<td>fitted_smoke_only</td>
+</tr>
+<tr>
+<td>Adult</td>
+<td>1</td>
+<td>real_child_morphemes</td>
+<td>519</td>
+<td>-0.3929</td>
+<td>0.3581</td>
+<td>0.2731</td>
+<td>0.08883</td>
+<td>fitted_smoke_only</td>
+</tr>
+<tr>
+<td>Adult</td>
+<td>1</td>
+<td>real_child_syllables</td>
+<td>519</td>
+<td>-0.5221</td>
+<td>0.414</td>
+<td>0.2078</td>
+<td>0.06647</td>
+<td>fitted_smoke_only</td>
+</tr>
+<tr>
+<td>Adult</td>
+<td>1</td>
+<td>real_child_phonemes</td>
+<td>519</td>
+<td>-1.106</td>
+<td>1.026</td>
+<td>0.2819</td>
+<td>0.05313</td>
+<td>fitted_smoke_only</td>
+</tr>
+<tr>
+<td>Caregiver</td>
+<td>0.3</td>
+<td>real_child_words</td>
+<td>517</td>
+<td>-0.6391</td>
+<td>0.1419</td>
+<td>8.283e-06</td>
+<td>0.1049</td>
+<td>fitted_smoke_only</td>
+</tr>
+<tr>
+<td>Caregiver</td>
+<td>0.3</td>
+<td>real_child_morphemes</td>
+<td>517</td>
+<td>-0.6821</td>
+<td>0.1586</td>
+<td>2.031e-05</td>
+<td>0.1039</td>
+<td>fitted_smoke_only</td>
+</tr>
+<tr>
+<td>Caregiver</td>
+<td>0.3</td>
+<td>real_child_syllables</td>
+<td>517</td>
+<td>-0.7634</td>
+<td>0.1833</td>
+<td>3.638e-05</td>
+<td>0.08277</td>
+<td>fitted_smoke_only</td>
+</tr>
+<tr>
+<td>Caregiver</td>
+<td>0.3</td>
+<td>real_child_phonemes</td>
+<td>517</td>
+<td>-1.686</td>
+<td>0.4548</td>
+<td>0.0002325</td>
+<td>0.06765</td>
+<td>fitted_smoke_only</td>
+</tr>
+<tr>
+<td>Caregiver</td>
+<td>0.5</td>
+<td>real_child_words</td>
+<td>519</td>
+<td>-0.4782</td>
+<td>0.1638</td>
+<td>0.003648</td>
+<td>0.08298</td>
+<td>fitted_smoke_only</td>
+</tr>
+<tr>
+<td>Caregiver</td>
+<td>0.5</td>
+<td>real_child_morphemes</td>
+<td>519</td>
+<td>-0.4569</td>
+<td>0.1829</td>
+<td>0.01278</td>
+<td>0.08317</td>
+<td>fitted_smoke_only</td>
+</tr>
+<tr>
+<td>Caregiver</td>
+<td>0.5</td>
+<td>real_child_syllables</td>
+<td>519</td>
+<td>-0.5673</td>
+<td>0.2112</td>
+<td>0.007467</td>
+<td>0.06243</td>
+<td>fitted_smoke_only</td>
+</tr>
+<tr>
+<td>Caregiver</td>
+<td>0.5</td>
+<td>real_child_phonemes</td>
+<td>519</td>
+<td>-1.223</td>
+<td>0.5235</td>
+<td>0.01986</td>
+<td>0.04955</td>
+<td>fitted_smoke_only</td>
+</tr>
+<tr>
+<td>Caregiver</td>
+<td>0.7</td>
+<td>real_child_words</td>
+<td>519</td>
+<td>-0.4432</td>
+<td>0.17</td>
+<td>0.009408</td>
+<td>0.08299</td>
+<td>fitted_smoke_only</td>
+</tr>
+<tr>
+<td>Caregiver</td>
+<td>0.7</td>
+<td>real_child_morphemes</td>
+<td>519</td>
+<td>-0.4342</td>
+<td>0.1896</td>
+<td>0.02244</td>
+<td>0.08582</td>
+<td>fitted_smoke_only</td>
+</tr>
+<tr>
+<td>Caregiver</td>
+<td>0.7</td>
+<td>real_child_syllables</td>
+<td>519</td>
+<td>-0.384</td>
+<td>0.22</td>
+<td>0.08146</td>
+<td>0.05673</td>
+<td>fitted_smoke_only</td>
+</tr>
+<tr>
+<td>Caregiver</td>
+<td>0.7</td>
+<td>real_child_phonemes</td>
+<td>519</td>
+<td>-0.9509</td>
+<td>0.5444</td>
+<td>0.08129</td>
+<td>0.04676</td>
+<td>fitted_smoke_only</td>
+</tr>
+<tr>
+<td>Caregiver</td>
+<td>1</td>
+<td>real_child_words</td>
+<td>519</td>
+<td>0.4446</td>
+<td>0.2302</td>
+<td>0.05396</td>
+<td>0.09854</td>
+<td>fitted_smoke_only</td>
+</tr>
+<tr>
+<td>Caregiver</td>
+<td>1</td>
+<td>real_child_morphemes</td>
+<td>519</td>
+<td>0.4756</td>
+<td>0.2563</td>
+<td>0.06413</td>
+<td>0.1037</td>
+<td>fitted_smoke_only</td>
+</tr>
+<tr>
+<td>Caregiver</td>
+<td>1</td>
+<td>real_child_syllables</td>
+<td>519</td>
+<td>0.6136</td>
+<td>0.2964</td>
+<td>0.03889</td>
+<td>0.08169</td>
+<td>fitted_smoke_only</td>
+</tr>
+<tr>
+<td>Caregiver</td>
+<td>1</td>
+<td>real_child_phonemes</td>
+<td>519</td>
+<td>1.589</td>
+<td>0.7362</td>
+<td>0.03132</td>
+<td>0.06512</td>
+<td>fitted_smoke_only</td>
+</tr>
+<tr>
+<td>Parent</td>
+<td>0.3</td>
+<td>real_child_words</td>
+<td>519</td>
+<td>-0.2562</td>
+<td>0.09126</td>
+<td>0.005176</td>
+<td>0.0944</td>
+<td>fitted_smoke_only</td>
+</tr>
+<tr>
+<td>Parent</td>
+<td>0.3</td>
+<td>real_child_morphemes</td>
+<td>519</td>
+<td>-0.2947</td>
+<td>0.1016</td>
+<td>0.003889</td>
+<td>0.09965</td>
+<td>fitted_smoke_only</td>
+</tr>
+<tr>
+<td>Parent</td>
+<td>0.3</td>
+<td>real_child_syllables</td>
+<td>519</td>
+<td>-0.2968</td>
+<td>0.1177</td>
+<td>0.01194</td>
+<td>0.07483</td>
+<td>fitted_smoke_only</td>
+</tr>
+<tr>
+<td>Parent</td>
+<td>0.3</td>
+<td>real_child_phonemes</td>
+<td>519</td>
+<td>-0.6103</td>
+<td>0.2924</td>
+<td>0.03733</td>
+<td>0.05758</td>
+<td>fitted_smoke_only</td>
+</tr>
+<tr>
+<td>Parent</td>
+<td>0.5</td>
+<td>real_child_words</td>
+<td>519</td>
+<td>-0.2692</td>
+<td>0.1103</td>
+<td>0.01497</td>
+<td>0.09161</td>
+<td>fitted_smoke_only</td>
+</tr>
+<tr>
+<td>Parent</td>
+<td>0.5</td>
+<td>real_child_morphemes</td>
+<td>519</td>
+<td>-0.3032</td>
+<td>0.1227</td>
+<td>0.01382</td>
+<td>0.09769</td>
+<td>fitted_smoke_only</td>
+</tr>
+<tr>
+<td>Parent</td>
+<td>0.5</td>
+<td>real_child_syllables</td>
+<td>519</td>
+<td>-0.2828</td>
+<td>0.1423</td>
+<td>0.04744</td>
+<td>0.07001</td>
+<td>fitted_smoke_only</td>
+</tr>
+<tr>
+<td>Parent</td>
+<td>0.5</td>
+<td>real_child_phonemes</td>
+<td>519</td>
+<td>-0.6177</td>
+<td>0.3531</td>
+<td>0.08086</td>
+<td>0.05508</td>
+<td>fitted_smoke_only</td>
+</tr>
+</tbody></table>
+<h2>Recommendation For Supervisor Meeting</h2>
+<p>Use this as evidence that the Route 2 measurement pipeline is now implemented: accepted child-turn samples can be transformed into context-level response entropy predictors and joined back to real child effort rows. The smoke remains too small to certify 100 accepted responses per context; it is a final pre-production feature and stability smoke, not the production analysis.</p>
+<h2>Questions That Remain Before Full Production</h2>
+<ul>
+<li>Should production use the <code>Caregiver</code>, <code>Parent</code>, or <code>Adult</code> wrapper, given</li>
+<p>the observed prompt sensitivity?</p>
+<li>Should T=0.5 be the primary estimate and T=0.7 a sensitivity estimate?</li>
+<li>Should contexts that repeatedly fail acceptance be excluded, resampled with a</li>
+<p>higher attempt cap, or retained as missing entropy?</p>
+<li>Should the production analysis average across prompts/temperatures or commit</li>
+<p>to one primary operational definition?</p>
+</ul>
+<h2>Decision Output</h2>
+<table>
+<thead><tr>
+<th>question</th>
+<th>answer</th>
+<th>evidence</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>Is the entropy script ready to consume full Mila-scale samples?</td>
+<td>yes, as a CPU feature builder; full production still needs full sample artifacts</td>
+<td>wrote 478 finite entropy settings from final-smoke CSVs without regeneration</td>
+</tr>
+<tr>
+<td>Are the generated samples stable enough for 100 accepted responses per context?</td>
+<td>not directly answerable from this final smoke</td>
+<td>final smoke has at most 20 accepted samples per setting; 100-sample stability must be checked on full/pilot samples</td>
+</tr>
+<tr>
+<td>Do T=0.5 and T=0.7 give similar context rankings?</td>
+<td>mostly similar in this smoke</td>
+<td>median within-prompt Spearman for T=0.5 versus T=0.7 = 0.815</td>
+</tr>
+<tr>
+<td>Does prompt wording materially change the predictor?</td>
+<td>yes, enough to keep prompt wording visible as a design choice</td>
+<td>median prompt-within-temperature Spearman = 0.693</td>
+</tr>
+<tr>
+<td>Are join gaps small and explainable?</td>
+<td>explainable but not small for the full frame, because this is a 40-context smoke</td>
+<td>matched real child rows = 519; missing full-frame rows = 1332456</td>
+</tr>
+<tr>
+<td>What exact summary should be sent to supervisors?</td>
+<td>the measurement pipeline works; final-smoke entropy favors T=0.5 primary with T=0.7 sensitivity, but 20 samples cannot certify 100-sample production stability</td>
+<td>473/480 settings reached 20 accepted samples; pathological incomplete settings remain auditable</td>
+</tr>
+<tr>
+<td>Did first-20 stability prove full-sample stability?</td>
+<td>only within this small smoke cap</td>
+<td>median M=20 Spearman versus full = 1</td>
+</tr>
+<tr>
+<td>Was k1/k2/k3 duplicate context text handled?</td>
+<td>yes, joins use the normalized context-text hash</td>
+<td>duplicate context-window rows in the join audit share one entropy feature set by context text</td>
+</tr>
+</tbody></table>
+<h2>Output Files</h2>
+<ul>
+<li>Feature table: <code>results/response_entropy_final_scoring_smoke/context_response_entropy_features.csv</code></li>
+<li>Stability table: <code>results/response_entropy_final_scoring_smoke/context_response_entropy_stability.csv</code></li>
+<li>Join audit: <code>results/response_entropy_final_scoring_smoke/context_response_entropy_join_audit.csv</code></li>
+<li>Temperature correlations: <code>results/response_entropy_final_scoring_smoke/context_response_entropy_temperature_correlations.csv</code></li>
+<li>Prompt correlations: <code>results/response_entropy_final_scoring_smoke/context_response_entropy_prompt_correlations.csv</code></li>
+<li>Joined analysis smoke: <code>results/response_entropy_final_scoring_smoke/route2_analysis_smoke_with_entropy.csv.gz</code></li>
+<li>Tiny model summary: <code>results/response_entropy_final_scoring_smoke/route2_sanity_model_summary.csv</code></li>
+<li>Manual review examples: <code>results/response_entropy_final_scoring_smoke/manual_review_entropy_examples.csv</code></li>
+<li>Figures: <code>figs/response_entropy_final_scoring_smoke</code></li>
+</ul>
+</main>
+</body>
+</html>
