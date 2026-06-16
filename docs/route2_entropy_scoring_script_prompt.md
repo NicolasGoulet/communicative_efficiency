@@ -3,6 +3,21 @@
 Use this prompt with a future coding agent after the final Route 2 generation
 smoke has completed.
 
+Status as of 2026-06-16: the final generation smoke has completed. Use these
+actual smoke artifacts as the default inputs for this entropy smoke:
+
+```text
+results/response_entropy_final_generation_smoke/accepted_samples.csv.gz
+results/response_entropy_final_generation_smoke/all_attempts.csv.gz
+results/response_entropy_final_generation_smoke/rejection_summary_by_setting.csv
+results/response_entropy_final_generation_smoke/quality_flags_by_setting.csv
+results/response_entropy_final_generation_smoke/smoke_manifest.csv
+results/response_entropy_final_generation_smoke/smoke_manifest_audit.csv
+docs/response_entropy_final_generation_smoke.html
+```
+
+Do not regenerate samples unless one of these artifacts is missing or corrupted.
+
 ## Objective
 
 Create the entropy scoring / feature-building script that consumes the Route 2
@@ -51,12 +66,18 @@ real_child_effort ~ response_entropy + expected_sample_length + controls
 Consume the final generation-smoke outputs, expected to include:
 
 ```text
-accepted_samples.csv.gz
-all_attempts.csv.gz
-rejection_summary_by_setting.csv
-quality_flags_by_setting.csv
-smoke_manifest.csv
+results/response_entropy_final_generation_smoke/accepted_samples.csv.gz
+results/response_entropy_final_generation_smoke/all_attempts.csv.gz
+results/response_entropy_final_generation_smoke/rejection_summary_by_setting.csv
+results/response_entropy_final_generation_smoke/quality_flags_by_setting.csv
+results/response_entropy_final_generation_smoke/smoke_manifest.csv
 ```
+
+The completed smoke wrote 9,512 accepted responses from 10,203 attempts across
+40 contexts x 3 prompt variants x 4 temperatures. It reached 20 accepted
+samples for 473/480 context-temperature-prompt settings; the 7 incomplete
+settings all came from one repetitive context and should remain visible in the
+entropy stability and join audits.
 
 Also consume the relevant context/Route 1 analysis frame or manifest needed to
 join entropy features back to real child utterance rows.
@@ -250,4 +271,3 @@ Does prompt wording materially change the predictor?
 Are join gaps small and explainable?
 What exact summary should be sent to supervisors?
 ```
-

@@ -26,10 +26,9 @@ For production, Mila is a better fit because we can:
 - keep the exact same scientific settings while reducing wall-clock time;
 - preserve one output CSV per shard for auditing and restartability.
 
-## Current Local Pilot Status
+## Completed Local Pilot And Final Smoke Status
 
-The current PC pilot is still valuable and should be allowed to finish unless
-we intentionally cancel it. It is testing:
+The broad PC pilot completed and was audited:
 
 ```text
 model: mistralai/Mistral-7B-v0.3
@@ -42,39 +41,51 @@ max_new_tokens: 24
 context windows: k1, k2, k3
 pilot contexts: 480
 planned samples: 288,000
+completed samples: 288,000
 ```
 
-The PC run uses:
+The final pre-Slurm generation smoke also completed on the PC:
 
 ```text
-batch_contexts: 2
-batch_samples: 16
-shared HF cache: ~/.cache/huggingface
+output: results/response_entropy_final_generation_smoke/
+report: docs/response_entropy_final_generation_smoke.html
+contexts: 40 balanced across context-length buckets
+prompt variants: Caregiver, Parent, Adult
+temperatures: 0.3, 0.5, 0.7, 1.0
+target accepted samples per context-temperature-prompt: 20
+max attempts per setting: 60
+accepted samples: 9,512
+attempts: 10,203
+complete settings: 473 / 480
 ```
 
-The pilot diagnostics should only be trusted after the generation is complete.
-The diagnostics script now refuses incomplete final reports by default.
+The final smoke used true end-of-turn stopping during decoding, accepted versus
+rejected attempt logging, deterministic quality flags, prompt-variant
+robustness checks, and the cap-96 safety rule. The remaining 7 incomplete
+settings came from one repetitive context and should be treated as a production
+audit case, not as a reason to discard the overall procedure.
 
-## What We Need From The Pilot Before Main Generation
+## What We Need Before Main Generation
 
-Before launching a larger Mila run, inspect:
+Before launching a larger Mila run, run the Route 2 entropy smoke using the
+final generation-smoke outputs. That smoke should inspect:
 
-- empty response rate by temperature;
-- max-token-hit rate by temperature;
-- boundary-stop rate by temperature;
 - entropy distributions by temperature;
-- split-half reliability at M=100;
-- downsample stability at M=25, 50, 75, 100;
+- split-half reliability;
+- downsample stability adapted to the available M=20 accepted-smoke sample cap;
 - rank correlations of context entropy across temperatures;
-- a small manual audit of generated responses.
+- rank correlations of context entropy across prompt variants;
+- join coverage back to real child rows;
+- a small downstream sanity model.
 
-The pilot should answer:
+The entropy smoke should answer:
 
 ```text
-Which temperatures produce interpretable child-like continuations?
-Are context entropy rankings stable enough at M=100?
-Can we reduce or must we increase samples_per_context?
-Should the production grid use all pilot temperatures or a smaller subset?
+Do the accepted samples produce stable response-entropy predictors?
+Do T=0.5 and T=0.7 rank contexts similarly enough for primary/sensitivity use?
+Does prompt wording materially change the predictor?
+Are join gaps small and explainable?
+Is the entropy script ready to consume full Mila-scale samples?
 ```
 
 No main production run should start before these questions are reviewed.
@@ -153,7 +164,14 @@ This prevents every job from redownloading Mistral separately.
 
 ## Mila Generation Command Template
 
-For one shard and one temperature:
+The old pilot sampler command below is no longer the preferred production
+template because it samples a fixed number of raw generations and trims
+post-hoc. Production should be based on the final smoke procedure: true
+end-of-turn stopping, accepted/rejected attempt logging, quality flags, and an
+attempt cap. The exact Slurm command should be written after the entropy smoke
+confirms the feature builder.
+
+For historical reference, the older one-shard sampler command was:
 
 ```bash
 env HF_HOME="$SCRATCH/huggingface" MPLCONFIGDIR=/tmp/matplotlib \
@@ -172,9 +190,9 @@ env HF_HOME="$SCRATCH/huggingface" MPLCONFIGDIR=/tmp/matplotlib \
   --device auto
 ```
 
-On larger GPUs, `--batch-samples` can be increased after a tiny smoke test.
-The scientific setting is `samples_per_context`; `batch_samples` is only a
-computational microbatch parameter.
+On larger GPUs, computational microbatch sizes can be increased after a tiny
+smoke test. The scientific target should be accepted valid child-turn samples,
+not merely total raw attempts.
 
 ## Suggested Mila Pilot Before Production
 
@@ -244,33 +262,37 @@ The second option will be more scalable for very large production runs.
 
 Use this sequence:
 
-1. Finish the PC pilot or intentionally stop it.
-2. Run final pilot diagnostics.
-3. Decide temperature grid and sample count.
-4. Build production manifest.
-5. Split manifest into shards.
-6. Rsync manifest/code/configs to Mila.
-7. Run one smoke shard.
-8. Run one real shard.
-9. Launch Slurm array.
-10. Audit completion.
-11. Build diagnostics and recommendations.
-12. Only then join response-space entropy predictors into analysis tables.
+1. Completed: broad PC pilot.
+2. Completed: final generation smoke with true stopping and rejection logging.
+3. Next: run the entropy/scoring smoke from
+   `docs/route2_entropy_scoring_script_prompt.md`.
+4. Review entropy stability, prompt/temperature sensitivity, and join audit.
+5. Confirm operational choices with supervisors.
+6. Build production manifest.
+7. Split manifest into shards.
+8. Rsync manifest/code/configs to Mila.
+9. Run one smoke shard.
+10. Run one real shard.
+11. Launch Slurm array.
+12. Audit completion.
+13. Build diagnostics and recommendations.
+14. Only then join response-space entropy predictors into analysis tables.
 
-## Current Recommendation Before Seeing Pilot Results
+## Current Recommendation After Generation Smoke
 
-For production, expect to use Mila with:
+For production planning, expect to use:
 
 ```text
 primary model: mistralai/Mistral-7B-v0.3
 prompt: Caregiver: {context}\nChild:
 top_p: 0.95
 top_k: 0
-max_new_tokens: 24
-samples_per_context: 100 unless pilot says otherwise
-temperatures: likely a reduced grid such as 0.7, 1.0, 1.3
+max_new_tokens: 96 safety cap
+primary temperature: 0.5
+sensitivity temperature: 0.7
+optional conservative diagnostic: 0.3
+T=1.0: optional diagnostic only, not primary production
 ```
 
-But this is not final. The actual production grid should be chosen after the
-pilot diagnostics.
-
+This is not final until the entropy smoke confirms stable predictors and the
+supervisors approve accepted-only entropy and prompt-wrapper choices.

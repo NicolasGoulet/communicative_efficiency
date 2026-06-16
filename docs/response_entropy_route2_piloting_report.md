@@ -189,9 +189,54 @@ to reach a newline when given a much larger cap.
 Status: completed on the PC at 2026-06-16 14:21:24 EDT.
 
 Runtime note: this 1,200-sample cap-96 smoke took 699.9 seconds because the
-current implementation still decodes all 96 tokens and trims afterward. A true
-end-of-turn stopping criterion should be implemented before production to avoid
-wasting GPU time.
+then-current implementation still decoded all 96 tokens and trimmed afterward.
+That limitation was addressed in the final generation smoke below, which used
+true end-of-turn stopping during decoding.
+
+### Final Generation Smoke With True End-Of-Turn Stopping
+
+Output:
+
+```text
+results/response_entropy_final_generation_smoke/
+docs/response_entropy_final_generation_smoke.html
+```
+
+Design:
+
+```text
+40 contexts balanced across context-length buckets
+prompt variants: Caregiver, Parent, Adult
+temperatures: 0.3, 0.5, 0.7, 1.0
+target accepted samples per context-temperature-prompt: 20
+max attempts per context-temperature-prompt: 60
+max_new_tokens = 96 safety cap
+```
+
+Purpose: run the final pre-Slurm generation procedure itself, not entropy
+scoring. This smoke tested true end-of-turn stopping, accepted versus rejected
+attempt logging, deterministic quality flags, prompt-variant robustness, and
+the final temperature grid.
+
+Status: completed on the PC on 2026-06-16.
+
+Result:
+
+```text
+accepted responses: 9,512
+total attempts: 10,203
+complete settings: 473 / 480
+incomplete settings: 7 / 480
+```
+
+All 7 incomplete settings came from one repetitive context:
+
+```text
+blink blink blink blink blink blink blink. blink blink blink. that's a light too.
+```
+
+The generation procedure is therefore ready to feed an entropy-scoring smoke,
+with the incomplete-context caveat retained in the audit tables.
 
 ## 4.1 Plot Artifacts
 
@@ -398,12 +443,11 @@ Oh watching others parment Name that beg literary fragject or commander segment
 passenger boot texture demolction ...
 ```
 
-## 8. Proposed Production Strategy
+## 8. Production Strategy After Final Smoke
 
-Before Mila-scale generation:
+Carry forward the final smoke design for Mila-scale generation:
 
-1. Implement true end-of-turn stopping during decoding, instead of generating
-   to the cap and trimming afterward.
+1. Use true end-of-turn stopping during decoding.
 2. Use `max_new_tokens=96` as a safety cap, not as the intended response
    length.
 3. Use T=0.5 as the primary temperature and T=0.7 as the main sensitivity
@@ -450,13 +494,20 @@ Do not launch the full Mila Slurm production run yet.
 
 Do next:
 
-1. Implement actual end-of-turn stopping and rejection logging.
-2. Run one small smoke with the final script.
-3. Manually audit a stratified sample of accepted and rejected generations.
-4. Confirm the operational definition with supervisors.
+1. Run the entropy/scoring smoke from
+   `docs/route2_entropy_scoring_script_prompt.md`, using the accepted samples
+   and audit tables from `results/response_entropy_final_generation_smoke/`.
+2. Check entropy distributions, split-half reliability, downsample stability,
+   temperature correlations, prompt-variant correlations, join coverage, and
+   the tiny downstream sanity model.
+3. Review the final generation-smoke examples and entropy-smoke examples with
+   supervisors.
+4. Confirm the operational definition with supervisors before full Mila-scale
+   production.
 
-Then proceed to Mila-scale generation if the small smoke shows low rejection
-rates and supervisor agreement on the operational definition.
+Then proceed to Mila-scale generation if the entropy smoke shows stable
+predictors, acceptable join coverage, and supervisor agreement on the
+operational definition.
 
 Current temperature recommendation:
 
@@ -464,5 +515,6 @@ Current temperature recommendation:
 Primary: T=0.5
 Sensitivity: T=0.7
 Optional conservative diagnostic: T=0.3
+Optional diagnostic only, not primary production: T=1.0
 Do not use for production: T=1.3, T=1.6
 ```

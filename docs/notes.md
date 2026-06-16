@@ -3382,6 +3382,112 @@ rg -n ",False|,false" \
 Focused test passed: 1 test. Builder regenerated both reports. Image-link
 audit still has 415 interpreted-atlas image references with 0 missing files.
 
+## 2026-06-16 - Corrected Route 1 baseline-atlas scaffold
+
+- Added a first implementation scaffold for the corrected Route 1 rebuild:
+
+```text
+src/build_route1_corrected_baseline_atlas.py
+tests/test_build_route1_corrected_baseline_atlas.py
+```
+
+- The scaffold does not run the full atlas by default. It writes manifests,
+  source-coverage audits, and bounded smoke fits so the long run can be
+  launched deliberately.
+- Encoded the corrected scientific separation:
+  - source-specific M1-M6/MX atlases are independent first-pass reports;
+  - real, random, unigram, bigram, trigram, and each LSTM target variant should
+    each get its own technical atlas report;
+  - the pooled `target_source * age_c * effort_c` model is a later comparison
+    report that reads/compares selected source-specific outputs, not a
+    replacement for fitting the source-specific atlases.
+- Encoded the child-structure guardrails:
+  - `CS1`/`CS2` use `C(child_id)` fixed intercepts/slopes;
+  - `CS4`/`CS5` MixedLM random-effect variants do not include `C(child_id)`;
+  - `CS6` uses within-child age with `C(child_id)`;
+  - `CS7` uses within-child age plus `child_mean_age_c` without `C(child_id)`.
+- Added parent-context effort derivation from `context_text` for all five
+  effort units and a rule-based `question_type` predictor.
+- Generated manifest artifacts under ignored results:
+
+```text
+results/route1_corrected_baseline_atlas/corrected_primary_source_specific_manifest.csv
+results/route1_corrected_baseline_atlas/corrected_child_structure_sensitivity_manifest.csv
+results/route1_corrected_baseline_atlas/child_structure_definitions.csv
+results/route1_corrected_baseline_atlas/corrected_model_family_definitions.csv
+```
+
+- Manifest row counts:
+
+```text
+corrected_primary_source_specific_manifest.csv: 600 model rows + header
+corrected_child_structure_sensitivity_manifest.csv: 72 model rows + header
+```
+
+- Ran a bounded source audit on the existing smoke Route 1 long table:
+
+```bash
+MPLCONFIGDIR=/tmp/matplotlib .venv/bin/python \
+  src/build_route1_corrected_baseline_atlas.py \
+  --stage audit \
+  --input results/route1_analysis_dataset/smoke_route1_scored_utterance_effort_long.csv.gz \
+  --output-dir results/route1_corrected_baseline_atlas/smoke_route1_long \
+  --max-rows 250000 \
+  --chunksize 50000
+```
+
+Audit output:
+
+```text
+results/route1_corrected_baseline_atlas/smoke_route1_long/source_coverage_audit.csv
+```
+
+The bounded smoke audit saw five child target sources (`real`, `random`,
+`unigram`, `bigram`, `trigram`) for `k0`, but only one child in that smoke
+slice, so it is a plumbing check rather than a scientific modeling sample.
+
+- Ran a bounded smoke fit:
+
+```bash
+MPLCONFIGDIR=/tmp/matplotlib .venv/bin/python \
+  src/build_route1_corrected_baseline_atlas.py \
+  --stage smoke-fit \
+  --input results/route1_analysis_dataset/smoke_route1_scored_utterance_effort_long.csv.gz \
+  --output-dir results/route1_corrected_baseline_atlas/smoke_route1_long \
+  --max-rows 250000 \
+  --chunksize 50000 \
+  --target-sources real,random \
+  --context-ks k0 \
+  --effort-cols nb_words \
+  --child-structures CS0c,CS1 \
+  --model-ids M1,M2,M3,M4a,M4b
+```
+
+Smoke fit output:
+
+```text
+results/route1_corrected_baseline_atlas/smoke_route1_long/smoke_fit_summary.csv
+```
+
+It wrote 20 model rows. All non-entropy k0 rows were correctly skipped with
+`fewer than two children`; entropy rows were correctly skipped with
+`no complete rows` because the smoke input lacks context entropy.
+
+- Verification:
+
+```bash
+MPLCONFIGDIR=/tmp/matplotlib .venv/bin/python -m py_compile \
+  src/build_route1_corrected_baseline_atlas.py
+
+MPLCONFIGDIR=/tmp/matplotlib .venv/bin/python -m unittest \
+  tests.test_build_route1_corrected_baseline_atlas
+
+MPLCONFIGDIR=/tmp/matplotlib .venv/bin/python -m unittest discover -s tests
+```
+
+Focused tests passed: 10 tests. Full suite passed: 276 tests. The full long
+Route 1 atlas has not been run.
+
 ## 2026-06-16 - Agent prompt for corrected Route 1 rebuild
 
 - Added an agent-facing launch prompt for the long corrected Route 1
@@ -3420,3 +3526,293 @@ env MPLCONFIGDIR=/tmp/matplotlib .venv/bin/python \
 
 Focused test passed: 1 test. Builder regenerated both reports. Image-link
 audit still has 415 interpreted-atlas image references with 0 missing files.
+
+## 2026-06-16 - Route 2 final pre-Slurm generation smoke
+
+- Implemented the final response-generation smoke in:
+
+```text
+src/build_response_entropy_final_generation_smoke.py
+scripts/run_response_entropy_final_generation_smoke_pc.sh
+tests/test_build_response_entropy_final_generation_smoke.py
+```
+
+- The smoke is generation/sampling only. It does not compute downstream
+  entropy features for Route 2 modeling.
+- The sampler uses true end-of-turn stopping during decoding for:
+
+```text
+\n
+\nCaregiver:
+\nParent:
+\nAdult:
+\nChild:
+\nCHI:
+```
+
+- It records every attempt, accepted or rejected, with deterministic quality
+  flags and rejection reasons.
+- Local focused verification before GPU launch:
+
+```bash
+MPLCONFIGDIR=/tmp/matplotlib .venv/bin/python -m unittest \
+  tests.test_build_response_entropy_final_generation_smoke \
+  tests.test_response_level_context_entropy \
+  tests.test_build_response_entropy_stopping_probe
+```
+
+Focused regression result: 18 tests passed.
+
+- Ran the real smoke on the PC through SSH, detached as PID `19436`:
+
+```bash
+ssh alkan@192.168.7.217
+cd /home/alkan/Portelance/communicative_efficiency
+setsid scripts/run_response_entropy_final_generation_smoke_pc.sh \
+  > results/response_entropy_final_generation_smoke/logs/final_generation_smoke.log \
+  2>&1 < /dev/null &
+```
+
+- PC generation settings:
+
+```text
+model: mistralai/Mistral-7B-v0.3
+contexts: 40, balanced 10 per context-length bucket
+prompt variants: Caregiver, Parent, Adult
+temperatures: 0.3, 0.5, 0.7, 1.0
+target accepted samples per context-temperature-prompt: 20
+max attempts per context-temperature-prompt: 60
+max_new_tokens: 96 safety cap
+top_p: 0.95
+top_k: 0
+dtype: bfloat16
+device: auto
+```
+
+- Runtime:
+
+```text
+PC start: 2026-06-16 15:06:23 EDT
+PC finish: 2026-06-16 15:28:04 EDT
+logged elapsed_seconds: 1288.0
+```
+
+- Copied the completed outputs back to the laptop:
+
+```text
+results/response_entropy_final_generation_smoke/
+figs/response_entropy_final_generation_smoke/
+docs/response_entropy_final_generation_smoke.md
+docs/response_entropy_final_generation_smoke.html
+```
+
+- Required output tables exist:
+
+```text
+accepted_samples.csv.gz
+all_attempts.csv.gz
+rejection_summary_by_setting.csv
+quality_flags_by_setting.csv
+prompt_temperature_rank_correlations.csv
+manual_review_examples.csv
+smoke_manifest.csv
+smoke_manifest_audit.csv
+```
+
+- Run totals:
+
+```text
+planned settings: 480 = 40 contexts x 3 prompt variants x 4 temperatures
+planned accepted samples: 9,600
+accepted samples written: 9,512
+attempts written: 10,203
+settings reaching 20 accepted samples: 473 / 480
+settings hitting the 60-attempt cap incomplete: 7 / 480
+```
+
+- All incomplete settings came from one long repetitive context:
+
+```text
+context_id: 053b94a7737f6201a29fa0db
+context_text: blink blink blink blink blink blink blink. blink blink blink. that's a light too.
+```
+
+The main rejection reason there was repetition-loop detection, especially at
+lower temperatures.
+
+- Temperature summary:
+
+```text
+T=0.3: 2,343 accepted / 2,540 attempts; rejection rate 7.76%; 3 incomplete settings
+T=0.5: 2,371 accepted / 2,550 attempts; rejection rate 7.02%; 3 incomplete settings
+T=0.7: 2,398 accepted / 2,523 attempts; rejection rate 4.95%; 1 incomplete setting
+T=1.0: 2,400 accepted / 2,590 attempts; rejection rate 7.34%; 0 incomplete settings
+```
+
+- Prompt robustness:
+
+```text
+median prompt-within-temperature Spearman:
+T=0.3: 0.605
+T=0.5: 0.744
+T=0.7: 0.732
+T=1.0: 0.592
+overall median: 0.693
+```
+
+- Decision readout from the smoke:
+  - T=0.5 primary and T=0.7 sensitivity are defensible as the production
+    recommendation, with explicit rejection-rate reporting.
+  - T=0.3 is useful as a conservative diagnostic but is vulnerable to
+    low-temperature repetition loops on pathological contexts.
+  - T=1.0 should remain optional/diagnostic rather than primary production.
+  - Prompt rankings are stable enough for a smoke-test recommendation, but not
+    so high that prompt wording can be ignored.
+  - Supervisors should explicitly approve accepted-only entropy, handling of
+    context-copy responses, and whether to keep the prompt wrapper.
+
+- Rerendered the local report after the PC run to make the incomplete-setting
+  caveat explicit; no GPU rerun was needed.
+- Post-run focused verification:
+
+```bash
+MPLCONFIGDIR=/tmp/matplotlib .venv/bin/python \
+  src/build_response_entropy_final_generation_smoke.py \
+  --stage summarize \
+  --output-dir results/response_entropy_final_generation_smoke \
+  --fig-dir figs/response_entropy_final_generation_smoke \
+  --report-md docs/response_entropy_final_generation_smoke.md \
+  --report-html docs/response_entropy_final_generation_smoke.html
+
+MPLCONFIGDIR=/tmp/matplotlib .venv/bin/python -m unittest \
+  tests.test_build_response_entropy_final_generation_smoke
+```
+
+Focused post-run test result: 5 tests passed.
+
+## 2026-06-16 - Expanded corrected Route 1 atlas readiness pass
+
+- Expanded `src/build_route1_corrected_baseline_atlas.py` beyond the core
+  M1-M6 ladder. The source-specific atlas manifest now includes:
+  - core M1-M6, with M4 split into M4a/M4b/M4c;
+  - extended internal models M7-M15:
+    - M7 nonlinear age;
+    - M8 nonlinear age by effort;
+    - M9 categorical age-bin trajectory;
+    - M10 age-bin by effort;
+    - M11 age by parent-context effort;
+    - M12 age by question type;
+    - M13 context entropy by question type;
+    - M14 parent effort by context entropy;
+    - M15 expanded context-interaction stress test.
+- Added default source targets for the LSTM scored variants:
+
+```text
+lstm_additive_k3_same_length
+lstm_additive_k4_same_length
+lstm_additive_k5_same_length
+```
+
+- Added stage support:
+  - `manifest`: writes model/report/command manifests only;
+  - `preflight`: writes manifests plus a bounded source-coverage audit;
+  - `fit-atlas`: fits selected source-specific models one target source at a
+    time and writes separate source report Markdown stubs;
+  - `smoke-fit`: remains for bounded quick checks.
+- The generated launch-command handoff is:
+
+```text
+results/route1_corrected_baseline_atlas/FULL_RUN_COMMANDS.md
+```
+
+- The launch handoff now includes a separate core child-structure sensitivity
+  command for real child utterances: CS0, CS0c, CS1, CS2, CS3, CS4, CS5, CS6,
+  and CS7 are fit outside the source-specific baseline atlas.
+
+- Regenerated default manifest artifacts:
+
+```text
+results/route1_corrected_baseline_atlas/corrected_primary_source_specific_manifest.csv
+results/route1_corrected_baseline_atlas/corrected_child_structure_sensitivity_manifest.csv
+results/route1_corrected_baseline_atlas/corrected_report_plan.csv
+results/route1_corrected_baseline_atlas/child_structure_definitions.csv
+results/route1_corrected_baseline_atlas/corrected_model_family_definitions.csv
+```
+
+- Current manifest row counts:
+
+```text
+corrected_primary_source_specific_manifest.csv: 2,040 model rows + header
+corrected_child_structure_sensitivity_manifest.csv: 72 model rows + header
+corrected_report_plan.csv: 10 report-plan rows + header
+```
+
+- Ran small checks only, not the full scientific fit:
+
+```bash
+MPLCONFIGDIR=/tmp/matplotlib .venv/bin/python -m unittest \
+  tests.test_build_route1_corrected_baseline_atlas
+
+MPLCONFIGDIR=/tmp/matplotlib .venv/bin/python \
+  src/build_route1_corrected_baseline_atlas.py \
+  --stage preflight \
+  --input results/route1_analysis_dataset/smoke_route1_scored_utterance_effort_long.csv.gz \
+  --output-dir results/route1_corrected_baseline_atlas/smoke_preflight_expanded \
+  --target-sources real,random,unigram,bigram,trigram,lstm_additive_k3_same_length \
+  --context-ks k0 \
+  --effort-cols nb_words \
+  --model-ids M1,M2,M7,M10 \
+  --max-rows 250000 \
+  --chunksize 50000
+
+MPLCONFIGDIR=/tmp/matplotlib .venv/bin/python \
+  src/build_route1_corrected_baseline_atlas.py \
+  --stage fit-atlas \
+  --input results/route1_analysis_dataset/smoke_route1_scored_utterance_effort_long.csv.gz \
+  --output-dir results/route1_corrected_baseline_atlas/smoke_fit_expanded \
+  --target-sources real,random \
+  --context-ks k0 \
+  --effort-cols nb_words \
+  --child-structures primary \
+  --model-ids M1,M2,M7,M10 \
+  --max-rows 250000 \
+  --chunksize 50000
+```
+
+- Focused tests passed after the final launch-command update: 15 tests.
+- Full suite passed after the final launch-command update: 281 tests in
+  275.911 seconds.
+- Smoke preflight wrote manifests, report plan, source audit, and launch
+  commands.
+- Smoke `fit-atlas` wrote 8 model rows plus independent source Markdown reports
+  under `results/route1_corrected_baseline_atlas/smoke_fit_expanded/reports/`.
+  The smoke input has only one child in the bounded slice, so the model rows
+  correctly skip as non-scientific plumbing checks.
+- Full long fit still has not been run.
+
+## 2026-06-16 - Route 2 entropy-smoke handoff after final generation smoke
+
+- Updated the Route 2 handoff Markdown after completing the final generation
+  smoke. The next prompt is:
+
+```text
+docs/route2_entropy_scoring_script_prompt.md
+```
+
+- The entropy smoke should consume the existing final generation-smoke
+  artifacts, not regenerate samples unless an artifact is missing or corrupted:
+
+```text
+results/response_entropy_final_generation_smoke/accepted_samples.csv.gz
+results/response_entropy_final_generation_smoke/all_attempts.csv.gz
+results/response_entropy_final_generation_smoke/rejection_summary_by_setting.csv
+results/response_entropy_final_generation_smoke/quality_flags_by_setting.csv
+results/response_entropy_final_generation_smoke/smoke_manifest.csv
+results/response_entropy_final_generation_smoke/smoke_manifest_audit.csv
+docs/response_entropy_final_generation_smoke.html
+```
+
+- The final generation smoke is ready to feed the entropy-scoring smoke. Full
+  Mila-scale generation should still wait until the entropy smoke confirms
+  stable predictors, acceptable join coverage, and supervisor approval of the
+  accepted-only entropy definition.

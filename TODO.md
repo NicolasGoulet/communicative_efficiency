@@ -24,12 +24,19 @@ When a task is completed, move any useful result or decision into
 ### Immediate Route 1 Cleanup / Baseline Atlas TODOs
 
 - [ ] Use `docs/route1_corrected_baseline_atlas_agent_prompt.md` as the launch prompt for the next long implementation run.
+- [x] Add a corrected Route 1 baseline-atlas scaffold that encodes source-specific
+      M1-M6 manifests, child-structure variants, parent-context effort,
+      question type, source-coverage audit, and bounded smoke fitting without
+      launching the full long run.
+- [x] Expand the corrected atlas scaffold with internal M7-M15 model families,
+      LSTM source defaults, report-plan output, launch-command output, a
+      preflight stage, and per-source `fit-atlas` report stubs.
 - [ ] Freeze the corrected Route 1 formula ladder: M1 `sum_bits ~ age_c + effort_c`; M2 `+ C(child_id)`; M3 `age_c * effort_c + C(child_id)`; M4a/M4b/M4c adding parent-context effort, context entropy, and question type one at a time; M5 all context controls; M6 selected context interactions with all lower-order terms kept.
 - [ ] Build/audit missing parent-context predictors: `parent_context_effort_*` for k1-k3 and `question_type` for preceding caretaker context. Existing context entropy/context-size columns can be reused only after an audit confirms coverage.
 - [ ] Refit the real-child Route 1 atlas with the cleaned ladder before further supervisor-facing claims.
-- [ ] Repeat the full M1-M6 Route 1 atlas independently for each generated target source: random, unigram, bigram, trigram, and LSTM variants. Keep formulas, effort units, context windows, age bins, and robustness checks parallel across sources.
+- [ ] Repeat the full M1-M6/MX Route 1 atlas independently for each generated target source: random, unigram, bigram, trigram, and LSTM variants. Keep formulas, effort units, context windows, age bins, and robustness checks parallel across sources, and write one technical atlas report per source.
 - [ ] Compare real-child and baseline trajectories side by side: age coefficients, fixed-effort age curves, context-control stability, and balanced/scrambled age robustness.
-- [ ] Only after source-specific atlases exist, fit the pooled formal comparison model `sum_bits ~ target_source * age_c * effort_c + context_controls + C(child_id)`.
+- [ ] Only after source-specific atlases exist, fit the pooled formal comparison model `sum_bits ~ target_source * age_c * effort_c + context_controls + C(child_id)` and write it as a separate downstream comparison report.
 - [ ] Run child-structure sensitivity for the corrected ladder as separate variants: no child identity plus clustered SE, `C(child_id)`, GEE clustered by child, MixedLM random intercept/slope, fixed-effect within-child age, and Mundlak within/between age. Do not combine `C(child_id)` with random child intercepts, and do not estimate `child_mean_age` inside a `C(child_id)` formula.
 - [ ] Keep Route 2 effort/length-outcome modeling parked until the corrected Route 1 child/baseline atlas is complete.
 
@@ -42,6 +49,7 @@ These are never to be implemented at the same time, always one at a time describ
 - TODO : Fix the utterance generation script and regenerate all the utterances
 - TODO : Then, score again all the utterances making sure it preserved punctuation and that sentences without any scorable-words are ignored. 
 - TODO: The generation of utterances using small LLM : it will be more detailed once it'll be the `Current Focus` but the general goal is that for every dataset from CHILDES we have,
+- TODO: Run the Route 2 entropy-scoring smoke from `docs/route2_entropy_scoring_script_prompt.md` using the final generation-smoke outputs. This is a feature-stability smoke, not the full Route 2 effort-outcome modeling phase.
 - TODO: Increase in questions over time?
 - TODO: Clarify the & markers 
 - TODO: Compare with and without these
@@ -165,3 +173,5 @@ Use this for short notes after finishing tasks.
 - 2026-06-16 - Added `docs/route1_corrected_baseline_atlas_agent_prompt.md`, an agent-facing launch prompt for the long corrected Route 1 rebuild. It defines the child-structure variants to compare separately, the corrected M1-M6 formulas, baseline-source atlas logic, implementation phases, deliverables, and acceptance checklist.
 - 2026-06-16 - Ran the cap-96 extreme-temperature Route 2 smoke on the PC for T=0.3, T=1.3, and T=1.6: 40 contexts x 3 temperatures x 10 samples = 1,200 samples. Results show T=0.3 reached a newline in all samples, but T=1.3 still missed newline before cap in 20.0% and T=1.6 missed in 62.75%; hard-bad automatic quality rates were 3.0%, 28.75%, and 70.5% respectively. Rendered the meeting-facing piloting report `docs/response_entropy_route2_piloting_report.html`.
 - 2026-06-16 - Added two future-agent Route 2 prompts: `docs/route2_final_generation_smoke_prompt.md` for the final pre-Slurm generation smoke at temperatures 0.3/0.5/0.7/1.0, and `docs/route2_entropy_scoring_script_prompt.md` for the downstream entropy feature/scoring script that consumes generated samples and builds Route 2 predictors.
+- 2026-06-16 - Implemented and ran the final Route 2 pre-Slurm generation smoke on the PC with true end-of-turn stopping, accepted/rejected attempt logging, deterministic quality flags, prompt-variant checks, and temperatures 0.3/0.5/0.7/1.0. Output: `docs/response_entropy_final_generation_smoke.html`, `results/response_entropy_final_generation_smoke/`, and `figs/response_entropy_final_generation_smoke/`. The run wrote 9,512 accepted responses from 10,203 attempts across 40 contexts x 3 prompt variants x 4 temperatures, with 473/480 settings reaching 20 accepted samples before the 60-attempt cap.
+- 2026-06-16 - Updated the Route 2 handoff Markdown after the final generation smoke so the next step points to `docs/route2_entropy_scoring_script_prompt.md` and uses the existing final-smoke artifacts rather than regenerating samples.

@@ -1,5 +1,11 @@
 # Prompt 1: Route 2 Final Generation Smoke Before Mila Production
 
+Status as of 2026-06-16: completed. The implemented smoke script is
+`src/build_response_entropy_final_generation_smoke.py`; the PC runner is
+`scripts/run_response_entropy_final_generation_smoke_pc.sh`; the report is
+`docs/response_entropy_final_generation_smoke.html`; and the generated smoke
+artifacts are under `results/response_entropy_final_generation_smoke/`.
+
 Use this prompt with a future coding agent before writing the full Mila Slurm
 production script.
 
@@ -217,4 +223,3 @@ Are rejection rates low enough for production?
 Are prompt-variant rankings stable enough?
 What exact questions should be asked of supervisors?
 ```
-

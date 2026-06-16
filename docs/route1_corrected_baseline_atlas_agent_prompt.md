@@ -80,6 +80,25 @@ M6:  M3 + age_c:context_entropy_c + effort_c:context_entropy_c
      + parent_context_effort_c + question_type
 ```
 
+Extended internal-report ladder:
+
+```text
+M7:  sum_bits ~ age_c + I(age_c^2) + effort_c + child structure
+M8:  sum_bits ~ age_c * effort_c + I(age_c^2)
+     + I(age_c^2):effort_c + child structure
+M9:  sum_bits ~ C(age_bin) + effort_c + child structure
+M10: sum_bits ~ C(age_bin) * effort_c + child structure
+M11: M5 + age_c:parent_context_effort_c
+M12: M5 + age_c:question_type
+M13: M5 + context_entropy_c:question_type
+M14: M5 + parent_context_effort_c:context_entropy_c
+M15: expanded context interaction stress test with age/effort/context
+     interactions and all lower-order context terms
+```
+
+The extended models are for internal robustness and model-comparison reporting.
+They do not replace the core M1-M6 ladder.
+
 For CS0/CS3/CS4/CS5/CS7 variants, remove `C(child_id)` and use the
 corresponding child structure instead. Keep the same scientific predictors.
 
@@ -100,6 +119,22 @@ LSTM generated target(s), keeping k variants separate
 The point is to compare the developmental trajectory of the real children
 against the developmental trajectories induced by the baselines.
 
+Report products should preserve that separation:
+
+```text
+Report A: real child M1-M6 / MX atlas
+Report B: random baseline M1-M6 / MX atlas
+Report C: unigram baseline M1-M6 / MX atlas
+Report D: bigram baseline M1-M6 / MX atlas
+Report E: trigram baseline M1-M6 / MX atlas
+Report F+: one separate atlas for each LSTM target variant
+```
+
+Each source-specific report should use the same formula ladder, effort units,
+context windows, child-structure labels, fixed-effort plots, and robustness
+logic where data support them. Do not put the baselines and real child targets
+into one mixed report and then treat that as the atlas.
+
 After the independent source-specific atlases exist, fit a pooled formal source
 comparison:
 
@@ -108,11 +143,12 @@ sum_bits ~ target_source * age_c * effort_c + context_controls + C(child_id)
 ```
 
 This pooled model is a formal comparison after the separate atlases, not a
-replacement for them.
+replacement for them. The pooled-comparison report should explicitly say which
+source-specific atlas artifacts it is comparing.
 
 ## Prompt To Give A Fresh Agent
 
-```text
+````text
 You are working in /home/apaixonada/EvaPortelance/Projet_1/communicative_efficiency.
 
 Goal: implement the corrected Route 1 M1-M6 baseline-atlas rebuild. This is a
@@ -185,6 +221,8 @@ Phase 2: implement corrected M1-M6 model definitions.
   M5: M3 + parent_context_effort + context_entropy + question_type
   M6: M3 + age:context_entropy + effort:context_entropy
       + parent_context_effort + question_type
+- Also prepare extended internal MX families M7-M15 for a larger technical
+  model-comparison report, while labeling them as extended rather than core.
 - Store readable formula, actual statsmodels formula, centered predictors,
   effort unit, target_source, context_k, child-structure variant, estimator,
   covariance, n_obs, n_children, n_sessions, coefficient summaries, status,
@@ -208,6 +246,9 @@ Phase 3: child-structure sensitivity.
 Phase 4: source-specific atlases.
 - Repeat the corrected M1-M6 atlas independently for each target_source:
   real child, random, unigram, bigram, trigram, LSTM variants.
+- Write one technical atlas report per target_source. A real-child report, a
+  random report, each n-gram report, and each LSTM report are separate
+  deliverables.
 - Generate the same compact tables, fixed-effort plots, and robustness summaries
   for each source.
 - Make side-by-side source comparison plots only after the independent source
@@ -218,6 +259,9 @@ Phase 5: pooled source comparison.
   + C(child_id)` after source-specific atlases exist.
 - Interpret source interactions as differences in developmental trajectories,
   not as standalone effects.
+- Write a separate comparison report that reads selected outputs from the
+  source-specific atlases. It should not be the only place where baseline
+  models are fit or interpreted.
 
 Phase 6: robustness and reporting.
 - Reuse or adapt age-bin balancing and age-scrambling checks for each source.
@@ -229,18 +273,68 @@ Phase 6: robustness and reporting.
 Expected deliverables:
 - A tested dataset builder or updater for the corrected source-specific Route 1
   modeling frame.
-- A tested model runner for corrected M1-M6 formulas and child-structure
-  variants.
-- Source-specific M1-M6 results for real, random, unigram, bigram, trigram, and
-  LSTM target sources.
-- A baseline-comparison report with side-by-side developmental trajectories.
+- A tested model runner for corrected core M1-M6 formulas, extended M7-M15
+  formulas, and child-structure variants.
+- Source-specific M1-M6/MX results for real, random, unigram, bigram, trigram,
+  and LSTM target sources.
+- Separate technical atlas reports for real, random, unigram, bigram, trigram,
+  and each LSTM target source.
+- A later baseline-comparison report with side-by-side developmental
+  trajectories, built from the source-specific atlas outputs.
 - A child-structure sensitivity report explaining `C(child_id)` versus
   `(1 | child_id)` and related variants.
 - TODO.md and docs/notes.md updates.
 
 Stop and ask before launching very long/GPU/HPC work or before modifying
 scored-source symlinks. Do not copy multi-GB scored outputs into Git.
+
+Preflight command to run before the long fit:
+
+```bash
+MPLCONFIGDIR=/tmp/matplotlib .venv/bin/python src/build_route1_corrected_baseline_atlas.py \
+  --stage preflight \
+  --input results/route1_analysis_dataset/route1_scored_utterance_effort_context_entropy_with_lstm_long.csv.gz \
+  --output-dir results/route1_corrected_baseline_atlas/full_preflight \
+  --target-sources real,random,unigram,bigram,trigram,lstm_additive_k3_same_length,lstm_additive_k4_same_length,lstm_additive_k5_same_length \
+  --context-ks k1,k2,k3 \
+  --effort-cols all \
+  --model-ids all \
+  --max-rows 0 \
+  --chunksize 250000
 ```
+
+Full source-specific fit command after preflight passes:
+
+```bash
+MPLCONFIGDIR=/tmp/matplotlib .venv/bin/python src/build_route1_corrected_baseline_atlas.py \
+  --stage fit-atlas \
+  --input results/route1_analysis_dataset/route1_scored_utterance_effort_context_entropy_with_lstm_long.csv.gz \
+  --output-dir results/route1_corrected_baseline_atlas/full_source_specific \
+  --target-sources real,random,unigram,bigram,trigram,lstm_additive_k3_same_length,lstm_additive_k4_same_length,lstm_additive_k5_same_length \
+  --context-ks k1,k2,k3 \
+  --effort-cols all \
+  --child-structures primary \
+  --model-ids all \
+  --max-rows 0 \
+  --chunksize 250000
+```
+
+Core child-structure sensitivity command after the source-specific fit:
+
+```bash
+MPLCONFIGDIR=/tmp/matplotlib .venv/bin/python src/build_route1_corrected_baseline_atlas.py \
+  --stage fit-atlas \
+  --input results/route1_analysis_dataset/route1_scored_utterance_effort_context_entropy_with_lstm_long.csv.gz \
+  --output-dir results/route1_corrected_baseline_atlas/full_child_structure_sensitivity \
+  --target-sources real \
+  --context-ks k3 \
+  --effort-cols all \
+  --child-structures CS0,CS0c,CS1,CS2,CS3,CS4,CS5,CS6,CS7 \
+  --model-ids core \
+  --max-rows 0 \
+  --chunksize 250000
+```
+````
 
 ## Acceptance Checklist
 
@@ -248,12 +342,14 @@ scored-source symlinks. Do not copy multi-GB scored outputs into Git.
 - [ ] Effort counts are recomputed from each source target utterance.
 - [ ] Parent-context effort and question type are present or explicitly
       documented as unavailable.
-- [ ] M1-M6 formulas obey interaction hierarchy.
+- [ ] M1-M15 formulas obey interaction hierarchy.
 - [ ] Child-structure variants are fit separately and labeled clearly.
 - [ ] No model combines `C(child_id)` with random child intercepts.
 - [ ] No model estimates `child_mean_age` together with `C(child_id)`.
 - [ ] Independent source-specific atlases exist before pooled source
       interaction interpretation.
+- [ ] There is one source-specific report per real/baseline/LSTM target source;
+      the pooled comparison report is separate and explicitly downstream.
 - [ ] Fixed-effort plots and age-scrambling checks are comparable across
       sources.
 - [ ] Documentation says which models are fit versus proposed.

@@ -231,7 +231,28 @@ max_new_tokens = 96
 planned samples = 1,200</code></pre>
 <p>Purpose: answer whether high temperatures that looked bad at cap 24 still fail to reach a newline when given a much larger cap.</p>
 <p>Status: completed on the PC at 2026-06-16 14:21:24 EDT.</p>
-<p>Runtime note: this 1,200-sample cap-96 smoke took 699.9 seconds because the current implementation still decodes all 96 tokens and trims afterward. A true end-of-turn stopping criterion should be implemented before production to avoid wasting GPU time.</p>
+<p>Runtime note: this 1,200-sample cap-96 smoke took 699.9 seconds because the then-current implementation still decoded all 96 tokens and trimmed afterward. That limitation was addressed in the final generation smoke below, which used true end-of-turn stopping during decoding.</p>
+<h3>Final Generation Smoke With True End-Of-Turn Stopping</h3>
+<p>Output:</p>
+<pre><code>results/response_entropy_final_generation_smoke/
+docs/response_entropy_final_generation_smoke.html</code></pre>
+<p>Design:</p>
+<pre><code>40 contexts balanced across context-length buckets
+prompt variants: Caregiver, Parent, Adult
+temperatures: 0.3, 0.5, 0.7, 1.0
+target accepted samples per context-temperature-prompt: 20
+max attempts per context-temperature-prompt: 60
+max_new_tokens = 96 safety cap</code></pre>
+<p>Purpose: run the final pre-Slurm generation procedure itself, not entropy scoring. This smoke tested true end-of-turn stopping, accepted versus rejected attempt logging, deterministic quality flags, prompt-variant robustness, and the final temperature grid.</p>
+<p>Status: completed on the PC on 2026-06-16.</p>
+<p>Result:</p>
+<pre><code>accepted responses: 9,512
+total attempts: 10,203
+complete settings: 473 / 480
+incomplete settings: 7 / 480</code></pre>
+<p>All 7 incomplete settings came from one repetitive context:</p>
+<pre><code>blink blink blink blink blink blink blink. blink blink blink. that&#x27;s a light too.</code></pre>
+<p>The generation procedure is therefore ready to feed an entropy-scoring smoke, with the incomplete-context caveat retained in the audit tables.</p>
 <h2>4.1 Plot Artifacts</h2>
 <p>Detailed probe reports with figures:</p>
 <pre><code>docs/response_entropy_stopping_probe_v2.html
@@ -489,11 +510,10 @@ what&#x27;s Granny_Dryden doing?
 T=1.6 kept response:
 Oh watching others parment Name that beg literary fragject or commander segment
 passenger boot texture demolction ...</code></pre>
-<h2>8. Proposed Production Strategy</h2>
-<p>Before Mila-scale generation:</p>
+<h2>8. Production Strategy After Final Smoke</h2>
+<p>Carry forward the final smoke design for Mila-scale generation:</p>
 <ol>
-<li>Implement true end-of-turn stopping during decoding, instead of generating</li>
-<p>to the cap and trimming afterward.</p>
+<li>Use true end-of-turn stopping during decoding.</li>
 <li>Use <code>max_new_tokens=96</code> as a safety cap, not as the intended response</li>
 <p>length.</p>
 <li>Use T=0.5 as the primary temperature and T=0.7 as the main sensitivity</li>
@@ -529,16 +549,21 @@ diagnostics.</code></pre>
 <p>Do not launch the full Mila Slurm production run yet.</p>
 <p>Do next:</p>
 <ol>
-<li>Implement actual end-of-turn stopping and rejection logging.</li>
-<li>Run one small smoke with the final script.</li>
-<li>Manually audit a stratified sample of accepted and rejected generations.</li>
-<li>Confirm the operational definition with supervisors.</li>
+<li>Run the entropy/scoring smoke from</li>
+<p><code>docs/route2_entropy_scoring_script_prompt.md</code>, using the accepted samples and audit tables from <code>results/response_entropy_final_generation_smoke/</code>.</p>
+<li>Check entropy distributions, split-half reliability, downsample stability,</li>
+<p>temperature correlations, prompt-variant correlations, join coverage, and the tiny downstream sanity model.</p>
+<li>Review the final generation-smoke examples and entropy-smoke examples with</li>
+<p>supervisors.</p>
+<li>Confirm the operational definition with supervisors before full Mila-scale</li>
+<p>production.</p>
 </ol>
-<p>Then proceed to Mila-scale generation if the small smoke shows low rejection rates and supervisor agreement on the operational definition.</p>
+<p>Then proceed to Mila-scale generation if the entropy smoke shows stable predictors, acceptable join coverage, and supervisor agreement on the operational definition.</p>
 <p>Current temperature recommendation:</p>
 <pre><code>Primary: T=0.5
 Sensitivity: T=0.7
 Optional conservative diagnostic: T=0.3
+Optional diagnostic only, not primary production: T=1.0
 Do not use for production: T=1.3, T=1.6</code></pre>
 </main>
 </body>
