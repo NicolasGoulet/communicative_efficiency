@@ -1,0 +1,486 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>M1-M6 Technical Implementation Companion</title>
+<style>
+:root {
+  color-scheme: light;
+  --ink: #1e2528;
+  --muted: #5e686d;
+  --line: #d9e0df;
+  --paper: #ffffff;
+  --soft: #f5f7f6;
+  --accent: #2f6f73;
+  --accent2: #c76f2c;
+}
+body {
+  margin: 0;
+  background: #eef2f1;
+  color: var(--ink);
+  font: 16px/1.58 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+main {
+  max-width: 980px;
+  margin: 34px auto 56px;
+  padding: 48px 58px;
+  background: var(--paper);
+  box-shadow: 0 18px 50px rgba(31, 45, 48, 0.12);
+}
+h1, h2, h3, h4 {
+  line-height: 1.18;
+  margin: 1.6em 0 0.55em;
+}
+h1 {
+  margin-top: 0;
+  font-size: 2.25rem;
+  border-bottom: 3px solid var(--accent);
+  padding-bottom: 0.45em;
+}
+h2 {
+  font-size: 1.55rem;
+  color: var(--accent);
+}
+h3 {
+  font-size: 1.18rem;
+}
+p {
+  margin: 0.75em 0;
+}
+a {
+  color: var(--accent);
+}
+blockquote {
+  border-left: 4px solid var(--accent2);
+  margin: 1.1em 0;
+  padding: 0.05em 1.1em;
+  color: var(--muted);
+  background: #fff8f2;
+}
+code {
+  background: var(--soft);
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  padding: 0.08em 0.3em;
+  font-family: "SFMono-Regular", Consolas, monospace;
+  font-size: 0.92em;
+}
+pre {
+  background: #f5f7f6;
+  color: var(--ink);
+  border: 1px solid var(--line);
+  padding: 1em;
+  overflow-x: auto;
+  border-radius: 7px;
+}
+pre code {
+  background: transparent;
+  border: 0;
+  padding: 0;
+  color: inherit;
+}
+table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 1.15em 0 1.45em;
+  font-size: 0.95em;
+}
+th, td {
+  border: 1px solid var(--line);
+  padding: 0.54em 0.68em;
+  vertical-align: top;
+}
+th {
+  background: #e7efed;
+  text-align: left;
+}
+tr:nth-child(even) td {
+  background: #fafbfb;
+}
+img {
+  max-width: 100%;
+  display: block;
+  margin: 1.1em auto 0.45em;
+}
+ul, ol {
+  padding-left: 1.4em;
+}
+.caption {
+  color: var(--muted);
+  font-size: 0.92em;
+  margin-top: -0.15em;
+}
+@media print {
+  body {
+    background: white;
+  }
+  main {
+    box-shadow: none;
+    margin: 0;
+    max-width: none;
+    padding: 28px;
+  }
+}
+</style>
+</head>
+<body>
+<main>
+<h1>M1-M6 Technical Implementation Companion</h1>
+<p>This companion explains the modeling mechanics behind the interpreted M1-M6 atlas. It is written for moments when the formulas, estimators, fixed effects, clustered standard errors, interactions, or Route 1 versus Route 2 distinction feel muddy.</p>
+<p>No new models are fit here. Proposed additions are explicitly marked as proposed/not yet run.</p>
+<h2>Route 1 And Route 2</h2>
+<p>Route 1 is the current utterance-information analysis:</p>
+<pre><code>informativeness ~ age + effort + controls</code></pre>
+<p>The outcome is <code>sum_bits</code>, the total Mistral surprisal of the target utterance. Route 1 asks whether the information in what the child actually said changes with age after production effort is controlled.</p>
+<p>Route 2 is the future effort-choice analysis:</p>
+<pre><code>effort_or_length ~ age + context_uncertainty + controls</code></pre>
+<p>Route 2 asks whether the context leads children to choose shorter or longer responses. It needs a context-level predictor such as response-space entropy, not only target-utterance surprisal.</p>
+<h2>Core Variables</h2>
+<ul>
+<li><code>sum_bits</code>: total target-utterance information in Mistral bits.</li>
+<li><code>age_c</code>: child age in months, centered by subtracting a reference mean.</li>
+<li><code>target_effort_c</code>: one effort measure, centered. Effort is words, morphemes, syllables, or phonemes.</li>
+<li><code>context_entropy_c</code>: current next-token context entropy, centered.</li>
+<li><code>context_size_c</code>: matched surface size of the context window, centered.</li>
+<li><code>C(child_id)</code>: child fixed intercepts in a statsmodels formula.</li>
+</ul>
+<h2>What Is OLS?</h2>
+<p>Ordinary least squares is ordinary linear regression. It fits a line or plane by choosing coefficients that minimize squared residuals:</p>
+<pre><code>observed sum_bits - predicted sum_bits</code></pre>
+<p>In these reports, OLS coefficients are on the additive bits scale. If the M2 word-count age coefficient is about <code>-0.122</code>, the model predicts about 0.122 fewer total bits per additional month for same-word-count utterances after child identity is controlled.</p>
+<p>Library used:</p>
+<pre><code>statsmodels.formula.api.ols</code></pre>
+<h2>What Is A GLM?</h2>
+<p>A generalized linear model keeps the idea of a linear predictor but allows a different outcome distribution and link function. A Gaussian GLM with identity link is very close to ordinary linear regression. A Gamma/log GLM is different: it is for positive continuous outcomes and models the log expected outcome.</p>
+<p>In a Gamma/log model, a coefficient is not &quot;bits per month&quot; directly. It is a change in log expected bits. Use prediction plots for intuition.</p>
+<p>Library used:</p>
+<pre><code>statsmodels.formula.api.glm</code></pre>
+<h2>What Is GEE?</h2>
+<p>Generalized estimating equations fit population-average regression models while accounting for clustered/repeated observations. In this project, the cluster is child. GEE is useful because utterance rows from the same child are correlated.</p>
+<p>Library used:</p>
+<pre><code>statsmodels.formula.api.gee(..., groups=&#x27;child_id&#x27;)</code></pre>
+<p>GEE is a sensitivity family here, not the primary supervisor-facing model.</p>
+<h2>What Is MixedLM?</h2>
+<p>MixedLM is a linear mixed model. It can include random effects such as a random child intercept or a random child age slope. A random intercept lets children vary around a population baseline. A random age slope lets children vary in developmental trajectory.</p>
+<p>Library used:</p>
+<pre><code>statsmodels mixed linear model</code></pre>
+<p>Mixed models are useful for correlated longitudinal data, but they can be singular or unstable when the data do not support all random-effect terms. In this project they are diagnostics rather than the current headline model.</p>
+<h2>Fixed Effects</h2>
+<p>A fixed effect estimates a separate coefficient for each level of a categorical variable. <code>C(child_id)</code> gives every child their own intercept. This controls stable child-level differences such as baseline verbosity, transcription style, corpus membership, or general predictability.</p>
+<p>In M2-M6, child fixed intercepts mean the age slope is estimated after each child has a personal baseline.</p>
+<h2>Random Effects</h2>
+<p>A random effect treats child-specific deviations as drawn from a population distribution. Random effects are useful when we want child-specific intercepts or slopes but also want shrinkage toward the population mean.</p>
+<p>Random effects answer a different question from fixed effects. They are not simply &quot;better fixed effects&quot;; they encode a different statistical assumption.</p>
+<h2>Clustered Standard Errors</h2>
+<p>Child-clustered standard errors adjust uncertainty for repeated utterances from the same child. They do not change the fitted line. They change standard errors, confidence intervals, and p-values.</p>
+<p>This is why OLS and child-clustered OLS can have identical plotted mean lines but different shaded confidence bands and p-values.</p>
+<h2>What Is An Interaction?</h2>
+<p>An interaction means the effect of one predictor depends on another predictor.</p>
+<p>Age x effort:</p>
+<pre><code>sum_bits ~ age_c * effort_c</code></pre>
+<p>asks whether the age slope differs for short versus long utterances.</p>
+<p>Age x effort level:</p>
+<pre><code>sum_bits ~ age_c * C(effort_level)</code></pre>
+<p>asks whether low, mid, and high effort groups have different age slopes.</p>
+<p>Age x context entropy:</p>
+<pre><code>sum_bits ~ age_c * context_entropy_c</code></pre>
+<p>asks whether the context-entropy association changes with age.</p>
+<p>Effort x context entropy:</p>
+<pre><code>sum_bits ~ effort_c * context_entropy_c</code></pre>
+<p>asks whether the relation between effort and total information differs in high-entropy contexts.</p>
+<h2>Why Center Variables?</h2>
+<p>Centering subtracts a reference mean from a numeric predictor. It does not change model fit or slopes for simple main effects. It makes the intercept and interaction main effects easier to read.</p>
+<p>With centered variables, an age coefficient in an interaction model is the age slope at average effort/context entropy, not at effort zero.</p>
+<h2>Why Separate Effort Units?</h2>
+<p>Words, morphemes, syllables, and phonemes are highly correlated. Putting all of them in one regression makes the coefficients unstable and hard to interpret. The current strategy fits parallel models, one effort unit at a time.</p>
+<p>That means a &quot;Words&quot; row and a &quot;Morphemes&quot; row are separate models asking the same question under different effort definitions.</p>
+<h2>What R2 Means Here</h2>
+<p><code>r2_observed_fitted</code> is an in-sample correspondence between observed and fitted <code>sum_bits</code>. It is useful for descriptive fit. It is not held-out predictive accuracy and should not be treated as proof that the model will generalize to new corpora.</p>
+<h2>What P-Values Mean Here</h2>
+<p>A p-value describes how surprising a coefficient estimate would be under a null model, given the model assumptions and uncertainty calculation. It is not an effect size, not a probability the hypothesis is true, and not a model-selection device by itself.</p>
+<p>For clustered child data, p-values are more credible when uncertainty respects child clustering or when robustness checks agree.</p>
+<h2>Model-Based Predictions</h2>
+<p>Model-based prediction plots show fitted expected <code>sum_bits</code> under specified values of age, effort, context, and child structure. They are not raw averages. Fixed-effort slice plots hold effort at exact values so the age trend is not merely driven by older children producing longer utterances.</p>
+<h2>Robustness And Scrambling Tests</h2>
+<p>Balanced bootstrap checks whether an age effect survives when age bins contribute equalized samples. Age scrambling checks whether the observed developmental slope depends on true age ordering. If the real slope is outside the scrambled null range, the age structure is doing real work.</p>
+<p>The current robustness report aggregates to child-session-context units to reduce the illusion that hundreds of thousands of utterance rows are independent.</p>
+<h2>Aggregating To Child-Session-Context Units</h2>
+<p>Aggregation changes the observational unit from utterance rows to:</p>
+<pre><code>child x session x context window</code></pre>
+<p>This reduces row-level dependence and makes robustness tests more conservative. It also means coefficients will not exactly match utterance-level models.</p>
+<h2>Is Child Identity Control Too Strong?</h2>
+<p>Short answer: child identity control is appropriate and scientifically useful here, but it changes the question. It is not automatically &quot;better&quot; in every sense.</p>
+<p>M1 asks a pooled question: across all rows, does age predict total information after effort control? Because children and corpora occupy different age ranges, M1 can confound development with which child, corpus, transcription style, and recording context happens to contribute data at a given age. This is why M1 is useful as a warning light rather than as the primary result.</p>
+<p>M2 adds child fixed intercepts. That means each child receives a separate baseline level of predicted information, while the model estimates one shared age slope. In plain terms, M2 asks whether the age effect remains after removing stable child-to-child baseline differences. This is a conservative move if the target is within-child developmental change.</p>
+<p>The worry is real: if children occupy different age ranges, child fixed effects discard between-child age composition. Some of that between-child variation may reflect meaningful developmental structure, but it is inseparable from corpus and child composition unless modeled carefully. M2 therefore answers a narrower question than &quot;do older children in the dataset differ from younger children?&quot; It answers &quot;within the child-adjusted comparison, is later age associated with different target information at fixed effort?&quot;</p>
+<p>Child fixed effects can be too restrictive if the scientific estimand is a population developmental trajectory that legitimately includes between-child differences. They can also leave weak support where a child&#x27;s age range is short or where older ages are represented by only a few children. They do not solve time-varying confounding, caregiver style changes, topic/task changes, or sparse age-bin support.</p>
+<p>The right interpretation is therefore balanced:</p>
+<ul>
+<li>M1 is vulnerable to child/corpus composition.</li>
+<li>M2 is more conservative for within-child development.</li>
+<li>M2 can be too narrow if we also care about between-child developmental differences.</li>
+<li>Random slopes, within/between decomposition, age-overlap restrictions, corpus controls, age-bin balancing, and leave-one-child/corpus-out checks should be added before making a final dissertation-level causal/developmental claim.</li>
+</ul>
+<p>Recommended next formulas are listed in the technical companion. None of those additions are claimed as results in this v2 report unless they already exist in saved artifacts.</p>
+<h2>Current M2 Result In Mechanical Terms</h2>
+<table>
+<thead><tr>
+<th>effort_strategy</th>
+<th>effort_label</th>
+<th>readable_formula</th>
+<th>n_obs</th>
+<th>n_children</th>
+<th>r2_observed_fitted</th>
+<th>age_coef</th>
+<th>age_p</th>
+<th>effort_coef</th>
+<th>effort_p</th>
+<th>entropy_coef</th>
+<th>entropy_p</th>
+<th>age_effort_coef</th>
+<th>age_effort_p</th>
+<th>age_entropy_coef</th>
+<th>age_entropy_p</th>
+<th>status</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>continuous</td>
+<td>Words</td>
+<td>sum_bits ~ age + effort + child identity</td>
+<td>4.47e+05</td>
+<td>21</td>
+<td>0.6259</td>
+<td>-0.1225</td>
+<td>&lt;.001</td>
+<td>6.367</td>
+<td>&lt;.001</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td>fit</td>
+</tr>
+<tr>
+<td>continuous</td>
+<td>Morphemes</td>
+<td>sum_bits ~ age + effort + child identity</td>
+<td>4.47e+05</td>
+<td>21</td>
+<td>0.6131</td>
+<td>-0.1355</td>
+<td>&lt;.001</td>
+<td>5.489</td>
+<td>&lt;.001</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td>fit</td>
+</tr>
+<tr>
+<td>continuous</td>
+<td>Syllables: CMU/pkg</td>
+<td>sum_bits ~ age + effort + child identity</td>
+<td>4.47e+05</td>
+<td>21</td>
+<td>0.6459</td>
+<td>-0.06326</td>
+<td>0.018</td>
+<td>5.236</td>
+<td>&lt;.001</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td>fit</td>
+</tr>
+<tr>
+<td>continuous</td>
+<td>Syllables: pkg</td>
+<td>sum_bits ~ age + effort + child identity</td>
+<td>4.47e+05</td>
+<td>21</td>
+<td>0.6296</td>
+<td>-0.04846</td>
+<td>0.049</td>
+<td>4.831</td>
+<td>&lt;.001</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td>fit</td>
+</tr>
+<tr>
+<td>continuous</td>
+<td>Phonemes</td>
+<td>sum_bits ~ age + effort + child identity</td>
+<td>4.47e+05</td>
+<td>21</td>
+<td>0.6443</td>
+<td>-0.06486</td>
+<td>0.013</td>
+<td>2.084</td>
+<td>&lt;.001</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td>fit</td>
+</tr>
+</tbody></table>
+<p>M2 is an OLS model with child fixed intercepts. Its uncertainty in the supervisor-facing report uses child-clustered robust standard errors. It answers a within-child-adjusted Route 1 question: for the same effort and child baseline, how does target utterance information change with age?</p>
+<h2>Route 2 Length Prediction Bridge</h2>
+<p>Route 2 should use effort as the outcome. The conceptual formula is:</p>
+<pre><code>production_effort ~ age + response_entropy + expected_model_response_length + context_size + question_type + child controls</code></pre>
+<p>Why Route 2 differs from Route 1:</p>
+<ul>
+<li>Route 1 asks how much information is in the utterance after effort is controlled.</li>
+<li>Route 2 asks how much effort the child chooses after context uncertainty is measured.</li>
+<li>Route 1 can use <code>sum_bits</code> as the outcome.</li>
+<li>Route 2 needs a context-level uncertainty measure available before the child speaks.</li>
+</ul>
+<p>The current next-token entropy feature is only a provisional bridge. Response-space entropy from sampled full responses is a better match for the Route 2 hypothesis.</p>
+<h2>Proposed Additions</h2>
+<table>
+<thead><tr>
+<th>proposal</th>
+<th>formula</th>
+<th>why</th>
+<th>status</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>within-child centered age</td>
+<td>sum_bits ~ age_within_child + effort + C(child_id)</td>
+<td>Directly estimates within-child change while preserving each child&#x27;s baseline.</td>
+<td>proposed/not yet run in this v2 synthesis</td>
+</tr>
+<tr>
+<td>within/between age decomposition</td>
+<td>sum_bits ~ age_within_child + child_mean_age + effort + corpus</td>
+<td>Separates within-child development from between-child/corpus age composition.</td>
+<td>proposed/not yet run in this v2 synthesis</td>
+</tr>
+<tr>
+<td>age-overlap restricted subset</td>
+<td>same as M2/M3 after restricting to age months shared by multiple children/corpora</td>
+<td>Checks whether the M2 slope is driven by children who occupy unique age ranges.</td>
+<td>proposed/not yet run in this v2 synthesis</td>
+</tr>
+<tr>
+<td>age-bin balanced model</td>
+<td>M2/M3 on equalized age-bin samples or child-session-context units</td>
+<td>Reduces leverage of dense toddler bins and follows Pawar-style stability logic.</td>
+<td>partially addressed by existing age-scrambling robustness; further utterance-level version not yet run</td>
+</tr>
+<tr>
+<td>corpus fixed effects</td>
+<td>sum_bits ~ age + effort + C(child_id) + C(dataset)</td>
+<td>Tests whether corpus/transcription context explains part of the child-adjusted trend.</td>
+<td>proposed/not yet run in this v2 synthesis</td>
+</tr>
+<tr>
+<td>child random intercept plus random age slope</td>
+<td>MixedLM: sum_bits ~ age + effort, groups=child_id, re_formula=&#x27;~age&#x27;</td>
+<td>Allows children to have different developmental slopes and shrinks noisy child-specific estimates.</td>
+<td>M2/M3 sensitivity exists; fuller overlap/balancing interpretation still proposed</td>
+</tr>
+<tr>
+<td>Route 2 effort outcome bridge</td>
+<td>effort ~ age + response_entropy + expected_model_response_length + context_size + C(child_id)</td>
+<td>Tests whether contextual uncertainty predicts how much children choose to say.</td>
+<td>proposed; response-space entropy pilot exists but production features are not yet the primary analysis</td>
+</tr>
+</tbody></table>
+<h2>Implementation Cheat Sheet</h2>
+<table>
+<thead><tr>
+<th>label</th>
+<th>library/object</th>
+<th>what it is</th>
+<th>where used</th>
+<th>dependence handling</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>OLS</td>
+<td><code>statsmodels.formula.api.ols</code></td>
+<td>ordinary linear regression on additive total bits</td>
+<td>M1 baseline; primary M1-M6 atlas fits after adding child fixed effects where specified</td>
+<td>none unless cluster covariance or <code>C(child_id)</code> is added</td>
+</tr>
+<tr>
+<td>OLS + child-clustered SE</td>
+<td><code>fit(cov_type=&#x27;cluster&#x27;, cov_kwds={&#x27;groups&#x27;: child_id})</code></td>
+<td>same OLS fitted line with standard errors adjusted for repeated utterances within child</td>
+<td>primary dual-effort, fixed-effort, context atlas, and many deep-dive rows</td>
+<td>affects uncertainty/p-values, not fitted means</td>
+</tr>
+<tr>
+<td>Child fixed intercepts</td>
+<td><code>C(child_id)</code> in statsmodels formulas</td>
+<td>one intercept per child</td>
+<td>primary M2-M6 formulas</td>
+<td>controls stable child baselines; it is not a random effect</td>
+</tr>
+<tr>
+<td>Child fixed age slopes</td>
+<td><code>age_c:C(child_id)</code></td>
+<td>one linear age slope adjustment per child</td>
+<td>M2/M3 sensitivity checks</td>
+<td>diagnostic for child-specific developmental slopes</td>
+</tr>
+<tr>
+<td>Gaussian GLM</td>
+<td><code>statsmodels.formula.api.glm(..., family=Gaussian())</code></td>
+<td>GLM version of the additive-bit linear model</td>
+<td>M1-M3 sensitivity rows</td>
+<td>no child dependence unless formula includes child terms</td>
+</tr>
+<tr>
+<td>Gamma GLM, log link</td>
+<td><code>statsmodels.formula.api.glm(..., family=Gamma(link=Log()))</code></td>
+<td>positive-outcome sensitivity model; coefficients are on log expected bits</td>
+<td>M1-M3 and M4 sensitivity rows</td>
+<td>no child dependence unless formula includes child terms</td>
+</tr>
+<tr>
+<td>GEE Gaussian/Gamma</td>
+<td><code>statsmodels.formula.api.gee(..., groups=&#x27;child_id&#x27;)</code></td>
+<td>population-average model clustered by child</td>
+<td>M2/M3 and M4 sensitivity rows</td>
+<td>models within-child correlation through GEE clustering</td>
+</tr>
+<tr>
+<td>MixedLM random child intercept/slope</td>
+<td><code>statsmodels</code> mixed linear model</td>
+<td>linear mixed model with random child intercept and sometimes random age slope</td>
+<td>M2/M3 sensitivity rows only</td>
+<td>random effects; several rows are singular/warning-prone, so use as diagnostics</td>
+</tr>
+</tbody></table>
+<h2>Practical Reading Order</h2>
+<ol>
+<li>Read M2 first.</li>
+<li>Check the M2 fixed-effort plots.</li>
+<li>Check M2 balanced/scrambled robustness.</li>
+<li>Use M3 only for age-by-effort nuance.</li>
+<li>Use M4 to explain context-control robustness.</li>
+<li>Treat M5/M6 as exploratory unless their interactions become stable in future runs.</li>
+</ol>
+</main>
+</body>
+</html>

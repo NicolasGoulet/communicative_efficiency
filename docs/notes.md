@@ -2644,3 +2644,436 @@ passed with 3 tests.
   - `docs/predicting_utterance_level_information_report.embedded.html`
 - Embedded HTML now reports 13 embedded images. The PDF was not regenerated and
   remains older than the Markdown/HTML.
+
+## 2026-06-16 - Response-space entropy pilot completed and audited
+
+- Interpreted the PC progress check:
+  - no rows under `ps -p 9317,10913` meant the generator PID and watchdog PID
+    were no longer running;
+  - `nvidia-smi` showing `0` GPU utilization and about 257 MiB memory meant the
+    GPU was idle;
+  - the sample gzip timestamp showed the last write time, not completion by
+    itself.
+- The first PC run had stopped early with:
+  - 272,600 valid sample rows out of 288,000 planned;
+  - 2,726 complete context-temperature pairs out of 2,880;
+  - the missing 154 context-temperature pairs were the tail of temperature
+    1.6;
+  - 16 malformed CSV records in the raw partial file, caused by multiline /
+    punctuation-rich generated text interacting poorly with the earlier append
+    format.
+- Preserved the raw interrupted file as:
+
+```text
+results/response_entropy_pilot_grid/pilot_response_samples.partial_2026-06-15.raw.csv.gz
+```
+
+- Wrote a clean parsed copy from the valid rows, then resumed only the missing
+  temperature-1.6 pairs into:
+
+```text
+results/response_entropy_pilot_grid/pilot_response_samples_clean.csv.gz
+```
+
+- Hardened `src/sample_context_responses.py`:
+  - append writes now use `csv.QUOTE_ALL` and `lineterminator="\n"`;
+  - resume scanning reads key columns as strings, skips malformed lines, drops
+    nonnumeric temperatures/sample indices, and tracks unique sample indices
+    per context-temperature pair.
+- Added focused coverage in `tests/test_response_level_context_entropy.py` for
+  quoted multiline sampled responses and malformed resume rows.
+- Added `scripts/run_response_entropy_pilot_resume_watchdog.sh` as a small
+  PC-side watchdog/resume helper. It waits for the original generator PID and
+  then reruns the resumable temperature-1.6 command if needed.
+- Verification commands:
+
+```bash
+.venv/bin/python -m unittest \
+  tests.test_response_level_context_entropy \
+  tests.test_build_response_entropy_pilot_grid
+```
+
+passed locally with 13 tests.
+
+Remote diagnostics command:
+
+```bash
+ssh alkan@192.168.7.217 \
+  "cd /home/alkan/Portelance/communicative_efficiency && \
+   MPLCONFIGDIR=/tmp/matplotlib .venv/bin/python \
+   src/build_response_entropy_pilot_grid.py \
+   --stage diagnostics \
+   --samples results/response_entropy_pilot_grid/pilot_response_samples_clean.csv.gz \
+   --generation-manifest results/response_entropy_pilot_grid/pilot_generation_manifest.csv \
+   --temperatures 0.3,0.5,0.7,1.0,1.3,1.6 \
+   --samples-per-context 100 \
+   --output-dir results/response_entropy_pilot_grid \
+   --fig-dir figs/response_entropy_pilot_grid \
+   --diagnostic-md docs/response_entropy_pilot_grid_diagnostics.md \
+   --diagnostic-html docs/response_entropy_pilot_grid_diagnostics.html"
+```
+
+completed successfully and wrote:
+
+```text
+results/response_entropy_pilot_grid/pilot_context_temperature_features.csv
+results/response_entropy_pilot_grid/pilot_completion_audit.csv
+results/response_entropy_pilot_grid/pilot_quality_by_temperature.csv
+results/response_entropy_pilot_grid/pilot_split_half_reliability.csv
+results/response_entropy_pilot_grid/pilot_downsample_stability.csv
+results/response_entropy_pilot_grid/pilot_temperature_rank_correlations.csv
+results/response_entropy_pilot_grid/pilot_diagnostic_figure_manifest.csv
+docs/response_entropy_pilot_grid_diagnostics.md
+docs/response_entropy_pilot_grid_diagnostics.html
+```
+
+- Strict completion audit:
+
+```text
+sample_rows_observed: 288000
+unique_contexts_observed: 480
+temperatures_observed: 0.3,0.5,0.7,1.0,1.3,1.6
+samples_per_context: 100
+expected_rows: 288000
+complete_context_temperature_pairs: 2880
+expected_context_temperature_pairs: 2880
+missing_or_incomplete_pairs: 0
+is_complete: True
+```
+
+- Temperature quality summary:
+  - entropy rises from 3.82 bits at T=0.3 to about 7.30 bits at T=1.3/1.6;
+  - unique sampled responses rise from about 32/100 at T=0.3 to about 98.5/100
+    at T=1.3/1.6;
+  - empty-response rate is low and stable, about 0.7-0.8% across temperatures;
+  - hit-max-token rate is essentially 100% for all temperatures, so the current
+    24-token cap is too short for interpreting full response endings;
+  - boundary-stop rate falls from 83.8% at T=0.3 to 2.2% at T=1.6.
+- Split-half reliability:
+  - T=0.3 and T=0.5 are reliable across halves (`spearman_r` about 0.93 and
+    0.86);
+  - T=0.7 is moderate (`spearman_r` about 0.69);
+  - T=1.0 is weak (`spearman_r` about 0.38);
+  - T=1.3 and T=1.6 are unstable/negative because entropy is nearly saturated
+    near the 100-sample cap.
+- Temperature rank correlations show two regimes:
+  - lower temperatures correlate with each other (`0.3` vs `0.5` about 0.88;
+    `0.5` vs `0.7` about 0.85);
+  - high temperatures correlate with each other (`1.3` vs `1.6` about 0.91)
+    but not with low-temperature rankings.
+- Immediate interpretation: the pilot generation itself is complete and usable
+  for diagnostics. For production, T=1.3/1.6 look too close to saturated
+  decoding noise; T=0.3 is stable but likely too conservative; T=0.5 and/or
+  T=0.7 are the strongest primary candidates, with T=1.0 as a possible
+  sensitivity point after manual response-quality review. The 24-token cap
+  should be reconsidered before production because nearly every sample hit it.
+- Synced completed PC outputs back to the laptop with `rsync` for
+  `results/response_entropy_pilot_grid/`, `figs/response_entropy_pilot_grid/`,
+  and the diagnostics Markdown/HTML.
+
+## 2026-06-16 - Supervisor-facing report rebuilt around Model 2
+
+- Re-read the current supervisor-facing Markdown before editing:
+
+```text
+docs/predicting_utterance_level_information_report.md
+```
+
+- The checked report was not in the state described by the earlier June 15
+  notes: the Markdown/HTML still had placeholder explanatory-model sections
+  (`TODO ADD RESULTS AND PLOTS` under First/Second/Third Model).
+- Rebuilt the report so Model 2 is the first result after the introduction:
+
+```text
+total utterance information ~ age + production effort + child identity
+```
+
+- Kept the report supervisor-facing by avoiding internal workflow/path framing
+  in the body and by preserving the existing dataset, effort, information, and
+  baseline sections.
+- Main M2 evidence promoted from saved artifacts:
+  - sample: 446,985 real child utterances, 21 children, k3 context;
+  - source table:
+    `results/m1_m6_dual_effort_quick_share/dual_model_summary.csv`;
+  - all five continuous-effort M2 age coefficients are negative:
+    words -0.122 bits/month, morphemes -0.136, CMU/pkg syllables -0.063,
+    package syllables -0.048, phonemes -0.065;
+  - effort coefficients remain strongly positive for every effort measure.
+- Added the five readable M2 fixed-effort plots from `figs/m2_simple_plots/`:
+
+```text
+m2_words_fixed_effort_and_global_trend.png
+m2_morphemes_fixed_effort_and_global_trend.png
+m2_syllables_cmu_pkg_fixed_effort_and_global_trend.png
+m2_syllables_pkg_fixed_effort_and_global_trend.png
+m2_phonemes_fixed_effort_and_global_trend.png
+```
+
+- Added matching k3 robustness results from:
+
+```text
+results/age_scrambling_robustness/age_scrambling_robustness_summary.csv
+figs/age_scrambling_robustness/m2_clear_robustness_regression_lines.png
+```
+
+- Important robustness distinction documented in the report: the robustness
+  checks use an aggregated child-session-context frame, so their slopes are
+  not numerically identical to the utterance-level M2 coefficients. The
+  matching k3 aggregated M2 slopes are still negative for all five effort
+  controls and fall outside the scrambled null intervals.
+- Rendered:
+
+```bash
+.venv/bin/python src/render_markdown_report.py \
+  docs/predicting_utterance_level_information_report.md \
+  docs/predicting_utterance_level_information_report.html
+
+.venv/bin/python src/embed_html_assets.py \
+  docs/predicting_utterance_level_information_report.html \
+  docs/predicting_utterance_level_information_report.embedded.html
+```
+
+- Embedded HTML reports 9 embedded images: the three coverage figures, five M2
+  fixed-effort figures, and the M2 robustness figure.
+- Verification:
+
+```bash
+rg -n "TODO|First Model|Second Model|Third Model|Route 1|breif|expending|bellow|Professor Xu :| t is " \
+  docs/predicting_utterance_level_information_report.md \
+  docs/predicting_utterance_level_information_report.html
+```
+
+returned no matches. The PDF was not regenerated.
+
+## 2026-06-16 - Response-space entropy stopping/max-token probes
+
+- Checked the completed Route 2 pilot first. The clean pilot output remains:
+
+```text
+results/response_entropy_pilot_grid/pilot_response_samples_clean.csv.gz
+```
+
+with 288,000 complete samples: 480 contexts x 6 temperatures x 100 samples.
+The diagnostic conclusion from the full pilot was that T=0.5 and T=0.7 are
+the strongest primary temperature candidates; T=0.3 is stable but
+conservative, T=1.0 is less reliable, and T=1.3/T=1.6 look saturated/noisy.
+
+- Built a bounded stopping probe workflow:
+
+```text
+src/build_response_entropy_stopping_probe.py
+scripts/run_response_entropy_stopping_probe_pc.sh
+tests/test_build_response_entropy_stopping_probe.py
+```
+
+The probe selects 40 contexts from the pilot manifest, balanced across context
+length buckets, and summarizes how generation behaves under different
+`max_new_tokens` caps.
+
+- First probe caveat: the initial stopping-probe output is not scientifically
+usable. It revealed a sampler bug caused by left-padded batches: generated
+tokens were sliced using each row's attention length instead of the padded
+prompt width, so some decoded "generated" text included the tail of the
+caregiver prompt. Fixed this in `src/sample_context_responses.py` by slicing
+from the batch prompt width:
+
+```text
+generated_token_ids(output_ids, prompt_token_width=encoded["input_ids"].shape[1])
+```
+
+and added a regression test in `tests/test_response_level_context_entropy.py`.
+
+- Corrected max-token probe (`results/response_entropy_stopping_probe_v2/`,
+  `docs/response_entropy_stopping_probe_v2.html`) tested 4,800 samples:
+  40 contexts x temperatures 0.5, 0.7, 1.0 x caps 12, 24, 48, 96 x
+  10 samples. With only explicit speaker-label stopping, every setting had
+  `hit_max_rate=1.0`; base Mistral did not naturally emit EOS within these
+  caps. Speaker-label boundary rates plateaued by 48-96 tokens:
+
+```text
+T=0.5 boundary_seen_rate: 0.345 at 12, 0.6425 at 24, 0.67 at 48, 0.675 at 96
+T=0.7 boundary_seen_rate: 0.285 at 12, 0.6050 at 24, 0.63 at 48, 0.640 at 96
+T=1.0 boundary_seen_rate: 0.205 at 12, 0.3950 at 24, 0.4575 at 48, 0.470 at 96
+```
+
+- Additional raw-text inspection on v2 showed that the model usually put a
+  generic newline before a speaker label or prose continuation. For cap 48,
+  generic-newline rates were about 0.985 at T=0.5, 0.995 at T=0.7, and 0.978
+  at T=1.0; median words before the first newline were 3, 3, and 4
+  respectively. This makes the first newline a more appropriate child-turn
+  boundary than waiting for an explicit `Caregiver:` label.
+
+- Updated `src/sample_context_responses.py` so the default stop strings include
+  a generic newline after the child response:
+
+```text
+["\nCaregiver:", "\nParent:", "\nAdult:", "\nChild:", "\nCHI:", "\n"]
+```
+
+The cleaner records a generic newline boundary as speaker marker `\n`, and
+focused tests cover both generic newline and explicit speaker-label behavior.
+
+- Final validation probe (`results/response_entropy_stopping_probe_v3/`,
+  `docs/response_entropy_stopping_probe_v3.html`) ran 800 samples on the PC:
+  40 contexts x temperatures 0.5 and 0.7 x cap 48 x 10 samples. It completed
+  at 2026-06-16 13:10:07 EDT. Summary:
+
+```text
+T=0.5: rows=400, boundary_seen_rate=0.985, hit_cap_no_boundary_rate=0.015,
+       empty_response_rate=0.0025, mean trimmed words=4.22,
+       p50 trimmed words=3, p90=9, p95=12
+T=0.7: rows=400, boundary_seen_rate=0.995, hit_cap_no_boundary_rate=0.005,
+       empty_response_rate=0.0025, mean trimmed words=4.29,
+       p50 trimmed words=3, p90=8.1, p95=11
+```
+
+The report still shows `hit_max_rate=1.0` because the current implementation
+generates the full 48 tokens and then trims the decoded text. That is a
+computational inefficiency, not evidence that the analytic response is
+length-capped. The scientifically relevant result is that the decoded text
+almost always contains a line/turn boundary before the cap.
+
+- Scientific decision for Route 2:
+  - Do not enforce the observed child's utterance length. That would turn the
+    response-space entropy measure into a same-length production control rather
+    than a distribution over plausible next child turns.
+  - Use free child-turn sampling: prompt with caretaker context and `Child:`,
+    sample the next child turn, then trim at the first newline/speaker
+    boundary/EOS.
+  - Use `max_new_tokens=48` as a generous safety cap for T=0.5/T=0.7, and
+    record sampled response length as a diagnostic/feature.
+  - Treat T=0.5 as the primary production candidate and T=0.7 as the main
+    sensitivity candidate unless manual quality review changes this. Avoid
+    T=1.3/T=1.6 for production entropy; T=1.0 is optional and less reliable.
+  - Before a large production run, consider adding a Transformers stopping
+    criterion for newline/speaker markers to avoid wasting GPU time, but the
+    existing post-generation trimming is scientifically adequate for the
+    response text itself.
+
+- Copied the corrected probe outputs back from the PC with `rsync` for:
+
+```text
+results/response_entropy_stopping_probe_v2/
+figs/response_entropy_stopping_probe_v2/
+docs/response_entropy_stopping_probe_v2.md
+docs/response_entropy_stopping_probe_v2.html
+results/response_entropy_stopping_probe_v3/
+figs/response_entropy_stopping_probe_v3/
+docs/response_entropy_stopping_probe_v3.md
+docs/response_entropy_stopping_probe_v3.html
+```
+
+- Regenerated the local v2/v3 stopping-probe reports after replacing the
+  stop-category figure with a more robust grouped bar plot. Verification:
+
+```bash
+MPLCONFIGDIR=/tmp/matplotlib .venv/bin/python -m unittest \
+  tests.test_response_level_context_entropy \
+  tests.test_build_response_entropy_stopping_probe
+
+MPLCONFIGDIR=/tmp/matplotlib .venv/bin/python -m unittest discover -s tests
+```
+
+passed with 13 focused tests and 257 full-suite tests.
+
+## 2026-06-16 - Response-space generation automatic quality audit
+
+- Ran an automatic quality audit on already-generated samples only; no new
+  generation was launched. The audit re-trimmed raw text at the first newline
+  to simulate the proposed first-line/end-of-turn response unit.
+- Structural quality flags included empty first line, speaker label inside the
+  kept first line, metadata/prose starts such as `The caregiver` or markdown
+  headings, no newline before the cap, overly long first lines, repetition
+  loops, and a softer exact/near context-copy review flag.
+- Main automatic results:
+
+```text
+v3 cap-48 probe:
+T=0.5 hard_bad_rate=0.0425, review_flag_including_copy=0.0975
+T=0.7 hard_bad_rate=0.0250, review_flag_including_copy=0.0725
+
+full 288k pilot, re-trimmed at first line:
+T=0.5 hard_bad_rate=0.0342, review_flag_including_copy=0.1141
+T=0.7 hard_bad_rate=0.0425, review_flag_including_copy=0.0873
+T=1.0 hard_bad_rate=0.1135, review_flag_including_copy=0.1227
+```
+
+- Interpretation: T=0.5/T=0.7 look viable for a formalized Route 2 measurement
+  after quality documentation; T=1.0 is much less attractive because cap/no-
+  boundary failures rise sharply. The hard structural failure rate is low at
+  T=0.5/T=0.7, but semantic oddities still require manual review because
+  automatic flags cannot reliably judge context appropriateness.
+- Recommended pre-Slurm sequence:
+  1. Implement true end-of-turn stopping during generation, while preserving
+     raw text, stop reason, and quality flags.
+  2. Run one small smoke on existing pilot contexts at T=0.5/T=0.7.
+  3. Manually label a stratified sample of generated first-line responses.
+  4. Run a small prompt-robustness smoke before full Mila production.
+
+## 2026-06-16 - Exhaustive Internal M1-M6 Super Atlas
+
+- Added a reproducible synthesis/report stage:
+
+```text
+src/build_m1_m6_super_atlas_report.py
+tests/test_build_m1_m6_super_atlas_report.py
+```
+
+- Purpose: create an internal cherry-picking source report for the supervisor
+  writeup, not a supervisor-facing narrative. The report explicitly documents
+  for each M1-M6 family:
+  - scientific question and formula;
+  - whether the main fit is ordinary least squares;
+  - which library/object was used (`statsmodels.formula.api.ols`, GLM, GEE,
+    or MixedLM);
+  - whether child identity is a fixed effect (`C(child_id)`) or a random-effect
+    sensitivity check;
+  - takeaways and caveats before the plot/table galleries.
+
+- Generated outputs:
+
+```text
+docs/utterance_information_m1_m6_super_atlas.md
+docs/utterance_information_m1_m6_super_atlas.html
+figs/m1_m6_super_atlas/
+results/m1_m6_super_atlas/figure_inventory.csv
+results/m1_m6_super_atlas/source_artifact_inventory.csv
+results/m1_m6_super_atlas/model_coverage_summary.csv
+results/m1_m6_super_atlas/overview_figure_manifest.csv
+```
+
+- Source coverage recorded in the report:
+  - 19 source CSV artifacts.
+  - 413 existing relevant PNG source figures.
+  - 11 newly generated overview figures.
+  - 437 Markdown image references in the final report, with 0 missing files.
+
+- Model coverage summary after correcting figure grouping to infer model IDs
+  from filenames rather than parent directories:
+
+```text
+model  dual_rows  estimator_sensitivity_rows  context_rows  robustness_rows  figure_rows
+M1     10         20                          20            80               46
+M2     10         35                          20            80               54
+M3     10         55                          20            80               57
+M4     10         0                           60            60               67
+M5     10         0                           60            60               63
+M6     10         0                           60            60               63
+```
+
+- Verification:
+
+```bash
+env MPLCONFIGDIR=/tmp/matplotlib .venv/bin/python -m unittest \
+  tests.test_build_m1_m6_super_atlas_report
+
+env MPLCONFIGDIR=/tmp/matplotlib .venv/bin/python -m unittest discover -s tests
+
+env MPLCONFIGDIR=/tmp/matplotlib .venv/bin/python \
+  src/build_m1_m6_super_atlas_report.py
+
+.venv/bin/python -c "from pathlib import Path; import re; md=Path('docs/utterance_information_m1_m6_super_atlas.md'); text=md.read_text(); imgs=re.findall(r'!\\[[^\\]]*\\]\\(([^)]+)\\)', text); missing=[src for src in imgs if not (md.parent/src).resolve().exists()]; print(len(imgs), len(missing))"
+```
+
+Focused tests passed: 3 tests. Full suite passed: 260 tests in 259.611s.
+Image-reference check: 437 refs, 0 missing.

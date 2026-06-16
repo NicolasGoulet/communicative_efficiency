@@ -1,3 +1,4 @@
+import gzip
 import math
 import tempfile
 import unittest
@@ -13,6 +14,7 @@ from src.sample_context_responses import (
     clean_generated_response_with_audit,
     completed_context_temperatures,
     format_prompt,
+    generated_token_ids,
     resolve_model_source,
 )
 from src.summarize_response_entropy_samples import (
@@ -49,6 +51,10 @@ class ResponseLevelContextEntropyTests(unittest.TestCase):
         self.assertEqual(cleaned, "riding a bike")
         self.assertTrue(stopped)
         self.assertEqual(marker, "Caregiver:")
+        cleaned, stopped, marker = clean_generated_response_with_audit("riding a bike\nthen more text")
+        self.assertEqual(cleaned, "riding a bike")
+        self.assertTrue(stopped)
+        self.assertEqual(marker, "\\n")
 
     def test_model_dir_none_uses_shared_huggingface_cache(self):
         self.assertEqual(resolve_model_source("mistral", None), ("mistral", None))
@@ -62,6 +68,13 @@ class ResponseLevelContextEntropyTests(unittest.TestCase):
             (snapshot / "config.json").write_text("{}", encoding="utf-8")
             self.assertEqual(resolve_model_source("mistral", snapshot), (str(snapshot), None))
 
+    def test_generated_token_slice_uses_padded_prompt_width(self):
+        output_ids = [0, 0, 101, 102, 103, 201, 202]
+
+        generated = generated_token_ids(output_ids, prompt_token_width=5)
+
+        self.assertEqual(generated, [201, 202])
+
     def test_response_sampler_appends_and_detects_complete_context_temperatures(self):
         with tempfile.TemporaryDirectory() as tmp:
             output_csv = Path(tmp) / "samples.csv.gz"
@@ -73,8 +86,8 @@ class ResponseLevelContextEntropyTests(unittest.TestCase):
                     "prompt_text": "Caregiver: what do you like\nChild:",
                     "temperature": 1.0,
                     "sample_index": sample_index,
-                    "raw_generated_text": "bike",
-                    "sampled_response_text": "bike",
+                    "raw_generated_text": 'bike\nCaregiver: okay, "quoted"',
+                    "sampled_response_text": 'bike\nCaregiver: okay, "quoted"',
                     "generated_token_count": 1,
                     "hit_max_new_tokens": 0,
                     "stopped_by_speaker_boundary": 0,
@@ -96,7 +109,22 @@ class ResponseLevelContextEntropyTests(unittest.TestCase):
             completed = completed_context_temperatures(output_csv, samples_per_context=2)
 
             self.assertEqual(completed, {("ctx1", 1.0)})
-            self.assertEqual(len(pd.read_csv(output_csv)), 2)
+            parsed = pd.read_csv(output_csv)
+            self.assertEqual(len(parsed), 2)
+            self.assertEqual(parsed["sampled_response_text"].iloc[0], 'bike\nCaregiver: okay, "quoted"')
+
+    def test_completed_context_temperatures_skips_malformed_resume_rows(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            output_csv = Path(tmp) / "samples.csv.gz"
+            with gzip.open(output_csv, "wt", encoding="utf-8", newline="") as handle:
+                handle.write("context_id,temperature,sample_index\n")
+                handle.write("ctx1,1.0,0\n")
+                handle.write("malformed row with missing fields\n")
+                handle.write("ctx1,1.0,1\n")
+
+            completed = completed_context_temperatures(output_csv, samples_per_context=2)
+
+            self.assertEqual(completed, {("ctx1", 1.0)})
 
     def test_build_manifest_filters_and_aggregates_duplicate_contexts(self):
         with tempfile.TemporaryDirectory() as tmp:

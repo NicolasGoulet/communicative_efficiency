@@ -131,13 +131,19 @@ ul, ol {
 <h2>Introduction</h2>
 <p>This document describes an utterance-level analysis of communicative efficiency in child language. The broad goal is to understand how children learn to package information in speech while managing the effort required to produce it.</p>
 <p>In this framing, communicative efficiency has two parts. The first is <strong>informativeness</strong>: how much information an utterance conveys in context. The second is <strong>effort</strong>: how much linguistic material is produced to convey that information. A developmental increase in total surprisal is not meaningful on its own if it simply reflects that older children produce longer utterances. For this reason, the analyses must compare informational content while controlling for utterance length and other effort-related properties.</p>
-<p>The analyses will focus on three related quantities:</p>
+<p>The analyses focus on three related quantities:</p>
 <ul>
 <li><strong>total information per utterance</strong>, measured with <code>sum_bits</code>;</li>
 <li><strong>information per unit of production effort</strong>, where <code>sum_bits</code> is divided by the number of words, morphemes, phonemes or syllables in an utterance;</li>
 <li><strong>tokenizer-level sensitivity</strong>, measured with <code>mean_bits_per_token</code>.</li>
 </ul>
-<p>A follow-up document will be shared in the following days that will explore the analyses proposed by Professor Xu : how (and if) do contextual information predict utterance length / utterance effort.</p>
+<p>A follow-up analysis asks a complementary question: whether contextual uncertainty predicts the length or effort of the child&#x27;s response.</p>
+<h2>Current Primary Result: Model 2</h2>
+<p>The clearest current model is Model 2:</p>
+<pre><code>total utterance information ~ age + production effort + child identity</code></pre>
+<p>The outcome is total utterance information in bits. Age is measured in months. Production effort is tested five ways: words, surface morphemes, two syllable estimates, and phonemes. Child identity is included so that each child has their own baseline level of predicted information.</p>
+<p>This model uses 446,985 real child utterances from 21 children, scored with the preceding three caretaker utterances as context. Across all five effort controls, the age coefficient is negative. In plain language: for the same amount of linguistic material, and within the child-adjusted comparison, older children&#x27;s utterances are predicted to contain less Mistral surprisal.</p>
+<p>That should not be interpreted as children &quot;communicating less.&quot; A safer interpretation is that older children produce utterances that are more predictable in their conversational context after production effort and stable between-child differences are controlled. This is consistent with development toward more conventional, contextually recoverable, or adult-like language use.</p>
 <h2>Analysis Sample</h2>
 <p>The initial analysis uses three longitudinal naturalistic caregiver-child corpora from CHILDES: Providence, Brown, and Manchester. Together, these corpora provide dense developmental trajectories for 21 children, with both child speech and caretaker speech scored under the same Mistral-based surprisal framework.</p>
 <p>The first comparisons focus on real child utterances, caretaker utterances, and matched-length baseline utterances. These comparisons are meant to tell us whether children&#x27;s utterances are merely becoming longer over time, or whether they are changing in how efficiently they use linguistic material to carry information.</p>
@@ -146,7 +152,7 @@ ul, ol {
 <ul>
 <li><code>006-023</code> months</li>
 </ul>
-<p>This is partly due to having very few utterances in these 6 months bins, but t is also consistent with well-established developmental changes in utterance length: around the second year, children increasingly move from single-word productions to multiword utterances, and mean length of utterance rises over early childhood.</p>
+<p>This is partly due to having very few utterances in these 6-month bins, but it is also consistent with well-established developmental changes in utterance length: around the second year, children increasingly move from single-word productions to multiword utterances, and mean length of utterance rises over early childhood.</p>
 <p>The following bins are six-month intervals:</p>
 <ul>
 <li><code>024-029</code></li>
@@ -280,7 +286,7 @@ ul, ol {
 <li><strong>Phonemes</strong>: <code>auto_phonemes_cmu_or_g2p</code>; CMUdict ARPABET phone counts are</li>
 <p>used for dictionary-covered words, with <code>g2p-en</code> applied to OOV forms as written.</p>
 </ul>
-<p>These measures are also important because the generated baselines (discussed bellow) are matched to children in word count, but not necessarily in morphemes, syllables, or phonemes. A baseline may therefore use the same number of words while still requiring a different amount of phonological or morphological effort.</p>
+<p>These measures are also important because the generated baselines discussed below are matched to children in word count, but not necessarily in morphemes, syllables, or phonemes. A baseline may therefore use the same number of words while still requiring a different amount of phonological or morphological effort.</p>
 <h2>Information</h2>
 <p>The second part of the analysis concerns informational content. Information is measured with Mistral surprisal in bits. Higher surprisal means that the model found the produced utterance less predictable in context, i.e. it contained <em>more information</em>; lower surprisal means that the utterance was more predictable, i.e. it contained <em>less information</em>.</p>
 <p>The main information measure is total utterance surprisal, <code>sum_bits</code>. This is the total amount of information assigned to the produced target utterance under the model. Because longer utterances naturally tend to accumulate more bits and also tend to make individual tokens less surprising, total information must be interpreted alongside effort.</p>
@@ -299,28 +305,124 @@ ul, ol {
 <p>The planned LSTM comparison follows the same additive developmental logic as the n-gram baselines. For each age bin, a different LSTM is trained on the current bin plus all previous bins, then used to generate utterances only for the target bin. This keeps the comparison aligned with the developmental information available to the n-gram baselines.</p>
 <p>The LSTM can listen to caretaker language, but it is only allowed to speak using the child-side vocabulary observed in the age-appropriate training data.</p>
 <p>The first LSTM comparison will use same-length generated utterances, so effort is held constant relative to the real child utterance. A later free-length variant can ask a different question: whether the model chooses a similar amount of communicative effort when responding to the same caretaker context.</p>
-<h2>Explanatory Models</h2>
-<p>This section of the document describes certain models that attempt to predict informational contents of child speech in naturalistic settings at the utterance level.</p>
-<p>Additionally, SES metrics were not available systematically for all children and was particularly sparse for the PBM sample.</p>
-<p>(At the time of sharing this report these are still underway).</p>
-<h3>First Model</h3>
-<p>TODO ADD RESULTS AND PLOTS</p>
-<h3>Second Model</h3>
-<p>TODO ADD RESULTS AND PLOTS</p>
-<h3>Third Model</h3>
-<p>TODO ADD RESULTS AND PLOTS</p>
-<h3>Key takeways</h3>
-<ul>
-<li>TODO</li>
-</ul>
+<h2>Model 2 Details</h2>
+<p>Model 2 is the main result to interpret at this stage because it controls both production effort and child identity. The formula is:</p>
+<pre><code>sum_bits ~ age + effort + child identity</code></pre>
+<p>The model is fit separately for each effort measure. This avoids putting words, morphemes, syllables, and phonemes in the same regression, where they would be highly correlated measures of the same underlying utterance size.</p>
+<p>The displayed version is an ordinary linear regression. The coefficient for age is in bits per month after effort and child identity are controlled. The coefficient for effort is the expected increase in total bits for one additional unit of that effort measure. The uncertainty estimates use child-clustered robust standard errors to account for repeated utterances from the same child. SES is not included in this version because systematic SES metadata are not available for all children in the current sample.</p>
+<table>
+<thead><tr>
+<th>Effort control</th>
+<th>Age effect, bits/month</th>
+<th>Age p</th>
+<th>Age effect, bits/6 months</th>
+<th>Effort effect, bits/unit</th>
+<th>Model fit</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>Words</td>
+<td>-0.122</td>
+<td>&lt;.001</td>
+<td>-0.735</td>
+<td>6.367</td>
+<td>R2 = 0.626</td>
+</tr>
+<tr>
+<td>Morphemes</td>
+<td>-0.136</td>
+<td>&lt;.001</td>
+<td>-0.813</td>
+<td>5.489</td>
+<td>R2 = 0.613</td>
+</tr>
+<tr>
+<td>Syllables: CMU/pkg</td>
+<td>-0.063</td>
+<td>0.018</td>
+<td>-0.380</td>
+<td>5.236</td>
+<td>R2 = 0.646</td>
+</tr>
+<tr>
+<td>Syllables: pkg</td>
+<td>-0.048</td>
+<td>0.049</td>
+<td>-0.291</td>
+<td>4.831</td>
+<td>R2 = 0.630</td>
+</tr>
+<tr>
+<td>Phonemes</td>
+<td>-0.065</td>
+<td>0.013</td>
+<td>-0.389</td>
+<td>2.084</td>
+<td>R2 = 0.644</td>
+</tr>
+</tbody></table>
+<p>All five age effects are negative and statistically reliable at conventional levels. The word and morpheme versions are the most direct to interpret. The phoneme and syllable versions show that the result is not limited to orthographic word count.</p>
+<p>The effort effects are large and positive, as expected: longer or more complex utterances carry more total information. The important point is that age still has a negative association with total information after this effort effect is controlled.</p>
+<h3>Fixed-Effort Predictions</h3>
+<p>The figures below show the fitted Model 2 age trajectory while holding effort fixed. Within each figure, the colored lines are exact fixed effort levels and the black line is the global adjusted trend. Because Model 2 does not include an age-by-effort interaction, the fixed-effort lines are parallel; the point of the plots is to show that the downward age trend is present at comparable utterance sizes.</p>
+<img src="../figs/m2_simple_plots/m2_words_fixed_effort_and_global_trend.png" alt="Model 2 fixed-effort predictions for word count">
+<img src="../figs/m2_simple_plots/m2_morphemes_fixed_effort_and_global_trend.png" alt="Model 2 fixed-effort predictions for morpheme count">
+<img src="../figs/m2_simple_plots/m2_syllables_cmu_pkg_fixed_effort_and_global_trend.png" alt="Model 2 fixed-effort predictions for CMU/pkg syllable count">
+<img src="../figs/m2_simple_plots/m2_syllables_pkg_fixed_effort_and_global_trend.png" alt="Model 2 fixed-effort predictions for package syllable count">
+<img src="../figs/m2_simple_plots/m2_phonemes_fixed_effort_and_global_trend.png" alt="Model 2 fixed-effort predictions for phoneme count">
+<h3>Robustness Checks</h3>
+<p>The main Model 2 table above is fit at the utterance level with the preceding three caretaker utterances as context. A complementary robustness analysis uses the same context window but aggregates the data into child-session-context units, then tests whether the age effect survives balanced resampling and age-label scrambling. Because this robustness analysis uses an aggregated frame, its coefficients are not numerically identical to the utterance-level coefficients, but the direction of the result is the same.</p>
+<p>Balanced age-bin bootstraps keep the estimated age effect negative for all five effort controls:</p>
+<table>
+<thead><tr>
+<th>Effort control</th>
+<th>Aggregated age effect</th>
+<th>Balanced bootstrap 95% range</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>Words</td>
+<td>-0.040</td>
+<td>-0.168 to -0.036</td>
+</tr>
+<tr>
+<td>Morphemes</td>
+<td>-0.043</td>
+<td>-0.178 to -0.029</td>
+</tr>
+<tr>
+<td>Syllables: CMU/pkg</td>
+<td>-0.029</td>
+<td>-0.143 to -0.004</td>
+</tr>
+<tr>
+<td>Syllables: pkg</td>
+<td>-0.033</td>
+<td>-0.152 to -0.017</td>
+</tr>
+<tr>
+<td>Phonemes</td>
+<td>-0.046</td>
+<td>-0.175 to -0.002</td>
+</tr>
+</tbody></table>
+<p>The same aggregated Model 2 effect was also compared against three scrambled age controls: grouped age-bin label scrambling, unit-level age scrambling, and within-child age scrambling. For every effort measure and every scrambling scheme, the observed age effect fell outside the scrambled null 95% interval. With 100 scramble replicates, the resulting two-sided permutation value was at or below 0.050 in each case, and approximately 0.010 in nearly all cases.</p>
+<img src="../figs/age_scrambling_robustness/m2_clear_robustness_regression_lines.png" alt="Model 2 balanced and age-scrambled robustness checks">
+<h3>Interpretation</h3>
+<p>Model 2 supports a conservative claim:</p>
+<pre><code>After controlling production effort and child identity, older child utterances
+have lower predicted total surprisal than younger child utterances.</code></pre>
+<p>This is an informativeness result, not yet a full communicative-efficiency result. It says that the informational content of the produced utterance changes with age after effort is controlled. It does not yet show whether children choose longer or shorter utterances because a context is more or less predictable.</p>
+<p>That second question needs a model where effort is the outcome, for example:</p>
+<pre><code>production effort ~ age + context uncertainty + child identity</code></pre>
+<p>The next context-uncertainty measure should ideally be response-level: instead of measuring uncertainty about only the next token, it should estimate how many plausible complete child responses the preceding caretaker context allows.</p>
 <h2>Possible Next Steps</h2>
-<h3>Using the full (still expending) data set</h3>
-<p>TODO DESCRIBE SUPER BRIEFLY THE NON-CLINICAL DATASET WE HAVE</p>
-<p>TODO DESCRIBE SUPER BREIFLY THE CLINICAL DATASET WE HAVE</p>
-<h3>Generate utterances with BabyLM-like architectures</h3>
-<p>An even stronger baseline would be have a BabyLM-like transformer architecture to generate utterances for each child utterance. To not have these models make inference on their training data, we train a new model for each corpus</p>
-<h3>Word-level surprisal</h3>
-<p>TODO DESCRIBE THIS IDEA</p>
+<h3>Expand Beyond the Initial Three Corpora</h3>
+<p>The present report focuses on Providence, Brown, and Manchester because they form the current dense longitudinal analysis set. The larger naturalistic dataset now includes additional caregiver-child corpora and can be used to ask whether the Model 2 pattern generalizes beyond these three corpora. Clinical and control corpora are also available, but they should be handled as a separate extension because their sampling designs differ from naturalistic home-interaction data.</p>
+<h3>Stronger Generated Baselines</h3>
+<p>The same-length random and n-gram baselines are useful because they control utterance length and developmental vocabulary access. A stronger generated baseline would use a small child-language model, such as an LSTM or BabyLM-like transformer, trained under the same developmental constraints. This would test whether the child pattern differs from a model that has learned more than local word frequencies.</p>
+<h3>Word-Level Surprisal</h3>
+<p>The current result uses total utterance information. Word-level surprisal would make it possible to ask where the age effect comes from inside the utterance: early versus late words, function versus content words, or particular lexical and morphological positions. This would help distinguish a broad utterance-level predictability effect from a small number of highly surprising words.</p>
 </main>
 </body>
 </html>

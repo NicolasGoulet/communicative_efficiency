@@ -9,6 +9,7 @@ writes one row per sampled response.
 from __future__ import annotations
 
 import argparse
+import csv
 import gzip
 import time
 from pathlib import Path
@@ -21,7 +22,7 @@ import torch
 DEFAULT_MANIFEST = Path("results/response_level_context_entropy/context_response_sampling_manifest.csv")
 DEFAULT_OUTPUT = Path("results/response_level_context_entropy/context_response_samples.csv.gz")
 DEFAULT_PROMPT_TEMPLATE = "Caregiver: {context}\nChild:"
-DEFAULT_STOP_STRINGS = ["\nCaregiver:", "\nParent:", "\nAdult:", "\nChild:", "\nCHI:"]
+DEFAULT_STOP_STRINGS = ["\nCaregiver:", "\nParent:", "\nAdult:", "\nChild:", "\nCHI:", "\n"]
 OUTPUT_COLUMNS = [
     "context_id",
     "manifest_row",
@@ -79,7 +80,8 @@ def clean_generated_response_with_audit(text: str, *, stop_strings: Sequence[str
             first_marker = marker
     if first_position is None:
         return raw.strip(), False, ""
-    return raw[:first_position].strip(), True, first_marker.strip()
+    marker_label = "\\n" if first_marker == "\n" else first_marker.strip()
+    return raw[:first_position].strip(), True, marker_label
 
 
 def model_input_device(model) -> torch.device:
@@ -89,6 +91,12 @@ def model_input_device(model) -> torch.device:
         return next(model.parameters()).device
     except StopIteration:  # pragma: no cover - defensive for unusual wrappers
         return torch.device("cpu")
+
+
+def generated_token_ids(output_ids, *, prompt_token_width: int):
+    """Return only generated token ids after the padded prompt width."""
+
+    return output_ids[int(prompt_token_width) :]
 
 
 def resolve_model_source(model_name: str, model_dir: Path | None) -> tuple[str, str | None]:
@@ -169,6 +177,7 @@ def sample_for_contexts(
         if torch.cuda.is_available():
             torch.cuda.manual_seed_all(seed + offset)
         encoded = tokenizer(prompt_batch, return_tensors="pt", padding=True).to(input_device)
+        prompt_token_width = int(encoded["input_ids"].shape[1])
         outputs = model.generate(
             **encoded,
             do_sample=True,
@@ -181,11 +190,8 @@ def sample_for_contexts(
             eos_token_id=tokenizer.eos_token_id,
             renormalize_logits=True,
         )
-        input_lengths = encoded["attention_mask"].sum(dim=1).detach().cpu().tolist()
-        for output_ids, input_len, source_row, sample_index, prompt in zip(
-            outputs, input_lengths, row_batch, sample_index_batch, prompt_batch
-        ):
-            generated_ids = output_ids[int(input_len) :]
+        for output_ids, source_row, sample_index, prompt in zip(outputs, row_batch, sample_index_batch, prompt_batch):
+            generated_ids = generated_token_ids(output_ids, prompt_token_width=prompt_token_width)
             raw_generated = tokenizer.decode(generated_ids, skip_special_tokens=True)
             response, stopped_by_boundary, stop_marker = clean_generated_response_with_audit(raw_generated)
             rows.append(
@@ -218,19 +224,28 @@ def completed_context_temperatures(output_csv: Path, samples_per_context: int) -
 
     if not output_csv.exists():
         return set()
-    counts: dict[tuple[str, float], int] = {}
+    sample_indices: dict[tuple[str, float], set[int]] = {}
     try:
-        reader = pd.read_csv(output_csv, usecols=["context_id", "temperature", "sample_index"], chunksize=100_000)
+        reader = pd.read_csv(
+            output_csv,
+            usecols=["context_id", "temperature", "sample_index"],
+            chunksize=100_000,
+            dtype=str,
+            keep_default_na=False,
+            on_bad_lines="skip",
+        )
         for chunk in reader:
-            chunk["temperature"] = pd.to_numeric(chunk["temperature"], errors="coerce")
-            for (context_id, temperature), group in chunk.groupby(["context_id", "temperature"], dropna=False):
-                if pd.isna(temperature):
+            chunk["temperature_numeric"] = pd.to_numeric(chunk["temperature"], errors="coerce")
+            chunk["sample_index_numeric"] = pd.to_numeric(chunk["sample_index"], errors="coerce")
+            chunk = chunk.dropna(subset=["temperature_numeric", "sample_index_numeric"])
+            for (context_id, temperature), group in chunk.groupby(["context_id", "temperature_numeric"], dropna=False):
+                if pd.isna(temperature) or context_id == "":
                     continue
                 key = (str(context_id), float(temperature))
-                counts[key] = counts.get(key, 0) + group["sample_index"].nunique()
+                sample_indices.setdefault(key, set()).update(group["sample_index_numeric"].astype(int).tolist())
     except (EOFError, gzip.BadGzipFile, pd.errors.EmptyDataError):
         return set()
-    return {key for key, count in counts.items() if count >= samples_per_context}
+    return {key for key, indices in sample_indices.items() if len(indices) >= samples_per_context}
 
 
 def append_rows(output_csv: Path, rows: list[dict[str, object]]) -> int:
@@ -247,9 +262,9 @@ def append_rows(output_csv: Path, rows: list[dict[str, object]]) -> int:
     write_header = not output_csv.exists() or output_csv.stat().st_size == 0
     if output_csv.suffix == ".gz":
         with gzip.open(output_csv, "at", newline="") as handle:
-            frame.to_csv(handle, index=False, header=write_header)
+            frame.to_csv(handle, index=False, header=write_header, quoting=csv.QUOTE_ALL, lineterminator="\n")
     else:
-        frame.to_csv(output_csv, index=False, mode="a", header=write_header)
+        frame.to_csv(output_csv, index=False, mode="a", header=write_header, quoting=csv.QUOTE_ALL, lineterminator="\n")
     return len(frame)
 
 
