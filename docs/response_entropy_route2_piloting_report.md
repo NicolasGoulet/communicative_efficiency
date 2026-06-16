@@ -186,8 +186,30 @@ planned samples = 1,200
 Purpose: answer whether high temperatures that looked bad at cap 24 still fail
 to reach a newline when given a much larger cap.
 
-Status: running at the time this report skeleton was created. Fill in final
-numbers after completion.
+Status: completed on the PC at 2026-06-16 14:21:24 EDT.
+
+Runtime note: this 1,200-sample cap-96 smoke took 699.9 seconds because the
+current implementation still decodes all 96 tokens and trims afterward. A true
+end-of-turn stopping criterion should be implemented before production to avoid
+wasting GPU time.
+
+## 4.1 Plot Artifacts
+
+Detailed probe reports with figures:
+
+```text
+docs/response_entropy_stopping_probe_v2.html
+docs/response_entropy_stopping_probe_v3.html
+docs/response_entropy_stopping_probe_v4_cap96_extreme_temps.html
+```
+
+Most useful v4 plots:
+
+![v4 boundary rate](../figs/response_entropy_stopping_probe_v4_cap96_extreme_temps/stopping_probe_boundary_rate.png)
+
+![v4 stop categories](../figs/response_entropy_stopping_probe_v4_cap96_extreme_temps/stopping_probe_stop_categories.png)
+
+![v4 p90 trimmed response words](../figs/response_entropy_stopping_probe_v4_cap96_extreme_temps/stopping_probe_p90_trimmed_words.png)
 
 ## 5. What We Learned About Max Tokens
 
@@ -212,13 +234,24 @@ caps:
 | 0.7 | 1.50% | 0.50% | 0.25% |
 | 1.0 | 8.25% | 2.25% | 0.50% |
 
-Interpretation before the extreme-temperature cap-96 smoke:
+The cap-96 extreme-temperature smoke added:
+
+| Temperature | Cap 96 | Did Not Reach Newline |
+| --- | ---: | ---: |
+| 0.3 | 96 | 0.00% |
+| 1.3 | 96 | 20.00% |
+| 1.6 | 96 | 62.75% |
+
+Interpretation after the extreme-temperature cap-96 smoke:
 
 - T=0.5 and T=0.7 are already clean under cap 48/96.
 - T=1.0 becomes much cleaner at cap 96 but remains less reliable in entropy
   stability and sample quality.
-- T=1.3 and T=1.6 looked very bad at cap 24; the new v4 smoke checks whether
-  this is only a cap issue or a deeper high-temperature quality issue.
+- T=0.3 is structurally very clean but may be too conservative for estimating
+  a rich response-space distribution.
+- T=1.3 and T=1.6 remain poor even with cap 96. The problem is not just the old
+  24-token cap; high-temperature generations often do not form clean one-turn
+  responses.
 
 ## 6. Quality Audit Of Existing Samples
 
@@ -245,6 +278,9 @@ Results for T=0.5/T=0.7:
 | full pilot first-line trim | 0.5 | 3.42% | 11.41% |
 | full pilot first-line trim | 0.7 | 4.25% | 8.73% |
 | full pilot first-line trim | 1.0 | 11.35% | 12.27% |
+| v4 cap-96 smoke | 0.3 | 3.00% | 7.75% |
+| v4 cap-96 smoke | 1.3 | 28.75% | 29.25% |
+| v4 cap-96 smoke | 1.6 | 70.50% | 70.50% |
 
 Interpretation:
 
@@ -252,8 +288,11 @@ Interpretation:
   low enough to justify a formalized smoke test.
 - T=1.0 has more cap/no-boundary failures and is a less attractive production
   setting.
-- T=1.3/T=1.6 should not be used without very strong evidence from the cap-96
-  smoke and a separate quality audit.
+- T=0.3 is clean but conservative; it can be useful as a lower-temperature
+  sensitivity point, but it is not the best primary measure of response-space
+  uncertainty.
+- T=1.3/T=1.6 should not be used for production. Their cap-96 hard-bad rates
+  are too high, and manual examples show long incoherent continuations.
 
 ## 7. Examples
 
@@ -336,6 +375,29 @@ Kept response:
 No, I'm not getting off the chair. I'm not getting off the chair. I'm not
 ```
 
+### Bad: High-Temperature Incoherence
+
+At T=1.3 and T=1.6, cap 96 often produces long continuations that are neither
+child-like nor context-relevant.
+
+```text
+Context:
+where's your egg?
+
+T=1.3 kept response:
+manned security just came running over saying they are running hot, tell
+!manning alone them immediately along with carts ...
+```
+
+```text
+Context:
+what's Granny_Dryden doing?
+
+T=1.6 kept response:
+Oh watching others parment Name that beg literary fragject or commander segment
+passenger boot texture demolction ...
+```
+
 ## 8. Proposed Production Strategy
 
 Before Mila-scale generation:
@@ -388,11 +450,19 @@ Do not launch the full Mila Slurm production run yet.
 
 Do next:
 
-1. Finish the cap-96 extreme-temperature smoke.
-2. Update this report with its final table.
-3. Implement actual end-of-turn stopping and rejection logging.
-4. Run one small smoke with the final script.
-5. Manually audit a stratified sample of accepted and rejected generations.
+1. Implement actual end-of-turn stopping and rejection logging.
+2. Run one small smoke with the final script.
+3. Manually audit a stratified sample of accepted and rejected generations.
+4. Confirm the operational definition with supervisors.
 
 Then proceed to Mila-scale generation if the small smoke shows low rejection
 rates and supervisor agreement on the operational definition.
+
+Current temperature recommendation:
+
+```text
+Primary: T=0.5
+Sensitivity: T=0.7
+Optional conservative diagnostic: T=0.3
+Do not use for production: T=1.3, T=1.6
+```

@@ -3077,3 +3077,346 @@ env MPLCONFIGDIR=/tmp/matplotlib .venv/bin/python \
 
 Focused tests passed: 3 tests. Full suite passed: 260 tests in 259.611s.
 Image-reference check: 437 refs, 0 missing.
+
+## 2026-06-16 - Interpreted M1-M6 Atlas v2 and Technical Companion
+
+- Saved the recent email motivating the naturalistic child communicative-
+  efficiency analysis exactly as provided:
+
+```text
+docs/project_motivation_recent_email_context_2026-06-16.md
+```
+
+- Added a synthesis/report-only builder and focused test:
+
+```text
+src/build_m1_m6_interpreted_atlas_report.py
+tests/test_build_m1_m6_interpreted_atlas_report.py
+```
+
+- Generated a new interpreted version of the M1-M6 super atlas without
+  modifying the original atlas:
+
+```text
+docs/utterance_information_m1_m6_super_atlas_v2_interpreted.md
+docs/utterance_information_m1_m6_super_atlas_v2_interpreted.html
+```
+
+- Generated a separate technical implementation companion:
+
+```text
+docs/utterance_information_m1_m6_technical_implementation_companion.md
+docs/utterance_information_m1_m6_technical_implementation_companion.html
+```
+
+- The interpreted atlas now explicitly connects the email's two-part
+  communicative-efficiency framing to the current modeling state:
+  - Route 1/current evidence: informativeness under controlled effort,
+    especially M2 `sum_bits ~ age_c + target_effort_c + C(child_id)`;
+  - Route 2/future analysis: effort or utterance length as the outcome,
+    predicted by response-space/context uncertainty plus confounds.
+- The report includes the exact saved email block, a model-by-model M1-M6
+  interpretation, coefficient meanings, plot-family reading notes, a balanced
+  discussion of child fixed effects, and proposed-not-yet-run formulas for
+  within/between child age decomposition, age-overlap checks, random slopes,
+  and Route 2 length prediction.
+- The companion explains OLS, GLM, GEE, MixedLM, fixed effects, random effects,
+  clustered standard errors, interactions, centering, R2, p-values, fixed-
+  effort prediction plots, and the Route 1/Route 2 distinction in mechanical
+  terms.
+- Generated audit outputs:
+
+```text
+results/m1_m6_interpreted_atlas/interpreted_atlas_image_link_audit.csv
+results/m1_m6_interpreted_atlas/figure_inventory.csv
+results/m1_m6_interpreted_atlas/source_artifact_inventory.csv
+```
+
+- Verification:
+
+```bash
+env MPLCONFIGDIR=/tmp/matplotlib .venv/bin/python -m unittest \
+  tests.test_build_m1_m6_interpreted_atlas_report
+
+env MPLCONFIGDIR=/tmp/matplotlib .venv/bin/python -m unittest \
+  tests.test_build_m1_m6_super_atlas_report \
+  tests.test_build_m1_m6_interpreted_atlas_report
+
+env MPLCONFIGDIR=/tmp/matplotlib .venv/bin/python \
+  src/build_m1_m6_interpreted_atlas_report.py
+
+rg -n ",False|,false" \
+  results/m1_m6_interpreted_atlas/interpreted_atlas_image_link_audit.csv
+
+env MPLCONFIGDIR=/tmp/matplotlib .venv/bin/python -m unittest discover -s tests
+```
+
+Focused interpreted-atlas test passed: 1 test. Super-atlas plus interpreted-
+atlas tests passed: 4 tests. Builder rendered both reports and audit CSVs.
+Image-link audit recorded 415 interpreted-atlas image references with 0 missing
+files. Full suite passed: 261 tests in 263.827s.
+
+## 2026-06-16 - Route 2 cap-96 extreme-temperature smoke and meeting report
+
+- User asked for a super-short cap-96 run at the temperatures not covered by
+  the previous cap grid: T=0.3, T=1.3, and T=1.6. Purpose: distinguish whether
+  the poor high-temperature newline rates in the full pilot were caused only
+  by the earlier 24-token cap, or whether high temperatures remain unsuitable
+  even with a larger safety cap.
+- Synced the current Route 2 sampler/probe files to the PC:
+
+```text
+src/sample_context_responses.py
+src/build_response_entropy_stopping_probe.py
+scripts/run_response_entropy_stopping_probe_pc.sh
+tests/test_response_level_context_entropy.py
+tests/test_build_response_entropy_stopping_probe.py
+```
+
+- Launched a detached PC job:
+
+```text
+output_dir: results/response_entropy_stopping_probe_v4_cap96_extreme_temps/
+fig_dir: figs/response_entropy_stopping_probe_v4_cap96_extreme_temps/
+report: docs/response_entropy_stopping_probe_v4_cap96_extreme_temps.html
+temperatures: 0.3, 1.3, 1.6
+max_new_tokens: 96
+contexts_per_bucket: 10
+samples_per_context: 10
+planned samples: 1,200
+```
+
+The first launch failed immediately because the script was not executable on
+the PC (`permission denied`). Relaunched successfully via `zsh
+scripts/run_response_entropy_stopping_probe_pc.sh`.
+
+- The independent progress-check command used during the run was:
+
+```bash
+ssh alkan@192.168.7.217 \
+  'cd /home/alkan/Portelance/communicative_efficiency; \
+   pid=$(cat results/response_entropy_stopping_probe_v4_cap96_extreme_temps/logs/stopping_probe_run.pid); \
+   ps -o pid,ppid,sid,stat,etime,cmd -p "$pid"; \
+   nvidia-smi --query-gpu=utilization.gpu,memory.used,power.draw,temperature.gpu --format=csv,noheader,nounits; \
+   tail -n 30 results/response_entropy_stopping_probe_v4_cap96_extreme_temps/logs/stopping_probe_run.log'
+```
+
+- Run completed on the PC at 2026-06-16 14:21:24 EDT:
+
+```text
+rows_written: 1,200
+elapsed_seconds: 699.9
+```
+
+Synced back:
+
+```text
+results/response_entropy_stopping_probe_v4_cap96_extreme_temps/
+figs/response_entropy_stopping_probe_v4_cap96_extreme_temps/
+docs/response_entropy_stopping_probe_v4_cap96_extreme_temps.md
+docs/response_entropy_stopping_probe_v4_cap96_extreme_temps.html
+```
+
+- Cap-96 stopping result:
+
+```text
+T=0.3: boundary_seen_rate=1.0000, hit_cap_no_boundary_rate=0.0000
+T=1.3: boundary_seen_rate=0.8000, hit_cap_no_boundary_rate=0.2000
+T=1.6: boundary_seen_rate=0.3725, hit_cap_no_boundary_rate=0.6275
+```
+
+In plain terms:
+
+```text
+T=0.3: 0.00% did not reach newline before cap 96
+T=1.3: 20.00% did not reach newline before cap 96
+T=1.6: 62.75% did not reach newline before cap 96
+```
+
+- Automatic quality audit for v4 first-line responses:
+
+```text
+T=0.3: hard_bad_rate=3.00%, review_rate=7.75%
+T=1.3: hard_bad_rate=28.75%, review_rate=29.25%
+T=1.6: hard_bad_rate=70.50%, review_rate=70.50%
+```
+
+The high-temperature examples were often long and incoherent, e.g. T=1.3/T=1.6
+responses drifted into unrelated names, fragments, prose, and word salad. The
+larger cap therefore does not rescue T=1.3/T=1.6 for production.
+
+- Created a meeting-facing Route 2 piloting report:
+
+```text
+docs/response_entropy_route2_piloting_report.md
+docs/response_entropy_route2_piloting_report.html
+```
+
+The report documents:
+
+```text
+supervisor-request interpretation;
+current operational definition;
+prompt and stopping rationale;
+full 288k pilot;
+corrected cap-grid probe;
+newline-stop validation probe;
+cap-96 extreme-temperature smoke;
+automatic quality audit;
+good/review/bad examples;
+production recommendation;
+questions to ask supervisors before Slurm production.
+```
+
+- Current Route 2 production recommendation:
+
+```text
+Primary temperature: T=0.5
+Sensitivity temperature: T=0.7
+Optional conservative diagnostic: T=0.3
+Do not use for production: T=1.3, T=1.6
+Safety cap: max_new_tokens=96
+Generation rule: true end-of-turn stopping during decoding
+Quality rule: resample until N valid child-turn responses, but record every
+rejected attempt and rejection reason.
+```
+
+- Key supervisor questions now documented:
+  1. Is `Caregiver: {context}\nChild:` an acceptable operational prompt for
+     "possible child responses"?
+  2. Should entropy be estimated over accepted valid child-turn completions
+     only, with rejected attempts reported, or should invalid completions remain
+     part of the empirical distribution?
+  3. Is T=0.5 primary plus T=0.7 sensitivity sufficient?
+  4. Should context-copy responses be kept, flagged, or excluded?
+  5. Should production target 100 accepted samples per context or 100 total
+     attempts?
+
+- Added two future-agent task prompts:
+
+```text
+docs/route2_final_generation_smoke_prompt.md
+docs/route2_entropy_scoring_script_prompt.md
+```
+
+The first prompt covers the final automatic generation smoke at temperatures
+0.3/0.5/0.7/1.0. The second prompt covers the entropy feature/scoring script
+that consumes generated samples. This explicitly preserves the distinction:
+sampling possible answers is the GPU generation step, while entropy scoring is
+the downstream CPU feature-building step unless sequence-probability rescoring
+is added later.
+
+## 2026-06-16 - Route 1 model-ladder clarification after review
+
+- Clarified the child-identity language in the interpreted M1-M6 atlas and
+  technical companion:
+  - `C(child_id)` means child fixed intercepts: one baseline per child, with a
+    shared child-adjusted age slope.
+  - `(1 | child_id)` means a mixed-model random child intercept: partially
+    pooled child baselines under a population-distribution assumption.
+  - `(1 + age_c | child_id)` adds random child age slopes, useful if stable but
+    potentially singular when child age coverage is narrow.
+  - child-clustered standard errors are not a child-identity control; they keep
+    the fitted mean but change uncertainty.
+
+- Clarified formula hierarchy for the corrected Route 1 ladder. In
+  statsmodels/Patsy syntax `age_c * effort_c` expands to:
+
+```text
+age_c + effort_c + age_c:effort_c
+```
+
+The cleaned Route 1 core to implement next is:
+
+```text
+M1:  sum_bits ~ age_c + effort_c
+M2:  sum_bits ~ age_c + effort_c + C(child_id)
+M3:  sum_bits ~ age_c * effort_c + C(child_id)
+M4a: M3 + parent_context_effort_c
+M4b: M3 + context_entropy_c
+M4c: M3 + question_type
+M5:  M3 + parent_context_effort_c + context_entropy_c + question_type
+M6:  M3 + age_c:context_entropy_c + effort_c:context_entropy_c
+     + parent_context_effort_c + question_type
+```
+
+- Clarified baseline-comparison logic for Route 1:
+  - first repeat the complete M1-M6 atlas independently for real child, random,
+    unigram, bigram, trigram, and LSTM target sources;
+  - keep formulas, effort units, context windows, age bins, and robustness
+    checks parallel across sources;
+  - then compare source-specific age coefficients, fixed-effort curves, and
+    age-scrambling robustness;
+  - only after those source-specific atlases exist, fit the pooled formal
+    comparison:
+
+```text
+sum_bits ~ target_source * age_c * effort_c + context_controls + C(child_id)
+```
+
+- Updated files:
+
+```text
+src/build_m1_m6_interpreted_atlas_report.py
+tests/test_build_m1_m6_interpreted_atlas_report.py
+docs/utterance_information_m1_m6_super_atlas_v2_interpreted.md
+docs/utterance_information_m1_m6_super_atlas_v2_interpreted.html
+docs/utterance_information_m1_m6_technical_implementation_companion.md
+docs/utterance_information_m1_m6_technical_implementation_companion.html
+TODO.md
+```
+
+- Verification:
+
+```bash
+env MPLCONFIGDIR=/tmp/matplotlib .venv/bin/python -m unittest \
+  tests.test_build_m1_m6_interpreted_atlas_report
+
+env MPLCONFIGDIR=/tmp/matplotlib .venv/bin/python \
+  src/build_m1_m6_interpreted_atlas_report.py
+
+rg -n ",False|,false" \
+  results/m1_m6_interpreted_atlas/interpreted_atlas_image_link_audit.csv
+```
+
+Focused test passed: 1 test. Builder regenerated both reports. Image-link
+audit still has 415 interpreted-atlas image references with 0 missing files.
+
+## 2026-06-16 - Agent prompt for corrected Route 1 rebuild
+
+- Added an agent-facing launch prompt for the long corrected Route 1
+  implementation:
+
+```text
+docs/route1_corrected_baseline_atlas_agent_prompt.md
+```
+
+- The prompt is designed for a fresh coding agent and records:
+  - the corrected Route 1 scope and the instruction to keep Route 2 parked;
+  - the child-structure variants to compare separately;
+  - the rule not to combine `C(child_id)` with `(1 | child_id)`;
+  - the rule not to estimate `child_mean_age` inside a `C(child_id)` model;
+  - the corrected M1-M6 formula ladder with hierarchy;
+  - the requirement to repeat the full atlas independently for real child,
+    random, unigram, bigram, trigram, and LSTM target sources;
+  - the later pooled source-comparison model;
+  - phased implementation steps, expected deliverables, and an acceptance
+    checklist.
+
+- Updated `TODO.md` so the immediate Route 1 cleanup section points to this
+  prompt and makes the child-structure comparison explicit.
+- Corrected the interpreted atlas/technical companion proposed-model wording so
+  within/between age decomposition is not written as
+  `child_mean_age + C(child_id)`.
+- Verification:
+
+```bash
+env MPLCONFIGDIR=/tmp/matplotlib .venv/bin/python -m unittest \
+  tests.test_build_m1_m6_interpreted_atlas_report
+
+env MPLCONFIGDIR=/tmp/matplotlib .venv/bin/python \
+  src/build_m1_m6_interpreted_atlas_report.py
+```
+
+Focused test passed: 1 test. Builder regenerated both reports. Image-link
+audit still has 415 interpreted-atlas image references with 0 missing files.

@@ -280,33 +280,39 @@ def proposed_models_table() -> pd.DataFrame:
     return pd.DataFrame(
         [
             {
-                "proposal": "within-child centered age",
-                "formula": "sum_bits ~ age_within_child + effort + C(child_id)",
-                "why": "Directly estimates within-child change while preserving each child's baseline.",
+                "proposal": "R1-M7 child-structure sensitivity",
+                "formula": "FE within: age_within_child * effort + controls + C(child_id); Mundlak: age_within_child * effort + child_mean_age + controls + random/clustered child structure",
+                "why": "Checks how the age result changes under fixed child baselines, random child baselines, and within/between age decomposition without mixing incompatible child structures.",
                 "status": "proposed/not yet run in this v2 synthesis",
             },
             {
-                "proposal": "within/between age decomposition",
-                "formula": "sum_bits ~ age_within_child + child_mean_age + effort + corpus",
-                "why": "Separates within-child development from between-child/corpus age composition.",
+                "proposal": "R1-M8 independent baseline atlases",
+                "formula": "repeat M1-M6 separately for real child, random, unigram, bigram, trigram, and LSTM targets",
+                "why": "Compares developmental trajectories of each baseline source against the real child trajectory without mixing source types in the first pass.",
                 "status": "proposed/not yet run in this v2 synthesis",
             },
             {
-                "proposal": "age-overlap restricted subset",
-                "formula": "same as M2/M3 after restricting to age months shared by multiple children/corpora",
-                "why": "Checks whether the M2 slope is driven by children who occupy unique age ranges.",
+                "proposal": "R1-M9 formal source-trajectory comparison",
+                "formula": "sum_bits ~ target_source * age_c * effort_c + context controls + C(child_id)",
+                "why": "Tests whether the real child age-effort trajectory differs statistically from each generated baseline trajectory.",
                 "status": "proposed/not yet run in this v2 synthesis",
             },
             {
-                "proposal": "age-bin balanced model",
-                "formula": "M2/M3 on equalized age-bin samples or child-session-context units",
-                "why": "Reduces leverage of dense toddler bins and follows Pawar-style stability logic.",
-                "status": "partially addressed by existing age-scrambling robustness; further utterance-level version not yet run",
+                "proposal": "context-control ladder",
+                "formula": "M3 + parent_context_effort, then M3 + context_entropy, then M3 + question_type, then all together",
+                "why": "Adds the parent/context confounds one at a time before interpreting any richer context interactions.",
+                "status": "partially present in context adjuncts; parent question-type ladder still proposed",
             },
             {
-                "proposal": "corpus fixed effects",
-                "formula": "sum_bits ~ age + effort + C(child_id) + C(dataset)",
-                "why": "Tests whether corpus/transcription context explains part of the child-adjusted trend.",
+                "proposal": "age-overlap and age-bin balance checks",
+                "formula": "same M2/M3/M4/M5 formulas after overlap restriction or balanced age-bin sampling",
+                "why": "Checks whether the trajectory is driven by children/corpora that occupy unique age ranges or dense age bins.",
+                "status": "partially addressed by existing age-scrambling robustness; fuller source-specific version not yet run",
+            },
+            {
+                "proposal": "corpus and session controls",
+                "formula": "sum_bits ~ age_c * effort_c + context controls + C(child_id) + C(dataset)",
+                "why": "Tests whether corpus/transcription/session composition explains part of the child-adjusted Route 1 trend.",
                 "status": "proposed/not yet run in this v2 synthesis",
             },
             {
@@ -316,10 +322,67 @@ def proposed_models_table() -> pd.DataFrame:
                 "status": "M2/M3 sensitivity exists; fuller overlap/balancing interpretation still proposed",
             },
             {
-                "proposal": "Route 2 effort outcome bridge",
+                "proposal": "parked Route 2 effort outcome bridge",
                 "formula": "effort ~ age + response_entropy + expected_model_response_length + context_size + C(child_id)",
                 "why": "Tests whether contextual uncertainty predicts how much children choose to say.",
-                "status": "proposed; response-space entropy pilot exists but production features are not yet the primary analysis",
+                "status": "parked for later; current priority remains Route 1",
+            },
+        ]
+    )
+
+
+def route1_todo_table() -> pd.DataFrame:
+    """Return the clarified Route 1 TODO list."""
+
+    return pd.DataFrame(
+        [
+            {
+                "priority": "1",
+                "todo": "Freeze the corrected Route 1 formula ladder",
+                "deliverable": "Explicit M1-M6 definitions with interaction hierarchy and one effort unit per fitted row.",
+                "status": "documentation clarified; implementation audit next",
+            },
+            {
+                "priority": "2",
+                "todo": "Create parent/context controls",
+                "deliverable": "`parent_context_effort_*`, `question_type`, and audited `context_entropy`/`context_size` columns for k1-k3.",
+                "status": "context entropy/size partly exist; parent effort and question type need audit/build",
+            },
+            {
+                "priority": "3",
+                "todo": "Refit child target Route 1 ladder",
+                "deliverable": "M1-M6 rows for real child utterances using the cleaned formula ladder and context-control sequence.",
+                "status": "current atlas is close but needs formula-ladder cleanup before final use",
+            },
+            {
+                "priority": "4",
+                "todo": "Repeat the whole atlas independently for each baseline",
+                "deliverable": "Separate M1-M6 atlases for random, unigram, bigram, trigram, and LSTM generated targets.",
+                "status": "proposed/not yet run",
+            },
+            {
+                "priority": "5",
+                "todo": "Compare source-specific developmental trajectories",
+                "deliverable": "Side-by-side age slopes, fixed-effort curves, robustness checks, and a source-trajectory comparison report.",
+                "status": "proposed/not yet run",
+            },
+            {
+                "priority": "6",
+                "todo": "Fit formal source interaction model",
+                "deliverable": "`sum_bits ~ target_source * age_c * effort_c + context controls + C(child_id)` after independent atlases exist.",
+                "status": "proposed/not yet run",
+            },
+            {
+                "priority": "7",
+                "todo": "Run child-structure sensitivity",
+                "deliverable": "Compare separate variants: no child identity plus clustered SE, `C(child_id)`, GEE grouped by child, MixedLM random intercept/slope, fixed-effect within-child age, and Mundlak within/between age. Do not combine `C(child_id)` with random child intercepts or child-level means.",
+                "status": "partly present as sensitivity rows; needs coherent Route 1 comparison table",
+            },
+            {
+                "priority": "8",
+                "todo": "Update supervisor-facing report only after the corrected Route 1 atlas is rerun",
+                "deliverable": "Short methods section plus a small number of fixed-effort plots and baseline-comparison plots.",
+                "status": "pending",
             },
         ]
     )
@@ -348,6 +411,113 @@ The right interpretation is therefore balanced:
 - Random slopes, within/between decomposition, age-overlap restrictions, corpus controls, age-bin balancing, and leave-one-child/corpus-out checks should be added before making a final dissertation-level causal/developmental claim.
 
 Recommended next formulas are listed in the technical companion. None of those additions are claimed as results in this v2 report unless they already exist in saved artifacts.
+"""
+
+
+def child_structure_clarification_section() -> str:
+    """Return fixed-effect versus random-effect clarification."""
+
+    return """## Child Identity: Fixed Effects, Random Effects, And Clustered SE
+
+There are three different ideas that are easy to blur together:
+
+1. `C(child_id)` means child fixed intercepts. Each child gets their own baseline level of `sum_bits`. The main age coefficient is then a shared child-adjusted age slope. This is the cleanest current primary Route 1 specification when the question is "does the age trend remain after stable child differences are removed?"
+2. `(1 | child_id)` is mixed-model shorthand for a random child intercept. It also lets children have different baselines, but it treats those baselines as partially pooled draws from a population distribution. In `statsmodels`, this is a `MixedLM` with `groups=child_id`.
+3. Child-clustered standard errors are not a child-identity control. They keep the same fitted mean as the OLS formula, but adjust uncertainty because utterances from the same child are correlated.
+
+The random-slope version is:
+
+```text
+(1 + age_c | child_id)
+```
+
+Conceptually, this lets each child have both a different baseline and a different developmental slope, with partial pooling. It is attractive scientifically, but it can be unstable or singular when some children have narrow age coverage. That is why the current report treats MixedLM as sensitivity evidence rather than the primary result.
+
+Practical recommendation for the corrected Route 1 ladder:
+
+- Primary: OLS with `C(child_id)` and child-clustered standard errors.
+- Sensitivity: GEE clustered by child.
+- Sensitivity: MixedLM random intercept and random age slope, if stable.
+- Diagnostic: within/between age decomposition to separate within-child development from between-child age composition.
+
+So `C(child_id)` and `(1 | child_id)` are not interchangeable notation. They answer related but different questions and rely on different assumptions.
+
+Do not fit `C(child_id)` and `(1 | child_id)` as if they were two independent controls in the same model. A child fixed intercept already gives each child its own baseline, while a random child intercept models child baselines through a partially pooled distribution. For this project, compare them as separate child-structure variants.
+
+Likewise, a between-child predictor such as `child_mean_age` is not interpretable in the same formula as `C(child_id)`, because the child fixed intercepts absorb child-level constants. Use `age_within_child + C(child_id)` for a fixed-effect within-child check, or use a Mundlak-style `age_within_child + child_mean_age` model with clustered/GEE/random child structure for the within/between comparison.
+"""
+
+
+def formula_hierarchy_section() -> str:
+    """Return formula hierarchy clarification for interactions."""
+
+    return """## Formula Hierarchy For Interactions
+
+The corrected Route 1 ladder must obey the hierarchy principle: if an interaction is in the model, its lower-order terms stay in the model too.
+
+In Patsy/statsmodels syntax:
+
+```text
+age_c * effort_c
+```
+
+expands to:
+
+```text
+age_c + effort_c + age_c:effort_c
+```
+
+So the compact formula is not dropping main effects. Still, reports should write the expansion in words because readers will ask. The same applies to `age_c * context_entropy_c` and `target_source * age_c * effort_c`.
+
+The cleaned Route 1 core should be:
+
+```text
+M1: sum_bits ~ age_c + effort_c
+M2: sum_bits ~ age_c + effort_c + C(child_id)
+M3: sum_bits ~ age_c * effort_c + C(child_id)
+M4a: M3 + parent_context_effort_c
+M4b: M3 + context_entropy_c
+M4c: M3 + question_type
+M5: M3 + parent_context_effort_c + context_entropy_c + question_type
+M6: M3 + age_c:context_entropy_c + effort_c:context_entropy_c + parent_context_effort_c + question_type
+```
+
+M4a/M4b/M4c are especially important because they test one parent/context control at a time before the all-controls model.
+"""
+
+
+def baseline_atlas_clarification_section() -> str:
+    """Return baseline-comparison clarification."""
+
+    return """## Baseline Comparison Logic
+
+Yes: the cleaner baseline-comparison logic is to repeat the Route 1 atlas separately for each target source.
+
+First-pass descriptive/comparative atlases:
+
+```text
+real child target:      M1-M6
+random target:          M1-M6
+unigram target:         M1-M6
+bigram target:          M1-M6
+trigram target:         M1-M6
+LSTM target(s):         M1-M6
+caretaker target:       optional separate role comparison, not the same baseline family
+```
+
+This means the same formulas, effort units, context windows, age bins, and robustness checks should be used independently for each source. Then we compare age coefficients, fixed-effort age curves, context-control stability, and age-scrambling robustness across sources.
+
+Why independent atlases first? Because they show the developmental trajectory each source would have on its own. If the real child trajectory looks different from random/ngram/LSTM trajectories, that is much easier to explain visually and scientifically.
+
+Only after the independent atlases exist should we fit the pooled formal comparison:
+
+```text
+sum_bits ~ target_source * age_c * effort_c + context_controls + C(child_id)
+```
+
+That pooled model tests whether source differences in the age-effort trajectory are statistically supported. But it should be the formal test after the source-specific atlases, not the only analysis.
+
+Implementation detail: effort should be recomputed on the actual target utterance for each source. For same-word-length baselines, word count may be matched by construction, but morphemes, syllables, and phonemes can still differ. Keep the original child row id so source-specific rows remain paired to the same age, child, session, and context.
 """
 
 
@@ -663,6 +833,9 @@ This is Route 1 evidence: informativeness under controlled effort. The future Ro
         "## Model Ladder\n\n" + atlas.markdown_table(atlas.model_formula_table(), max_rows=10),
         "## Estimator And Library Guide\n\n" + atlas.markdown_table(atlas.estimator_guide_table(), max_rows=20),
         child_identity_section(),
+        child_structure_clarification_section(),
+        formula_hierarchy_section(),
+        baseline_atlas_clarification_section(),
         "## Evidence Hierarchy\n\n"
         + atlas.markdown_table(
             pd.DataFrame(
@@ -744,7 +917,12 @@ This is Route 1 evidence: informativeness under controlled effort. The future Ro
     )
 
     sections.append(
-        "## Appendix C: Complete Figure Inventory\n\n"
+        "## Appendix C: Corrected Route 1 TODO List\n\n"
+        + atlas.markdown_table(route1_todo_table(), max_rows=20)
+    )
+
+    sections.append(
+        "## Appendix D: Complete Figure Inventory\n\n"
         "This inventory is included so image coverage is auditable. The report embeds PNGs; PDF duplicates are intentionally not embedded.\n\n"
         + atlas.markdown_table(
             figure_inventory[figure_inventory["exists"].astype(bool)][
@@ -789,8 +967,11 @@ Route 2 asks whether the context leads children to choose shorter or longer resp
 - `sum_bits`: total target-utterance information in Mistral bits.
 - `age_c`: child age in months, centered by subtracting a reference mean.
 - `target_effort_c`: one effort measure, centered. Effort is words, morphemes, syllables, or phonemes.
+- `parent_context_effort_c`: effort/length of the preceding caretaker context, centered.
 - `context_entropy_c`: current next-token context entropy, centered.
 - `context_size_c`: matched surface size of the context window, centered.
+- `question_type`: parent/context utterance type such as statement, binary question, or wh-question.
+- `target_source`: real child, random, unigram, bigram, trigram, or LSTM target source.
 - `C(child_id)`: child fixed intercepts in a statsmodels formula.
 
 ## What Is OLS?
@@ -857,6 +1038,8 @@ A random effect treats child-specific deviations as drawn from a population dist
 
 Random effects answer a different question from fixed effects. They are not simply "better fixed effects"; they encode a different statistical assumption.
 
+{child_structure_clarification_section()}
+
 ## Clustered Standard Errors
 
 Child-clustered standard errors adjust uncertainty for repeated utterances from the same child. They do not change the fitted line. They change standard errors, confidence intervals, and p-values.
@@ -898,6 +1081,8 @@ sum_bits ~ effort_c * context_entropy_c
 ```
 
 asks whether the relation between effort and total information differs in high-entropy contexts.
+
+{formula_hierarchy_section()}
 
 ## Why Center Variables?
 
@@ -949,9 +1134,15 @@ This reduces row-level dependence and makes robustness tests more conservative. 
 
 M2 is an OLS model with child fixed intercepts. Its uncertainty in the supervisor-facing report uses child-clustered robust standard errors. It answers a within-child-adjusted Route 1 question: for the same effort and child baseline, how does target utterance information change with age?
 
-## Route 2 Length Prediction Bridge
+{baseline_atlas_clarification_section()}
 
-Route 2 should use effort as the outcome. The conceptual formula is:
+## Corrected Route 1 TODO List
+
+{atlas.markdown_table(route1_todo_table(), max_rows=20)}
+
+## Route 2 Length Prediction Bridge Is Parked
+
+Route 2 should use effort as the outcome, but it is parked until the corrected Route 1 child/baseline atlas is done. The conceptual Route 2 formula is:
 
 ```text
 production_effort ~ age + response_entropy + expected_model_response_length + context_size + question_type + child controls
@@ -964,7 +1155,7 @@ Why Route 2 differs from Route 1:
 - Route 1 can use `sum_bits` as the outcome.
 - Route 2 needs a context-level uncertainty measure available before the child speaks.
 
-The current next-token entropy feature is only a provisional bridge. Response-space entropy from sampled full responses is a better match for the Route 2 hypothesis.
+The current next-token entropy feature is only a provisional bridge. Response-space entropy from sampled full responses is a better match for the Route 2 hypothesis, but that belongs to the later effort-outcome phase rather than the current Route 1 cleanup.
 
 ## Proposed Additions
 
