@@ -3844,6 +3844,7 @@ MPLCONFIGDIR=/tmp/matplotlib .venv/bin/python \
 ```
 
 - Focused tests passed: 5 tests.
+- Full suite passed after the scoring smoke: 286 tests in 302.021 seconds.
 - Real final-smoke scoring outputs:
 
 ```text
