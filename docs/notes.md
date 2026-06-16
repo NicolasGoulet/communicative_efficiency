@@ -2557,3 +2557,90 @@ MPLCONFIGDIR=/tmp/matplotlib .venv/bin/python \
 ```
 
 passed with 3 tests.
+
+## 2026-06-15 - Supervisor-facing M1-M3 smoking-gun section
+
+- Minimally updated `docs/predicting_utterance_level_information_report.md`
+  without changing the earlier dataset, effort, information, or baseline
+  sections.
+- Filled the previous explanatory-model TODOs with Models 1-3:
+  - M1: `sum_bits ~ age_c + effort_c`
+  - M2: `sum_bits ~ age_c + effort_c + C(child_id)`
+  - M3: `sum_bits ~ age_c * effort_c + C(child_id)`
+- Documented that these are `statsmodels` OLS fits with child-clustered robust
+  standard errors; M2/M3 also include child fixed effects through
+  `C(child_id)`.
+- Added compact coefficient table, fixed-effort slice summary, and balanced /
+  scrambled age-check summary using the already-fit artifacts:
+  `results/m1_m6_dual_effort_quick_share/dual_model_summary.csv`,
+  `results/m1_m6_fixed_effort_atlas/atlas_fixed_slice_slopes.csv`, and
+  `results/age_scrambling_robustness/age_scrambling_robustness_summary.csv`.
+- Regenerated:
+  - `docs/predicting_utterance_level_information_report.html`
+  - `docs/predicting_utterance_level_information_report.embedded.html`
+- No models were refit for this supervisor-facing edit. The attempted headless
+  Brave PDF export did not update the PDF, so the current PDF remains older
+  than the Markdown/HTML.
+
+## 2026-06-15 - Supervisor-facing slice revision after review
+
+- Updated the same report section after review of the HTML:
+  - removed the dual-effort low/mid/high prediction figures from the
+    supervisor-facing document because those categorical effort panels are a
+    coarser alternate encoding and were confusing in this setting;
+  - removed the compact coefficient table from the supervisor draft;
+  - foregrounded exact fixed-effort slice plots for Model 1 and Model 2 instead.
+- Added a short explanation that phoneme slices are distribution-supported:
+  the supervisor-facing phoneme panel uses the twelve most frequent exact
+  phoneme counts, 2-13; the fuller atlas groups these as low 2-5, middle 6-9,
+  and high 10-13 representative sizes.
+- Regenerated:
+  - `docs/predicting_utterance_level_information_report.html`
+  - `docs/predicting_utterance_level_information_report.embedded.html`
+- No model fitting was rerun; this was a report/rendering change using existing
+  fixed-effort artifacts.
+
+## 2026-06-15 - Supervisor-facing methods clarification
+
+- Updated the explanatory-model section to state explicitly that the displayed
+  M1-M3 models are linear regression / OLS models in `statsmodels`, with
+  child-clustered robust standard errors.
+- Clarified that M2/M3 use child fixed effects rather than random intercepts in
+  the supervisor-facing first pass; internal sensitivity reports explored GEE,
+  GLM, and mixed-effect variants, including random-intercept/random-slope
+  attempts.
+- Added the methodological caveat that predictors were not selected by
+  stepwise selection or variable-importance ranking; the ladder is
+  theory-driven, and effort units are separated because they are highly
+  correlated.
+- Restored one fixed-effort plot directly inside each Model 1, Model 2, and
+  Model 3 section. Regenerated local and embedded HTML. No models were refit.
+
+## 2026-06-15 - Supervisor-facing M1-M3 plot and model-family cleanup
+
+- Re-read the Advanced Data Analytics course notes on correlated data,
+  regularization/model selection, and longitudinal modeling before editing the
+  supervisor-facing report again.
+- Tightened the statistical-methods paragraph:
+  - displayed M1-M3 results are OLS / linear regression because `sum_bits` is a
+    continuous outcome in bits and the coefficients are directly interpretable;
+  - child-clustered robust standard errors account for repeated utterances from
+    the same child in the uncertainty estimates;
+  - M2/M3 use child fixed effects so each child gets their own baseline
+    intercept;
+  - internal sensitivity work also includes GEE grouped by child, GLM/Gamma
+    variants, and mixed-effect random-intercept/random-slope models.
+- Clarified that child identity is not the substantive "finding"; it is an
+  adjustment for uneven longitudinal coverage, because different children enter
+  and leave the corpus at different ages and contribute different numbers of
+  sessions.
+- Added all requested M1-M3 supervisor-facing plots:
+  - fixed-effort slice plots for M1, M2, and M3;
+  - balanced/scrambled interval plots for M1, M2, and M3;
+  - the robustness heatmap;
+  - balanced/scrambled regression-line diagnostics for M1, M2, and M3.
+- Regenerated:
+  - `docs/predicting_utterance_level_information_report.html`
+  - `docs/predicting_utterance_level_information_report.embedded.html`
+- Embedded HTML now reports 13 embedded images. The PDF was not regenerated and
+  remains older than the Markdown/HTML.

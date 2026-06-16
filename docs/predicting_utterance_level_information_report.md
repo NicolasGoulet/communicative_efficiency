@@ -241,23 +241,242 @@ This section of the document describes certain models that attempt to predict in
 
 Additionally, SES metrics were not available systematically for all children and was particularly sparse for the PBM sample. 
 
-(At the time of sharing this report these are still underway).
+The first modeling pass focuses on three closely related models. The outcome is
+`sum_bits`, the total Mistral surprisal of the target child utterance in bits.
 
-### First Model
+### Statistical Model Choice
 
-TODO ADD RESULTS AND PLOTS
+These are linear regression models for a continuous outcome measured in bits.
+They are fit with ordinary least squares in `statsmodels`. Because each child
+contributes many utterances, uncertainty estimates use child-clustered robust
+standard errors. Models 2 and 3 also include child fixed effects, which means
+each child gets their own baseline intercept.
 
-### Second Model 
+The first presentation uses linear regression because the outcome is continuous
+and the coefficients remain directly interpretable in bits. This is not the
+only model family we considered. Internal checks also explored Gaussian GEE
+models grouped by child, GLM/Gamma variants for positive outcomes, and
+mixed-effect models with random intercepts and random age slopes. GEE asks for
+a population-average trend while accounting for within-child correlation;
+mixed-effects models estimate child-level variation in baselines and slopes;
+GLM/Gamma variants check whether the positivity/skew of total bits changes the
+conclusion. These belong in the technical appendix, while the first
+supervisor-facing result uses the more transparent model ladder below.
 
-TODO ADD RESULTS AND PLOTS
+The model ladder is theory-driven rather than selected automatically. We do not
+use stepwise selection or variable-importance ranking to choose predictors,
+because the effort measures are strongly correlated with one another and
+variable-importance measures can be unstable under multicollinearity. Instead,
+words, morphemes, syllables, and phonemes are analyzed as separate effort
+controls.
 
-### Third Model 
+| Model family | Role in the current analysis |
+| --- | --- |
+| OLS / linear regression | Main displayed model family; gives directly interpretable changes in bits. |
+| Child fixed effects | Controls stable child-to-child differences by giving each child their own intercept. |
+| Child-clustered standard errors | Keeps the OLS mean structure but adjusts uncertainty for repeated utterances from the same child. |
+| GEE grouped by child | Internal sensitivity check for population-average effects with correlated rows. |
+| Mixed effects | Internal sensitivity check for random child intercepts and random age slopes; useful, but less stable here and less transparent for the first presentation. |
+| GLM/Gamma variants | Internal sensitivity check for the fact that total bits are positive and skewed. |
 
-TODO ADD RESULTS AND PLOTS
+The child term is not treated as a substantive discovery by itself. It is a
+necessary adjustment for this unbalanced longitudinal design: different
+children enter the corpus at different ages, leave at different ages, and
+contribute different numbers of sessions. Model 2 asks whether the age pattern
+remains after each child is allowed to have their own baseline level of
+surprisal. This does not invent observations at ages where a child was not
+recorded; it estimates the age trend from the observed developmental timeline
+while preventing stable between-child differences from being mistaken for age.
+The substantive finding is therefore not "children differ"; it is that the
+same-effort age trajectory changes direction once the model accounts for those
+stable child-to-child differences.
+
+In the formulas below, `age_c` and `effort_c` are centered versions of age in
+months and the effort count. The age coefficient therefore gives the expected
+change in total bits for one additional month, after the model's controls.
+
+### Model 1: Pooled Age and Effort
+
+**Question.** If all children are pooled together, does age predict total
+information after controlling for the amount of linguistic material in the
+utterance?
+
+**Formula.**
+
+```text
+sum_bits ~ age_c + effort_c
+```
+
+This model controls utterance effort, but it does not control stable
+differences between children. It is therefore a useful baseline model, not the
+main developmental model.
+
+Model 1 gives a mixed developmental picture. With exact effort counts, the age
+coefficient is not reliable for words or morphemes, and it is positive for the
+two phonological effort measures that reach conventional significance. This
+suggests that simply pooling all children is not enough to isolate the
+developmental trajectory.
+
+![Model 1 fixed-effort age trajectories](../figs/m1_m6_fixed_effort_slices/m1_top_frequency_12_fixed_effort_slices.png)
+
+Each line shows the predicted age trajectory for one exact fixed effort value.
+In Model 1, the trajectories are mostly flat or upward. This is the pooled
+picture before controlling stable differences between children.
+
+![Model 1 balanced and scrambled age checks](../figs/age_scrambling_robustness/m1_age_slope_robustness_intervals.png)
+
+### Model 2: Age and Effort with Child Identity
+
+**Question.** Does the developmental age effect remain after controlling for
+the fact that different children have different baselines and are observed over
+different age ranges?
+
+**Formula.**
+
+```text
+sum_bits ~ age_c + effort_c + C(child_id)
+```
+
+Here `C(child_id)` is a fixed effect for each child. It lets each child have a
+different intercept, so the age coefficient is no longer driven only by
+between-child differences.
+
+Model 2 changes the conclusion. After child identity is controlled, all five
+effort measures show a negative age coefficient, and all five are statistically
+reliable. This suggests that, at comparable effort, children's utterances
+become less surprising to the model as they get older.
+
+![Model 2 fixed-effort age trajectories](../figs/m1_m6_fixed_effort_slices/m2_top_frequency_12_fixed_effort_slices.png)
+
+The same fixed-effort slices now turn downward. This is the clearest visual
+evidence that the pooled model was hiding a within-child developmental pattern.
+
+![Model 2 balanced and scrambled age checks](../figs/age_scrambling_robustness/m2_age_slope_robustness_intervals.png)
+
+### Model 3: Age by Effort
+
+**Question.** Does the relationship between effort and total information itself
+change with age?
+
+**Formula.**
+
+```text
+sum_bits ~ age_c * effort_c + C(child_id)
+```
+
+This model keeps the child fixed effects from Model 2 and adds the interaction
+between age and effort. The interaction tests whether the slope relating effort
+to total bits changes over development.
+
+Model 3 is broadly consistent with Model 2. The age coefficients are negative
+for all five effort measures and statistically reliable for four of five. The
+age-by-effort interaction is small in most versions, so the main result is not
+that effort suddenly has a completely different meaning over development.
+Rather, once child identity is controlled, the age trajectory itself is
+downward.
+
+![Model 3 fixed-effort age trajectories](../figs/m1_m6_fixed_effort_slices/m3_top_frequency_12_fixed_effort_slices.png)
+
+Model 3 preserves the downward pattern while asking whether the effort slope
+itself changes with age. The interaction is not the main driver of the result;
+the child-controlled age trajectory remains the central finding.
+
+![Model 3 balanced and scrambled age checks](../figs/age_scrambling_robustness/m3_age_slope_robustness_intervals.png)
+
+### Fixed-Effort Slice Check
+
+The fitted models summarize the global effect of age after controlling effort
+numerically. As an additional check, we also plot predicted age trajectories at
+exact fixed effort values. These plots are easier to read: each line answers,
+"what is the predicted age trajectory for utterances with this exact amount of
+effort?"
+
+For words and morphemes, the plotted fixed values are exact counts from 1 to
+12. For syllables and phonemes, we first checked the observed distribution of
+utterance lengths and then selected data-supported values. In the phoneme
+panel, the plotted values are 2 through 13 phonemes: the twelve most frequent
+exact phoneme counts in the current child-utterance sample. In the fuller atlas,
+these same phoneme values are grouped as low representative sizes (2-5),
+middle representative sizes (6-9), and high representative sizes (10-13).
+
+The contrast between Models 1 and 2 is the core result. Model 1 does not
+control child identity and gives upward or flat predicted trajectories. Model 2
+controls child identity, and the predicted trajectory turns downward across the
+fixed-effort slices. Across the full fixed-effort atlas, Model 2 shows negative
+age slopes in 67 of 67 fixed-effort slices. Model 3 shows negative age slopes
+in 63 of 67 fixed-effort slices.
+
+| Model | Fixed-effort slices | Negative slices | Median slope per six months | Range |
+| --- | --- | --- | --- | --- |
+| M1 | 67 | 0/67 | 0.309 | 0.002 to 0.414 |
+| M2 | 67 | 67/67 | -0.389 | -0.813 to -0.291 |
+| M3 | 67 | 63/67 | -0.420 | -0.942 to 0.194 |
+
+### Balanced and Scrambled Age Checks
+
+The robustness analysis asks whether the observed age effects are stable under
+two different kinds of checks.
+
+First, a balanced bootstrap resamples the data so that age bins contribute more
+evenly. This is a stability check, not a null test. If the observed slope falls
+inside the balanced-bootstrap interval, it means the result is compatible with
+balanced age-bin resampling.
+
+Second, age-scrambling checks destroy the real developmental ordering. These
+are null tests. The most important version scrambles age within each child,
+which preserves child identity but breaks that child's developmental timeline.
+If the observed slope is outside this scrambled null distribution, the real
+developmental order is carrying information.
+
+![Robustness summary for balanced and scrambled age checks](../figs/age_scrambling_robustness/robustness_outside_null_heatmap.png)
+
+The model-specific robustness plots above show where the observed age slope
+falls relative to balanced-bootstrap intervals and scrambled-age null
+intervals. The heatmap gives the same information compactly across the model
+family. The strongest result is again Models 2 and 3. For both models, the
+observed negative age slopes are outside the scrambled null intervals in all
+comparisons for the unit-level and within-child scrambling checks. This supports
+the interpretation that the downward age trajectory is tied to real
+developmental ordering, not just to arbitrary age labels.
+
+The next three plots show the same robustness checks as regression-line
+diagnostics. They are more visual than the interval plots: the observed line is
+compared with balanced resamples and age-scrambled controls.
+
+![Model 1 balanced and scrambled regression lines](../figs/age_scrambling_robustness/m1_clear_robustness_regression_lines.png)
+
+![Model 2 balanced and scrambled regression lines](../figs/age_scrambling_robustness/m2_clear_robustness_regression_lines.png)
+
+![Model 3 balanced and scrambled regression lines](../figs/age_scrambling_robustness/m3_clear_robustness_regression_lines.png)
+
+| Model | Check | Comparisons | Observed negative | Outside 95% interval | Permutation p < .05 |
+| --- | --- | --- | --- | --- | --- |
+| M1 | Balanced bootstrap | 20 | 2/20 | 16/20 |  |
+| M1 | Age-bin scramble | 20 | 2/20 | 16/20 | 16/20 |
+| M1 | Unit-age scramble | 20 | 2/20 | 20/20 | 19/20 |
+| M1 | Within-child scramble | 20 | 2/20 | 13/20 | 5/20 |
+| M2 | Balanced bootstrap | 20 | 20/20 | 1/20 |  |
+| M2 | Age-bin scramble | 20 | 20/20 | 20/20 | 19/20 |
+| M2 | Unit-age scramble | 20 | 20/20 | 20/20 | 20/20 |
+| M2 | Within-child scramble | 20 | 20/20 | 20/20 | 20/20 |
+| M3 | Balanced bootstrap | 20 | 20/20 | 4/20 |  |
+| M3 | Age-bin scramble | 20 | 20/20 | 20/20 | 18/20 |
+| M3 | Unit-age scramble | 20 | 20/20 | 20/20 | 20/20 |
+| M3 | Within-child scramble | 20 | 20/20 | 20/20 | 20/20 |
 
 ### Key takeways
 
-- TODO 
+- Total surprisal cannot be interpreted without effort controls, because older
+  children produce longer utterances.
+- Model 1 is not sufficient as a developmental model, because it pools children
+  who cover different age ranges.
+- Once child identity is controlled in Models 2 and 3, age has a consistently
+  negative association with total surprisal at comparable effort.
+- The fixed-effort slice checks show the same pattern visually: for Model 2,
+  all 67 fixed-effort slices have downward age trajectories.
+- The age-scrambling checks support the interpretation that the effect depends
+  on real developmental ordering, especially when age is scrambled within
+  child.
 
 ## Possible Next Steps 
 
@@ -274,4 +493,3 @@ An even stronger baseline would be have a BabyLM-like transformer architecture t
 ### Word-level surprisal
 
 TODO DESCRIBE THIS IDEA
-
