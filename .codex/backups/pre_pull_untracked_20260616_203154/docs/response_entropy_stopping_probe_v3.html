@@ -1,0 +1,302 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Response Entropy Stopping Probe</title>
+<style>
+:root {
+  color-scheme: light;
+  --ink: #1e2528;
+  --muted: #5e686d;
+  --line: #d9e0df;
+  --paper: #ffffff;
+  --soft: #f5f7f6;
+  --accent: #2f6f73;
+  --accent2: #c76f2c;
+}
+body {
+  margin: 0;
+  background: #eef2f1;
+  color: var(--ink);
+  font: 16px/1.58 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+main {
+  max-width: 980px;
+  margin: 34px auto 56px;
+  padding: 48px 58px;
+  background: var(--paper);
+  box-shadow: 0 18px 50px rgba(31, 45, 48, 0.12);
+}
+h1, h2, h3, h4 {
+  line-height: 1.18;
+  margin: 1.6em 0 0.55em;
+}
+h1 {
+  margin-top: 0;
+  font-size: 2.25rem;
+  border-bottom: 3px solid var(--accent);
+  padding-bottom: 0.45em;
+}
+h2 {
+  font-size: 1.55rem;
+  color: var(--accent);
+}
+h3 {
+  font-size: 1.18rem;
+}
+p {
+  margin: 0.75em 0;
+}
+a {
+  color: var(--accent);
+}
+blockquote {
+  border-left: 4px solid var(--accent2);
+  margin: 1.1em 0;
+  padding: 0.05em 1.1em;
+  color: var(--muted);
+  background: #fff8f2;
+}
+code {
+  background: var(--soft);
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  padding: 0.08em 0.3em;
+  font-family: "SFMono-Regular", Consolas, monospace;
+  font-size: 0.92em;
+}
+pre {
+  background: #f5f7f6;
+  color: var(--ink);
+  border: 1px solid var(--line);
+  padding: 1em;
+  overflow-x: auto;
+  border-radius: 7px;
+}
+pre code {
+  background: transparent;
+  border: 0;
+  padding: 0;
+  color: inherit;
+}
+table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 1.15em 0 1.45em;
+  font-size: 0.95em;
+}
+th, td {
+  border: 1px solid var(--line);
+  padding: 0.54em 0.68em;
+  vertical-align: top;
+}
+th {
+  background: #e7efed;
+  text-align: left;
+}
+tr:nth-child(even) td {
+  background: #fafbfb;
+}
+img {
+  max-width: 100%;
+  display: block;
+  margin: 1.1em auto 0.45em;
+}
+ul, ol {
+  padding-left: 1.4em;
+}
+.caption {
+  color: var(--muted);
+  font-size: 0.92em;
+  margin-top: -0.15em;
+}
+@media print {
+  body {
+    background: white;
+  }
+  main {
+    box-shadow: none;
+    margin: 0;
+    max-width: none;
+    padding: 28px;
+  }
+}
+</style>
+</head>
+<body>
+<main>
+<h1>Response Entropy Stopping Probe</h1>
+<p>This is a bounded diagnostic rerun for response-space entropy generation. It tests whether generated child responses stop naturally, reach a later speaker boundary, or keep running until the configured max-token cap.</p>
+<h2>Manifest</h2>
+<table>
+<thead><tr>
+<th>bucket</th>
+<th>available_contexts</th>
+<th>selected_contexts</th>
+<th>min_context_words_selected</th>
+<th>max_context_words_selected</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>01_one_word</td>
+<td>15</td>
+<td>10</td>
+<td>1</td>
+<td>1</td>
+</tr>
+<tr>
+<td>02_two_to_four</td>
+<td>88</td>
+<td>10</td>
+<td>2</td>
+<td>4</td>
+</tr>
+<tr>
+<td>03_five_to_nine</td>
+<td>185</td>
+<td>10</td>
+<td>5</td>
+<td>9</td>
+</tr>
+<tr>
+<td>04_ten_plus</td>
+<td>192</td>
+<td>10</td>
+<td>10</td>
+<td>29</td>
+</tr>
+</tbody></table>
+<h2>Setting Summary</h2>
+<table>
+<thead><tr>
+<th>max_new_tokens</th>
+<th>temperature</th>
+<th>rows</th>
+<th>contexts</th>
+<th>mean_samples_per_context</th>
+<th>empty_response_rate</th>
+<th>hit_max_rate</th>
+<th>boundary_seen_rate</th>
+<th>hit_cap_no_boundary_rate</th>
+<th>natural_eos_no_boundary_rate</th>
+<th>boundary_and_hit_cap_rate</th>
+<th>mean_generated_tokens</th>
+<th>mean_sampled_words_after_trim</th>
+<th>p50_sampled_words_after_trim</th>
+<th>p90_sampled_words_after_trim</th>
+<th>p95_sampled_words_after_trim</th>
+<th>mean_raw_generated_words</th>
+<th>median_boundary_char_position</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>48</td>
+<td>0.5</td>
+<td>400</td>
+<td>40</td>
+<td>10</td>
+<td>0.0025</td>
+<td>1</td>
+<td>0.985</td>
+<td>0.015</td>
+<td>0</td>
+<td>0.9825</td>
+<td>48</td>
+<td>4.22</td>
+<td>3</td>
+<td>9</td>
+<td>12</td>
+<td>25.29</td>
+<td>13</td>
+</tr>
+<tr>
+<td>48</td>
+<td>0.7</td>
+<td>400</td>
+<td>40</td>
+<td>10</td>
+<td>0.0025</td>
+<td>1</td>
+<td>0.995</td>
+<td>0.005</td>
+<td>0</td>
+<td>0.9925</td>
+<td>48</td>
+<td>4.29</td>
+<td>3</td>
+<td>8.1</td>
+<td>11</td>
+<td>27.05</td>
+<td>14</td>
+</tr>
+</tbody></table>
+<h2>Stop Categories</h2>
+<table>
+<thead><tr>
+<th>max_new_tokens</th>
+<th>temperature</th>
+<th>stop_category</th>
+<th>rows</th>
+<th>rate</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>48</td>
+<td>0.5</td>
+<td>boundary_seen_and_generation_hit_cap</td>
+<td>393</td>
+<td>0.9825</td>
+</tr>
+<tr>
+<td>48</td>
+<td>0.5</td>
+<td>empty</td>
+<td>1</td>
+<td>0.0025</td>
+</tr>
+<tr>
+<td>48</td>
+<td>0.5</td>
+<td>hit_cap_no_boundary</td>
+<td>6</td>
+<td>0.015</td>
+</tr>
+<tr>
+<td>48</td>
+<td>0.7</td>
+<td>boundary_seen_and_generation_hit_cap</td>
+<td>397</td>
+<td>0.9925</td>
+</tr>
+<tr>
+<td>48</td>
+<td>0.7</td>
+<td>empty</td>
+<td>1</td>
+<td>0.0025</td>
+</tr>
+<tr>
+<td>48</td>
+<td>0.7</td>
+<td>hit_cap_no_boundary</td>
+<td>2</td>
+<td>0.005</td>
+</tr>
+</tbody></table>
+<h2>Figures</h2>
+<img src="../figs/response_entropy_stopping_probe_v3/stopping_probe_hit_max_rate.png" alt="max-token hit rate">
+<img src="../figs/response_entropy_stopping_probe_v3/stopping_probe_boundary_rate.png" alt="speaker-boundary rate">
+<img src="../figs/response_entropy_stopping_probe_v3/stopping_probe_p90_trimmed_words.png" alt="p90 trimmed response words">
+<img src="../figs/response_entropy_stopping_probe_v3/stopping_probe_stop_categories.png" alt="stop categories">
+<h2>Files</h2>
+<ul>
+<li>Combined samples: <code>results/response_entropy_stopping_probe_v3/stopping_probe_samples_combined.csv.gz</code></li>
+<li>Setting summary: <code>results/response_entropy_stopping_probe_v3/stopping_probe_setting_summary.csv</code></li>
+<li>Stop categories: <code>results/response_entropy_stopping_probe_v3/stopping_probe_stop_category_summary.csv</code></li>
+<li>Manual examples: <code>results/response_entropy_stopping_probe_v3/stopping_probe_manual_examples.csv</code></li>
+<li>Figure manifest: <code>results/response_entropy_stopping_probe_v3/stopping_probe_figure_manifest.csv</code></li>
+</ul>
+</main>
+</body>
+</html>
