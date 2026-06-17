@@ -309,7 +309,10 @@ if [[ "$DRY_RUN" == "1" ]]; then
   exit 0
 fi
 
-tail -n +2 "$TASKS_TSV" | while IFS=$'\\t' read -r task_id mode corpus child input_csv text_col context_col output_csv; do
+tail -n +2 "$TASKS_TSV" | awk -F'\\t' 'BEGIN {OFS = FS} {if ($7 == "") $7 = "__NO_CONTEXT__"; print}' | while IFS=$'\\t' read -r task_id mode corpus child input_csv text_col context_col output_csv; do
+  if [[ "$context_col" == "__NO_CONTEXT__" ]]; then
+    context_col=""
+  fi
   echo "[INFO] task=$task_id corpus=$corpus child=$child context=${context_col:-k0} output=$output_csv"
   if [[ -f "$output_csv" && "$OVERWRITE" != "1" ]]; then
     echo "[SKIP] exists: $output_csv"

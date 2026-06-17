@@ -128,6 +128,7 @@ class HeldoutRealChildScoringBundleTests(unittest.TestCase):
             self.assertIn("--modes real", script_text)
             self.assertIn("task_count\" -ne 12", script_text)
             self.assertIn("--strict-context-col", script_text)
+            self.assertIn("__NO_CONTEXT__", script_text)
 
             with tarfile.open(tar_gz, "r:gz") as archive:
                 names = set(archive.getnames())
