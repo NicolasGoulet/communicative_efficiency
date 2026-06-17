@@ -3892,3 +3892,101 @@ missing full-frame rows: 1,332,456
   - Suggested supervisor summary: the measurement pipeline works; final-smoke
     entropy favors T=0.5 primary with T=0.7 sensitivity, but 20 samples cannot
     certify 100-sample production stability.
+
+## 2026-06-16 - Current scored real-child coverage plots
+
+- Built the current-scored real-child coverage plots from the PBM scored
+  Mistral tree, counting each real utterance once from `k0` outputs.
+- Current scored real-child universe: 21 children from Brown, Manchester, and
+  Providence; 446,508 scored real-child rows; observed ages 11.133-62.4 months;
+  52 integer months covered from 11 through 62.
+- The smallest current-scored child set covering all current-scored integer
+  months is Providence/Naima, Brown/Sarah, and Brown/Adam.
+- Outputs:
+
+```text
+figs/route1_current_scored_coverage/current_scored_real_child_age_coverage.png
+figs/route1_current_scored_coverage/current_scored_real_child_age_coverage.pdf
+figs/route1_current_scored_coverage/current_scored_minimal_month_cover_set.png
+figs/route1_current_scored_coverage/current_scored_minimal_month_cover_set.pdf
+results/route1_current_scored_coverage/current_scored_real_child_coverage_summary.csv
+results/route1_current_scored_coverage/current_scored_real_child_age_points.csv
+results/route1_current_scored_coverage/current_scored_minimal_month_cover_set.csv
+results/route1_current_scored_coverage/current_scored_child_candidate_ranking.csv
+```
+
+- Added same-axis row-comparison plots for selecting heldout children. These
+  put proposed strict-preprocessed heldout candidates, the current scored
+  3-child cover set, Brown/Manchester/Providence scored dataset-union rows, and
+  the all-PBM scored union on one age axis:
+
+```text
+figs/route1_current_scored_coverage/current_scored_subset3_vs_all21_union_tight.png
+figs/route1_current_scored_coverage/current_scored_subset3_vs_all21_union_tight.pdf
+results/route1_current_scored_coverage/current_scored_subset3_vs_all21_union_by_month.csv
+results/route1_current_scored_coverage/current_scored_subset3_vs_all21_union_summary.csv
+figs/route1_current_scored_coverage/scored_pbm_vs_proposed_sets_row_coverage.png
+figs/route1_current_scored_coverage/scored_pbm_vs_proposed_sets_row_coverage.pdf
+results/route1_current_scored_coverage/scored_pbm_vs_proposed_sets_row_coverage.csv
+results/route1_current_scored_coverage/nonpbm_three_child_set_ranking.csv
+```
+
+- Exhaustive ranking of all 30,856 three-child combinations from the 58
+  non-PBM strict children confirms that Forrester/Ella,
+  MPI-EVA-Manchester/Helen, and Sachs/Naomi are the unique 3-child set covering
+  all non-PBM observed integer months, 12-61. No non-PBM set can cover PBM-only
+  months 11 and 62.
+
+## 2026-06-16 - Heldout real-child scoring handoff
+
+- Added a tested heldout scoring bundle builder for the best non-PBM
+  three-child set:
+
+```text
+src/create_heldout_real_child_scoring_bundle.py
+tests/test_create_heldout_real_child_scoring_bundle.py
+docs/heldout_real_child_generalization_pc_scoring_prompt.md
+```
+
+- Built the real-child-only bundle:
+
+```text
+results/scoring_bundles/heldout_real_child_generalization_2026-06-16/
+results/scoring_bundles/heldout_real_child_generalization_2026-06-16.tar.gz
+```
+
+- Bundle contents: Forrester/Ella, Sachs/Naomi, and
+  MPI-EVA-Manchester/Helen `chi.surprisal_scoring.csv` files, preserving
+  age/session/file metadata, `context_k1`-`context_k3`, and real target text.
+  It deliberately does not stage generated-baseline scoring.
+- Row counts:
+
+```text
+Forrester/Ella: 6,663 rows, ages 12.033-60.000, 0 blank targets
+Sachs/Naomi: 16,344 rows, ages 14.967-57.100, 0 blank targets
+MPI-EVA-Manchester/Helen: 154,593 rows, ages 36.067-61.633, 0 blank targets
+total: 177,600 rows
+expected scoring tasks: 12 = 3 children x real mode x k0/k1/k2/k3
+```
+
+- Predictor availability is recorded in
+  `metadata/predictor_availability.csv`: age/session/file metadata, real target
+  text, and caretaker context text are available before scoring; context
+  entropy, response-space entropy, and generated-baseline scores are not yet
+  available for these heldout children.
+- Verified locally with focused tests and a scorer-side dry run. The dry run
+  extracted the tarball under `/tmp`, ran the bundled scoring wrapper with
+  `DRY_RUN=1`, and built a 12-task manifest.
+- Rsynced the tarball and PC prompt to:
+
+```text
+alkan@192.168.7.217:/home/alkan/Portelance/compute_surprisal_mila/new_data/
+```
+
+- Verified on the PC that the corrected wrapper falls back to
+  `.venv/bin/python` when `uv` is not on PATH. Remote dry run wrote exactly 12
+  tasks to:
+
+```text
+/home/alkan/Portelance/compute_surprisal_mila/slurm/tasks_heldout_real_child_generalization_2026-06-16_mistral.tsv
+```
