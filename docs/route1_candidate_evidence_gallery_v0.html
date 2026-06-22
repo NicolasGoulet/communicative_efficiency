@@ -1,0 +1,1152 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Route 1 Candidate Evidence Gallery v0</title>
+<style>
+:root {
+  color-scheme: light;
+  --ink: #1e2528;
+  --muted: #5e686d;
+  --line: #d9e0df;
+  --paper: #ffffff;
+  --soft: #f5f7f6;
+  --accent: #2f6f73;
+  --accent2: #c76f2c;
+}
+body {
+  margin: 0;
+  background: #eef2f1;
+  color: var(--ink);
+  font: 16px/1.58 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+main {
+  max-width: 980px;
+  margin: 34px auto 56px;
+  padding: 48px 58px;
+  background: var(--paper);
+  box-shadow: 0 18px 50px rgba(31, 45, 48, 0.12);
+}
+h1, h2, h3, h4 {
+  line-height: 1.18;
+  margin: 1.6em 0 0.55em;
+}
+h1 {
+  margin-top: 0;
+  font-size: 2.25rem;
+  border-bottom: 3px solid var(--accent);
+  padding-bottom: 0.45em;
+}
+h2 {
+  font-size: 1.55rem;
+  color: var(--accent);
+}
+h3 {
+  font-size: 1.18rem;
+}
+p {
+  margin: 0.75em 0;
+}
+a {
+  color: var(--accent);
+}
+blockquote {
+  border-left: 4px solid var(--accent2);
+  margin: 1.1em 0;
+  padding: 0.05em 1.1em;
+  color: var(--muted);
+  background: #fff8f2;
+}
+code {
+  background: var(--soft);
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  padding: 0.08em 0.3em;
+  font-family: "SFMono-Regular", Consolas, monospace;
+  font-size: 0.92em;
+}
+pre {
+  background: #f5f7f6;
+  color: var(--ink);
+  border: 1px solid var(--line);
+  padding: 1em;
+  overflow-x: auto;
+  border-radius: 7px;
+}
+pre code {
+  background: transparent;
+  border: 0;
+  padding: 0;
+  color: inherit;
+}
+table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 1.15em 0 1.45em;
+  font-size: 0.95em;
+}
+th, td {
+  border: 1px solid var(--line);
+  padding: 0.54em 0.68em;
+  vertical-align: top;
+}
+th {
+  background: #e7efed;
+  text-align: left;
+}
+tr:nth-child(even) td {
+  background: #fafbfb;
+}
+img {
+  max-width: 100%;
+  display: block;
+  margin: 1.1em auto 0.45em;
+}
+ul, ol {
+  padding-left: 1.4em;
+}
+.caption {
+  color: var(--muted);
+  font-size: 0.92em;
+  margin-top: -0.15em;
+}
+@media print {
+  body {
+    background: white;
+  }
+  main {
+    box-shadow: none;
+    margin: 0;
+    max-width: none;
+    padding: 28px;
+  }
+}
+</style>
+</head>
+<body>
+<main>
+<h1>Route 1 Candidate Evidence Gallery v0</h1>
+<p>This is <strong>not</strong> the supervisor report. It is a selectable gallery of promising Route 1 plots, checks, and exact effect sentences to inspect before deciding what goes into the supervisor-facing narrative.</p>
+<h2>What This File Is For</h2>
+<ul>
+<li>Pull the best candidates from every Route 1 Atlas/report family.</li>
+<li>Put actual plots next to literal one-line effect interpretations.</li>
+<li>Separate promising evidence from cautions and robustness checks.</li>
+<li>Make it easy to choose what to promote into the final supervisor report.</li>
+</ul>
+<h2>Source Reports</h2>
+<ul>
+<li>Real child Atlas v2: <a href="utterance_information_route1_real_corrected_fixed_effort_atlas_v2.html">utterance_information_route1_real_corrected_fixed_effort_atlas_v2.html</a></li>
+<li>Source-specific Atlas v2 index: <a href="utterance_information_route1_source_specific_corrected_fixed_effort_atlas_v2_index.html">utterance_information_route1_source_specific_corrected_fixed_effort_atlas_v2_index.html</a></li>
+<li>Heldout child prediction report: <a href="utterance_information_route1_heldout_real_child_prediction_report.html">utterance_information_route1_heldout_real_child_prediction_report.html</a></li>
+<li>Caretaker Atlas v2: <a href="utterance_information_route1_caretaker_corrected_fixed_effort_atlas_v2.html">utterance_information_route1_caretaker_corrected_fixed_effort_atlas_v2.html</a></li>
+<li>Age-scrambling robustness: <a href="utterance_information_age_scrambling_robustness.html">utterance_information_age_scrambling_robustness.html</a></li>
+<li>Technical model companion: <a href="utterance_information_m1_m6_technical_implementation_companion.html">utterance_information_m1_m6_technical_implementation_companion.html</a></li>
+</ul>
+<h2>How To Read An Atlas Line</h2>
+<p>A fixed-effort Atlas line is a fitted regression prediction, not a raw average.</p>
+<ul>
+<li><strong>Downward age line:</strong> at the same effort level, older children are predicted to carry less <code>sum_bits</code>.</li>
+<li><strong>Upward age line:</strong> at the same effort level, older children are predicted to carry more <code>sum_bits</code>.</li>
+<li><strong>Separated effort bands:</strong> longer utterances carry more total information, so effort must be controlled.</li>
+<li><strong>Actual-vs-predicted heldout line:</strong> black is the real heldout trajectory; teal dashed is the PBM-trained model&#x27;s predicted trajectory.</li>
+</ul>
+<h2>Fast Pick List</h2>
+<table>
+<thead><tr>
+<th>Use status</th>
+<th>Candidate</th>
+<th>Why</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>Strong candidate</td>
+<td>C01 Real child fixed-effort line</td>
+<td>Cleanest Route 1 developmental story.</td>
+</tr>
+<tr>
+<td>Strong candidate</td>
+<td>C02 Source comparison</td>
+<td>Shows real/random/generated baselines on same slope scale.</td>
+</tr>
+<tr>
+<td>Strong candidate</td>
+<td>C05 Age-scrambling robustness</td>
+<td>Defends against age-bin composition artifacts.</td>
+</tr>
+<tr>
+<td>Diagnostic candidate</td>
+<td>C07 Heldout actual vs predicted</td>
+<td>Direct generalization check, currently mixed.</td>
+</tr>
+<tr>
+<td>Context bridge</td>
+<td>C04 Context controls</td>
+<td>Links to email confounds without overclaiming Route 2.</td>
+</tr>
+<tr>
+<td>Contrast candidate</td>
+<td>C09 Caretaker contrast</td>
+<td>Helps show child result is not automatic in adult speech.</td>
+</tr>
+</tbody></table>
+<h2>C01. Real child fixed-effort developmental line</h2>
+<p><strong>Artifact family:</strong> Route 1 real-child Atlas v2</p>
+<p><strong>What to inspect:</strong> Start with the k3/M4c/words fixed-effort Atlas plot, because it controls child identity, effort, and broad question type.</p>
+<p><strong>Effect one-liner:</strong> age -&gt; lower sum_bits at the same word count: M4c estimates -0.127 bits/month for real child speech.</p>
+<p><strong>Variable importance / predictor relation:</strong> Effort dominates the outcome, child identity matters, and M4c is the clean confound-control candidate among the simple Atlas v2 models.</p>
+<p><strong>Why promising:</strong> This is the cleanest Route 1 story candidate: developmental trend after effort and child identity are controlled.</p>
+<p><strong>Caution before supervisor report:</strong> Do not present it alone; pair it with source comparison and robustness cards so it is not just one fitted line.</p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/real/real_k3_m4c_nb_words_fixed_effort_atlas.png" alt="C01 real_k3_m4c_nb_words_fixed_effort_atlas.png">
+<img src="../figs/route1_candidate_evidence_gallery/real_k3_words_model_ladder_r2_importance.png" alt="C01 real_k3_words_model_ladder_r2_importance.png">
+<table>
+<thead><tr>
+<th>model</th>
+<th>what changed</th>
+<th>R2</th>
+<th>delta R2 vs M2</th>
+<th>age effect</th>
+<th>effort effect</th>
+<th>context entropy</th>
+<th>context effort</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>M1</td>
+<td>Pooled age + effort sanity check; not the main developmental claim.</td>
+<td>0.6130</td>
+<td>-0.0129</td>
+<td>0.000 bits/month (p=0.993)</td>
+<td>6.35 bits/word (p=&lt;.001)</td>
+<td>(p=)</td>
+<td>(p=)</td>
+</tr>
+<tr>
+<td>M2</td>
+<td>Primary controlled line: age + effort with child identity fixed effects.</td>
+<td>0.6259</td>
+<td>0.0000</td>
+<td>-0.122 bits/month (p=&lt;.001)</td>
+<td>6.37 bits/word (p=&lt;.001)</td>
+<td>(p=)</td>
+<td>(p=)</td>
+</tr>
+<tr>
+<td>M3</td>
+<td>Checks whether the age line changes across effort levels.</td>
+<td>0.6259</td>
+<td>0.0000</td>
+<td>-0.122 bits/month (p=&lt;.001)</td>
+<td>6.38 bits/word (p=&lt;.001)</td>
+<td>(p=)</td>
+<td>(p=)</td>
+</tr>
+<tr>
+<td>M4a</td>
+<td>Adds preceding caretaker/context effort as a confound control.</td>
+<td>0.6266</td>
+<td>0.0007</td>
+<td>-0.116 bits/month (p=&lt;.001)</td>
+<td>6.38 bits/word (p=&lt;.001)</td>
+<td>(p=)</td>
+<td>-0.070 (p=&lt;.001)</td>
+</tr>
+<tr>
+<td>M4b</td>
+<td>Adds next-token context entropy as a contextual predictability control.</td>
+<td>0.6266</td>
+<td>0.0007</td>
+<td>-0.126 bits/month (p=&lt;.001)</td>
+<td>6.37 bits/word (p=&lt;.001)</td>
+<td>-0.471 (p=&lt;.001)</td>
+<td>(p=)</td>
+</tr>
+<tr>
+<td>M4c</td>
+<td>Adds broad question type, a key context-form confound from the email.</td>
+<td>0.6297</td>
+<td>0.0038</td>
+<td>-0.127 bits/month (p=&lt;.001)</td>
+<td>6.38 bits/word (p=&lt;.001)</td>
+<td>(p=)</td>
+<td>(p=)</td>
+</tr>
+<tr>
+<td>M5</td>
+<td>Combines context effort, context entropy, and question type.</td>
+<td>0.6269</td>
+<td>0.0009</td>
+<td>-0.122 bits/month (p=&lt;.001)</td>
+<td>6.38 bits/word (p=&lt;.001)</td>
+<td>-0.468 (p=&lt;.001)</td>
+<td>-0.044 (p=&lt;.001)</td>
+</tr>
+<tr>
+<td>M6</td>
+<td>Tests whether context entropy changes the age/effort relation.</td>
+<td>0.6269</td>
+<td>0.0010</td>
+<td>-0.123 bits/month (p=&lt;.001)</td>
+<td>6.38 bits/word (p=&lt;.001)</td>
+<td>-0.469 (p=&lt;.001)</td>
+<td>-0.044 (p=&lt;.001)</td>
+</tr>
+<tr>
+<td>M15</td>
+<td>Richest current context-interaction stress test.</td>
+<td>0.6285</td>
+<td>0.0026</td>
+<td>-0.127 bits/month (p=&lt;.001)</td>
+<td>6.42 bits/word (p=&lt;.001)</td>
+<td>-0.321 (p=&lt;.001)</td>
+<td>-0.034 (p=&lt;.001)</td>
+</tr>
+</tbody></table>
+<table>
+<thead><tr>
+<th>arrow</th>
+<th>effect</th>
+<th>number</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>age ↓</td>
+<td>Older children carry less total information at the same word count, after child identity and question type are controlled.</td>
+<td>-0.127 bits/month; p=&lt;.001</td>
+</tr>
+<tr>
+<td>effort ↑</td>
+<td>Longer utterances carry much more information; this is the mechanical predictor we must hold fixed.</td>
+<td>6.38 bits per extra word; p=&lt;.001</td>
+</tr>
+<tr>
+<td>age × effort ≈ flat</td>
+<td>In real child speech, the age slope is not strongly different across word-count levels in this model.</td>
+<td>-0.0038 bits/month/word; p=0.522</td>
+</tr>
+<tr>
+<td>context entropy ↓</td>
+<td>Next-token context entropy is a meaningful control here, but it is not the final Route 2 response-space entropy claim.</td>
+<td>-0.469 bits; p=&lt;.001</td>
+</tr>
+<tr>
+<td>parent context effort ↓</td>
+<td>Longer preceding caretaker context slightly lowers child utterance information at fixed child effort.</td>
+<td>-0.044 bits/context word; p=&lt;.001</td>
+</tr>
+<tr>
+<td>question type matters</td>
+<td>Question/statement form improves fit, so it belongs as a confound before telling the developmental story.</td>
+<td>M4c has the best simple k3/word R2 among the context-control candidates.</td>
+</tr>
+</tbody></table>
+<h2>C02. Every source atlas on the same slope scale</h2>
+<p><strong>Artifact family:</strong> Route 1 source-specific Atlas v2</p>
+<p><strong>What to inspect:</strong> Compare the fixed-effort M4c k3/word slopes across real, random, n-gram, and LSTM source atlases.</p>
+<p><strong>Effect one-liner:</strong> real child slopes go down; random slopes go up; n-gram/LSTM baselines mostly go down but differ by effort band.</p>
+<p><strong>Variable importance / predictor relation:</strong> This card is not a predictor-importance card; it is a baseline specificity check for the age slope.</p>
+<p><strong>Why promising:</strong> It shows the real-child line is not an artifact of using any generated target or of the plotting code.</p>
+<p><strong>Caution before supervisor report:</strong> Generated baselines are not psychological controls; use them as sanity checks, not as direct alternative children.</p>
+<img src="../figs/route1_candidate_evidence_gallery/source_comparison_m4c_k3_words_slopes.png" alt="C02 source_comparison_m4c_k3_words_slopes.png">
+<table>
+<thead><tr>
+<th>source atlas</th>
+<th>1-4 words</th>
+<th>5-8 words</th>
+<th>9-12 words</th>
+<th>plot</th>
+<th>atlas</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>Real child</td>
+<td>-0.76</td>
+<td>-0.85</td>
+<td>-0.95</td>
+<td><a href="../figs/route1_source_specific_corrected_fixed_effort_atlas/real/real_k3_m4c_nb_words_fixed_effort_atlas.png">plot</a></td>
+<td><a href="utterance_information_route1_real_corrected_fixed_effort_atlas_v2.html">html</a></td>
+</tr>
+<tr>
+<td>Random</td>
+<td>+1.03</td>
+<td>+1.24</td>
+<td>+1.46</td>
+<td><a href="../figs/route1_source_specific_corrected_fixed_effort_atlas/random/random_k3_m4c_nb_words_fixed_effort_atlas.png">plot</a></td>
+<td><a href="utterance_information_route1_random_corrected_fixed_effort_atlas_v2.html">html</a></td>
+</tr>
+<tr>
+<td>Unigram</td>
+<td>-0.08</td>
+<td>-0.78</td>
+<td>-1.48</td>
+<td><a href="../figs/route1_source_specific_corrected_fixed_effort_atlas/unigram/unigram_k3_m4c_nb_words_fixed_effort_atlas.png">plot</a></td>
+<td><a href="utterance_information_route1_unigram_corrected_fixed_effort_atlas_v2.html">html</a></td>
+</tr>
+<tr>
+<td>Bigram</td>
+<td>-0.10</td>
+<td>-0.69</td>
+<td>-1.28</td>
+<td><a href="../figs/route1_source_specific_corrected_fixed_effort_atlas/bigram/bigram_k3_m4c_nb_words_fixed_effort_atlas.png">plot</a></td>
+<td><a href="utterance_information_route1_bigram_corrected_fixed_effort_atlas_v2.html">html</a></td>
+</tr>
+<tr>
+<td>Trigram</td>
+<td>-0.09</td>
+<td>-0.39</td>
+<td>-0.68</td>
+<td><a href="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k3_m4c_nb_words_fixed_effort_atlas.png">plot</a></td>
+<td><a href="utterance_information_route1_trigram_corrected_fixed_effort_atlas_v2.html">html</a></td>
+</tr>
+<tr>
+<td>LSTM k3</td>
+<td>-0.26</td>
+<td>-0.78</td>
+<td>-1.29</td>
+<td><a href="../figs/route1_source_specific_corrected_fixed_effort_atlas/lstm_additive_k3_same_length/lstm_additive_k3_same_length_k3_m4c_nb_words_fixed_effort_atlas.png">plot</a></td>
+<td><a href="utterance_information_route1_lstm_additive_k3_same_length_corrected_fixed_effort_atlas_v2.html">html</a></td>
+</tr>
+<tr>
+<td>LSTM k4</td>
+<td>-0.32</td>
+<td>-0.91</td>
+<td>-1.50</td>
+<td><a href="../figs/route1_source_specific_corrected_fixed_effort_atlas/lstm_additive_k4_same_length/lstm_additive_k4_same_length_k3_m4c_nb_words_fixed_effort_atlas.png">plot</a></td>
+<td><a href="utterance_information_route1_lstm_additive_k4_same_length_corrected_fixed_effort_atlas_v2.html">html</a></td>
+</tr>
+<tr>
+<td>LSTM k5</td>
+<td>-0.34</td>
+<td>-0.85</td>
+<td>-1.35</td>
+<td><a href="../figs/route1_source_specific_corrected_fixed_effort_atlas/lstm_additive_k5_same_length/lstm_additive_k5_same_length_k3_m4c_nb_words_fixed_effort_atlas.png">plot</a></td>
+<td><a href="utterance_information_route1_lstm_additive_k5_same_length_corrected_fixed_effort_atlas_v2.html">html</a></td>
+</tr>
+</tbody></table>
+<h2>C03. One selected plot from each source-specific Atlas</h2>
+<p><strong>Artifact family:</strong> Real, random, unigram, bigram, trigram, LSTM k3/k4/k5 Atlas v2 reports</p>
+<p><strong>What to inspect:</strong> Use this as the visual menu: one M4c/k3/words fixed-effort plot per source-specific Atlas.</p>
+<p><strong>Effect one-liner:</strong> the same formula produces different age-line shapes depending on whether the target is real child speech or a baseline.</p>
+<p><strong>Variable importance / predictor relation:</strong> Formula is held constant here, so differences are about target source behavior, not model specification.</p>
+<p><strong>Why promising:</strong> This directly satisfies the &#x27;pull from every atlas&#x27; requirement without burying you in hundreds of plots.</p>
+<p><strong>Caution before supervisor report:</strong> If one source looks interesting, open the full source Atlas before promoting it.</p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/real/real_k3_m4c_nb_words_fixed_effort_atlas.png" alt="C03 real_k3_m4c_nb_words_fixed_effort_atlas.png">
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/random/random_k3_m4c_nb_words_fixed_effort_atlas.png" alt="C03 random_k3_m4c_nb_words_fixed_effort_atlas.png">
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/unigram/unigram_k3_m4c_nb_words_fixed_effort_atlas.png" alt="C03 unigram_k3_m4c_nb_words_fixed_effort_atlas.png">
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/bigram/bigram_k3_m4c_nb_words_fixed_effort_atlas.png" alt="C03 bigram_k3_m4c_nb_words_fixed_effort_atlas.png">
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k3_m4c_nb_words_fixed_effort_atlas.png" alt="C03 trigram_k3_m4c_nb_words_fixed_effort_atlas.png">
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/lstm_additive_k3_same_length/lstm_additive_k3_same_length_k3_m4c_nb_words_fixed_effort_atlas.png" alt="C03 lstm_additive_k3_same_length_k3_m4c_nb_words_fixed_effort_atlas.png">
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/lstm_additive_k4_same_length/lstm_additive_k4_same_length_k3_m4c_nb_words_fixed_effort_atlas.png" alt="C03 lstm_additive_k4_same_length_k3_m4c_nb_words_fixed_effort_atlas.png">
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/lstm_additive_k5_same_length/lstm_additive_k5_same_length_k3_m4c_nb_words_fixed_effort_atlas.png" alt="C03 lstm_additive_k5_same_length_k3_m4c_nb_words_fixed_effort_atlas.png">
+<table>
+<thead><tr>
+<th>source atlas</th>
+<th>1-4 words</th>
+<th>5-8 words</th>
+<th>9-12 words</th>
+<th>plot</th>
+<th>atlas</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>Real child</td>
+<td>-0.76</td>
+<td>-0.85</td>
+<td>-0.95</td>
+<td><a href="../figs/route1_source_specific_corrected_fixed_effort_atlas/real/real_k3_m4c_nb_words_fixed_effort_atlas.png">plot</a></td>
+<td><a href="utterance_information_route1_real_corrected_fixed_effort_atlas_v2.html">html</a></td>
+</tr>
+<tr>
+<td>Random</td>
+<td>+1.03</td>
+<td>+1.24</td>
+<td>+1.46</td>
+<td><a href="../figs/route1_source_specific_corrected_fixed_effort_atlas/random/random_k3_m4c_nb_words_fixed_effort_atlas.png">plot</a></td>
+<td><a href="utterance_information_route1_random_corrected_fixed_effort_atlas_v2.html">html</a></td>
+</tr>
+<tr>
+<td>Unigram</td>
+<td>-0.08</td>
+<td>-0.78</td>
+<td>-1.48</td>
+<td><a href="../figs/route1_source_specific_corrected_fixed_effort_atlas/unigram/unigram_k3_m4c_nb_words_fixed_effort_atlas.png">plot</a></td>
+<td><a href="utterance_information_route1_unigram_corrected_fixed_effort_atlas_v2.html">html</a></td>
+</tr>
+<tr>
+<td>Bigram</td>
+<td>-0.10</td>
+<td>-0.69</td>
+<td>-1.28</td>
+<td><a href="../figs/route1_source_specific_corrected_fixed_effort_atlas/bigram/bigram_k3_m4c_nb_words_fixed_effort_atlas.png">plot</a></td>
+<td><a href="utterance_information_route1_bigram_corrected_fixed_effort_atlas_v2.html">html</a></td>
+</tr>
+<tr>
+<td>Trigram</td>
+<td>-0.09</td>
+<td>-0.39</td>
+<td>-0.68</td>
+<td><a href="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k3_m4c_nb_words_fixed_effort_atlas.png">plot</a></td>
+<td><a href="utterance_information_route1_trigram_corrected_fixed_effort_atlas_v2.html">html</a></td>
+</tr>
+<tr>
+<td>LSTM k3</td>
+<td>-0.26</td>
+<td>-0.78</td>
+<td>-1.29</td>
+<td><a href="../figs/route1_source_specific_corrected_fixed_effort_atlas/lstm_additive_k3_same_length/lstm_additive_k3_same_length_k3_m4c_nb_words_fixed_effort_atlas.png">plot</a></td>
+<td><a href="utterance_information_route1_lstm_additive_k3_same_length_corrected_fixed_effort_atlas_v2.html">html</a></td>
+</tr>
+<tr>
+<td>LSTM k4</td>
+<td>-0.32</td>
+<td>-0.91</td>
+<td>-1.50</td>
+<td><a href="../figs/route1_source_specific_corrected_fixed_effort_atlas/lstm_additive_k4_same_length/lstm_additive_k4_same_length_k3_m4c_nb_words_fixed_effort_atlas.png">plot</a></td>
+<td><a href="utterance_information_route1_lstm_additive_k4_same_length_corrected_fixed_effort_atlas_v2.html">html</a></td>
+</tr>
+<tr>
+<td>LSTM k5</td>
+<td>-0.34</td>
+<td>-0.85</td>
+<td>-1.35</td>
+<td><a href="../figs/route1_source_specific_corrected_fixed_effort_atlas/lstm_additive_k5_same_length/lstm_additive_k5_same_length_k3_m4c_nb_words_fixed_effort_atlas.png">plot</a></td>
+<td><a href="utterance_information_route1_lstm_additive_k5_same_length_corrected_fixed_effort_atlas_v2.html">html</a></td>
+</tr>
+</tbody></table>
+<h2>C04. Context controls and confounds from the email</h2>
+<p><strong>Artifact family:</strong> Context M1-M6 Atlas plus real Atlas v2</p>
+<p><strong>What to inspect:</strong> Check whether context entropy and context size change the age/effort story.</p>
+<p><strong>Effect one-liner:</strong> context entropy is a meaningful control in Route 1, but it is not yet the Route 2 claim about choosing utterance length.</p>
+<p><strong>Variable importance / predictor relation:</strong> In the real k3/word ladder, adding context controls changes R2 modestly compared with the effort and child-identity base.</p>
+<p><strong>Why promising:</strong> This is the bridge from the current Route 1 report to the email&#x27;s stronger context-predictability story.</p>
+<p><strong>Caution before supervisor report:</strong> Do not overclaim optimization from this card; it controls context predictability but does not yet model effort choice.</p>
+<img src="../figs/context_m1_m6_fixed_effort_atlas/k3_m6e_nb_words_fixed_effort_atlas.png" alt="C04 k3_m6e_nb_words_fixed_effort_atlas.png">
+<img src="../figs/context_m1_m6_fixed_effort_atlas/k3_m6es_nb_words_fixed_effort_atlas.png" alt="C04 k3_m6es_nb_words_fixed_effort_atlas.png">
+<img src="../figs/route1_candidate_evidence_gallery/pbm_real_k3_predictor_correlation_heatmap.png" alt="C04 pbm_real_k3_predictor_correlation_heatmap.png">
+<table>
+<thead><tr>
+<th>model</th>
+<th>formula</th>
+<th>R2</th>
+<th>age</th>
+<th>target effort</th>
+<th>context entropy</th>
+<th>context size</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>M4E</td>
+<td>sum_bits ~ age_c + target_effort_c + context_entropy_c + C(child_id)</td>
+<td>0.6266</td>
+<td>-0.127 (p=&lt;.001)</td>
+<td>6.37 (p=&lt;.001)</td>
+<td>-0.472 (p=&lt;.001)</td>
+<td>(p=)</td>
+</tr>
+<tr>
+<td>M4ES</td>
+<td>sum_bits ~ age_c + target_effort_c + context_entropy_c + context_size_c + C(child_id)</td>
+<td>0.6268</td>
+<td>-0.123 (p=&lt;.001)</td>
+<td>6.37 (p=&lt;.001)</td>
+<td>-0.470 (p=&lt;.001)</td>
+<td>-0.043 (p=&lt;.001)</td>
+</tr>
+<tr>
+<td>M6E</td>
+<td>sum_bits ~ age_c <em> target_effort_c + age_c </em> context_entropy_c + target_effort_c * context_entropy_c + C(child_id)</td>
+<td>0.6266</td>
+<td>-0.127 (p=&lt;.001)</td>
+<td>6.38 (p=&lt;.001)</td>
+<td>-0.473 (p=&lt;.001)</td>
+<td>(p=)</td>
+</tr>
+<tr>
+<td>M6ES</td>
+<td>sum_bits ~ age_c <em> target_effort_c + age_c </em> context_entropy_c + target_effort_c <em> context_entropy_c + age_c </em> context_size_c + target_effort_c <em> context_size_c + context_entropy_c </em> context_size_c + C(child_id)</td>
+<td>0.6285</td>
+<td>-0.127 (p=&lt;.001)</td>
+<td>6.42 (p=&lt;.001)</td>
+<td>-0.494 (p=&lt;.001)</td>
+<td>-0.035 (p=&lt;.001)</td>
+</tr>
+</tbody></table>
+<h2>C05. Age-scrambling and age-bin robustness</h2>
+<p><strong>Artifact family:</strong> Age scrambling robustness report</p>
+<p><strong>What to inspect:</strong> Check whether observed age slopes sit outside shuffled or balanced-bootstrap age-label nulls.</p>
+<p><strong>Effect one-liner:</strong> the useful claim is not just &#x27;a line exists&#x27;; it must be stronger than age-label artifacts.</p>
+<p><strong>Variable importance / predictor relation:</strong> Robustness varies by model; use the table to decide which model is sturdy enough for the supervisor report.</p>
+<p><strong>Why promising:</strong> This is the best defense against &#x27;is this just age-bin composition?&#x27;</p>
+<p><strong>Caution before supervisor report:</strong> Some checks may be mixed; only promote models whose observed slope behaves well under the relevant null.</p>
+<img src="../figs/age_scrambling_robustness/m2_clear_robustness_regression_lines.png" alt="C05 m2_clear_robustness_regression_lines.png">
+<img src="../figs/age_scrambling_robustness/m6_clear_robustness_regression_lines.png" alt="C05 m6_clear_robustness_regression_lines.png">
+<img src="../figs/age_scrambling_robustness/robustness_outside_null_heatmap.png" alt="C05 robustness_outside_null_heatmap.png">
+<table>
+<thead><tr>
+<th>model</th>
+<th>check</th>
+<th>observed age</th>
+<th>null 95% interval</th>
+<th>outside null?</th>
+<th>p</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>M2</td>
+<td>Balanced age-bin bootstrap</td>
+<td>-0.040</td>
+<td>[-0.168, -0.036]</td>
+<td>False</td>
+<td></td>
+</tr>
+<tr>
+<td>M2</td>
+<td>Grouped age-bin label scramble</td>
+<td>-0.040</td>
+<td>[-0.025, 0.028]</td>
+<td>True</td>
+<td>0.010</td>
+</tr>
+<tr>
+<td>M2</td>
+<td>Unit-level age scramble</td>
+<td>-0.040</td>
+<td>[-0.013, 0.013]</td>
+<td>True</td>
+<td>0.010</td>
+</tr>
+<tr>
+<td>M2</td>
+<td>Within-child age scramble</td>
+<td>-0.040</td>
+<td>[-0.020, 0.018]</td>
+<td>True</td>
+<td>0.010</td>
+</tr>
+<tr>
+<td>M3</td>
+<td>Balanced age-bin bootstrap</td>
+<td>-0.050</td>
+<td>[-0.186, -0.022]</td>
+<td>False</td>
+<td></td>
+</tr>
+<tr>
+<td>M3</td>
+<td>Grouped age-bin label scramble</td>
+<td>-0.050</td>
+<td>[-0.025, 0.027]</td>
+<td>True</td>
+<td>0.010</td>
+</tr>
+<tr>
+<td>M3</td>
+<td>Unit-level age scramble</td>
+<td>-0.050</td>
+<td>[-0.010, 0.012]</td>
+<td>True</td>
+<td>0.010</td>
+</tr>
+<tr>
+<td>M3</td>
+<td>Within-child age scramble</td>
+<td>-0.050</td>
+<td>[-0.020, 0.014]</td>
+<td>True</td>
+<td>0.010</td>
+</tr>
+<tr>
+<td>M4</td>
+<td>Balanced age-bin bootstrap</td>
+<td>-0.038</td>
+<td>[-0.186, 0.028]</td>
+<td>False</td>
+<td></td>
+</tr>
+<tr>
+<td>M4</td>
+<td>Grouped age-bin label scramble</td>
+<td>-0.038</td>
+<td>[-0.032, 0.037]</td>
+<td>True</td>
+<td>0.020</td>
+</tr>
+<tr>
+<td>M4</td>
+<td>Unit-level age scramble</td>
+<td>-0.038</td>
+<td>[-0.010, 0.010]</td>
+<td>True</td>
+<td>0.010</td>
+</tr>
+<tr>
+<td>M4</td>
+<td>Within-child age scramble</td>
+<td>-0.038</td>
+<td>[-0.020, 0.025]</td>
+<td>True</td>
+<td>0.010</td>
+</tr>
+<tr>
+<td>M5</td>
+<td>Balanced age-bin bootstrap</td>
+<td>-0.033</td>
+<td>[-0.181, 0.022]</td>
+<td>False</td>
+<td></td>
+</tr>
+<tr>
+<td>M5</td>
+<td>Grouped age-bin label scramble</td>
+<td>-0.033</td>
+<td>[-0.032, 0.030]</td>
+<td>True</td>
+<td>0.059</td>
+</tr>
+<tr>
+<td>M5</td>
+<td>Unit-level age scramble</td>
+<td>-0.033</td>
+<td>[-0.014, 0.013]</td>
+<td>True</td>
+<td>0.010</td>
+</tr>
+<tr>
+<td>M5</td>
+<td>Within-child age scramble</td>
+<td>-0.033</td>
+<td>[-0.013, 0.026]</td>
+<td>True</td>
+<td>0.010</td>
+</tr>
+<tr>
+<td>M6</td>
+<td>Balanced age-bin bootstrap</td>
+<td>-0.058</td>
+<td>[-0.113, 0.020]</td>
+<td>False</td>
+<td></td>
+</tr>
+<tr>
+<td>M6</td>
+<td>Grouped age-bin label scramble</td>
+<td>-0.058</td>
+<td>[-0.044, 0.033]</td>
+<td>True</td>
+<td>0.030</td>
+</tr>
+<tr>
+<td>M6</td>
+<td>Unit-level age scramble</td>
+<td>-0.058</td>
+<td>[-0.012, 0.012]</td>
+<td>True</td>
+<td>0.010</td>
+</tr>
+<tr>
+<td>M6</td>
+<td>Within-child age scramble</td>
+<td>-0.058</td>
+<td>[-0.018, 0.022]</td>
+<td>True</td>
+<td>0.010</td>
+</tr>
+</tbody></table>
+<h2>C06. Estimator-family checks: OLS, GEE, GLM, MixedLM</h2>
+<p><strong>Artifact family:</strong> M1/M2/M3 deep dive</p>
+<p><strong>What to inspect:</strong> Compare adjusted age lines across OLS with fixed effects, clustered SE, GEE, GLM, and mixed-effects variants.</p>
+<p><strong>Effect one-liner:</strong> the candidate age story is stronger if the line direction does not depend on one estimator.</p>
+<p><strong>Variable importance / predictor relation:</strong> Old deep-dive delta-R2 shows effort explains far more raw variance than age, which is exactly why fixed-effort plotting is necessary.</p>
+<p><strong>Why promising:</strong> This gives the methods backup: the story is not just a single OLS table.</p>
+<p><strong>Caution before supervisor report:</strong> Use these as checks/appendix material unless a model-family contrast becomes central.</p>
+<img src="../figs/m1_m2_utterance_information_deep_dive/m2_ols_child_fe_adjusted_age_lines.png" alt="C06 m2_ols_child_fe_adjusted_age_lines.png">
+<img src="../figs/m1_m2_utterance_information_deep_dive/m2_mixed_random_age_slope_adjusted_age_lines.png" alt="C06 m2_mixed_random_age_slope_adjusted_age_lines.png">
+<img src="../figs/m1_m2_utterance_information_deep_dive/m3_gee_gaussian_interaction_adjusted_age_lines.png" alt="C06 m3_gee_gaussian_interaction_adjusted_age_lines.png">
+<img src="../figs/m1_m2_utterance_information_deep_dive/m1_m2_delta_r2_variable_importance.png" alt="C06 m1_m2_delta_r2_variable_importance.png">
+<table>
+<thead><tr>
+<th>model_id</th>
+<th>model_label</th>
+<th>effort_col</th>
+<th>effort_label</th>
+<th>importance_term</th>
+<th>full_r2</th>
+<th>reduced_r2</th>
+<th>delta_r2_when_dropped</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>M1</td>
+<td>M1: age + effort</td>
+<td>nb_words</td>
+<td>Words</td>
+<td>Words</td>
+<td>0.6129770457378894</td>
+<td>0.0450766913754767</td>
+<td>0.5679003543624126</td>
+</tr>
+<tr>
+<td>M1</td>
+<td>M1: age + effort</td>
+<td>nb_words</td>
+<td>Words</td>
+<td>Age in months</td>
+<td>0.6129770457378894</td>
+<td>0.612977023580856</td>
+<td>2.2157033319203382e-08</td>
+</tr>
+<tr>
+<td>M2</td>
+<td>M2: age + effort + child identity</td>
+<td>nb_words</td>
+<td>Words</td>
+<td>Words</td>
+<td>0.6259086571579606</td>
+<td>0.0924273121982121</td>
+<td>0.5334813449597485</td>
+</tr>
+<tr>
+<td>M2</td>
+<td>M2: age + effort + child identity</td>
+<td>nb_words</td>
+<td>Words</td>
+<td>Child identity</td>
+<td>0.6259086571579606</td>
+<td>0.6129770457378894</td>
+<td>0.0129316114200712</td>
+</tr>
+<tr>
+<td>M2</td>
+<td>M2: age + effort + child identity</td>
+<td>nb_words</td>
+<td>Words</td>
+<td>Age in months</td>
+<td>0.6259086571579606</td>
+<td>0.6240329079059622</td>
+<td>0.0018757492519984</td>
+</tr>
+</tbody></table>
+<h2>C07. Heldout children: actual regression line vs predicted regression line</h2>
+<p><strong>Artifact family:</strong> Heldout real child prediction report</p>
+<p><strong>What to inspect:</strong> Black dots/line are actual heldout child monthly data; teal dashed line is PBM-trained prediction at the same child and effort band.</p>
+<p><strong>Effect one-liner:</strong> this asks whether a PBM-trained Route 1 model predicts the shape of unseen children&#x27;s information trajectories.</p>
+<p><strong>Variable importance / predictor relation:</strong> Prediction uses population PBM models because heldout children cannot use child fixed effects learned from themselves.</p>
+<p><strong>Why promising:</strong> This is the generalization check you wanted: actual line and predicted line are literally in the same panel.</p>
+<p><strong>Caution before supervisor report:</strong> Current heldout fixed-effort slopes are mixed by child and band, so this is a diagnostic candidate, not yet the cleanest proof.</p>
+<img src="../figs/route1_candidate_evidence_gallery/heldout_pop_m4c_actual_vs_predicted_regression_lines.png" alt="C07 heldout_pop_m4c_actual_vs_predicted_regression_lines.png">
+<img src="../figs/route1_candidate_evidence_gallery/heldout_pop_m4c_calibration_residuals.png" alt="C07 heldout_pop_m4c_calibration_residuals.png">
+<table>
+<thead><tr>
+<th>child_key</th>
+<th>effort_band</th>
+<th>actual_slope_bits_per_month</th>
+<th>predicted_slope_bits_per_month</th>
+<th>actual_month_points</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>Forrester/Ella</td>
+<td>1-4</td>
+<td>0.0270012292327988</td>
+<td>-0.0140398757396908</td>
+<td>25</td>
+</tr>
+<tr>
+<td>Forrester/Ella</td>
+<td>5-8</td>
+<td>-0.4186608170105513</td>
+<td>-0.0002467981761615</td>
+<td>25</td>
+</tr>
+<tr>
+<td>Forrester/Ella</td>
+<td>9-12</td>
+<td>-1.2387577536068777</td>
+<td>0.0135462793873675</td>
+<td>14</td>
+</tr>
+<tr>
+<td>Sachs/Naomi</td>
+<td>1-4</td>
+<td>0.1146939748090093</td>
+<td>-0.0140398757396904</td>
+<td>24</td>
+</tr>
+<tr>
+<td>Sachs/Naomi</td>
+<td>5-8</td>
+<td>0.0282044151825889</td>
+<td>-0.0002467981761605</td>
+<td>21</td>
+</tr>
+<tr>
+<td>Sachs/Naomi</td>
+<td>9-12</td>
+<td>0.8291591365210335</td>
+<td>0.0135462793873688</td>
+<td>14</td>
+</tr>
+<tr>
+<td>MPI-EVA-Manchester/Helen</td>
+<td>1-4</td>
+<td>0.0475976291643852</td>
+<td>-0.0140398757396904</td>
+<td>26</td>
+</tr>
+<tr>
+<td>MPI-EVA-Manchester/Helen</td>
+<td>5-8</td>
+<td>-0.0824757391384523</td>
+<td>-0.0002467981761613</td>
+<td>26</td>
+</tr>
+<tr>
+<td>MPI-EVA-Manchester/Helen</td>
+<td>9-12</td>
+<td>-0.069148974089826</td>
+<td>0.013546279387368</td>
+<td>26</td>
+</tr>
+</tbody></table>
+<h2>C08. Heldout child selection coverage</h2>
+<p><strong>Artifact family:</strong> Heldout child selection/corpus coverage</p>
+<p><strong>What to inspect:</strong> Use this only to explain why Ella, Naomi, and Helen were selected.</p>
+<p><strong>Effect one-liner:</strong> the selected three children cover a broad month range while staying outside the PBM training set.</p>
+<p><strong>Variable importance / predictor relation:</strong> No predictor importance; this is a sampling/support argument.</p>
+<p><strong>Why promising:</strong> It prevents the heldout section from looking arbitrary.</p>
+<p><strong>Caution before supervisor report:</strong> This belongs before prediction results, not as evidence of communicative efficiency.</p>
+<img src="../figs/route1_heldout_real_child_prediction/heldout_selection_pbm_corpus_coverage.png" alt="C08 heldout_selection_pbm_corpus_coverage.png">
+<img src="../figs/big_cleaned_dataset/default_naturalistic_merged_006_023/pbm_reference_and_heldout_candidate_options.png" alt="C08 pbm_reference_and_heldout_candidate_options.png">
+<h2>C09. Caretaker contrast</h2>
+<p><strong>Artifact family:</strong> Caretaker Route 1 Atlas v2</p>
+<p><strong>What to inspect:</strong> Compare parent/caretaker fixed-effort age lines to the child lines.</p>
+<p><strong>Effect one-liner:</strong> caretaker information does not show the same clean child-age downward story after dyad and effort controls.</p>
+<p><strong>Variable importance / predictor relation:</strong> Caretaker effort dominates caretaker sum_bits; child age is weak or model-dependent in the selected k3/word controls.</p>
+<p><strong>Why promising:</strong> This makes the child result more interpretable: the developmental pattern is not automatically present for adult speech in the same sessions.</p>
+<p><strong>Caution before supervisor report:</strong> The caretaker report answers a different question: adult speech as a function of child age, not adult language development.</p>
+<img src="../figs/route1_caretaker_corrected_fixed_effort_atlas/caretaker_k3_cm2_nb_words_fixed_effort_atlas.png" alt="C09 caretaker_k3_cm2_nb_words_fixed_effort_atlas.png">
+<img src="../figs/route1_caretaker_corrected_fixed_effort_atlas/caretaker_k3_cm6_nb_words_fixed_effort_atlas.png" alt="C09 caretaker_k3_cm6_nb_words_fixed_effort_atlas.png">
+<table>
+<thead><tr>
+<th>model</th>
+<th>formula</th>
+<th>R2</th>
+<th>age effect</th>
+<th>effort effect</th>
+<th>context effort</th>
+<th>age x effort</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>CM2</td>
+<td>caretaker_sum_bits ~ child_age_c + caretaker_effort_c + C(dyad_child_id)</td>
+<td>0.6607</td>
+<td>0.029 bits/month (p=0.274)</td>
+<td>4.74 bits/word (p=&lt;.001)</td>
+<td>(p=)</td>
+<td>(p=)</td>
+</tr>
+<tr>
+<td>CM3</td>
+<td>caretaker_sum_bits ~ child_age_c * caretaker_effort_c + C(dyad_child_id)</td>
+<td>0.6607</td>
+<td>0.028 bits/month (p=0.266)</td>
+<td>4.74 bits/word (p=&lt;.001)</td>
+<td>(p=)</td>
+<td>0.0018 (p=0.722)</td>
+</tr>
+<tr>
+<td>CM4c</td>
+<td>caretaker_sum_bits ~ child_age_c * caretaker_effort_c + C(dyad_child_id) + C(question_type)</td>
+<td>0.6624</td>
+<td>0.025 bits/month (p=0.325)</td>
+<td>4.74 bits/word (p=&lt;.001)</td>
+<td>(p=)</td>
+<td>0.0019 (p=0.703)</td>
+</tr>
+<tr>
+<td>CM6</td>
+<td>caretaker_sum_bits ~ child_age_c * caretaker_effort_c + C(dyad_child_id) + preceding_context_caretaker_effort_c + C(question_type) + child_age_c:preceding_context_caretaker_effort_c + caretaker_effort_c:preceding_context_caretaker_effort_c</td>
+<td>0.6716</td>
+<td>0.048 bits/month (p=0.065)</td>
+<td>4.90 bits/word (p=&lt;.001)</td>
+<td>-0.169 (p=&lt;.001)</td>
+<td>0.0058 (p=0.286)</td>
+</tr>
+</tbody></table>
+<h2>C10. Child vs caretaker size-controlled descriptive contrast</h2>
+<p><strong>Artifact family:</strong> Meeting size-controlled plots</p>
+<p><strong>What to inspect:</strong> Use these as descriptive support before or after the model-based child/caretaker contrast.</p>
+<p><strong>Effect one-liner:</strong> child and caretaker information differ even when utterance size is held constant descriptively.</p>
+<p><strong>Variable importance / predictor relation:</strong> No model predictor importance; this is a descriptive exact-size comparison.</p>
+<p><strong>Why promising:</strong> It is easy to understand visually and may help introduce why fixed effort matters.</p>
+<p><strong>Caution before supervisor report:</strong> It is not a substitute for the regression-controlled Atlas result.</p>
+<img src="../figs/meeting_size_controlled_plots/exact_words_child_vs_caretaker.png" alt="C10 exact_words_child_vs_caretaker.png">
+<img src="../figs/meeting_size_controlled_plots/child_vs_caretaker_bits_per_word_by_size.png" alt="C10 child_vs_caretaker_bits_per_word_by_size.png">
+<h2>Model Card Menu: M1-M15</h2>
+<p>These are implementation-level cards from the current Route 1 Atlas v2 ladder. I do <strong>not</strong> find a real implemented M16 artifact in the current ladder, so this gallery does not invent one.</p>
+<table>
+<thead><tr>
+<th>model</th>
+<th>question</th>
+<th>formula</th>
+<th>plain-language role</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>M1</td>
+<td>Does age predict target information after controlling target effort, pooling children?</td>
+<td>sum_bits ~ age + effort</td>
+<td>Pooled age + effort sanity check; not the main developmental claim.</td>
+</tr>
+<tr>
+<td>M2</td>
+<td>Does the age effect remain after child identity is controlled?</td>
+<td>sum_bits ~ age + effort + C(child_id)</td>
+<td>Primary controlled line: age + effort with child identity fixed effects.</td>
+</tr>
+<tr>
+<td>M3</td>
+<td>Does the effort-information relation change with age?</td>
+<td>sum_bits ~ age * effort + C(child_id)</td>
+<td>Checks whether the age line changes across effort levels.</td>
+</tr>
+<tr>
+<td>M4a</td>
+<td>Does preceding caretaker effort explain additional target information?</td>
+<td>sum_bits ~ age * effort + parent_context_effort + C(child_id)</td>
+<td>Adds preceding caretaker/context effort as a confound control.</td>
+</tr>
+<tr>
+<td>M4b</td>
+<td>Does context entropy explain additional target information?</td>
+<td>sum_bits ~ age * effort + context_entropy + C(child_id)</td>
+<td>Adds next-token context entropy as a contextual predictability control.</td>
+</tr>
+<tr>
+<td>M4c</td>
+<td>Does preceding caretaker question type explain additional target information?</td>
+<td>sum_bits ~ age * effort + C(question_type) + C(child_id)</td>
+<td>Adds broad question type, a key context-form confound from the email.</td>
+</tr>
+<tr>
+<td>M5</td>
+<td>Do parent effort, context entropy, and question type each matter after age, target effort, and child identity?</td>
+<td>sum_bits ~ age * effort + parent_context_effort + context_entropy + C(question_type) + C(child_id)</td>
+<td>Combines context effort, context entropy, and question type.</td>
+</tr>
+<tr>
+<td>M6</td>
+<td>Does context-entropy sensitivity change with age or target effort?</td>
+<td>sum_bits ~ age * effort + parent_context_effort + context_entropy + C(question_type) + age:context_entropy + effort:context_entropy + C(child_id)</td>
+<td>Tests whether context entropy changes the age/effort relation.</td>
+</tr>
+<tr>
+<td>M7</td>
+<td>Does a curved age trajectory explain target information beyond linear age and effort?</td>
+<td>sum_bits ~ age + effort + I(age ** 2) + C(child_id)</td>
+<td>Nonlinear age check: age plus age squared.</td>
+</tr>
+<tr>
+<td>M8</td>
+<td>Does the effort-information relation change along a curved age trajectory?</td>
+<td>sum_bits ~ age * effort + I(age <strong> 2) + I(age </strong> 2):effort + C(child_id)</td>
+<td>Nonlinear age-by-effort check.</td>
+</tr>
+<tr>
+<td>M9</td>
+<td>Do age-bin differences remain after target effort and child identity are controlled?</td>
+<td>sum_bits ~ C(age_bin) + effort + C(child_id)</td>
+<td>Categorical age-bin check rather than one straight age slope.</td>
+</tr>
+<tr>
+<td>M10</td>
+<td>Does the effort-information relation differ across developmental age bins?</td>
+<td>sum_bits ~ C(age_bin) * effort + C(child_id)</td>
+<td>Age-bin-by-effort check.</td>
+</tr>
+<tr>
+<td>M11</td>
+<td>Does preceding caretaker effort matter differently across development?</td>
+<td>sum_bits ~ age * effort + parent_context_effort + context_entropy + C(question_type) + age:parent_context_effort + C(child_id)</td>
+<td>Age-by-parent-context-effort interaction check.</td>
+</tr>
+<tr>
+<td>M12</td>
+<td>Does the developmental trajectory differ by broad preceding caretaker question type?</td>
+<td>sum_bits ~ age * effort + parent_context_effort + context_entropy + C(question_type) + age:C(question_type) + C(child_id)</td>
+<td>Age-by-question-type interaction check.</td>
+</tr>
+<tr>
+<td>M13</td>
+<td>Does context entropy matter differently after different broad caretaker question types?</td>
+<td>sum_bits ~ age * effort + parent_context_effort + context_entropy + C(question_type) + context_entropy:C(question_type) + C(child_id)</td>
+<td>Context-entropy-by-question-type interaction check.</td>
+</tr>
+<tr>
+<td>M14</td>
+<td>Do context entropy and preceding caretaker effort jointly predict target information?</td>
+<td>sum_bits ~ age * effort + parent_context_effort + context_entropy + C(question_type) + parent_context_effort:context_entropy + C(child_id)</td>
+<td>Parent-context-effort-by-context-entropy interaction check.</td>
+</tr>
+<tr>
+<td>M15</td>
+<td>Do the main context controls alter the age-effort trajectory under a larger interaction stress test?</td>
+<td>sum_bits ~ age * effort + parent_context_effort + context_entropy + C(question_type) + age:context_entropy + effort:context_entropy + age:parent_context_effort + effort:parent_context_effort + context_entropy:C(question_type) + C(child_id)</td>
+<td>Richest current context-interaction stress test.</td>
+</tr>
+</tbody></table>
+<h2>Effect Sentence Menu</h2>
+<table>
+<thead><tr>
+<th>arrow</th>
+<th>effect</th>
+<th>number</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>age ↓</td>
+<td>Older children carry less total information at the same word count, after child identity and question type are controlled.</td>
+<td>-0.127 bits/month; p=&lt;.001</td>
+</tr>
+<tr>
+<td>effort ↑</td>
+<td>Longer utterances carry much more information; this is the mechanical predictor we must hold fixed.</td>
+<td>6.38 bits per extra word; p=&lt;.001</td>
+</tr>
+<tr>
+<td>age × effort ≈ flat</td>
+<td>In real child speech, the age slope is not strongly different across word-count levels in this model.</td>
+<td>-0.0038 bits/month/word; p=0.522</td>
+</tr>
+<tr>
+<td>context entropy ↓</td>
+<td>Next-token context entropy is a meaningful control here, but it is not the final Route 2 response-space entropy claim.</td>
+<td>-0.469 bits; p=&lt;.001</td>
+</tr>
+<tr>
+<td>parent context effort ↓</td>
+<td>Longer preceding caretaker context slightly lowers child utterance information at fixed child effort.</td>
+<td>-0.044 bits/context word; p=&lt;.001</td>
+</tr>
+<tr>
+<td>question type matters</td>
+<td>Question/statement form improves fit, so it belongs as a confound before telling the developmental story.</td>
+<td>M4c has the best simple k3/word R2 among the context-control candidates.</td>
+</tr>
+</tbody></table>
+<h2>Saved Artifacts</h2>
+<pre><code>results/route1_candidate_evidence_gallery/candidate_evidence_cards.csv
+results/route1_candidate_evidence_gallery/selected_source_atlas_cards.csv
+results/route1_candidate_evidence_gallery/selected_caretaker_k3_words_models.csv
+results/route1_candidate_evidence_gallery/selected_age_scrambling_robustness_k3_words.csv
+results/route1_candidate_evidence_gallery/selected_old_deep_dive_variable_importance_words.csv
+results/route1_candidate_evidence_gallery/selected_context_m1_m6_k3_words_models.csv
+results/route1_candidate_evidence_gallery/heldout_pop_m4c_actual_vs_predicted_regression_slopes.csv
+results/route1_candidate_evidence_gallery/pbm_real_k3_predictor_correlations.csv
+results/route1_candidate_evidence_gallery/source_comparison_m4c_k3_words_slopes.csv
+figs/route1_candidate_evidence_gallery</code></pre>
+</main>
+</body>
+</html>

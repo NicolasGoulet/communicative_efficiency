@@ -1,0 +1,428 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Child Informativeness At Fixed Utterance Effort</title>
+<style>
+:root {
+  color-scheme: light;
+  --ink: #1e2528;
+  --muted: #5e686d;
+  --line: #d9e0df;
+  --paper: #ffffff;
+  --soft: #f5f7f6;
+  --accent: #2f6f73;
+  --accent2: #c76f2c;
+}
+body {
+  margin: 0;
+  background: #eef2f1;
+  color: var(--ink);
+  font: 16px/1.58 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+main {
+  max-width: 980px;
+  margin: 34px auto 56px;
+  padding: 48px 58px;
+  background: var(--paper);
+  box-shadow: 0 18px 50px rgba(31, 45, 48, 0.12);
+}
+h1, h2, h3, h4 {
+  line-height: 1.18;
+  margin: 1.6em 0 0.55em;
+}
+h1 {
+  margin-top: 0;
+  font-size: 2.25rem;
+  border-bottom: 3px solid var(--accent);
+  padding-bottom: 0.45em;
+}
+h2 {
+  font-size: 1.55rem;
+  color: var(--accent);
+}
+h3 {
+  font-size: 1.18rem;
+}
+p {
+  margin: 0.75em 0;
+}
+a {
+  color: var(--accent);
+}
+blockquote {
+  border-left: 4px solid var(--accent2);
+  margin: 1.1em 0;
+  padding: 0.05em 1.1em;
+  color: var(--muted);
+  background: #fff8f2;
+}
+code {
+  background: var(--soft);
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  padding: 0.08em 0.3em;
+  font-family: "SFMono-Regular", Consolas, monospace;
+  font-size: 0.92em;
+}
+pre {
+  background: #f5f7f6;
+  color: var(--ink);
+  border: 1px solid var(--line);
+  padding: 1em;
+  overflow-x: auto;
+  border-radius: 7px;
+}
+pre code {
+  background: transparent;
+  border: 0;
+  padding: 0;
+  color: inherit;
+}
+table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 1.15em 0 1.45em;
+  font-size: 0.95em;
+}
+th, td {
+  border: 1px solid var(--line);
+  padding: 0.54em 0.68em;
+  vertical-align: top;
+}
+th {
+  background: #e7efed;
+  text-align: left;
+}
+tr:nth-child(even) td {
+  background: #fafbfb;
+}
+img {
+  max-width: 100%;
+  display: block;
+  margin: 1.1em auto 0.45em;
+}
+ul, ol {
+  padding-left: 1.4em;
+}
+.caption {
+  color: var(--muted);
+  font-size: 0.92em;
+  margin-top: -0.15em;
+}
+@media print {
+  body {
+    background: white;
+  }
+  main {
+    box-shadow: none;
+    margin: 0;
+    max-width: none;
+    padding: 28px;
+  }
+}
+</style>
+</head>
+<body>
+<main>
+<h1>Child Informativeness At Fixed Utterance Effort</h1>
+<p>Generated on 2026-06-20.</p>
+<p>This report is the child-only Route 1 modeling suite. The outcome is <code>sum_bits</code>, meaning total model-estimated information in the child utterance. Every scientific formula includes an explicit target-effort control or exact-length category control, because raw total bits are structurally entangled with utterance length and child MLU increases with age.</p>
+<p>The report deliberately emphasizes regression-line plots rather than tables. The CSV artifacts contain the exact coefficients, p-values, fit metrics, fixed-effort prediction grids, and saved model paths.</p>
+<h2>Scientific Contract</h2>
+<ul>
+<li>We are not asking whether older children talk more. They do.</li>
+<li>We are asking whether, for utterances of the same size, older children produce utterances with more or less information.</li>
+<li>The fixed-effort lines are the main evidence because they hold utterance size constant.</li>
+<li>The exact-length formulas are the strongest MLU check because MLU cannot explain an age slope estimated inside one exact utterance length.</li>
+<li>A global age effect across lengths is interpretable only when it is model-adjusted or averaged over fixed-effort slices. A raw average across utterances would mostly rediscover MLU.</li>
+<li>Repeated utterances from the same children and sessions motivate GEE and mixed-model checks, not only OLS.</li>
+</ul>
+<h2>Why This Is Not Just MLU</h2>
+<p>MLU is a change in the distribution of utterance lengths with age. The exact-length models remove that explanation by estimating age patterns while length is either fixed in the plotted slice or represented by exact length categories. In a two-word comparison, every utterance has two words; in a three-word comparison, every utterance has three words. MLU can change how often those lengths occur, but it cannot by itself create a developmental slope inside a fixed-length comparison.</p>
+<h2>Statistical Strategy</h2>
+<p>Utterances are repeated observations nested in sessions and children. The estimator grid therefore includes a transparent row-level child fixed-effect model, session/exact-effort aggregate checks, GEE models grouped by child, Gamma/log positive-outcome checks, and mixed models with child and session random-effect structures. These are sensitivity layers around the same length-controlled scientific contrast.</p>
+<h2>Run Summary</h2>
+<ul>
+<li>Requested model fits: <code>189</code>.</li>
+<li>Successful fits: <code>189</code>.</li>
+<li>Skipped or failed fits: <code>0</code>. Details are saved in <code>model_summary.csv</code>.</li>
+<li>Children represented in successful fits: <code>21</code>.</li>
+<li>Sessions represented in successful fits: <code>983</code>.</li>
+<li>Observation/cell count range across successful fits: <code>26,457</code> to <code>446,985</code>.</li>
+<li>Mean fixed-effort age slope across saved prediction lines: <code>-0.475</code> bits per six months.</li>
+<li>Downward fixed-effort lines: <code>2,119</code>; upward fixed-effort lines: <code>149</code>.</li>
+<li>Primary exact-length slopes from F18-F21: <code>41</code> downward and <code>7</code> upward.</li>
+<li>Upward primary exact-length slopes occur at exact lengths: <code>8, 10, 11, 12</code>.</li>
+<li>The longest exact lengths are much sparser and should be read cautiously: 10 words=1,594 rows, 11 words=896 rows, 12 words=591 rows.</li>
+</ul>
+<h2>Formula Guide</h2>
+<h3>F01: Age at fixed effort</h3>
+<p><strong>Question.</strong> Does age predict total utterance information after utterance effort is held constant?</p>
+<p><strong>Formula.</strong> <code>sum_bits ~ age_c + effort_c</code></p>
+<p><strong>Meaning.</strong> This is the minimum defensible Route 1 formula. The outcome is total bits for the child utterance, age is the developmental predictor, and effort is the utterance size control. A negative age line here means that, among utterances of the same size, older children produce utterances that are less surprising to the model.</p>
+<p><strong>Length control.</strong> This formula controls target effort either with <code>effort_c</code> or exact-length categories, so it does not interpret age through raw growth in MLU.</p>
+<h3>F02: Age by effort</h3>
+<p><strong>Question.</strong> Does the developmental age effect depend on how large the utterance is?</p>
+<p><strong>Formula.</strong> <code>sum_bits ~ age_c + effort_c + age_c:effort_c</code></p>
+<p><strong>Meaning.</strong> This is the basic fixed-effort interaction model. It lets one-word, two-word, and longer utterances have different developmental slopes. This directly tests whether a single global age effect is hiding different fixed-length trajectories.</p>
+<p><strong>Length control.</strong> This formula controls target effort either with <code>effort_c</code> or exact-length categories, so it does not interpret age through raw growth in MLU.</p>
+<h3>F03: Parent effort control</h3>
+<p><strong>Question.</strong> Does preceding caretaker-context amount explain extra child utterance information?</p>
+<p><strong>Formula.</strong> <code>sum_bits ~ age_c + effort_c + parent_context_effort_c</code></p>
+<p><strong>Meaning.</strong> This model keeps child utterance effort controlled and adds the amount of preceding caretaker context in the same effort unit. It asks whether a child utterance is more or less informative when it follows a longer local context.</p>
+<p><strong>Length control.</strong> This formula controls target effort either with <code>effort_c</code> or exact-length categories, so it does not interpret age through raw growth in MLU.</p>
+<h3>F04: Age by parent effort</h3>
+<p><strong>Question.</strong> Does the effect of preceding caretaker effort change with child age?</p>
+<p><strong>Formula.</strong> <code>sum_bits ~ age_c + effort_c + parent_context_effort_c + age_c:parent_context_effort_c</code></p>
+<p><strong>Meaning.</strong> This model tests whether the relation between caretaker-context amount and child information is developmentally changing, while still comparing child utterances at matched target effort.</p>
+<p><strong>Length control.</strong> This formula controls target effort either with <code>effort_c</code> or exact-length categories, so it does not interpret age through raw growth in MLU.</p>
+<h3>F05: Effort by parent effort</h3>
+<p><strong>Question.</strong> Does preceding caretaker effort matter differently for short versus long child utterances?</p>
+<p><strong>Formula.</strong> <code>sum_bits ~ age_c + effort_c + parent_context_effort_c + effort_c:parent_context_effort_c</code></p>
+<p><strong>Meaning.</strong> This model asks whether the local context amount changes the slope linking child utterance size to child utterance information. It is a context-by-length check, not a raw length-growth check.</p>
+<p><strong>Length control.</strong> This formula controls target effort either with <code>effort_c</code> or exact-length categories, so it does not interpret age through raw growth in MLU.</p>
+<h3>F06: Parent interaction stress test</h3>
+<p><strong>Question.</strong> Do the age, target-effort, and parent-context-effort relations survive together?</p>
+<p><strong>Formula.</strong> <code>sum_bits ~ age_c + effort_c + parent_context_effort_c + age_c:effort_c + age_c:parent_context_effort_c + effort_c:parent_context_effort_c</code></p>
+<p><strong>Meaning.</strong> This is the richer parent-context formula. It keeps the key fixed-effort age-by-effort term and checks whether parent context effort changes either the developmental trajectory or the effort-information relation.</p>
+<p><strong>Length control.</strong> This formula controls target effort either with <code>effort_c</code> or exact-length categories, so it does not interpret age through raw growth in MLU.</p>
+<h3>F07: Question type control</h3>
+<p><strong>Question.</strong> Does the age effect remain after broad preceding-context question type is controlled?</p>
+<p><strong>Formula.</strong> <code>sum_bits ~ age_c + effort_c + C(question_type)</code></p>
+<p><strong>Meaning.</strong> This formula compares fixed-effort child utterances while accounting for whether the preceding context is not a question, a wh-question, a yes/no question, another question, or empty. It is a local discourse control.</p>
+<p><strong>Length control.</strong> This formula controls target effort either with <code>effort_c</code> or exact-length categories, so it does not interpret age through raw growth in MLU.</p>
+<h3>F08: Context entropy control</h3>
+<p><strong>Question.</strong> Does age still predict child utterance information after local context entropy is controlled?</p>
+<p><strong>Formula.</strong> <code>sum_bits ~ age_c + effort_c + context_entropy_c</code></p>
+<p><strong>Meaning.</strong> This formula adds the available context-entropy feature. It separates the developmental fixed-effort age pattern from the fact that some contexts make upcoming language more predictable than others.</p>
+<p><strong>Length control.</strong> This formula controls target effort either with <code>effort_c</code> or exact-length categories, so it does not interpret age through raw growth in MLU.</p>
+<h3>F09: All context controls</h3>
+<p><strong>Question.</strong> Does the fixed-effort age effect remain after the main local-context controls are added together?</p>
+<p><strong>Formula.</strong> <code>sum_bits ~ age_c + effort_c + parent_context_effort_c + context_entropy_c + C(question_type)</code></p>
+<p><strong>Meaning.</strong> This is the compact contextual-control model. It estimates the age pattern at fixed child effort while simultaneously controlling caretaker context amount, context entropy, and broad question type.</p>
+<p><strong>Length control.</strong> This formula controls target effort either with <code>effort_c</code> or exact-length categories, so it does not interpret age through raw growth in MLU.</p>
+<h3>F10: All context controls with age by effort</h3>
+<p><strong>Question.</strong> Does the fixed-effort age-by-effort pattern remain after the main context controls are added?</p>
+<p><strong>Formula.</strong> <code>sum_bits ~ age_c + effort_c + parent_context_effort_c + context_entropy_c + C(question_type) + age_c:effort_c</code></p>
+<p><strong>Meaning.</strong> This is a strong candidate headline formula because it keeps the fixed-length interpretation explicit and adds the major local-context confounds.</p>
+<p><strong>Length control.</strong> This formula controls target effort either with <code>effort_c</code> or exact-length categories, so it does not interpret age through raw growth in MLU.</p>
+<h3>F11: Entropy interactions</h3>
+<p><strong>Question.</strong> Does sensitivity to context entropy change with child age or child utterance effort?</p>
+<p><strong>Formula.</strong> <code>sum_bits ~ age_c + effort_c + parent_context_effort_c + context_entropy_c + C(question_type) + age_c:effort_c + age_c:context_entropy_c + effort_c:context_entropy_c</code></p>
+<p><strong>Meaning.</strong> This formula checks whether the context-entropy control is only an additive nuisance variable or whether entropy changes the developmental and fixed-effort slopes themselves.</p>
+<p><strong>Length control.</strong> This formula controls target effort either with <code>effort_c</code> or exact-length categories, so it does not interpret age through raw growth in MLU.</p>
+<h3>F12: Full context interaction stress test</h3>
+<p><strong>Question.</strong> Do the developmental fixed-effort results persist under a richer context-interaction stress test?</p>
+<p><strong>Formula.</strong> <code>sum_bits ~ age_c + effort_c + parent_context_effort_c + context_entropy_c + C(question_type) + age_c:effort_c + age_c:parent_context_effort_c + effort_c:parent_context_effort_c + age_c:context_entropy_c + effort_c:context_entropy_c + parent_context_effort_c:context_entropy_c</code></p>
+<p><strong>Meaning.</strong> This is deliberately not the simplest interpretation model. It is a stress test for the claim that the age pattern is not just an artifact of parent context effort, entropy, or their interaction with child effort.</p>
+<p><strong>Length control.</strong> This formula controls target effort either with <code>effort_c</code> or exact-length categories, so it does not interpret age through raw growth in MLU.</p>
+<h3>F13: Question interactions</h3>
+<p><strong>Question.</strong> Does the developmental or entropy effect differ by broad preceding-context question type?</p>
+<p><strong>Formula.</strong> <code>sum_bits ~ age_c + effort_c + parent_context_effort_c + context_entropy_c + C(question_type) + age_c:effort_c + age_c:C(question_type) + context_entropy_c:C(question_type)</code></p>
+<p><strong>Meaning.</strong> This formula checks whether wh-questions, yes/no questions, and other contexts produce different fixed-effort developmental patterns.</p>
+<p><strong>Length control.</strong> This formula controls target effort either with <code>effort_c</code> or exact-length categories, so it does not interpret age through raw growth in MLU.</p>
+<h3>F14: Curved age trajectory</h3>
+<p><strong>Question.</strong> Is the fixed-effort developmental trajectory curved rather than straight?</p>
+<p><strong>Formula.</strong> <code>sum_bits ~ age_c + I(age_c ** 2) + effort_c</code></p>
+<p><strong>Meaning.</strong> This formula keeps effort controlled but allows the age trajectory to bend. It is useful if the decline or increase in fixed-effort information is strongest at early ages and then flattens later.</p>
+<p><strong>Length control.</strong> This formula controls target effort either with <code>effort_c</code> or exact-length categories, so it does not interpret age through raw growth in MLU.</p>
+<h3>F15: Curved age by effort</h3>
+<p><strong>Question.</strong> Does the curved developmental trajectory differ across utterance sizes?</p>
+<p><strong>Formula.</strong> <code>sum_bits ~ age_c + I(age_c ** 2) + effort_c + age_c:effort_c + I(age_c ** 2):effort_c</code></p>
+<p><strong>Meaning.</strong> This is the nonlinear version of the age-by-effort model. It checks whether one-word and longer utterances have different curved age trajectories.</p>
+<p><strong>Length control.</strong> This formula controls target effort either with <code>effort_c</code> or exact-length categories, so it does not interpret age through raw growth in MLU.</p>
+<h3>F16: Age-bin trajectory</h3>
+<p><strong>Question.</strong> Do developmental age-bin differences remain after target effort is controlled?</p>
+<p><strong>Formula.</strong> <code>sum_bits ~ C(age_bin) + effort_c</code></p>
+<p><strong>Meaning.</strong> This formula avoids imposing a straight age slope. It compares age bins directly, while still holding utterance effort constant.</p>
+<p><strong>Length control.</strong> This formula controls target effort either with <code>effort_c</code> or exact-length categories, so it does not interpret age through raw growth in MLU.</p>
+<h3>F17: Age-bin by effort</h3>
+<p><strong>Question.</strong> Do age-bin differences depend on utterance effort?</p>
+<p><strong>Formula.</strong> <code>sum_bits ~ C(age_bin) + effort_c + C(age_bin):effort_c</code></p>
+<p><strong>Meaning.</strong> This is the categorical-age version of the fixed-effort interaction model. It asks whether developmental differences look different for short and long utterances without assuming a linear age trend.</p>
+<p><strong>Length control.</strong> This formula controls target effort either with <code>effort_c</code> or exact-length categories, so it does not interpret age through raw growth in MLU.</p>
+<h3>F18: Exact-length fixed effects</h3>
+<p><strong>Question.</strong> Does age predict total information after each exact utterance length gets its own baseline?</p>
+<p><strong>Formula.</strong> <code>sum_bits ~ age_c + C(effort_value_int)</code></p>
+<p><strong>Meaning.</strong> This model treats length as a category, not as a linear covariate. It removes the MLU explanation by comparing the age trajectory after arbitrary differences among exact word counts have been absorbed.</p>
+<p><strong>Length control.</strong> This formula controls target effort either with <code>effort_c</code> or exact-length categories, so it does not interpret age through raw growth in MLU.</p>
+<h3>F19: Exact-length age slopes</h3>
+<p><strong>Question.</strong> Do the age slopes remain downward inside exact utterance-length strata?</p>
+<p><strong>Formula.</strong> <code>sum_bits ~ age_c + C(effort_value_int) + age_c:C(effort_value_int)</code></p>
+<p><strong>Meaning.</strong> This is the main MLU-proof formula. It estimates a separate age slope for each exact utterance length, so the developmental effect is read within same-length comparisons rather than across the changing MLU distribution.</p>
+<p><strong>Length control.</strong> This formula controls target effort either with <code>effort_c</code> or exact-length categories, so it does not interpret age through raw growth in MLU.</p>
+<h3>F20: Exact-length fixed effects with context controls</h3>
+<p><strong>Question.</strong> Does the exact-length age effect remain after the main local-context controls?</p>
+<p><strong>Formula.</strong> <code>sum_bits ~ age_c + C(effort_value_int) + parent_context_effort_c + context_entropy_c + C(question_type)</code></p>
+<p><strong>Meaning.</strong> This model keeps exact length categorical and adds caretaker context effort, context entropy, and question type. It asks whether the same-length age trajectory survives the major local context controls.</p>
+<p><strong>Length control.</strong> This formula controls target effort either with <code>effort_c</code> or exact-length categories, so it does not interpret age through raw growth in MLU.</p>
+<h3>F21: Exact-length age slopes with context controls</h3>
+<p><strong>Question.</strong> Do exact-length age slopes remain after local-context controls?</p>
+<p><strong>Formula.</strong> <code>sum_bits ~ age_c + C(effort_value_int) + age_c:C(effort_value_int) + parent_context_effort_c + context_entropy_c + C(question_type)</code></p>
+<p><strong>Meaning.</strong> This is the strongest current same-length formula. Each exact utterance length can have its own age slope, and the model still controls parent context effort, context entropy, question type, and child identity through the estimator.</p>
+<p><strong>Length control.</strong> This formula controls target effort either with <code>effort_c</code> or exact-length categories, so it does not interpret age through raw growth in MLU.</p>
+<h2>Estimator Guide</h2>
+<h3>row_ols_fe_cluster</h3>
+<p><strong>Model.</strong> Row-level OLS with child fixed intercepts and child-clustered SE</p>
+<p><strong>What it does.</strong> Fits the utterance-level model directly and adds one intercept for each child. Standard errors are clustered by child, so repeated utterances from the same child are not treated as independent for uncertainty.</p>
+<p><strong>Why it is here.</strong> This is the clearest fixed-effort baseline: it answers the Route 1 question on the original utterance rows while controlling child identity.</p>
+<p><strong>Data scale.</strong> <code>row</code>. <strong>Covariance/dependence structure.</strong> <code>cluster_child</code>.</p>
+<h3>agg_ols_fe_cluster</h3>
+<p><strong>Model.</strong> Session/effort-cell OLS with child fixed intercepts and child-clustered SE</p>
+<p><strong>What it does.</strong> Averages utterances into child-session-exact-effort-context cells, then fits OLS with child fixed intercepts and child-clustered standard errors.</p>
+<p><strong>Why it is here.</strong> It prevents sessions with many repeated utterances from dominating the analysis and checks that the row-level result is not just a high-row-count-session result.</p>
+<p><strong>Data scale.</strong> <code>aggregate</code>. <strong>Covariance/dependence structure.</strong> <code>cluster_child</code>.</p>
+<h3>agg_glm_gaussian</h3>
+<p><strong>Model.</strong> Session/effort-cell Gaussian GLM with child fixed intercepts</p>
+<p><strong>What it does.</strong> Fits the same mean formula through the GLM framework with a Gaussian outcome distribution. It is close to OLS but uses the generalized-model machinery.</p>
+<p><strong>Why it is here.</strong> It is a bridge from ordinary regression to the generalized estimators used for positive skewed outcomes.</p>
+<p><strong>Data scale.</strong> <code>aggregate</code>. <strong>Covariance/dependence structure.</strong> <code>model_based</code>.</p>
+<h3>agg_glm_gamma_log</h3>
+<p><strong>Model.</strong> Session/effort-cell Gamma/log GLM with child fixed intercepts</p>
+<p><strong>What it does.</strong> Fits positive total bits with a Gamma mean-variance relation and a log link, while keeping the same length-controlled formula and child fixed intercepts.</p>
+<p><strong>Why it is here.</strong> Total bits are positive and often right-skewed, so this checks whether the fixed-effort age result depends on a Gaussian error assumption.</p>
+<p><strong>Data scale.</strong> <code>aggregate</code>. <strong>Covariance/dependence structure.</strong> <code>model_based</code>.</p>
+<h3>agg_gee_gaussian</h3>
+<p><strong>Model.</strong> Session/effort-cell Gaussian GEE grouped by child</p>
+<p><strong>What it does.</strong> Fits a population-average Gaussian model with an exchangeable working correlation for repeated cells from the same child. Child fixed intercepts remain in the mean model.</p>
+<p><strong>Why it is here.</strong> This estimates the mean relation while representing within-child dependence, which is essential for repeated utterances from the same children.</p>
+<p><strong>Data scale.</strong> <code>aggregate</code>. <strong>Covariance/dependence structure.</strong> <code>exchangeable_child</code>.</p>
+<h3>agg_gee_gamma_log</h3>
+<p><strong>Model.</strong> Session/effort-cell Gamma/log GEE grouped by child</p>
+<p><strong>What it does.</strong> Combines a positive skewed Gamma/log mean with GEE&#x27;s child-level working correlation.</p>
+<p><strong>Why it is here.</strong> This checks whether the positive-outcome GEE story agrees with the fixed-effort OLS and mixed-model stories.</p>
+<p><strong>Data scale.</strong> <code>aggregate</code>. <strong>Covariance/dependence structure.</strong> <code>exchangeable_child</code>.</p>
+<h3>agg_mixed_random_intercept</h3>
+<p><strong>Model.</strong> Session/effort-cell mixed model with random child intercept</p>
+<p><strong>What it does.</strong> Fits a linear mixed model where each child has a random intercept rather than a fixed intercept.</p>
+<p><strong>Why it is here.</strong> This is the standard repeated-measures model when children are sampled units and the analysis should estimate child-to-child variability.</p>
+<p><strong>Data scale.</strong> <code>aggregate</code>. <strong>Covariance/dependence structure.</strong> <code>random_child_intercept</code>.</p>
+<h3>agg_mixed_random_age_slope</h3>
+<p><strong>Model.</strong> Session/effort-cell mixed model with random child age slope</p>
+<p><strong>What it does.</strong> Allows children to differ both in their baseline information level and in their developmental age slope.</p>
+<p><strong>Why it is here.</strong> This is the main check for whether one average developmental line is hiding children with different age trajectories.</p>
+<p><strong>Data scale.</strong> <code>aggregate</code>. <strong>Covariance/dependence structure.</strong> <code>random_child_intercept_age_slope</code>.</p>
+<h3>agg_mixed_session_intercept</h3>
+<p><strong>Model.</strong> Session/effort-cell mixed model with child and session intercepts</p>
+<p><strong>What it does.</strong> Adds a child random intercept and a session-level variance component.</p>
+<p><strong>Why it is here.</strong> The data are repeated utterances inside sessions inside children. This model asks whether the age effect survives after both levels are represented.</p>
+<p><strong>Data scale.</strong> <code>aggregate</code>. <strong>Covariance/dependence structure.</strong> <code>random_child_and_session_intercepts</code>.</p>
+<h2>Regression Plots</h2>
+<h3>Model-free descriptive means within exact utterance lengths. This is a sanity check, not the adjusted inferential estimate.</h3>
+<img src="../figs/route1_child_length_controlled_model_suite/observed_exact_length_age_bin_means.png" alt="observed_exact_length_age_bins">
+<h3>Age slopes estimated inside exact utterance-length comparisons. This is the direct check that the pattern is not produced by the age-related MLU shift.</h3>
+<img src="../figs/route1_child_length_controlled_model_suite/mlu_proof_exact_length_age_slopes.png" alt="mlu_proof_exact_length_slopes">
+<h3>Mean slope in predicted total bits per six months, averaged across fixed-effort lines.</h3>
+<img src="../figs/route1_child_length_controlled_model_suite/slope_heatmap_formula_by_estimator.png" alt="slope_heatmap">
+<h3>Observed-vs-fitted variance explained. For non-OLS estimators this is descriptive, not a classical OLS R2.</h3>
+<img src="../figs/route1_child_length_controlled_model_suite/variance_explained_by_formula_estimator.png" alt="variance_explained">
+<h3>Control-dominance diagnostic. Large effort terms are treated as evidence that raw total bits are length-confounded, not as the substantive finding.</h3>
+<img src="../figs/route1_child_length_controlled_model_suite/variable_importance_standardized_coefficients.png" alt="variable_importance">
+<h3>Primary fixed-effort lines</h3>
+<p>Each line is a model prediction at one exact utterance size. A downward line means predicted total bits decline with age when that size is held fixed. These are the key plots for separating communicative informativeness from raw MLU growth.</p>
+<p><strong>F01: Age at fixed effort</strong></p>
+<img src="../figs/route1_child_length_controlled_model_suite/f01_k3_nb_words_row_ols_fe_cluster_fixed_effort_lines.png" alt="F01">
+<p><strong>F02: Age by effort</strong></p>
+<img src="../figs/route1_child_length_controlled_model_suite/f02_k3_nb_words_row_ols_fe_cluster_fixed_effort_lines.png" alt="F02">
+<p><strong>F03: Parent effort control</strong></p>
+<img src="../figs/route1_child_length_controlled_model_suite/f03_k3_nb_words_row_ols_fe_cluster_fixed_effort_lines.png" alt="F03">
+<p><strong>F04: Age by parent effort</strong></p>
+<img src="../figs/route1_child_length_controlled_model_suite/f04_k3_nb_words_row_ols_fe_cluster_fixed_effort_lines.png" alt="F04">
+<p><strong>F05: Effort by parent effort</strong></p>
+<img src="../figs/route1_child_length_controlled_model_suite/f05_k3_nb_words_row_ols_fe_cluster_fixed_effort_lines.png" alt="F05">
+<p><strong>F06: Parent interaction stress test</strong></p>
+<img src="../figs/route1_child_length_controlled_model_suite/f06_k3_nb_words_row_ols_fe_cluster_fixed_effort_lines.png" alt="F06">
+<p><strong>F07: Question type control</strong></p>
+<img src="../figs/route1_child_length_controlled_model_suite/f07_k3_nb_words_row_ols_fe_cluster_fixed_effort_lines.png" alt="F07">
+<p><strong>F08: Context entropy control</strong></p>
+<img src="../figs/route1_child_length_controlled_model_suite/f08_k3_nb_words_row_ols_fe_cluster_fixed_effort_lines.png" alt="F08">
+<p><strong>F09: All context controls</strong></p>
+<img src="../figs/route1_child_length_controlled_model_suite/f09_k3_nb_words_row_ols_fe_cluster_fixed_effort_lines.png" alt="F09">
+<p><strong>F10: All context controls with age by effort</strong></p>
+<img src="../figs/route1_child_length_controlled_model_suite/f10_k3_nb_words_row_ols_fe_cluster_fixed_effort_lines.png" alt="F10">
+<p><strong>F11: Entropy interactions</strong></p>
+<img src="../figs/route1_child_length_controlled_model_suite/f11_k3_nb_words_row_ols_fe_cluster_fixed_effort_lines.png" alt="F11">
+<p><strong>F12: Full context interaction stress test</strong></p>
+<img src="../figs/route1_child_length_controlled_model_suite/f12_k3_nb_words_row_ols_fe_cluster_fixed_effort_lines.png" alt="F12">
+<p><strong>F13: Question interactions</strong></p>
+<img src="../figs/route1_child_length_controlled_model_suite/f13_k3_nb_words_row_ols_fe_cluster_fixed_effort_lines.png" alt="F13">
+<p><strong>F14: Curved age trajectory</strong></p>
+<img src="../figs/route1_child_length_controlled_model_suite/f14_k3_nb_words_row_ols_fe_cluster_fixed_effort_lines.png" alt="F14">
+<p><strong>F15: Curved age by effort</strong></p>
+<img src="../figs/route1_child_length_controlled_model_suite/f15_k3_nb_words_row_ols_fe_cluster_fixed_effort_lines.png" alt="F15">
+<p><strong>F16: Age-bin trajectory</strong></p>
+<img src="../figs/route1_child_length_controlled_model_suite/f16_k3_nb_words_row_ols_fe_cluster_fixed_effort_lines.png" alt="F16">
+<p><strong>F17: Age-bin by effort</strong></p>
+<img src="../figs/route1_child_length_controlled_model_suite/f17_k3_nb_words_row_ols_fe_cluster_fixed_effort_lines.png" alt="F17">
+<p><strong>F18: Exact-length fixed effects</strong></p>
+<img src="../figs/route1_child_length_controlled_model_suite/f18_k3_nb_words_row_ols_fe_cluster_fixed_effort_lines.png" alt="F18">
+<p><strong>F19: Exact-length age slopes</strong></p>
+<img src="../figs/route1_child_length_controlled_model_suite/f19_k3_nb_words_row_ols_fe_cluster_fixed_effort_lines.png" alt="F19">
+<p><strong>F20: Exact-length fixed effects with context controls</strong></p>
+<img src="../figs/route1_child_length_controlled_model_suite/f20_k3_nb_words_row_ols_fe_cluster_fixed_effort_lines.png" alt="F20">
+<p><strong>F21: Exact-length age slopes with context controls</strong></p>
+<img src="../figs/route1_child_length_controlled_model_suite/f21_k3_nb_words_row_ols_fe_cluster_fixed_effort_lines.png" alt="F21">
+<h3>Estimator comparison lines</h3>
+<p>These lines average over the plotted fixed-effort slices. This is the defensible version of a global effect across lengths: it is model-adjusted and length-controlled, not a raw mean over utterances of different sizes.</p>
+<p><strong>F01: Age at fixed effort</strong></p>
+<img src="../figs/route1_child_length_controlled_model_suite/f01_k3_nb_words_estimator_mean_lines.png" alt="F01 estimator comparison">
+<p><strong>F02: Age by effort</strong></p>
+<img src="../figs/route1_child_length_controlled_model_suite/f02_k3_nb_words_estimator_mean_lines.png" alt="F02 estimator comparison">
+<p><strong>F03: Parent effort control</strong></p>
+<img src="../figs/route1_child_length_controlled_model_suite/f03_k3_nb_words_estimator_mean_lines.png" alt="F03 estimator comparison">
+<p><strong>F04: Age by parent effort</strong></p>
+<img src="../figs/route1_child_length_controlled_model_suite/f04_k3_nb_words_estimator_mean_lines.png" alt="F04 estimator comparison">
+<p><strong>F05: Effort by parent effort</strong></p>
+<img src="../figs/route1_child_length_controlled_model_suite/f05_k3_nb_words_estimator_mean_lines.png" alt="F05 estimator comparison">
+<p><strong>F06: Parent interaction stress test</strong></p>
+<img src="../figs/route1_child_length_controlled_model_suite/f06_k3_nb_words_estimator_mean_lines.png" alt="F06 estimator comparison">
+<p><strong>F07: Question type control</strong></p>
+<img src="../figs/route1_child_length_controlled_model_suite/f07_k3_nb_words_estimator_mean_lines.png" alt="F07 estimator comparison">
+<p><strong>F08: Context entropy control</strong></p>
+<img src="../figs/route1_child_length_controlled_model_suite/f08_k3_nb_words_estimator_mean_lines.png" alt="F08 estimator comparison">
+<p><strong>F09: All context controls</strong></p>
+<img src="../figs/route1_child_length_controlled_model_suite/f09_k3_nb_words_estimator_mean_lines.png" alt="F09 estimator comparison">
+<p><strong>F10: All context controls with age by effort</strong></p>
+<img src="../figs/route1_child_length_controlled_model_suite/f10_k3_nb_words_estimator_mean_lines.png" alt="F10 estimator comparison">
+<p><strong>F11: Entropy interactions</strong></p>
+<img src="../figs/route1_child_length_controlled_model_suite/f11_k3_nb_words_estimator_mean_lines.png" alt="F11 estimator comparison">
+<p><strong>F12: Full context interaction stress test</strong></p>
+<img src="../figs/route1_child_length_controlled_model_suite/f12_k3_nb_words_estimator_mean_lines.png" alt="F12 estimator comparison">
+<p><strong>F13: Question interactions</strong></p>
+<img src="../figs/route1_child_length_controlled_model_suite/f13_k3_nb_words_estimator_mean_lines.png" alt="F13 estimator comparison">
+<p><strong>F14: Curved age trajectory</strong></p>
+<img src="../figs/route1_child_length_controlled_model_suite/f14_k3_nb_words_estimator_mean_lines.png" alt="F14 estimator comparison">
+<p><strong>F15: Curved age by effort</strong></p>
+<img src="../figs/route1_child_length_controlled_model_suite/f15_k3_nb_words_estimator_mean_lines.png" alt="F15 estimator comparison">
+<p><strong>F16: Age-bin trajectory</strong></p>
+<img src="../figs/route1_child_length_controlled_model_suite/f16_k3_nb_words_estimator_mean_lines.png" alt="F16 estimator comparison">
+<p><strong>F17: Age-bin by effort</strong></p>
+<img src="../figs/route1_child_length_controlled_model_suite/f17_k3_nb_words_estimator_mean_lines.png" alt="F17 estimator comparison">
+<p><strong>F18: Exact-length fixed effects</strong></p>
+<img src="../figs/route1_child_length_controlled_model_suite/f18_k3_nb_words_estimator_mean_lines.png" alt="F18 estimator comparison">
+<p><strong>F19: Exact-length age slopes</strong></p>
+<img src="../figs/route1_child_length_controlled_model_suite/f19_k3_nb_words_estimator_mean_lines.png" alt="F19 estimator comparison">
+<p><strong>F20: Exact-length fixed effects with context controls</strong></p>
+<img src="../figs/route1_child_length_controlled_model_suite/f20_k3_nb_words_estimator_mean_lines.png" alt="F20 estimator comparison">
+<p><strong>F21: Exact-length age slopes with context controls</strong></p>
+<img src="../figs/route1_child_length_controlled_model_suite/f21_k3_nb_words_estimator_mean_lines.png" alt="F21 estimator comparison">
+<h2>Saved Artifacts</h2>
+<p>The reusable model memory for this run is saved on disk:</p>
+<pre><code>results/route1_child_length_controlled_model_suite/model_summary.csv
+results/route1_child_length_controlled_model_suite/coefficient_long.csv
+results/route1_child_length_controlled_model_suite/fixed_effort_predictions.csv.gz
+results/route1_child_length_controlled_model_suite/fixed_slice_slopes.csv
+results/route1_child_length_controlled_model_suite/exact_length_observed_age_bin_means.csv
+results/route1_child_length_controlled_model_suite/formula_definitions.csv
+results/route1_child_length_controlled_model_suite/estimator_definitions.csv
+results/route1_child_length_controlled_model_suite/models
+figs/route1_child_length_controlled_model_suite</code></pre>
+<p>To regenerate only one layer later:</p>
+<pre><code>.venv/bin/python src/build_route1_child_length_controlled_model_suite.py --stage fit
+.venv/bin/python src/build_route1_child_length_controlled_model_suite.py --stage plot
+.venv/bin/python src/build_route1_child_length_controlled_model_suite.py --stage report</code></pre>
+</main>
+</body>
+</html>

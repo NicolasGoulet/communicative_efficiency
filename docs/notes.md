@@ -100,6 +100,110 @@ confirmed.
 - TODO: Which baselines are active?
 - TODO: What is the empty-utterance policy?
 
+## 2026-06-18 Active Route 1 Candidate-Report Correction
+
+- User clarified that `docs/route1_best_model_robustness_package.md` should not
+  be a giant M1-M15 dump and should not be dominated by compact tables or
+  aggregate diagnostics.
+- Current deliverable is a focused, plot-first candidate report for choosing
+  supervisor-report figures.
+- This is a communicative-efficiency analysis, not a raw MLU/length-growth
+  analysis. Do not frame the result as predicting how large total `sum_bits`
+  becomes with age. Raw total bits can increase just because older children say
+  longer utterances.
+- Main Route 1 estimand is conditional utterance information: how
+  utterance-level `sum_bits` changes with age at fixed child effort and after
+  controls such as child identity and parent-context effort.
+- The design context must be explicit: continuous bits are measured for many
+  utterances from the same children, across multiple sessions/ages, with
+  repeated measurements inside children and sessions. Estimator choices must be
+  justified against this repeated-measures structure.
+- The report should include promising existing M1-M15 candidates only when they
+  answer the actual question. Current promising existing candidates are M2,
+  M3, M4a, M4c, M5, M6, M7, M11, and M15, not the full M1-M15 inventory.
+- The specific simple parent-effort candidate family to test/plot is:
+
+```text
+sum_bits ~ age + child effort + child identity
+sum_bits ~ age + child effort + parent context effort + child identity
+sum_bits ~ age + child effort + age:child effort + parent context effort + child identity
+sum_bits ~ age + child effort + parent context effort + age:parent context effort + child identity
+sum_bits ~ age + child effort + parent context effort + child effort:parent context effort + child identity
+sum_bits ~ age + child effort + parent context effort
+           + age:child effort
+           + age:parent context effort
+           + child effort:parent context effort
+           + child identity
+```
+
+- When writing interactions, always include and display lower-order predictors.
+  For example, write `age_c + effort_c + age_c:effort_c`; do not rely on
+  shorthand alone.
+- Keep conditional total-bits and bits-per-token/rate outcomes separate. A
+  secondary `mean_bits_per_token` or `sum_bits / child effort` model can be
+  added, but it answers a different question from total bits at fixed effort.
+- Do not promote raw observed-vs-fitted `sum_bits` plots as evidence for
+  communicative efficiency. They mostly show the mechanical length/total-bits
+  relationship and can confuse the analysis with MLU.
+- Required visual emphasis: regression/fixed-effort age lines for real
+  children, generated baselines, caretaker contrasts, and the three heldout
+  children's actual-vs-predicted lines. Tables should be brief support only.
+- Estimator rationale to show:
+  OLS with child fixed effects and child-clustered SE is the main Atlas
+  baseline; GEE Gaussian handles population-average repeated continuous
+  outcomes; GEE Gamma/log checks positive skew; GLM Gaussian/Gamma-log are
+  distribution/link sensitivity checks; MixedLM random intercepts allow child
+  baseline differences; MixedLM random age slopes allow child-specific
+  developmental trajectories; month/session aggregation is robustness against
+  pseudo-replication, not the main result.
+
+## 2026-06-18 Route 1 Formula-Permutation Estimator Report
+
+- Added `src/build_route1_formula_permutation_estimator_report.py`.
+- Generated internal model-selection report:
+  `docs/route1_formula_permutation_estimator_report.md`,
+  `docs/route1_formula_permutation_estimator_report.html`, and
+  `docs/route1_formula_permutation_estimator_report.embedded.html`.
+- Report output artifacts:
+  `results/route1_formula_permutation_estimator_report/` and
+  `figs/route1_formula_permutation_estimator_report/`.
+- Formula grid: 36 formulas. Every formula keeps age, child effort, and child
+  identity handling. The grid permutes context entropy, parent-context effort,
+  question/form type, `age:child effort`, `age:context entropy`, and
+  `age:parent context effort`, with lower-order terms always written and fit.
+- Estimator grid: 7 estimator families for every formula:
+  OLS + child fixed effects + clustered SE, GEE Gaussian + `C(child_id)`,
+  GEE Gamma/log + `C(child_id)`, GLM Gaussian, GLM Gamma/log, MixedLM random
+  child intercept, and MixedLM random child age slope.
+- Verification: `formula_estimator_summary.csv` has 252 rows, 36 unique
+  formulas, 7 unique estimators, and all 252 fits have status `fit`.
+  `formula_report_figure_manifest.csv` has 82 available figures. The Markdown
+  report has 36 formula sections, 252 estimator subsections, and 90 image
+  references with 0 missing.
+- Command:
+
+```bash
+MPLCONFIGDIR=/tmp/matplotlib .venv/bin/python src/build_route1_formula_permutation_estimator_report.py
+.venv/bin/python -m unittest tests.test_build_route1_best_model_robustness_package
+```
+
+- Important interpretation note: this new report is an aggregate
+  child-session/effort-band repeated-measures screen using `mean_sum_bits`.
+  It is for choosing formulas and estimator families. The row-level Atlas
+  remains the source to promote for final supervisor-facing fixed-effort
+  `sum_bits` claims.
+- Correction after interpretability audit: the report now shows exact row-level
+  fixed-effort Atlas plots before aggregate estimator screens for formulas that
+  map to existing Atlas models. It also adds a global same-effort plot that
+  averages the row-level fixed-word-count prediction lines across fixed sizes.
+  For F02/M3, all 12 fixed-word-count slopes are downward, with mean
+  -0.136 bits/month and range -0.157 to -0.115 bits/month.
+- Verification after correction: regenerated Markdown/HTML/embedded HTML,
+  confirmed 96 Markdown image references with 0 missing, confirmed the F02
+  global fixed-effort plot exists, and reran
+  `MPLCONFIGDIR=/tmp/matplotlib .venv/bin/python -m unittest tests.test_build_route1_best_model_robustness_package`
+  with 9 tests passing.
+
 ## Important Paths
 
 - `src/prepare_datasets.py`
@@ -3990,3 +4094,1149 @@ alkan@192.168.7.217:/home/alkan/Portelance/compute_surprisal_mila/new_data/
 ```text
 /home/alkan/Portelance/compute_surprisal_mila/slurm/tasks_heldout_real_child_generalization_2026-06-16_mistral.tsv
 ```
+
+## 2026-06-16 - Caretaker Route 1 atlas preflight prepared
+
+- Added the caretaker-target atlas scaffold:
+
+```text
+src/build_route1_caretaker_atlas.py
+tests/test_build_route1_caretaker_atlas.py
+```
+
+- Scope: entropy-free caretaker utterance information models. The outcome is
+  caretaker `sum_bits`; the timeline is focal child age; the target role is
+  `caretaker`. This is separate from the child/baseline atlas and does not use
+  context entropy.
+- Model ladder prepared:
+
+```text
+CM1: sum_bits ~ age_c + effort_c
+CM2: CM1 + C(child_id)
+CM3: age_c * effort_c + C(child_id)
+CM4a: CM3 + preceding_context_effort_c
+CM4c: CM3 + C(question_type)
+CM5: CM3 + preceding_context_effort_c + C(question_type)
+CM6: CM5 + age/context-effort and effort/context-effort interactions
+```
+
+- Real-data dyad-balanced smoke fit:
+
+```bash
+MPLCONFIGDIR=/tmp/matplotlib .venv/bin/python src/build_route1_caretaker_atlas.py \
+  --stage smoke-fit \
+  --input results/route1_analysis_dataset/route1_scored_utterance_effort_with_lstm_long.csv.gz \
+  --output-dir results/route1_caretaker_atlas/smoke_fit_balanced \
+  --context-ks k1,k2,k3 \
+  --effort-cols nb_words \
+  --model-ids CM1,CM2,CM3,CM4a,CM4c,CM5 \
+  --max-rows 5000 \
+  --chunksize 250000
+```
+
+- Smoke result: `18/18` model rows fit across k1-k3, with 5 dyads and 5,000
+  caretaker rows per context window. Output:
+
+```text
+results/route1_caretaker_atlas/smoke_fit_balanced/caretaker_smoke_fit_summary.csv
+results/route1_caretaker_atlas/smoke_fit_balanced/caretaker_smoke_fixed_effort_predictions.csv
+```
+
+- Full preflight audit command:
+
+```bash
+MPLCONFIGDIR=/tmp/matplotlib .venv/bin/python src/build_route1_caretaker_atlas.py \
+  --stage preflight \
+  --input results/route1_analysis_dataset/route1_scored_utterance_effort_with_lstm_long.csv.gz \
+  --output-dir results/route1_caretaker_atlas/preflight \
+  --context-ks k0,k1,k2,k3 \
+  --effort-cols all \
+  --model-ids all \
+  --max-rows 0 \
+  --chunksize 250000
+```
+
+- Preflight audit result:
+
+```text
+k0: 668,903 rows, 21 children, 2 speakers, 139 sessions, 0 missing age/sum_bits/effort rows
+k1: 668,903 rows, 21 children, 2 speakers, 139 sessions, 0 missing age/sum_bits/effort rows
+k2: 668,903 rows, 21 children, 2 speakers, 139 sessions, 0 missing age/sum_bits/effort rows
+k3: 668,903 rows, 21 children, 2 speakers, 139 sessions, 0 missing age/sum_bits/effort rows
+```
+
+- Preflight outputs:
+
+```text
+results/route1_caretaker_atlas/preflight/caretaker_context_audit.csv
+results/route1_caretaker_atlas/preflight/caretaker_child_context_audit.csv
+results/route1_caretaker_atlas/preflight/caretaker_model_manifest.csv
+results/route1_caretaker_atlas/preflight/caretaker_model_family_definitions.csv
+results/route1_caretaker_atlas/preflight/CARETAKER_FULL_RUN_COMMANDS.md
+```
+
+- Verification:
+
+```bash
+MPLCONFIGDIR=/tmp/matplotlib .venv/bin/python -m unittest tests.test_build_route1_caretaker_atlas
+MPLCONFIGDIR=/tmp/matplotlib .venv/bin/python -m unittest tests.test_build_route1_corrected_baseline_atlas
+MPLCONFIGDIR=/tmp/matplotlib .venv/bin/python -m unittest discover -s tests
+```
+
+- Results: focused caretaker tests passed, corrected baseline-atlas tests
+  passed, and the full unit suite passed with `295` tests.
+- The full caretaker atlas fit was deliberately not launched. Run it after the
+  current child/baseline atlas finishes.
+
+## 2026-06-17 - Route 1 corrected fixed-effort Atlas v2 suite completed
+
+- Refit/saved the source-specific child/baseline/LSTM corrected fixed-effort
+  atlas artifacts using the extended M1-M15 ladder:
+
+```bash
+MPLCONFIGDIR=/tmp/matplotlib .venv/bin/python src/build_route1_source_specific_m1_m6_fixed_effort_atlas.py \
+  --stage analysis \
+  --input results/route1_analysis_dataset/route1_scored_utterance_effort_context_entropy_with_lstm_long.csv.gz \
+  --output-dir results/route1_source_specific_corrected_fixed_effort_atlas \
+  --fig-dir figs/route1_source_specific_corrected_fixed_effort_atlas \
+  --doc-dir docs \
+  --sources real,random,unigram,bigram,trigram,lstm_additive_k3_same_length,lstm_additive_k4_same_length,lstm_additive_k5_same_length \
+  --context-ks k1,k2,k3 \
+  --effort-cols all \
+  --model-ids M1,M2,M3,M4a,M4b,M4c,M5,M6,M7,M8,M9,M10,M11,M12,M13,M14,M15 \
+  --chunksize 250000 \
+  --n-points 60 \
+  --no-pdf
+```
+
+- Each of the eight source groups wrote:
+
+```text
+255 model rows
+255 fitted rows
+7,095 coefficient rows
+183,600 fixed-effort prediction rows
+255 plot-manifest rows
+510 figure files (PNG + PDF)
+```
+
+- Rendered independent Markdown/HTML/PDF Atlas v2 reports plus an index:
+
+```text
+docs/utterance_information_route1_real_corrected_fixed_effort_atlas_v2.{md,html,pdf}
+docs/utterance_information_route1_random_corrected_fixed_effort_atlas_v2.{md,html,pdf}
+docs/utterance_information_route1_unigram_corrected_fixed_effort_atlas_v2.{md,html,pdf}
+docs/utterance_information_route1_bigram_corrected_fixed_effort_atlas_v2.{md,html,pdf}
+docs/utterance_information_route1_trigram_corrected_fixed_effort_atlas_v2.{md,html,pdf}
+docs/utterance_information_route1_lstm_additive_k3_same_length_corrected_fixed_effort_atlas_v2.{md,html,pdf}
+docs/utterance_information_route1_lstm_additive_k4_same_length_corrected_fixed_effort_atlas_v2.{md,html,pdf}
+docs/utterance_information_route1_lstm_additive_k5_same_length_corrected_fixed_effort_atlas_v2.{md,html,pdf}
+docs/utterance_information_route1_source_specific_corrected_fixed_effort_atlas_v2_index.{md,html,pdf}
+```
+
+- The real-child report includes the available model-version/estimator
+  sensitivity layer and the real-child age-scrambling robustness section. Image
+  link audit: 255 image refs per baseline/LSTM report, 325 image refs for the
+  real-child report, and 0 missing images.
+
+- Ran the full caretaker/parent atlas:
+
+```bash
+MPLCONFIGDIR=/tmp/matplotlib .venv/bin/python src/build_route1_caretaker_atlas.py \
+  --stage fit-atlas \
+  --input results/route1_analysis_dataset/route1_scored_utterance_effort_with_lstm_long.csv.gz \
+  --output-dir results/route1_caretaker_atlas/full_fit \
+  --fig-dir figs/route1_caretaker_corrected_fixed_effort_atlas \
+  --doc-dir docs \
+  --context-ks k0,k1,k2,k3 \
+  --effort-cols all \
+  --model-ids all \
+  --max-rows 0 \
+  --chunksize 250000 \
+  --n-points 60
+```
+
+- Caretaker audit:
+
+```text
+140 model rows
+120 fitted rows
+2,695 coefficient rows
+86,400 fixed-effort prediction rows
+120 plot-manifest rows
+240 figure files (PNG + PDF)
+```
+
+- Caretaker reports:
+
+```text
+docs/utterance_information_route1_caretaker_corrected_fixed_effort_atlas_v2.{md,html,pdf}
+results/route1_caretaker_atlas/full_fit/reports/caretaker_corrected_fixed_effort_atlas_v2.{md,html,pdf}
+```
+
+- Caretaker image link audit: 120 image refs in each report copy and 0 missing
+  images.
+- Verification:
+
+```bash
+MPLCONFIGDIR=/tmp/matplotlib .venv/bin/python -m py_compile \
+  src/build_route1_source_specific_m1_m6_fixed_effort_atlas.py \
+  src/build_route1_caretaker_atlas.py
+MPLCONFIGDIR=/tmp/matplotlib .venv/bin/python -m unittest tests.test_build_route1_caretaker_atlas
+MPLCONFIGDIR=/tmp/matplotlib .venv/bin/python -m unittest discover -s tests
+```
+
+- Results: edited builders compile, focused caretaker tests passed, and the
+  full suite passed with 295 tests in 291.829 seconds.
+
+## 2026-06-17 - Atlas v2 Reader-Facing HTML/PDF Repair
+
+- Repaired the source-specific and caretaker Atlas v2 report layer after the
+  first HTML reports used repo-root-relative image paths that broke when opened
+  from `docs/`.
+- Regenerated all child/source Atlas v2 reports and the caretaker Atlas v2
+  report from saved fit artifacts, without refitting models.
+- Report body now starts with model cards and plots: each model section states
+  the question, formula, statsmodels formula, regression type, library,
+  uncertainty structure, outcome, coverage, and how to read the plots.
+- Removed the large in-body formula/coefficient/status/slope tables from the
+  reader-facing HTML. Those tables remain available as CSV artifacts under
+  `results/route1_source_specific_corrected_fixed_effort_atlas/` and
+  `results/route1_caretaker_atlas/full_fit/`.
+- Added a caretaker `--stage report` path so future report-only regeneration can
+  reuse saved caretaker artifacts:
+
+```bash
+MPLCONFIGDIR=/tmp/matplotlib .venv/bin/python src/build_route1_caretaker_atlas.py \
+  --stage report \
+  --output-dir results/route1_caretaker_atlas/full_fit \
+  --fig-dir figs/route1_caretaker_corrected_fixed_effort_atlas \
+  --doc-dir docs
+```
+
+- Regenerated/refreshed HTML and PDF files in `docs/` for real, random,
+  unigram, bigram, trigram, LSTM k3/k4/k5, caretaker, and the source-specific
+  index. The refreshed full-report PDFs now embed plots and are tens of MB
+  rather than the old small broken-image exports.
+- Verification:
+
+```bash
+MPLCONFIGDIR=/tmp/matplotlib .venv/bin/python -m py_compile \
+  src/build_route1_source_specific_m1_m6_fixed_effort_atlas.py \
+  src/build_route1_caretaker_atlas.py
+MPLCONFIGDIR=/tmp/matplotlib .venv/bin/python -m unittest tests.test_build_route1_caretaker_atlas
+```
+
+- Link/render checks: 2,230 HTML image `src` references, 0 missing files; no
+  remaining `figs/...` browser-broken image references in the regenerated
+  report Markdown/HTML; headless browser screenshots of the real and caretaker
+  HTML show visible plot panels.
+
+## 2026-06-17 Route 1 Atlas v2 Consultation HTML Fix
+
+- Reworked the Route 1 Atlas v2 report layer into model-card, plot-first
+  consultation reports: each model section starts with the question, formula,
+  fitted statsmodels formula, estimator/library, uncertainty structure,
+  outcome, coverage, and then the fixed-effort plots.
+- Fixed browser image paths for reports opened from `docs/` by writing image
+  links relative to the report file instead of the repository root.
+- Added `--embed-images` support to `src/render_markdown_report.py` and
+  generated self-contained `.embedded.html` copies for all source-specific and
+  caretaker Atlas v2 reports.
+- Verification: 10 embedded reports, 2,230 total image references, 2,230
+  embedded `data:image/...` sources, 0 non-embedded image links, about 506 MB
+  total embedded HTML. Focused caretaker atlas tests passed.
+
+## 2026-06-17 Heldout Real-Child Sum-Bits Rsync
+
+- Found the heldout real-child scoring run on the PC at:
+
+```text
+/home/alkan/Portelance/compute_surprisal_mila/results/raw_surprisal_heldout_real_child_generalization_2026-06-16
+```
+
+- PC audit passed: 12 scored files, 710,400 total rows, 710,400 finite
+  `sum_bits` rows, and 710,400 positive-token rows.
+- Rsynced the scored tree back to the laptop/repo-local external-results area:
+
+```text
+results/external/compute_surprisal_mila/raw_surprisal_heldout_real_child_generalization_2026-06-16/
+```
+
+- Local audit passed with the same totals. Children and per-context rows:
+  Forrester/Ella = 6,663 rows per context, Sachs/Naomi = 16,344 rows per
+  context, MPI-EVA-Manchester/Helen = 154,593 rows per context, for k0-k3.
+
+## 2026-06-17 Heldout Real-Child Trajectory Prediction Report
+
+- Added `src/build_route1_heldout_real_child_prediction_report.py` for the
+  final Route 1 out-of-child robustness check. The report trains PBM real-child
+  population and Mundlak-compatible OLS models, then predicts the scored real
+  trajectories of heldout Forrester/Ella, Sachs/Naomi, and
+  MPI-EVA-Manchester/Helen.
+- The report deliberately excludes fixed-effect `C(child_id)` models from the
+  main heldout prediction because unseen children do not have fitted child
+  intercepts. Entropy-dependent Route 1 models remain parked until heldout
+  context-entropy and response-space-entropy predictors are computed.
+- Generated report files:
+
+```text
+docs/utterance_information_route1_heldout_real_child_prediction_report.md
+docs/utterance_information_route1_heldout_real_child_prediction_report.html
+docs/utterance_information_route1_heldout_real_child_prediction_report.embedded.html
+docs/utterance_information_route1_heldout_real_child_prediction_report.pdf
+```
+
+- Generated analysis artifacts:
+
+```text
+results/route1_heldout_real_child_prediction/heldout_prediction_fit_summary.csv
+results/route1_heldout_real_child_prediction/heldout_prediction_metrics.csv
+results/route1_heldout_real_child_prediction/heldout_prediction_monthly.csv.gz
+results/route1_heldout_real_child_prediction/heldout_fixed_effort_prediction_grid.csv.gz
+results/route1_heldout_real_child_prediction/heldout_fixed_effort_observed_monthly.csv.gz
+results/route1_heldout_real_child_prediction/heldout_selection_coverage_rows.csv
+figs/route1_heldout_real_child_prediction/
+```
+
+- Verification: the builder compiles; full run fit 60 model/context/effort
+  combinations and skipped only the 4 impossible k0 context-predictor
+  combinations; Markdown has 10 image references with 0 missing files; embedded
+  HTML has 10 embedded data images and 0 external figure refs; a headless
+  browser screenshot of the HTML shows the coverage plot rendering; PDF export
+  wrote a 2.4 MB report.
+
+## 2026-06-17 Supervisor Candidate Report v0
+
+- Added `src/build_supervisor_candidate_report.py`, a selective candidate
+  synthesis report for the next supervisor-facing draft. It does not replace
+  `docs/predicting_utterance_level_information_report.*`; it is a staging
+  report for choosing the cleanest story and plots.
+- The report links the current model-card locations, explicitly notes that the
+  implemented Atlas v2 ladder is M1-M15 rather than M1-M16, and separates Route
+  1 from the email's Route 2 effort-prediction idea.
+- New plots generated under `figs/supervisor_candidate_report/`:
+  route map, source-specific fixed-effort slope comparison, real k3/word
+  model-ladder R2/Delta-R2 importance view, heldout actual-vs-predicted
+  regression-line checks, heldout calibration/residual checks, and PBM real-k3
+  raw predictor correlation heatmap.
+- Key saved tables under `results/supervisor_candidate_report/`: model-card
+  appendix rows, effect sentence cards, nested variable-importance table,
+  heldout actual-vs-predicted regression slopes, heldout calibration rows,
+  source slope comparison, and raw predictor correlations.
+- Generated report files:
+
+```text
+docs/communicative_efficiency_supervisor_candidate_report_v0.md
+docs/communicative_efficiency_supervisor_candidate_report_v0.html
+docs/communicative_efficiency_supervisor_candidate_report_v0.embedded.html
+docs/communicative_efficiency_supervisor_candidate_report_v0.pdf
+```
+
+- Verification: `src/build_supervisor_candidate_report.py` compiles; 6 Markdown
+  image refs with 0 missing files; embedded HTML has 6/6 data images and 0
+  external figure refs; headless browser screenshot shows the first page and
+  main source-slope plot rendering; PDF refreshed from the final HTML.
+
+## 2026-06-18 Route 1 Best-Model Robustness Package Handoff
+
+- Added a new top-priority handoff section to `TODO.md`:
+  `Next Priority: Route 1 Best-Model Robustness Package Before Supervisor
+  Report`.
+- The handoff records that the Atlas is an inventory, not the final story, and
+  that the next task should fit/audit the best Route 1 model families before
+  updating the supervisor-facing report.
+- The section lists the core formulas to fit and plot: M2, M3, M4c, M5,
+  M15/rich context-interaction model, nonlinear age model, month-level aggregate
+  model, and heldout population prediction model.
+- It also lists the estimator families that must be audited or fit beyond OLS:
+  OLS with child fixed effects and clustered SE, Gaussian GEE, Gamma/log GEE,
+  Gaussian GLM, Gamma/log GLM, MixedLM random child intercept, MixedLM random
+  child age slope, nonlinear age variants, aggregate models, and heldout
+  prediction models.
+- The handoff includes required plots, model-card fields, literal one-line
+  effect sentences, existing artifacts to audit before refitting, and acceptance
+  criteria for the pre-supervisor candidate evidence report.
+
+## 2026-06-18 Supervisor Candidate Report Figure Explanations
+
+- Updated `src/build_supervisor_candidate_report.py` so each promoted figure in
+  `docs/communicative_efficiency_supervisor_candidate_report_v0.md` gets an
+  explicit guide with four parts: what the figure shows, how to read it, what it
+  means for the Route 1 claim, and what not to overclaim.
+- The guide now covers the route map, source-slope comparison, model-ladder
+  R2/Delta-R2 plot, heldout actual-vs-predicted regression lines, heldout
+  calibration/residual plot, and raw predictor-correlation heatmap.
+- Regenerated:
+
+```text
+docs/communicative_efficiency_supervisor_candidate_report_v0.md
+docs/communicative_efficiency_supervisor_candidate_report_v0.html
+docs/communicative_efficiency_supervisor_candidate_report_v0.embedded.html
+docs/communicative_efficiency_supervisor_candidate_report_v0.pdf
+```
+
+- Added focused tests in `tests/test_build_supervisor_candidate_report.py`.
+- Verification:
+
+```bash
+.venv/bin/python -m unittest tests.test_build_supervisor_candidate_report
+.venv/bin/python -m py_compile src/build_supervisor_candidate_report.py tests/test_build_supervisor_candidate_report.py
+MPLCONFIGDIR=/tmp/matplotlib .venv/bin/python src/build_supervisor_candidate_report.py
+.venv/bin/python -c "from pathlib import Path; import re; md=Path('docs/communicative_efficiency_supervisor_candidate_report_v0.md'); text=md.read_text(encoding='utf-8'); refs=re.findall(r'!\\[[^\\]]*\\]\\(([^)]+)\\)', text); missing=[]; [missing.append(ref) for ref in refs if not (md.parent / ref).resolve().exists()]; print(f'image_refs={len(refs)} missing={len(missing)}')"
+rg -o "data:image/[^;]+;base64" docs/communicative_efficiency_supervisor_candidate_report_v0.embedded.html | wc -l
+rg -n "src=\"\\.\\./figs|src=\"figs|\\.png" docs/communicative_efficiency_supervisor_candidate_report_v0.embedded.html
+```
+
+- Results: focused unittest passed (`2` tests); `py_compile` passed; report
+  rebuild refreshed Markdown, HTML, embedded HTML, and PDF; Markdown audit found
+  `image_refs=6 missing=0`; embedded HTML audit found `6` embedded data images
+  and no external PNG references.
+
+## 2026-06-18 Route 1 Best-Model Robustness Package
+
+- Added `src/build_route1_best_model_robustness_package.py`, a dedicated
+  pre-supervisor evidence-gallery builder for the TODO block covering M2, M3,
+  M4c, M5, M15/rich interactions, nonlinear age, month-level aggregation, and
+  heldout population prediction evidence.
+- The builder reuses the row-level Atlas, deep-dive, source-comparison,
+  age-scrambling, heldout, and caretaker artifacts where they already exist,
+  then fits the missing month-level aggregate robustness grid for the five core
+  formulas across seven estimator families: OLS with child fixed effects and
+  child-clustered SE, GEE Gaussian, GEE Gamma/log, GLM Gaussian, GLM Gamma/log,
+  MixedLM random child intercept, and MixedLM random child age slope.
+- New reusable outputs are under
+  `results/route1_best_model_robustness_package/`, including:
+
+```text
+aggregate_estimator_family_summary.csv
+aggregate_estimator_fixed_effort_predictions.csv
+aggregate_ols_fe_nested_r2.csv
+estimator_family_coverage.csv
+existing_artifact_audit.csv
+required_plot_manifest.csv
+real_child_k3_month_effort_band_aggregate.csv.gz
+```
+
+- New figure outputs are under
+  `figs/route1_best_model_robustness_package/`, including same-question
+  estimator-family fixed-effort age lines, an estimator-family age-effect
+  forest plot, aggregate nested delta-R2, and aggregate actual-vs-predicted
+  regression-line checks.
+- Generated report files:
+
+```text
+docs/route1_best_model_robustness_package.md
+docs/route1_best_model_robustness_package.html
+docs/route1_best_model_robustness_package.embedded.html
+docs/route1_best_model_robustness_package.pdf
+```
+
+- The report is explicitly labeled as a pre-supervisor candidate/evidence
+  gallery, not the final supervisor report. It includes model cards,
+  estimator-family coverage, literal one-line effect interpretations, fixed
+  effort age plots, estimator comparisons, coefficient forest plots,
+  delta-R2/nested-model plots, actual-vs-predicted plots, heldout calibration,
+  age-scrambling robustness, source comparisons, and caretaker contrast plots.
+- Important interpretation note: the newly fit month-level aggregate robustness
+  models reduce pseudo-replication, but they are not a drop-in replacement for
+  the row-level Atlas story. In the aggregate robustness view, the M5 OLS
+  child-fixed-effect age coefficient is positive and marginal
+  (`0.166` bits/month, `p=0.064`), whereas the row-level fixed-effort Atlas
+  remains the main comparable baseline. Treat the aggregate results as a
+  sensitivity analysis until the final supervisor report chooses the promoted
+  model family.
+- Verification commands run:
+
+```bash
+MPLCONFIGDIR=/tmp/matplotlib .venv/bin/python -m unittest tests.test_build_route1_best_model_robustness_package
+.venv/bin/python -m py_compile src/build_route1_best_model_robustness_package.py tests/test_build_route1_best_model_robustness_package.py
+MPLCONFIGDIR=/tmp/matplotlib .venv/bin/python src/build_route1_best_model_robustness_package.py
+.venv/bin/python -c "from pathlib import Path; import re; md=Path('docs/route1_best_model_robustness_package.md'); text=md.read_text(encoding='utf-8'); refs=re.findall(r'!\\[[^\\]]*\\]\\(([^)]+)\\)', text); missing=[ref for ref in refs if not (md.parent / ref).resolve().exists()]; print(f'image_refs={len(refs)} missing={len(missing)}')"
+rg -o "data:image/[^;]+;base64" docs/route1_best_model_robustness_package.embedded.html
+```
+
+- Results: focused unittest passed (`6` tests); `py_compile` passed; the report
+  rebuild refreshed Markdown, HTML, embedded HTML, and PDF; Markdown audit found
+  `image_refs=18 missing=0`; embedded HTML audit found `18` embedded data
+  images and `0` external figure refs; the estimator audit found `35/35`
+  aggregate model/estimator fits and the required-plot manifest found `18/18`
+  available plots. The report build emitted only non-fatal statsmodels
+  FutureWarnings about the GLM BIC deviance formula.
+
+## 2026-06-18 Route 1 Formula-by-Formula Deep-Dive Revision
+
+- Revised `src/build_route1_best_model_robustness_package.py` so
+  `docs/route1_best_model_robustness_package.md` is organized one formula at a
+  time, with one subsection per estimator family, instead of asking the reader
+  to inspect a broad compact grid/table first.
+- Added explicit formula variants requested during model-selection discussion:
+  `M5_no_question`, `M5_age_effort_no_question`,
+  `M5_age_effort_question`, `M5_parent_reaction_no_question`, and
+  `M5_parent_reaction_question`.
+- Interaction formulas are now written with all lower-order terms visible. For
+  example, the report writes `age_c + effort_c + age_c:effort_c` rather than
+  Patsy shorthand.
+- The report now includes natural-language test sentences for every formula,
+  plain-language control descriptions, child-fixed-effect and
+  population/random-effect formula versions, a note separating age-effort
+  correlation from an actual interaction, variable-importance/R2 diagnostics,
+  and term-level interpretations of the relation between each predictor and
+  `sum_bits` inside each estimator subsection.
+- Added `aggregate_key_term_relation_summary.csv` under
+  `results/route1_best_model_robustness_package/` so all term-level
+  coefficient, p-value, interval, and direction summaries are reusable without
+  putting a long table in the reader-facing report.
+- Regenerated:
+
+```text
+docs/route1_best_model_robustness_package.md
+docs/route1_best_model_robustness_package.html
+docs/route1_best_model_robustness_package.embedded.html
+docs/route1_best_model_robustness_package.pdf
+```
+
+- Verification commands run:
+
+```bash
+.venv/bin/python -m py_compile src/build_route1_best_model_robustness_package.py tests/test_build_route1_best_model_robustness_package.py
+MPLCONFIGDIR=/tmp/matplotlib .venv/bin/python -m unittest tests.test_build_route1_best_model_robustness_package
+MPLCONFIGDIR=/tmp/matplotlib .venv/bin/python src/build_route1_best_model_robustness_package.py
+rg -n "^## |^### |compact aggregate|Aggregate Estimator Fit Summary|Estimator-Family Coverage|age_c \\* effort_c|Natural-language test|Relation between predictors" docs/route1_best_model_robustness_package.md
+.venv/bin/python - <<'PY'
+from pathlib import Path
+import pandas as pd, re
+summary = pd.read_csv('results/route1_best_model_robustness_package/aggregate_estimator_family_summary.csv')
+relation = pd.read_csv('results/route1_best_model_robustness_package/aggregate_key_term_relation_summary.csv')
+manifest = pd.read_csv('results/route1_best_model_robustness_package/required_plot_manifest.csv')
+md = Path('docs/route1_best_model_robustness_package.md')
+text = md.read_text(encoding='utf-8')
+refs = re.findall(r'!\\[[^\\]]*\\]\\(([^)]+)\\)', text)
+missing = [ref for ref in refs if not (md.parent / ref).resolve().exists()]
+print('fit_rows=', int((summary['status']=='fit').sum()), '/', len(summary))
+print('relation_rows=', len(relation))
+print('plots=', int((manifest['status']=='available').sum()), '/', len(manifest))
+print('image_refs=', len(refs), 'missing=', len(missing))
+print('formula_sections=', len(re.findall(r'^## (M[0-9A-Za-z_]+)\\.', text, flags=re.M)))
+print('estimator_subsections=', len(re.findall(r'^### M.* - ', text, flags=re.M)))
+print('has_star_formula=', 'age_c * effort_c' in text)
+print('has_compact_aggregate=', 'compact aggregate' in text.lower())
+PY
+rg -o "data:image/[^;]+;base64" docs/route1_best_model_robustness_package.embedded.html | wc -l
+```
+
+- Results: focused unittest passed (`7` tests); `py_compile` passed; report
+  rebuild refreshed Markdown, HTML, embedded HTML, and PDF; the rebuilt report
+  has `10` formula sections and `70` estimator subsections; estimator coverage
+  is `70/70`; term-level relation rows are `329`; the plot manifest is
+  `28/28`; Markdown image audit found `image_refs=22 missing=0`; embedded HTML
+  contains `22` embedded images; the report contains no `age_c * effort_c`
+  shorthand and no old "compact aggregate" language. The report build emitted
+  only non-fatal statsmodels FutureWarnings about the GLM BIC deviance formula.
+
+## 2026-06-18 Route 1 Deep-Dive Plot Battery Expansion
+
+- Expanded `src/build_route1_best_model_robustness_package.py` so the
+  formula-by-formula report includes the expected plot battery inside the
+  model sections, not only at the end of the report.
+- For every core/deep-dive formula, the report now includes:
+  row-level Atlas fixed-effort plots when an existing Atlas plot is available,
+  estimator-family fixed-effort age lines, actual-vs-predicted regression
+  plots, estimator residual/calibration summaries, and term-effect forests.
+- For every formula-estimator subsection, the report now includes a dedicated
+  actual-vs-fitted and residual-over-age diagnostic plot for that exact
+  estimator.
+- The fitter now saves fitted values/residuals for all estimator families, not
+  only OLS:
+
+```text
+results/route1_best_model_robustness_package/aggregate_estimator_fitted_values.csv.gz
+```
+
+  This file includes all seven estimator families for all ten formulas.
+- Regenerated:
+
+```text
+docs/route1_best_model_robustness_package.md
+docs/route1_best_model_robustness_package.html
+docs/route1_best_model_robustness_package.embedded.html
+docs/route1_best_model_robustness_package.pdf
+```
+
+- Verification commands run:
+
+```bash
+.venv/bin/python -m py_compile src/build_route1_best_model_robustness_package.py tests/test_build_route1_best_model_robustness_package.py
+MPLCONFIGDIR=/tmp/matplotlib .venv/bin/python -m unittest tests.test_build_route1_best_model_robustness_package
+MPLCONFIGDIR=/tmp/matplotlib .venv/bin/python src/build_route1_best_model_robustness_package.py
+brave-browser --headless --no-sandbox --disable-gpu --print-to-pdf=/home/apaixonada/EvaPortelance/Projet_1/communicative_efficiency/docs/route1_best_model_robustness_package.pdf file:///home/apaixonada/EvaPortelance/Projet_1/communicative_efficiency/docs/route1_best_model_robustness_package.html
+.venv/bin/python - <<'PY'
+from pathlib import Path
+import pandas as pd, re
+base = Path('results/route1_best_model_robustness_package')
+summary = pd.read_csv(base / 'aggregate_estimator_family_summary.csv')
+relation = pd.read_csv(base / 'aggregate_key_term_relation_summary.csv')
+manifest = pd.read_csv(base / 'required_plot_manifest.csv')
+fitted = pd.read_csv(base / 'aggregate_estimator_fitted_values.csv.gz')
+md = Path('docs/route1_best_model_robustness_package.md')
+text = md.read_text(encoding='utf-8')
+refs = re.findall(r'!\\[[^\\]]*\\]\\(([^)]+)\\)', text)
+missing = [ref for ref in refs if not (md.parent / ref).resolve().exists()]
+print('fit_rows=', int((summary['status']=='fit').sum()), '/', len(summary))
+print('models=', summary['model_id'].nunique())
+print('estimators=', summary['estimator_id'].nunique())
+print('fitted_value_rows=', len(fitted), 'fitted_models=', fitted['model_id'].nunique(), 'fitted_estimators=', fitted['estimator_id'].nunique())
+print('relation_rows=', len(relation))
+print('plots=', int((manifest['status']=='available').sum()), '/', len(manifest))
+print('image_refs=', len(refs), 'missing=', len(missing))
+print('formula_sections=', len(re.findall(r'^## (M[0-9A-Za-z_]+)\\.', text, flags=re.M)))
+print('estimator_subsections=', len(re.findall(r'^### M.* - ', text, flags=re.M)))
+print('estimator_diagnostic_reads=', text.count('Estimator diagnostic read'))
+print('actual_vs_predicted_reads=', text.count('Actual-vs-predicted read'))
+print('residual_calibration_reads=', text.count('Residual/calibration read'))
+print('term_forest_reads=', text.count('Predictor-relation read'))
+print('has_star_formula=', 'age_c * effort_c' in text)
+print('has_compact_aggregate=', 'compact aggregate' in text.lower())
+PY
+rg -o "data:image/[^;]+;base64" docs/route1_best_model_robustness_package.embedded.html | wc -l
+```
+
+- Results: focused unittest passed (`7` tests); `py_compile` passed; report
+  rebuild refreshed Markdown, HTML, embedded HTML, and PDF; estimator coverage
+  remained `70/70`; fitted-value diagnostics cover `199,353` formula-estimator
+  fitted rows, `10` formulas, and `7` estimator families; term-level relation
+  rows remained `329`; plot manifest is now `140/140`; Markdown image audit
+  found `127` image refs with `0` missing; embedded HTML contains `127`
+  embedded images; every one of the `70` estimator subsections has an
+  estimator diagnostic read/plot; the report still contains no
+  `age_c * effort_c` shorthand and no old "compact aggregate" language. The
+  PDF was explicitly re-rendered after detecting a stale timestamp; the final
+  PDF is `37,636,121` bytes, `113` pages, and has creation time
+  `2026-06-18 08:37:56 EDT`. The report build emitted only non-fatal
+  statsmodels FutureWarnings about the GLM BIC deviance formula.
+
+## 2026-06-18 Route 1 Fixed-Effort Report Simplification
+
+- Simplified `docs/route1_best_model_robustness_package.md` after reviewing the
+  intended scientific question again. The report now focuses on row-level
+  fixed-effort regression-line plots rather than the aggregate estimator
+  diagnostic battery.
+- The report states the outcome distinction explicitly:
+  `sum_bits` is total uncertainty/information in one utterance; effort columns
+  are predictors/controls; bits per token such as `sum_bits / nb_words` would
+  be a separate rate outcome; `mean_sum_bits` aggregate-cell robustness is not
+  the main outcome and not bits per token.
+- Included row-level Atlas fixed-effort regression-line plots for M2, M3, M4c,
+  M5, M15, and M7. These are the plots tied to the established claim that at
+  fixed child effort, predicted total utterance bits generally decrease with
+  age after child identity and other controls.
+- Included the heldout actual-vs-predicted regression-line plot and calibration
+  plot, plus age-scrambling, source-comparison, and caretaker contrast plots.
+- Regenerated:
+
+```text
+docs/route1_best_model_robustness_package.md
+docs/route1_best_model_robustness_package.html
+docs/route1_best_model_robustness_package.embedded.html
+```
+
+- Verification:
+
+```bash
+.venv/bin/python -m py_compile src/build_route1_best_model_robustness_package.py tests/test_build_route1_best_model_robustness_package.py
+MPLCONFIGDIR=/tmp/matplotlib .venv/bin/python -m unittest tests.test_build_route1_best_model_robustness_package
+MPLCONFIGDIR=/tmp/matplotlib .venv/bin/python src/build_route1_best_model_robustness_package.py
+.venv/bin/python - <<'PY'
+from pathlib import Path
+import re, pandas as pd
+md=Path('docs/route1_best_model_robustness_package.md')
+text=md.read_text(encoding='utf-8')
+refs=re.findall(r'!\\[[^\\]]*\\]\\(([^)]+)\\)', text)
+missing=[r for r in refs if not (md.parent/r).resolve().exists()]
+manifest=pd.read_csv('results/route1_best_model_robustness_package/required_plot_manifest.csv')
+print('image_refs=', len(refs), 'missing=', len(missing))
+print('plots=', int((manifest.status=='available').sum()), '/', len(manifest))
+print('formula_sections=', len(re.findall(r'^## (M[0-9A-Za-z_]+)\\.', text, flags=re.M)))
+PY
+rg -o "data:image/[^;]+;base64" docs/route1_best_model_robustness_package.embedded.html | wc -l
+```
+
+- Results: focused unittest passed (`7` tests); `py_compile` passed; report
+  rebuild refreshed Markdown, HTML, and embedded HTML; Markdown audit found
+  `13` image refs with `0` missing; plot manifest is `13/13`; embedded HTML
+  contains `13` embedded images; the report now has `6` formula sections. PDF
+  rendering is temporarily unavailable because both local Chrome and Brave
+  crash in Crashpad before writing the PDF in this environment.
+
+## 2026-06-18 Communicative-Efficiency Scope Correction
+
+- Corrected the Route 1 candidate-report framing after user clarified that the
+  project is communicative efficiency, not prediction of raw `sum_bits` growth.
+  Raw total bits can rise because older children produce longer utterances;
+  that is an MLU/length-growth fact and must not be treated as the core
+  efficiency result.
+- Updated `TODO.md` and this notes file so future agent work starts from the
+  correct estimand: conditional utterance information at fixed child effort,
+  with controls such as child identity and parent-context effort.
+- Regenerated `docs/route1_best_model_robustness_package.md`, `.html`, and
+  `.embedded.html` as a focused candidate regression-line gallery.
+- The report now states that evidence should come from fixed-effort regression
+  lines, not raw observed-vs-fitted total-bit diagnostics. Heldout
+  actual-vs-predicted lines remain because those are the requested
+  three-heldout-child generalization plots.
+- Promising existing M1-M15 candidates shown: M2, M3, M4a, M4c, M5, M6, M7,
+  M11, and M15. Exact parent-effort screening candidates shown from existing
+  all-estimator artifacts: M5_no_question, M5_age_effort_no_question,
+  M5_parent_reaction_no_question, and M5_parent_reaction_question.
+- Verification run:
+
+```bash
+.venv/bin/python -m py_compile src/build_route1_best_model_robustness_package.py tests/test_build_route1_best_model_robustness_package.py
+MPLCONFIGDIR=/tmp/matplotlib .venv/bin/python -m unittest tests.test_build_route1_best_model_robustness_package
+MPLCONFIGDIR=/tmp/matplotlib .venv/bin/python src/build_route1_best_model_robustness_package.py
+```
+
+- Audit result: Markdown has 94 image references with 0 missing; required plot
+  manifest is 85/85 available; embedded HTML contains 94 embedded images; the
+  report contains 0 references to `aggregate_actual_vs_model_prediction`, 0 raw
+  actual-vs-fitted references, 0 `mean_sum_bits` mentions, and explicit
+  communicative-efficiency/MLU warnings. PDF rendering remains unavailable in
+  this environment because Brave crashes in Crashpad before writing the file.
+- Added an explicit "Multiple Age Effects Can Coexist" section to
+  `docs/route1_best_model_robustness_package.md`: M1 pooled effort-only
+  contrast, M2 child-identity contrast, and M3 age-by-effort contrast. The
+  report now shows M1 fixed-effort lines plus M1/M2/M3 balanced/scrambled
+  robustness lines. Key k3 word-effort values: row-level M1 is essentially
+  flat/slightly upward (age coefficient 0.0003 bits/month, p=0.993), the
+  age-bin/unit robustness M1 slope is positive (0.0542), and child-controlled
+  M2/M3 remain downward. Rebuilt Markdown/HTML/embedded HTML; verified 100
+  Markdown image references with 0 missing and 9 focused tests passing.
+
+## 2026-06-20 Route 1 Child-Only Length-Controlled Model Suite
+
+- Added `src/build_route1_child_length_controlled_model_suite.py` with decoupled
+  `fit`, `plot`, `report`, and `all` stages, plus focused tests in
+  `tests/test_build_route1_child_length_controlled_model_suite.py`.
+- The suite is child-only by default and enforces the Route 1 length contract:
+  every scientific formula includes either `effort_c` or exact word-count
+  categories with `C(effort_value_int)`. Interactions are written with explicit
+  lower-order terms, not formula shorthand.
+- Added exact-length F18-F21 formulas to directly address the MLU concern:
+  F18 absorbs exact word-count categories, F19 estimates separate age slopes
+  inside each exact word count, F20 adds local-context controls, and F21
+  combines exact-length age slopes with local-context controls. These models
+  test developmental change within same-length utterance comparisons rather
+  than across the changing age distribution of utterance lengths.
+- Default real-child run used K3 context and word effort:
+
+```bash
+MPLCONFIGDIR=/tmp/matplotlib .venv/bin/python \
+  src/build_route1_child_length_controlled_model_suite.py \
+  --stage all \
+  --context-ks k3 \
+  --effort-cols nb_words \
+  --formula-ids all \
+  --estimators all \
+  --n-points 60
+```
+
+- Outputs:
+
+```text
+docs/route1_child_length_controlled_model_suite.md
+docs/route1_child_length_controlled_model_suite.html
+results/route1_child_length_controlled_model_suite/model_summary.csv
+results/route1_child_length_controlled_model_suite/coefficient_long.csv
+results/route1_child_length_controlled_model_suite/fixed_effort_predictions.csv.gz
+results/route1_child_length_controlled_model_suite/fixed_slice_slopes.csv
+results/route1_child_length_controlled_model_suite/exact_length_observed_age_bin_means.csv
+results/route1_child_length_controlled_model_suite/formula_definitions.csv
+results/route1_child_length_controlled_model_suite/estimator_definitions.csv
+results/route1_child_length_controlled_model_suite/models/
+figs/route1_child_length_controlled_model_suite/
+```
+
+- Fit audit: `446,985` real-child K3 rows, `21` children, `983` child-session
+  keys. The model grid fit `189/189` requested combinations: 21 formulas x 9
+  estimators/repeated-measures structures. All 189 fitted result objects were
+  saved as pickle files with zero model-save errors.
+- Figure/report audit: generated `47` PNG figures: 21 primary fixed-effort or
+  exact-length line plots, 21 estimator-comparison fixed-effort line plots, one
+  exact-length age-slope proof plot, one observed exact-length age-bin plot,
+  one slope heatmap, one variance-explained plot, and one control-dominance
+  standardized-coefficient diagnostic plot.
+- Scientific signal in this run: fixed-effort slopes are mostly downward. The
+  saved slope grid has `2,119` downward and `149` upward fixed-effort/exact-
+  length lines overall. For the primary row-level OLS child-fixed-effect
+  estimator, all F01-F17 continuous-effort slices were downward. The exact-
+  length F18-F21 primary slopes were `41` downward and `7` upward; lengths
+  `1-7` are consistently downward in the exact-length interaction formulas,
+  while positive slopes at `8` and `10-12` should be interpreted cautiously
+  because the longest lengths have much thinner support.
+- Exact-length support audit from
+  `exact_length_observed_age_bin_means.csv`: lengths 1-7 each have thousands
+  of observed utterances and all 21 children represented; length 8 still has
+  4,725 utterances and 20 children; lengths 10-12 are sparse by comparison
+  and include small age-bin cells, so the report flags them as support-limited.
+- The variance-explained figure uses squared observed-vs-fitted correlation as
+  a bounded descriptive fit metric across OLS/GLM/GEE/MixedLM families. This
+  avoids letting Gamma/log SSE-scale pseudo-R2 dominate the diagnostic plot.
+- The standardized-coefficient plot was reframed as a control-dominance
+  diagnostic. Large effort coefficients show why raw total bits are length-
+  confounded; they are not presented as the communicative-efficiency finding.
+- Regenerated `docs/route1_child_length_controlled_model_suite.md` and `.html`
+  without course-label phrasing. The report now has an explicit "Why This Is
+  Not Just MLU" section, 47 Markdown image references with zero missing files,
+  and no occurrences of the removed phrase in the Markdown or HTML.
+- Verification:
+
+```bash
+MPLCONFIGDIR=/tmp/matplotlib .venv/bin/python -m py_compile \
+  src/build_route1_child_length_controlled_model_suite.py \
+  tests/test_build_route1_child_length_controlled_model_suite.py
+MPLCONFIGDIR=/tmp/matplotlib .venv/bin/python -m unittest \
+  tests.test_build_route1_child_length_controlled_model_suite
+MPLCONFIGDIR=/tmp/matplotlib .venv/bin/python \
+  src/build_route1_child_length_controlled_model_suite.py \
+  --stage all \
+  --context-ks k3 \
+  --effort-cols nb_words \
+  --formula-ids all \
+  --estimators all \
+  --n-points 60
+MPLCONFIGDIR=/tmp/matplotlib .venv/bin/python \
+  src/build_route1_child_length_controlled_model_suite.py --stage report
+MPLCONFIGDIR=/tmp/matplotlib .venv/bin/python -m unittest discover -s tests
+```
+
+- Results: py_compile passed; focused tests passed (`7` tests). The full model
+  run completed with `189/189` fits and zero model-save errors. The report-only
+  regeneration completed after the final wording patch. Full unit suite passed
+  `313` tests in `281.326` seconds. Existing statsmodels smoke tests still emit
+  convergence, perfect-separation, and plotting warnings on tiny synthetic data,
+  but the test suite completed successfully.
+
+## 2026-06-22 - Route 1 phoneme fixed-effort line audit
+
+- Added a small audit confirming the current real-child corrected
+  source-specific Atlas uses the requested phoneme fixed-effort selection
+  logic: the 12 most frequent exact real-child phoneme counts.
+- Current real-child phoneme values are `2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12,
+  13`, split in the Atlas as low `2-5`, middle `6-9`, and high `10-13`.
+- Outputs:
+
+```text
+docs/route1_phoneme_effort_line_audit.md
+docs/route1_phoneme_effort_line_audit.html
+results/route1_phoneme_effort_line_audit/real_phoneme_effort_value_distribution_with_top12.csv
+results/route1_phoneme_effort_line_audit/real_current_atlas_phoneme_bin_definitions.csv
+results/route1_phoneme_effort_line_audit/real_k3_main_model_phoneme_fixed_effort_slopes.csv
+figs/route1_phoneme_effort_line_audit/real_phoneme_top12_frequency_audit.png
+figs/route1_phoneme_effort_line_audit/real_k3_phoneme_main_model_slope_audit.png
+```
+
+- Verification: inspected
+  `src/build_route1_source_specific_m1_m6_fixed_effort_atlas.py` and the saved
+  `fixed_effort_bin_definitions.csv`; rendered the audit Markdown to HTML; used
+  `view_image` to visually confirm both generated PNGs are nonblank and legible.
+
+## 2026-06-22 - Route 1 real-vs-controls context report
+
+- Added `src/build_route1_real_vs_controls_context_report.py` and
+  `tests/test_build_route1_real_vs_controls_context_report.py` to build and
+  guard a comparison-first report opposing real child utterances against random,
+  unigram, bigram, trigram, additive same-length LSTM k3/k4/k5, and caretaker
+  speech over the same PBM developmental period.
+- The report uses k0 as the no-context quantity and k3 as the with-context
+  quantity. For generated child controls, source gaps are paired by
+  `utterance_id`; caretaker comparisons are age/session-structure comparisons
+  rather than utterance-paired alternatives.
+- Generated sections for Real vs Random, Real vs Unigram, Real vs Bigram, Real
+  vs Trigram, Real vs LSTMs, and Real vs Caretakers. Each section includes four
+  plots: k0 versus k3 age means, k3 with-context focus, context gain through
+  age, and source-minus-real gap through age.
+- Fitted difference models for generated controls:
+  `gap_k3 ~ age_c + effort_c + C(child_id)` and
+  `gain_gap ~ age_c + effort_c + C(child_id)`, with child-clustered standard
+  errors. Fitted caretaker source-interaction models for `sum_bits_k3` and
+  `context_gain`.
+- Retrieved illustrative matched examples for generated controls where the
+  real child utterance had much lower k3 surprisal than the generated
+  alternative under the same prior context. Caretaker examples are labeled as
+  representative context-gain examples because they are not generated
+  alternatives for the same child row.
+- Outputs:
+
+```text
+docs/route1_real_vs_controls_context_report.md
+docs/route1_real_vs_controls_context_report.html
+docs/route1_real_vs_controls_context_report.embedded.html
+results/route1_real_vs_controls_context_report/source_age_summary.csv
+results/route1_real_vs_controls_context_report/paired_gap_summary.csv
+results/route1_real_vs_controls_context_report/difference_model_summary.csv
+results/route1_real_vs_controls_context_report/matched_examples.csv
+results/route1_real_vs_controls_context_report/caretaker_examples.csv
+figs/route1_real_vs_controls_context_report/
+```
+
+- Added the report to `docs/route1_current_reports_browser_index.html`.
+- Verification:
+
+```bash
+MPLCONFIGDIR=/tmp/matplotlib-cache .venv/bin/python -m py_compile \
+  src/build_route1_real_vs_controls_context_report.py \
+  tests/test_build_route1_real_vs_controls_context_report.py
+MPLCONFIGDIR=/tmp/matplotlib-cache .venv/bin/python -m unittest \
+  tests.test_build_route1_real_vs_controls_context_report
+MPLCONFIGDIR=/tmp/matplotlib-cache .venv/bin/python \
+  src/build_route1_real_vs_controls_context_report.py --stage all
+MPLCONFIGDIR=/tmp/matplotlib-cache .venv/bin/python \
+  src/build_route1_real_vs_controls_context_report.py --stage report
+```
+
+- Results: `py_compile` passed, the focused unittest passed (`4` tests), the
+  full report build completed, the final report-only regeneration completed
+  after fixing report-relative figure paths, and the Markdown audit found 24
+  image references with 0 missing files.
+
+## 2026-06-22 - Real-vs-controls regression-line expansion
+
+- Expanded `docs/route1_real_vs_controls_context_report.md`/`.html` with a
+  model-based fixed-effort regression-line layer. This addresses the missing
+  difference-in-regression-lines evidence: the report now shows not only raw
+  k0/k3 age-bin means, but also Atlas-predicted k3 lines at the same word
+  counts.
+- The primary regression-line plots use the saved corrected fixed-effort Atlas
+  `M2` predictions for child sources and `CM2` for caretakers at fixed 2-, 6-,
+  and 10-word utterances. Each comparison section now includes the source and
+  real regression lines, source-minus-real predicted line gaps, and slope
+  differences across model variants.
+- Added slope-difference tables and plain-language M2/CM2 slope reads. Example:
+  the random comparison reports real children at `-0.735` bits per 6 months
+  versus random at `+1.068` bits per 6 months, with real `12/12` downward fixed
+  word-count lines and random `0/12`.
+- Model-slope comparisons use average bits per 6 months across the 12 fixed
+  word-count lines for `M2`, `M3`, `M4c`, `M5`, `M6`, `M7`, `M11`, and `M15`
+  where available. Caretakers use the available mapped `CM2`, `CM3`, `CM4c`,
+  `CM5`, and `CM6` variants.
+- Additional outputs:
+
+```text
+results/route1_real_vs_controls_context_report/regression_line_slope_difference_summary.csv
+results/route1_real_vs_controls_context_report/*_regression_line_predictions.csv
+results/route1_real_vs_controls_context_report/*_regression_line_slopes.csv
+results/route1_real_vs_controls_context_report/*_regression_line_slope_differences.csv
+results/route1_real_vs_controls_context_report/*_regression_line_gaps.csv
+figs/route1_real_vs_controls_context_report/*_m2_k3_fixed_word_regression_lines.png
+figs/route1_real_vs_controls_context_report/*_m2_k3_fixed_word_regression_gaps.png
+figs/route1_real_vs_controls_context_report/*_k3_word_model_slope_differences.png
+```
+
+- Verification:
+
+```bash
+MPLCONFIGDIR=/tmp/matplotlib-cache .venv/bin/python \
+  src/build_route1_real_vs_controls_context_report.py --stage report
+MPLCONFIGDIR=/tmp/matplotlib-cache .venv/bin/python -m py_compile \
+  src/build_route1_real_vs_controls_context_report.py \
+  tests/test_build_route1_real_vs_controls_context_report.py
+MPLCONFIGDIR=/tmp/matplotlib-cache .venv/bin/python -m unittest \
+  tests.test_build_route1_real_vs_controls_context_report
+```
+
+- Results: report-only regeneration completed; focused unittest passed (`6`
+  tests); Markdown image audit found 42 image references with 0 missing files.
+  Visually inspected the random fixed-effort regression-line and model-slope
+  difference plots.
+
+## 2026-06-22 - Side draft proposed supervisor-report completion
+
+- Added `src/build_supervisor_proposed_completion_report.py` to generate a
+  separate proposed completion beside the current supervisor-facing report. The
+  builder reads `docs/predicting_utterance_level_information_report.md` as the
+  base but writes only new side-draft outputs:
+
+```text
+docs/predicting_utterance_level_information_report_proposed_completion.md
+docs/predicting_utterance_level_information_report_proposed_completion.html
+docs/predicting_utterance_level_information_report_proposed_completion.embedded.html
+```
+
+- The current `docs/predicting_utterance_level_information_report.*` files were
+  intentionally left unchanged.
+- The side draft adds a proposed completion section summarizing
+  real-vs-random, real-vs-ngram, real-vs-LSTM, and real-vs-caretaker evidence,
+  including row-weighted k0/k3/context-gain means, primary fixed-effort slope
+  comparisons, paired generated-control gap models, caretaker interaction
+  results, and candidate promoted figures.
+- Added the side draft to `docs/route1_current_reports_browser_index.html` and
+  added focused tests in
+  `tests/test_build_supervisor_proposed_completion_report.py`.
+- Verification:
+
+```bash
+MPLCONFIGDIR=/tmp/matplotlib-cache .venv/bin/python -m py_compile \
+  src/build_supervisor_proposed_completion_report.py \
+  tests/test_build_supervisor_proposed_completion_report.py
+MPLCONFIGDIR=/tmp/matplotlib-cache .venv/bin/python -m unittest \
+  tests.test_build_supervisor_proposed_completion_report
+MPLCONFIGDIR=/tmp/matplotlib-cache .venv/bin/python \
+  src/build_supervisor_proposed_completion_report.py
+```
+
+- Results: `py_compile` passed; focused unittest passed (`4` tests); side-draft
+  regeneration completed; Markdown image audit found 18 image references with 0
+  missing files; `git diff` confirmed no changes to the current supervisor
+  report Markdown/HTML/embedded HTML files.
+
+## 2026-06-22 - Supervisor proposed-completion v2 correction
+
+- Replaced the weak proposed-completion side draft with a model-rich v2 while
+  keeping the original supervisor-facing report untouched:
+
+```text
+docs/predicting_utterance_level_information_report.md
+docs/predicting_utterance_level_information_report.html
+docs/predicting_utterance_level_information_report.embedded.html
+```
+
+- Regenerated only the side-draft outputs:
+
+```text
+docs/predicting_utterance_level_information_report_proposed_completion.md
+docs/predicting_utterance_level_information_report_proposed_completion.html
+docs/predicting_utterance_level_information_report_proposed_completion.embedded.html
+```
+
+- The v2 side draft now includes the real-child k3/word model ladder, the
+  F01-F21 length-controlled suite, exact-length MLU proof figures, estimator
+  family checks, age-scrambling robustness, source-specific real-vs-random /
+  unigram / bigram / trigram / LSTM / caretaker panels, source-specific Atlas
+  figures, paired source-gap models, caretaker contrasts, and heldout-child
+  diagnostics.
+- Verification:
+
+```bash
+MPLCONFIGDIR=/tmp/matplotlib-cache .venv/bin/python -m py_compile \
+  src/build_supervisor_proposed_completion_report.py \
+  tests/test_build_supervisor_proposed_completion_report.py
+MPLCONFIGDIR=/tmp/matplotlib-cache .venv/bin/python -m unittest \
+  tests.test_build_supervisor_proposed_completion_report
+MPLCONFIGDIR=/tmp/matplotlib-cache .venv/bin/python \
+  src/build_supervisor_proposed_completion_report.py
+```
+
+- Results: `py_compile` passed; focused unittest passed (`4` tests);
+  regeneration completed; Markdown image audit found `70` image references with
+  `0` missing files; `git diff` confirmed no changes to the current supervisor
+  report Markdown/HTML/embedded HTML files.
+
+## 2026-06-22 - Exhaustive ANCOVA group-comparison gallery
+
+- Added `src/build_route1_exhaustive_ancova_gallery.py` and
+  `tests/test_build_route1_exhaustive_ancova_gallery.py`.
+- Built a figure-first pre-supervisor selection gallery that compares real
+  children, generated baselines, LSTM baselines, and caretakers with ANCOVA-
+  style adjusted group comparisons across five effort scales: words,
+  morphemes, CMU/pkg syllables, package syllables, and phonemes.
+- The report is intentionally organized with figures first and audit tables
+  second:
+
+```text
+docs/route1_exhaustive_ancova_gallery.md
+docs/route1_exhaustive_ancova_gallery.html
+docs/route1_exhaustive_ancova_gallery.embedded.html
+figs/route1_exhaustive_ancova_gallery/
+```
+
+- Reusable outputs for future plotting:
+
+```text
+results/route1_exhaustive_ancova_gallery/effort_cell_summary.csv.gz
+results/route1_exhaustive_ancova_gallery/effort_cell_summary_nb_words.csv.gz
+results/route1_exhaustive_ancova_gallery/effort_cell_summary_nb_morphemes.csv.gz
+results/route1_exhaustive_ancova_gallery/effort_cell_summary_nb_syllables_cmu_or_pkg.csv.gz
+results/route1_exhaustive_ancova_gallery/effort_cell_summary_nb_syllables_pkg.csv.gz
+results/route1_exhaustive_ancova_gallery/effort_cell_summary_nb_phonemes.csv.gz
+results/route1_exhaustive_ancova_gallery/ancova_term_tests.csv
+results/route1_exhaustive_ancova_gallery/adjusted_marginal_means.csv
+results/route1_exhaustive_ancova_gallery/source_real_adjusted_contrasts.csv
+results/route1_exhaustive_ancova_gallery/top_exact_effort_values.csv
+results/route1_exhaustive_ancova_gallery/exact_effort_adjusted_means.csv
+results/route1_exhaustive_ancova_gallery/exact_effort_source_real_gaps.csv
+results/route1_exhaustive_ancova_gallery/figure_manifest.csv
+```
+
+- Output sizes/shapes: aggregate effort cells `704,488` rows; ANCOVA term tests
+  `580` rows; adjusted marginal means `2,000` rows; source-real contrasts `640`
+  rows; exact-effort adjusted means `960` rows; exact-effort source-real gaps
+  `7,680` rows; figure manifest `33` PNGs.
+- Added the report to `docs/route1_current_reports_browser_index.html`.
+- The report includes a note from the frequency/informativity CDS paper: age-bin
+  ANOVA-style evidence is useful, but frequency and sampling confounds should
+  be explicit, so this gallery is designed for later frequency-control model
+  passes rather than overclaiming from raw age/source differences.
+- Revised the gallery after review so the report now explains the ANCOVA logic
+  before the figure gallery and adds plot-level reading cards. Each figure now
+  states what is controlled, how to read the visual, and what the current model
+  says. The main text explicitly separates the Route 1 child-output claim
+  (children's own utterances become less unpredictable at fixed effort) from
+  the copied paper's caregiver/CDS phonological-informativity claim. Added a
+  dedicated real-child-vs-caretaker adjusted section with k3 and context-gain
+  panels.
+- Main reported evidence in the revised gallery: real-child adjusted k3 bits
+  decline by `-5.46` to `-3.19` bits from first to last age bin across effort
+  scales, with fitted slopes `-0.62` to `-0.29` bits per six months. Exact-
+  effort checks show `51/60` top-exact-effort slopes downward.
+- Follow-up clarification: regenerated source-minus-real line plots with titles
+  and y-axis labels that explicitly say these are bits above/below real child
+  utterances. The report now includes a source-comparison reading note: real
+  child utterances are the `0` reference line, and colored lines are adjusted
+  source-minus-real contrasts rather than raw surprisal curves.
+
+## 2026-06-22 - Frequency/informativity predictor layer
+
+- Added `src/build_route1_frequency_informativity_predictors.py` and
+  `tests/test_build_route1_frequency_informativity_predictors.py`.
+- Scaffolded text-level lexical/phone frequency and phone-bigram informativity
+  predictors keyed by `target_text_hash`. The full text-column pass is not run
+  yet because pandas' C parser segfaulted on the large scored text CSV in this
+  environment, while the Python parser was too slow for a full text pass.
+- Computed the safe first frequency-control layer without reading the text
+  column, using standard-library `gzip`/`csv` streaming:
+
+```text
+results/route1_frequency_informativity_predictors/hash_frequency_predictors.csv.gz
+results/route1_frequency_informativity_predictors/hash_frequency_predictor_dictionary.csv
+results/route1_frequency_informativity_predictors/source_age_scoring_row_counts.csv
+```
+
+- `hash_frequency_predictors.csv.gz` has `5,447,310` rows: each target text hash
+  scored under caretaker-CDS, real-child, and combined real-plus-caretaker
+  reference scopes. Predictors are `exact_target_frequency` and smoothed
+  `exact_target_frequency_bits`.
+- Verification:
+
+```bash
+MPLCONFIGDIR=/tmp/matplotlib-cache .venv/bin/python -m py_compile \
+  src/build_route1_exhaustive_ancova_gallery.py \
+  src/build_route1_frequency_informativity_predictors.py \
+  tests/test_build_route1_exhaustive_ancova_gallery.py \
+  tests/test_build_route1_frequency_informativity_predictors.py
+MPLCONFIGDIR=/tmp/matplotlib-cache .venv/bin/python -m unittest \
+  tests.test_build_route1_exhaustive_ancova_gallery \
+  tests.test_build_route1_frequency_informativity_predictors
+MPLCONFIGDIR=/tmp/matplotlib-cache .venv/bin/python \
+  src/build_route1_exhaustive_ancova_gallery.py --stage all
+MPLCONFIGDIR=/tmp/matplotlib-cache .venv/bin/python \
+  src/build_route1_exhaustive_ancova_gallery.py --stage report
+MPLCONFIGDIR=/tmp/matplotlib-cache .venv/bin/python \
+  src/build_route1_frequency_informativity_predictors.py --mode hash-only --chunksize 1000000
+```
+
+- Results: focused tests passed (`9` tests); report regeneration completed;
+  Markdown image audit found `33` image references with `0` missing files; the
+  safe hash-frequency predictor build completed.
+- Additional 2026-06-22 verification after the explanatory-gallery revision:
+  focused tests passed again (`9` tests), and the Markdown image audit again
+  found `33` image references with `0` missing files.

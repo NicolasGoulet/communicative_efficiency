@@ -1,0 +1,367 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Heldout Real-Child Trajectory Prediction Report</title>
+<style>
+:root {
+  color-scheme: light;
+  --ink: #1e2528;
+  --muted: #5e686d;
+  --line: #d9e0df;
+  --paper: #ffffff;
+  --soft: #f5f7f6;
+  --accent: #2f6f73;
+  --accent2: #c76f2c;
+}
+body {
+  margin: 0;
+  background: #eef2f1;
+  color: var(--ink);
+  font: 16px/1.58 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+main {
+  max-width: 980px;
+  margin: 34px auto 56px;
+  padding: 48px 58px;
+  background: var(--paper);
+  box-shadow: 0 18px 50px rgba(31, 45, 48, 0.12);
+}
+h1, h2, h3, h4 {
+  line-height: 1.18;
+  margin: 1.6em 0 0.55em;
+}
+h1 {
+  margin-top: 0;
+  font-size: 2.25rem;
+  border-bottom: 3px solid var(--accent);
+  padding-bottom: 0.45em;
+}
+h2 {
+  font-size: 1.55rem;
+  color: var(--accent);
+}
+h3 {
+  font-size: 1.18rem;
+}
+p {
+  margin: 0.75em 0;
+}
+a {
+  color: var(--accent);
+}
+blockquote {
+  border-left: 4px solid var(--accent2);
+  margin: 1.1em 0;
+  padding: 0.05em 1.1em;
+  color: var(--muted);
+  background: #fff8f2;
+}
+code {
+  background: var(--soft);
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  padding: 0.08em 0.3em;
+  font-family: "SFMono-Regular", Consolas, monospace;
+  font-size: 0.92em;
+}
+pre {
+  background: #f5f7f6;
+  color: var(--ink);
+  border: 1px solid var(--line);
+  padding: 1em;
+  overflow-x: auto;
+  border-radius: 7px;
+}
+pre code {
+  background: transparent;
+  border: 0;
+  padding: 0;
+  color: inherit;
+}
+table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 1.15em 0 1.45em;
+  font-size: 0.95em;
+}
+th, td {
+  border: 1px solid var(--line);
+  padding: 0.54em 0.68em;
+  vertical-align: top;
+}
+th {
+  background: #e7efed;
+  text-align: left;
+}
+tr:nth-child(even) td {
+  background: #fafbfb;
+}
+img {
+  max-width: 100%;
+  display: block;
+  margin: 1.1em auto 0.45em;
+}
+ul, ol {
+  padding-left: 1.4em;
+}
+.caption {
+  color: var(--muted);
+  font-size: 0.92em;
+  margin-top: -0.15em;
+}
+@media print {
+  body {
+    background: white;
+  }
+  main {
+    box-shadow: none;
+    margin: 0;
+    max-width: none;
+    padding: 28px;
+  }
+}
+</style>
+</head>
+<body>
+<main>
+<h1>Heldout Real-Child Trajectory Prediction Report</h1>
+<p>This is the out-of-child robustness check: can models trained only on the scored PBM universe predict the real <code>sum_bits</code> trajectories of three unseen children?</p>
+<p>The heldout children are <code>Forrester/Ella</code>, <code>Sachs/Naomi</code>, and <code>MPI-EVA-Manchester/Helen</code>. They were not part of the scored PBM training universe used for the Route 1 Atlas v2 model fits.</p>
+<h2>1. Why These Three Children</h2>
+<p>We selected the smallest non-PBM set that gives broad month coverage across the child-language age range while staying small enough to score and inspect carefully. The plot below deliberately shows PBM at the corpus level only, then each heldout child and the heldout union.</p>
+<img src="../figs/route1_heldout_real_child_prediction/heldout_selection_pbm_corpus_coverage.png" alt="Heldout coverage">
+<p>Read: the PBM rows show the training/scored universe by corpus; the heldout rows show why Ella, Naomi, and Helen are complementary. Ella covers early through late ages, Naomi fills much of the early/middle trajectory, and Helen densely covers the later months. Their union covers 50 integer months from 12 to 61 months.</p>
+<h2>2. Prediction Design</h2>
+<ul>
+<li>Training data: PBM real-child scored rows from the Route 1 analysis dataset.</li>
+<li>Test data: heldout real utterances for Ella, Naomi, and Helen, scored on the PC and rsynced locally.</li>
+<li>Outcome: <code>sum_bits</code>, total information in the real child utterance.</li>
+<li>Estimator: <code>statsmodels.formula.api.ols</code> linear regression.</li>
+<li>Prediction target: population-level out-of-child prediction. <code>C(child_id)</code> fixed-effect models are not used for the main heldout prediction because a brand-new child has no fitted child intercept.</li>
+<li>Child adjustment used where possible: Mundlak-style within/between age models, which can predict unseen children because they use the child mean age rather than a child-specific intercept.</li>
+<li>Current predictor boundary: <code>context_entropy_bits</code> and response-space entropy are not yet computed for the heldout contexts, so entropy-dependent Atlas models are explicitly withheld from this report.</li>
+</ul>
+<p>Models fit for this report:</p>
+<table>
+<thead><tr>
+<th>model_id</th>
+<th>model</th>
+<th>atlas analogue</th>
+<th>formula</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>POP_M1</td>
+<td>Population age + effort</td>
+<td>M1 without child fixed effects</td>
+<td>sum_bits ~ age_c + effort_c</td>
+</tr>
+<tr>
+<td>POP_M3</td>
+<td>Population age x effort</td>
+<td>M3 without child fixed effects</td>
+<td>sum_bits ~ age_c * effort_c</td>
+</tr>
+<tr>
+<td>POP_M4A</td>
+<td>Population age x effort + parent-context effort</td>
+<td>M4a without child fixed effects</td>
+<td>sum_bits ~ age_c * effort_c + parent_context_effort_c</td>
+</tr>
+<tr>
+<td>POP_M4C</td>
+<td>Population age x effort + question type</td>
+<td>M4c without child fixed effects</td>
+<td>sum_bits ~ age_c * effort_c + C(question_type)</td>
+</tr>
+<tr>
+<td>POP_M7</td>
+<td>Population nonlinear age</td>
+<td>M7 without child fixed effects</td>
+<td>sum_bits ~ age_c + effort_c + I(age_c ** 2)</td>
+</tr>
+<tr>
+<td>POP_M8</td>
+<td>Population nonlinear age x effort</td>
+<td>M8 without child fixed effects</td>
+<td>sum_bits ~ age_c * effort_c + I(age_c <strong> 2) + I(age_c </strong> 2):effort_c</td>
+</tr>
+<tr>
+<td>MUND_M1</td>
+<td>Mundlak within/between age + effort</td>
+<td>child-coverage-adjusted M1-like model</td>
+<td>sum_bits ~ age_within_child_c + child_mean_age_c + effort_c</td>
+</tr>
+<tr>
+<td>MUND_M3</td>
+<td>Mundlak within-age x effort</td>
+<td>child-coverage-adjusted M3-like model</td>
+<td>sum_bits ~ age_within_child_c * effort_c + child_mean_age_c</td>
+</tr>
+</tbody></table>
+<h2>3. Overall Heldout Prediction Metrics</h2>
+<p>The compact table below summarizes the main k3/word-count comparison across the three children. Lower MAE/RMSE is better; slope-sign matches count how many of the three children have the same actual and predicted developmental direction.</p>
+<table>
+<thead><tr>
+<th>model_id</th>
+<th>model_label</th>
+<th>mean_mae</th>
+<th>mean_rmse</th>
+<th>mean_corr</th>
+<th>slope_sign_matches</th>
+<th>child_rows</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>POP_M4C</td>
+<td>Population age x effort + question type</td>
+<td>9.709</td>
+<td>13.525</td>
+<td>0.766</td>
+<td>3</td>
+<td>3</td>
+</tr>
+<tr>
+<td>POP_M1</td>
+<td>Population age + effort</td>
+<td>9.784</td>
+<td>13.585</td>
+<td>0.762</td>
+<td>3</td>
+<td>3</td>
+</tr>
+<tr>
+<td>POP_M4A</td>
+<td>Population age x effort + parent-context effort</td>
+<td>9.794</td>
+<td>13.603</td>
+<td>0.763</td>
+<td>3</td>
+<td>3</td>
+</tr>
+<tr>
+<td>POP_M8</td>
+<td>Population nonlinear age x effort</td>
+<td>9.851</td>
+<td>13.604</td>
+<td>0.762</td>
+<td>3</td>
+<td>3</td>
+</tr>
+<tr>
+<td>POP_M3</td>
+<td>Population age x effort</td>
+<td>9.789</td>
+<td>13.605</td>
+<td>0.762</td>
+<td>3</td>
+<td>3</td>
+</tr>
+<tr>
+<td>POP_M7</td>
+<td>Population nonlinear age</td>
+<td>9.867</td>
+<td>13.636</td>
+<td>0.761</td>
+<td>3</td>
+<td>3</td>
+</tr>
+<tr>
+<td>MUND_M1</td>
+<td>Mundlak within/between age + effort</td>
+<td>10.233</td>
+<td>14.013</td>
+<td>0.760</td>
+<td>3</td>
+<td>3</td>
+</tr>
+<tr>
+<td>MUND_M3</td>
+<td>Mundlak within-age x effort</td>
+<td>10.231</td>
+<td>14.015</td>
+<td>0.762</td>
+<td>3</td>
+<td>3</td>
+</tr>
+</tbody></table>
+<p>Full fit summary: <code>results/route1_heldout_real_child_prediction/heldout_prediction_fit_summary.csv</code> Full metrics: <code>results/route1_heldout_real_child_prediction/heldout_prediction_metrics.csv</code></p>
+<h2>4. Actual vs Predicted Trajectories</h2>
+<p>These plots use each child&#x27;s actual heldout utterances and compare monthly mean actual <code>sum_bits</code> to monthly mean PBM-model predictions. This is not fixed-effort yet; it is the row-wise prediction sanity check.</p>
+<h3>actual vs predicted k3 POP M3 nb words</h3>
+<img src="../figs/route1_heldout_real_child_prediction/actual_vs_predicted_k3_POP_M3_nb_words.png" alt="actual vs predicted k3 POP M3 nb words">
+<h3>actual vs predicted k3 POP M4A nb words</h3>
+<img src="../figs/route1_heldout_real_child_prediction/actual_vs_predicted_k3_POP_M4A_nb_words.png" alt="actual vs predicted k3 POP M4A nb words">
+<h3>actual vs predicted k3 POP M4C nb words</h3>
+<img src="../figs/route1_heldout_real_child_prediction/actual_vs_predicted_k3_POP_M4C_nb_words.png" alt="actual vs predicted k3 POP M4C nb words">
+<h3>actual vs predicted k3 MUND M3 nb words</h3>
+<img src="../figs/route1_heldout_real_child_prediction/actual_vs_predicted_k3_MUND_M3_nb_words.png" alt="actual vs predicted k3 MUND M3 nb words">
+<h2>5. Fixed-Effort Trajectory Checks</h2>
+<p>These are the closest analogue to the Atlas fixed-effort plots. Lines are PBM-trained predictions at fixed effort levels. Points are heldout observed monthly means in the matching effort bands.</p>
+<h3>fixed effort k3 POP M3 nb words</h3>
+<img src="../figs/route1_heldout_real_child_prediction/fixed_effort_k3_POP_M3_nb_words.png" alt="fixed effort k3 POP M3 nb words">
+<h3>fixed effort k3 POP M4A nb words</h3>
+<img src="../figs/route1_heldout_real_child_prediction/fixed_effort_k3_POP_M4A_nb_words.png" alt="fixed effort k3 POP M4A nb words">
+<h3>fixed effort k3 MUND M3 nb words</h3>
+<img src="../figs/route1_heldout_real_child_prediction/fixed_effort_k3_MUND_M3_nb_words.png" alt="fixed effort k3 MUND M3 nb words">
+<h3>fixed effort k3 POP M3 nb morphemes</h3>
+<img src="../figs/route1_heldout_real_child_prediction/fixed_effort_k3_POP_M3_nb_morphemes.png" alt="fixed effort k3 POP M3 nb morphemes">
+<h3>fixed effort k3 MUND M3 nb morphemes</h3>
+<img src="../figs/route1_heldout_real_child_prediction/fixed_effort_k3_MUND_M3_nb_morphemes.png" alt="fixed effort k3 MUND M3 nb morphemes">
+<h2>6. Interpretation Boundary</h2>
+<p>This report answers the first robustness question: the PBM-trained age/effort/context-size/question-type models can now be compared against real unseen-child trajectories. The honest limitation is that fixed child identity effects cannot be directly transported to new children; the Mundlak variants are the out-of-sample-compatible child-coverage adjustment.</p>
+<p>The next predictor-enrichment step is to compute heldout <code>context_entropy_bits</code> and later response-space entropy for the same contexts. Once those are attached, the entropy-dependent M4b/M5/M6/M11-M15 families and Route 2 prediction models can be tested on the same heldout children.</p>
+<h2>Saved Artifacts</h2>
+<pre><code>results/route1_heldout_real_child_prediction/heldout_scored_utterance_effort_long.csv.gz
+results/route1_heldout_real_child_prediction/heldout_prediction_fit_summary.csv
+results/route1_heldout_real_child_prediction/heldout_prediction_metrics.csv
+results/route1_heldout_real_child_prediction/heldout_prediction_monthly.csv.gz
+results/route1_heldout_real_child_prediction/heldout_fixed_effort_prediction_grid.csv.gz
+results/route1_heldout_real_child_prediction/heldout_fixed_effort_observed_monthly.csv.gz
+results/route1_heldout_real_child_prediction/heldout_selection_coverage_rows.csv
+figs/route1_heldout_real_child_prediction</code></pre>
+<h2>Skipped Fits</h2>
+<p>Some model/context combinations are intentionally skipped, mostly because context models do not apply to k0.</p>
+<table>
+<thead><tr>
+<th>model_id</th>
+<th>context_k</th>
+<th>effort_label</th>
+<th>status</th>
+<th>error</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>POP_M4A</td>
+<td>k0</td>
+<td>Words</td>
+<td>skipped</td>
+<td>model needs context but context is k0</td>
+</tr>
+<tr>
+<td>POP_M4C</td>
+<td>k0</td>
+<td>Words</td>
+<td>skipped</td>
+<td>model needs context but context is k0</td>
+</tr>
+<tr>
+<td>POP_M4A</td>
+<td>k0</td>
+<td>Morphemes</td>
+<td>skipped</td>
+<td>model needs context but context is k0</td>
+</tr>
+<tr>
+<td>POP_M4C</td>
+<td>k0</td>
+<td>Morphemes</td>
+<td>skipped</td>
+<td>model needs context but context is k0</td>
+</tr>
+</tbody></table>
+</main>
+</body>
+</html>

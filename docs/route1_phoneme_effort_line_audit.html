@@ -1,0 +1,496 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Route 1 Phoneme Fixed-Effort Line Audit</title>
+<style>
+:root {
+  color-scheme: light;
+  --ink: #1e2528;
+  --muted: #5e686d;
+  --line: #d9e0df;
+  --paper: #ffffff;
+  --soft: #f5f7f6;
+  --accent: #2f6f73;
+  --accent2: #c76f2c;
+}
+body {
+  margin: 0;
+  background: #eef2f1;
+  color: var(--ink);
+  font: 16px/1.58 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+main {
+  max-width: 980px;
+  margin: 34px auto 56px;
+  padding: 48px 58px;
+  background: var(--paper);
+  box-shadow: 0 18px 50px rgba(31, 45, 48, 0.12);
+}
+h1, h2, h3, h4 {
+  line-height: 1.18;
+  margin: 1.6em 0 0.55em;
+}
+h1 {
+  margin-top: 0;
+  font-size: 2.25rem;
+  border-bottom: 3px solid var(--accent);
+  padding-bottom: 0.45em;
+}
+h2 {
+  font-size: 1.55rem;
+  color: var(--accent);
+}
+h3 {
+  font-size: 1.18rem;
+}
+p {
+  margin: 0.75em 0;
+}
+a {
+  color: var(--accent);
+}
+blockquote {
+  border-left: 4px solid var(--accent2);
+  margin: 1.1em 0;
+  padding: 0.05em 1.1em;
+  color: var(--muted);
+  background: #fff8f2;
+}
+code {
+  background: var(--soft);
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  padding: 0.08em 0.3em;
+  font-family: "SFMono-Regular", Consolas, monospace;
+  font-size: 0.92em;
+}
+pre {
+  background: #f5f7f6;
+  color: var(--ink);
+  border: 1px solid var(--line);
+  padding: 1em;
+  overflow-x: auto;
+  border-radius: 7px;
+}
+pre code {
+  background: transparent;
+  border: 0;
+  padding: 0;
+  color: inherit;
+}
+table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 1.15em 0 1.45em;
+  font-size: 0.95em;
+}
+th, td {
+  border: 1px solid var(--line);
+  padding: 0.54em 0.68em;
+  vertical-align: top;
+}
+th {
+  background: #e7efed;
+  text-align: left;
+}
+tr:nth-child(even) td {
+  background: #fafbfb;
+}
+img {
+  max-width: 100%;
+  display: block;
+  margin: 1.1em auto 0.45em;
+}
+ul, ol {
+  padding-left: 1.4em;
+}
+.caption {
+  color: var(--muted);
+  font-size: 0.92em;
+  margin-top: -0.15em;
+}
+@media print {
+  body {
+    background: white;
+  }
+  main {
+    box-shadow: none;
+    margin: 0;
+    max-width: none;
+    padding: 28px;
+  }
+}
+</style>
+</head>
+<body>
+<main>
+<h1>Route 1 Phoneme Fixed-Effort Line Audit</h1>
+<p>This audit checks whether the current Route 1 phoneme fixed-effort plots use the requested data-supported phoneme utterance sizes.</p>
+<h2>Answer</h2>
+<p>Yes for the current real-child corrected source-specific Atlas: phoneme effort lines use the 12 most frequent exact phoneme counts in the real-child rows, ordered and split into three groups of four.</p>
+<ul>
+<li>Selected exact phoneme counts: 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13</li>
+<li>Current Atlas groups: low = 2-5, middle = 6-9, high = 10-13</li>
+<li>Source-specific nuance: generated baselines choose their own top 12 values from their generated utterance distributions.</li>
+</ul>
+<h2>Selection Proof</h2>
+<img src="../figs/route1_phoneme_effort_line_audit/real_phoneme_top12_frequency_audit.png" alt="Top 12 phoneme frequency audit">
+<h3>Current Atlas Bin Definitions</h3>
+<table>
+<thead><tr>
+<th>atlas_bin</th>
+<th>fixed_values</th>
+<th>support_rows</th>
+<th>support_children</th>
+<th>rule</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>low representative sizes</td>
+<td>2, 3, 4, 5</td>
+<td>525210</td>
+<td>21</td>
+<td>Ordered split of the 12 most frequent observed exact values.</td>
+</tr>
+<tr>
+<td>middle representative sizes</td>
+<td>6, 7, 8, 9</td>
+<td>356739</td>
+<td>21</td>
+<td>Ordered split of the 12 most frequent observed exact values.</td>
+</tr>
+<tr>
+<td>high representative sizes</td>
+<td>10, 11, 12, 13</td>
+<td>221985</td>
+<td>21</td>
+<td>Ordered split of the 12 most frequent observed exact values.</td>
+</tr>
+</tbody></table>
+<h3>Top 12 Real-Child Phoneme Counts</h3>
+<table>
+<thead><tr>
+<th>effort_value</th>
+<th>rows</th>
+<th>pct_rows</th>
+<th>n_children</th>
+<th>n_age_bins</th>
+<th>age_min</th>
+<th>age_max</th>
+<th>frequency_rank</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>2</td>
+<td>58082</td>
+<td>12.99</td>
+<td>21</td>
+<td>8</td>
+<td>11.1</td>
+<td>62.4</td>
+<td>1</td>
+</tr>
+<tr>
+<td>3</td>
+<td>46836</td>
+<td>10.48</td>
+<td>21</td>
+<td>8</td>
+<td>11.7</td>
+<td>62.4</td>
+<td>2</td>
+</tr>
+<tr>
+<td>4</td>
+<td>36656</td>
+<td>8.2</td>
+<td>21</td>
+<td>8</td>
+<td>11.7</td>
+<td>62.4</td>
+<td>3</td>
+</tr>
+<tr>
+<td>5</td>
+<td>33496</td>
+<td>7.49</td>
+<td>21</td>
+<td>8</td>
+<td>11.7</td>
+<td>62.4</td>
+<td>4</td>
+</tr>
+<tr>
+<td>6</td>
+<td>32426</td>
+<td>7.25</td>
+<td>21</td>
+<td>8</td>
+<td>11.7</td>
+<td>62.4</td>
+<td>5</td>
+</tr>
+<tr>
+<td>7</td>
+<td>32405</td>
+<td>7.25</td>
+<td>21</td>
+<td>8</td>
+<td>11.9</td>
+<td>62.4</td>
+<td>6</td>
+</tr>
+<tr>
+<td>8</td>
+<td>29827</td>
+<td>6.67</td>
+<td>21</td>
+<td>8</td>
+<td>11.7</td>
+<td>62.4</td>
+<td>7</td>
+</tr>
+<tr>
+<td>9</td>
+<td>24255</td>
+<td>5.43</td>
+<td>21</td>
+<td>8</td>
+<td>12.7</td>
+<td>62.4</td>
+<td>8</td>
+</tr>
+<tr>
+<td>10</td>
+<td>22351</td>
+<td>5.0</td>
+<td>21</td>
+<td>8</td>
+<td>11.9</td>
+<td>62.4</td>
+<td>9</td>
+</tr>
+<tr>
+<td>11</td>
+<td>20107</td>
+<td>4.5</td>
+<td>21</td>
+<td>8</td>
+<td>12.9</td>
+<td>62.4</td>
+<td>10</td>
+</tr>
+<tr>
+<td>12</td>
+<td>17339</td>
+<td>3.88</td>
+<td>21</td>
+<td>8</td>
+<td>11.9</td>
+<td>62.4</td>
+<td>11</td>
+</tr>
+<tr>
+<td>13</td>
+<td>14198</td>
+<td>3.18</td>
+<td>21</td>
+<td>8</td>
+<td>15.2</td>
+<td>62.4</td>
+<td>12</td>
+</tr>
+</tbody></table>
+<h2>Main Model Slopes Under Phoneme Effort</h2>
+<img src="../figs/route1_phoneme_effort_line_audit/real_k3_phoneme_main_model_slope_audit.png" alt="Phoneme main model slope audit">
+<table>
+<thead><tr>
+<th>model_id</th>
+<th>fixed_effort_value</th>
+<th>slope_bits_per_month</th>
+<th>slope_bits_per_6_months</th>
+<th>direction</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>M4c</td>
+<td>2</td>
+<td>-0.0897</td>
+<td>-0.538</td>
+<td>downward</td>
+</tr>
+<tr>
+<td>M4c</td>
+<td>3</td>
+<td>-0.0869</td>
+<td>-0.522</td>
+<td>downward</td>
+</tr>
+<tr>
+<td>M4c</td>
+<td>4</td>
+<td>-0.0842</td>
+<td>-0.505</td>
+<td>downward</td>
+</tr>
+<tr>
+<td>M4c</td>
+<td>5</td>
+<td>-0.0815</td>
+<td>-0.489</td>
+<td>downward</td>
+</tr>
+<tr>
+<td>M4c</td>
+<td>6</td>
+<td>-0.0787</td>
+<td>-0.472</td>
+<td>downward</td>
+</tr>
+<tr>
+<td>M4c</td>
+<td>7</td>
+<td>-0.076</td>
+<td>-0.456</td>
+<td>downward</td>
+</tr>
+<tr>
+<td>M4c</td>
+<td>8</td>
+<td>-0.0733</td>
+<td>-0.44</td>
+<td>downward</td>
+</tr>
+<tr>
+<td>M4c</td>
+<td>9</td>
+<td>-0.0706</td>
+<td>-0.423</td>
+<td>downward</td>
+</tr>
+<tr>
+<td>M4c</td>
+<td>10</td>
+<td>-0.0678</td>
+<td>-0.407</td>
+<td>downward</td>
+</tr>
+<tr>
+<td>M4c</td>
+<td>11</td>
+<td>-0.0651</td>
+<td>-0.391</td>
+<td>downward</td>
+</tr>
+<tr>
+<td>M4c</td>
+<td>12</td>
+<td>-0.0624</td>
+<td>-0.374</td>
+<td>downward</td>
+</tr>
+<tr>
+<td>M4c</td>
+<td>13</td>
+<td>-0.0597</td>
+<td>-0.358</td>
+<td>downward</td>
+</tr>
+<tr>
+<td>M5</td>
+<td>2</td>
+<td>-0.0851</td>
+<td>-0.511</td>
+<td>downward</td>
+</tr>
+<tr>
+<td>M5</td>
+<td>3</td>
+<td>-0.0818</td>
+<td>-0.491</td>
+<td>downward</td>
+</tr>
+<tr>
+<td>M5</td>
+<td>4</td>
+<td>-0.0785</td>
+<td>-0.471</td>
+<td>downward</td>
+</tr>
+<tr>
+<td>M5</td>
+<td>5</td>
+<td>-0.0752</td>
+<td>-0.451</td>
+<td>downward</td>
+</tr>
+<tr>
+<td>M5</td>
+<td>6</td>
+<td>-0.0718</td>
+<td>-0.431</td>
+<td>downward</td>
+</tr>
+<tr>
+<td>M5</td>
+<td>7</td>
+<td>-0.0685</td>
+<td>-0.411</td>
+<td>downward</td>
+</tr>
+<tr>
+<td>M5</td>
+<td>8</td>
+<td>-0.0652</td>
+<td>-0.391</td>
+<td>downward</td>
+</tr>
+<tr>
+<td>M5</td>
+<td>9</td>
+<td>-0.0618</td>
+<td>-0.371</td>
+<td>downward</td>
+</tr>
+<tr>
+<td>M5</td>
+<td>10</td>
+<td>-0.0585</td>
+<td>-0.351</td>
+<td>downward</td>
+</tr>
+<tr>
+<td>M5</td>
+<td>11</td>
+<td>-0.0552</td>
+<td>-0.331</td>
+<td>downward</td>
+</tr>
+<tr>
+<td>M5</td>
+<td>12</td>
+<td>-0.0519</td>
+<td>-0.311</td>
+<td>downward</td>
+</tr>
+<tr>
+<td>M5</td>
+<td>13</td>
+<td>-0.0485</td>
+<td>-0.291</td>
+<td>downward</td>
+</tr>
+</tbody></table>
+<h2>Existing Atlas Plot To Read</h2>
+<p>The corresponding current main candidate plot is:</p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/real/real_k3_m4c_nb_phonemes_fixed_effort_atlas.png" alt="Real k3 M4c phoneme fixed-effort Atlas">
+<h2>Files Used</h2>
+<pre><code>src/build_route1_source_specific_m1_m6_fixed_effort_atlas.py
+results/route1_source_specific_corrected_fixed_effort_atlas/real/fixed_effort_bin_definitions.csv
+results/route1_source_specific_corrected_fixed_effort_atlas/real/fixed_slice_slopes.csv
+results/effort_slice_audit/effort_value_distribution.csv</code></pre>
+</main>
+</body>
+</html>

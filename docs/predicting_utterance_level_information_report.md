@@ -6,11 +6,11 @@ Working draft, June 2026
 
 This document describes an utterance-level analysis of communicative efficiency
 in child language. The broad goal is to understand how children learn to package
-information in speech while managing the effort required to produce it. 
+information in speech while managing the effort required to produce it.
 
 In this framing, communicative efficiency has two parts. The first is
 **informativeness**: how much information an utterance conveys in context. The
-second is **effort**: how much linguistic material is produced to convey that
+second is **production effort**: how much linguistic material is produced to convey that
 information. A developmental increase in total surprisal is not meaningful on
 its own if it simply reflects that older children produce longer utterances.
 For this reason, the analyses must compare informational content while
@@ -25,30 +25,6 @@ The analyses focus on three related quantities:
 A follow-up analysis asks a complementary question: whether contextual
 uncertainty predicts the length or effort of the child's response.
 
-## Current Primary Result: Model 2
-
-The clearest current model is Model 2:
-
-```text
-total utterance information ~ age + production effort + child identity
-```
-
-The outcome is total utterance information in bits. Age is measured in months.
-Production effort is tested five ways: words, surface morphemes, two syllable
-estimates, and phonemes. Child identity is included so that each child has
-their own baseline level of predicted information.
-
-This model uses 446,985 real child utterances from 21 children, scored with the
-preceding three caretaker utterances as context. Across all five effort
-controls, the age coefficient is negative. In plain language: for the same
-amount of linguistic material, and within the child-adjusted comparison,
-older children's utterances are predicted to contain less Mistral surprisal.
-
-That should not be interpreted as children "communicating less." A safer
-interpretation is that older children produce utterances that are more
-predictable in their conversational context after production effort and stable
-between-child differences are controlled. This is consistent with development
-toward more conventional, contextually recoverable, or adult-like language use.
 
 ## Analysis Sample
 

@@ -9,7 +9,9 @@ code.
 from __future__ import annotations
 
 import argparse
+import base64
 import html
+import mimetypes
 import re
 from pathlib import Path
 
@@ -308,7 +310,26 @@ def markdown_to_html(markdown: str) -> str:
     return "\n".join(html_lines)
 
 
-def render_markdown_file(input_md: Path, output_html: Path, title: str | None = None) -> None:
+def embed_image_sources(html_text: str, *, base_dir: Path) -> str:
+    """Replace local image src attributes with data URIs."""
+
+    def replace(match: re.Match[str]) -> str:
+        prefix, src, suffix = match.groups()
+        raw_src = html.unescape(src)
+        if raw_src.startswith(("http://", "https://", "data:")):
+            return match.group(0)
+        image_path = (base_dir / raw_src).resolve()
+        if not image_path.exists() or not image_path.is_file():
+            return match.group(0)
+        mime = mimetypes.guess_type(image_path.name)[0] or "application/octet-stream"
+        encoded = base64.b64encode(image_path.read_bytes()).decode("ascii")
+        data_uri = f"data:{mime};base64,{encoded}"
+        return f'{prefix}{html.escape(data_uri, quote=True)}{suffix}'
+
+    return re.sub(r'(<img\b[^>]*\bsrc=")([^"]+)("[^>]*>)', replace, html_text)
+
+
+def render_markdown_file(input_md: Path, output_html: Path, title: str | None = None, *, embed_images: bool = False) -> None:
     markdown = input_md.read_text(encoding="utf-8")
     body = markdown_to_html(markdown)
     if title is None:
@@ -317,27 +338,27 @@ def render_markdown_file(input_md: Path, output_html: Path, title: str | None = 
             input_md.stem,
         )
         title = first_heading
-    output_html.write_text(
-        "\n".join(
-            [
-                "<!doctype html>",
-                '<html lang="en">',
-                "<head>",
-                '<meta charset="utf-8">',
-                '<meta name="viewport" content="width=device-width, initial-scale=1">',
-                f"<title>{html.escape(title)}</title>",
-                f"<style>{REPORT_CSS}</style>",
-                "</head>",
-                "<body>",
-                "<main>",
-                body,
-                "</main>",
-                "</body>",
-                "</html>",
-            ]
-        ),
-        encoding="utf-8",
+    html_text = "\n".join(
+        [
+            "<!doctype html>",
+            '<html lang="en">',
+            "<head>",
+            '<meta charset="utf-8">',
+            '<meta name="viewport" content="width=device-width, initial-scale=1">',
+            f"<title>{html.escape(title)}</title>",
+            f"<style>{REPORT_CSS}</style>",
+            "</head>",
+            "<body>",
+            "<main>",
+            body,
+            "</main>",
+            "</body>",
+            "</html>",
+        ]
     )
+    if embed_images:
+        html_text = embed_image_sources(html_text, base_dir=output_html.parent)
+    output_html.write_text(html_text, encoding="utf-8")
 
 
 def parse_args() -> argparse.Namespace:
@@ -345,12 +366,13 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("input_md", type=Path)
     parser.add_argument("output_html", type=Path)
     parser.add_argument("--title", default=None)
+    parser.add_argument("--embed-images", action="store_true")
     return parser.parse_args()
 
 
 def main() -> None:
     args = parse_args()
-    render_markdown_file(args.input_md, args.output_html, args.title)
+    render_markdown_file(args.input_md, args.output_html, args.title, embed_images=args.embed_images)
     print(f"[OK] Wrote {args.output_html}")
 
 

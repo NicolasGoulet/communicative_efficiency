@@ -1,0 +1,1556 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Predicting Informational Content at the Utterance Level: Proposed Completion Draft</title>
+<style>
+:root {
+  color-scheme: light;
+  --ink: #1e2528;
+  --muted: #5e686d;
+  --line: #d9e0df;
+  --paper: #ffffff;
+  --soft: #f5f7f6;
+  --accent: #2f6f73;
+  --accent2: #c76f2c;
+}
+body {
+  margin: 0;
+  background: #eef2f1;
+  color: var(--ink);
+  font: 16px/1.58 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+main {
+  max-width: 980px;
+  margin: 34px auto 56px;
+  padding: 48px 58px;
+  background: var(--paper);
+  box-shadow: 0 18px 50px rgba(31, 45, 48, 0.12);
+}
+h1, h2, h3, h4 {
+  line-height: 1.18;
+  margin: 1.6em 0 0.55em;
+}
+h1 {
+  margin-top: 0;
+  font-size: 2.25rem;
+  border-bottom: 3px solid var(--accent);
+  padding-bottom: 0.45em;
+}
+h2 {
+  font-size: 1.55rem;
+  color: var(--accent);
+}
+h3 {
+  font-size: 1.18rem;
+}
+p {
+  margin: 0.75em 0;
+}
+a {
+  color: var(--accent);
+}
+blockquote {
+  border-left: 4px solid var(--accent2);
+  margin: 1.1em 0;
+  padding: 0.05em 1.1em;
+  color: var(--muted);
+  background: #fff8f2;
+}
+code {
+  background: var(--soft);
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  padding: 0.08em 0.3em;
+  font-family: "SFMono-Regular", Consolas, monospace;
+  font-size: 0.92em;
+}
+pre {
+  background: #f5f7f6;
+  color: var(--ink);
+  border: 1px solid var(--line);
+  padding: 1em;
+  overflow-x: auto;
+  border-radius: 7px;
+}
+pre code {
+  background: transparent;
+  border: 0;
+  padding: 0;
+  color: inherit;
+}
+table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 1.15em 0 1.45em;
+  font-size: 0.95em;
+}
+th, td {
+  border: 1px solid var(--line);
+  padding: 0.54em 0.68em;
+  vertical-align: top;
+}
+th {
+  background: #e7efed;
+  text-align: left;
+}
+tr:nth-child(even) td {
+  background: #fafbfb;
+}
+img {
+  max-width: 100%;
+  display: block;
+  margin: 1.1em auto 0.45em;
+}
+ul, ol {
+  padding-left: 1.4em;
+}
+.caption {
+  color: var(--muted);
+  font-size: 0.92em;
+  margin-top: -0.15em;
+}
+@media print {
+  body {
+    background: white;
+  }
+  main {
+    box-shadow: none;
+    margin: 0;
+    max-width: none;
+    padding: 28px;
+  }
+}
+</style>
+</head>
+<body>
+<main>
+<h1>Predicting Informational Content at the Utterance Level: Proposed Completion Draft</h1>
+<p>Proposed completion draft, June 2026</p>
+<p>This side draft starts from the current supervisor-facing report and adds candidate completion text. The current supervisor-facing report files were not modified.</p>
+<h2>Introduction</h2>
+<p>This document describes an utterance-level analysis of communicative efficiency in child language. The broad goal is to understand how children learn to package information in speech while managing the effort required to produce it.</p>
+<p>In this framing, communicative efficiency has two parts. The first is <strong>informativeness</strong>: how much information an utterance conveys in context. The second is <strong>effort</strong>: how much linguistic material is produced to convey that information. A developmental increase in total surprisal is not meaningful on its own if it simply reflects that older children produce longer utterances. For this reason, the analyses must compare informational content while controlling for utterance length and other effort-related properties.</p>
+<p>The analyses focus on three related quantities:</p>
+<ul>
+<li><strong>total information per utterance</strong>, measured with <code>sum_bits</code>;</li>
+<li><strong>information per unit of production effort</strong>, where <code>sum_bits</code> is divided by the number of words, morphemes, phonemes or syllables in an utterance;</li>
+<li><strong>tokenizer-level sensitivity</strong>, measured with <code>mean_bits_per_token</code>.</li>
+</ul>
+<p>A follow-up analysis asks a complementary question: whether contextual uncertainty predicts the length or effort of the child&#x27;s response.</p>
+<h2>Current Primary Result: Model 2</h2>
+<p>The clearest current model is Model 2:</p>
+<pre><code>total utterance information ~ age + production effort + child identity</code></pre>
+<p>The outcome is total utterance information in bits. Age is measured in months. Production effort is tested five ways: words, surface morphemes, two syllable estimates, and phonemes. Child identity is included so that each child has their own baseline level of predicted information.</p>
+<p>This model uses 446,985 real child utterances from 21 children, scored with the preceding three caretaker utterances as context. Across all five effort controls, the age coefficient is negative. In plain language: for the same amount of linguistic material, and within the child-adjusted comparison, older children&#x27;s utterances are predicted to contain less Mistral surprisal.</p>
+<p>That should not be interpreted as children &quot;communicating less.&quot; A safer interpretation is that older children produce utterances that are more predictable in their conversational context after production effort and stable between-child differences are controlled. This is consistent with development toward more conventional, contextually recoverable, or adult-like language use.</p>
+<h2>Analysis Sample</h2>
+<p>The initial analysis uses three longitudinal naturalistic caregiver-child corpora from CHILDES: Providence, Brown, and Manchester. Together, these corpora provide dense developmental trajectories for 21 children, with both child speech and caretaker speech scored under the same Mistral-based surprisal framework.</p>
+<p>The first comparisons focus on real child utterances, caretaker utterances, and matched-length baseline utterances. These comparisons are meant to tell us whether children&#x27;s utterances are merely becoming longer over time, or whether they are changing in how efficiently they use linguistic material to carry information.</p>
+<h2>Developmental Age Bins</h2>
+<p>For descriptive plots and age-binned summaries, the first age bin combines the early months:</p>
+<ul>
+<li><code>006-023</code> months</li>
+</ul>
+<p>This is partly due to having very few utterances in these 6-month bins, but it is also consistent with well-established developmental changes in utterance length: around the second year, children increasingly move from single-word productions to multiword utterances, and mean length of utterance rises over early childhood.</p>
+<p>The following bins are six-month intervals:</p>
+<ul>
+<li><code>024-029</code></li>
+<li><code>030-035</code></li>
+<li><code>036-041</code></li>
+<li><code>042-047</code></li>
+<li><code>048-053</code></li>
+<li><code>054-059</code></li>
+<li><code>060-065</code></li>
+</ul>
+<p>This binning scheme gives enough support to the youngest period while retaining six-month developmental resolution afterward. All scored child and caretaker utterances in the current analysis sample are assigned to one of these bins.</p>
+<h2>Utterance Coverage by Age</h2>
+<p>The current analysis sample contains 446,985 child utterances and 668,903 caretaker utterances. The table below shows their distribution across developmental age bins.</p>
+<table>
+<thead><tr>
+<th>Age bin</th>
+<th>Caretaker utterances</th>
+<th>Child utterances</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>006-023</td>
+<td>150,345</td>
+<td>62,816</td>
+</tr>
+<tr>
+<td>024-029</td>
+<td>249,127</td>
+<td>162,210</td>
+</tr>
+<tr>
+<td>030-035</td>
+<td>199,242</td>
+<td>142,447</td>
+</tr>
+<tr>
+<td>036-041</td>
+<td>37,663</td>
+<td>37,683</td>
+</tr>
+<tr>
+<td>042-047</td>
+<td>18,374</td>
+<td>16,345</td>
+</tr>
+<tr>
+<td>048-053</td>
+<td>7,910</td>
+<td>12,909</td>
+</tr>
+<tr>
+<td>054-059</td>
+<td>5,226</td>
+<td>10,033</td>
+</tr>
+<tr>
+<td>060-065</td>
+<td>1,016</td>
+<td>2,542</td>
+</tr>
+</tbody></table>
+<img src="../figs/utterance_information/total_utterances_by_age_bin.png" alt="Total child and caretaker utterances by developmental age bin">
+<p>Most utterances fall between 6 and 35 months, especially because Manchester is dense in the early-to-middle toddler range. The later bins remain useful, but they contain fewer observations, particularly for caretakers in the oldest bin. This should be kept in mind when interpreting age-binned descriptive summaries.</p>
+<p>The contribution of each corpus also changes across developmental time:</p>
+<img src="../figs/utterance_information/utterances_by_age_bin_and_corpus.png" alt="Corpus contribution to utterance counts by age bin">
+<p>This uneven corpus contribution is expected for longitudinal CHILDES data.</p>
+<h2>Corpora and Children</h2>
+<p>The current Providence/Brown/Manchester analysis set contains 21 children.</p>
+<table>
+<thead><tr>
+<th>Corpus</th>
+<th>Children</th>
+<th>Child utterances</th>
+<th>Caretaker utterances</th>
+<th>Child age range</th>
+<th>Transcript files</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>Brown</td>
+<td>3</td>
+<td>92,555</td>
+<td>64,206</td>
+<td>18.0-62.4</td>
+<td>214</td>
+</tr>
+<tr>
+<td>Manchester</td>
+<td>12</td>
+<td>232,614</td>
+<td>342,246</td>
+<td>20.7-36.3</td>
+<td>408</td>
+</tr>
+<tr>
+<td>Providence</td>
+<td>6</td>
+<td>121,816</td>
+<td>262,451</td>
+<td>11.1-48.1</td>
+<td>361</td>
+</tr>
+<tr>
+<td>Total</td>
+<td>21</td>
+<td>446,985</td>
+<td>668,903</td>
+<td>11.1-62.4</td>
+<td>983</td>
+</tr>
+</tbody></table>
+<h3>Brown</h3>
+<p>Brown contributes three children. Eve covers the earliest Brown range, from about 18 to 27 months. Adam and Sarah contribute longer developmental trajectories extending into the 60-month range. Brown is therefore especially important for the later bins.</p>
+<h3>Manchester</h3>
+<p>Manchester contributes 12 children and the largest number of child utterances in the current analysis set. Its developmental window is narrower, roughly 21 to 36 months, but it is dense within that period. Manchester is therefore a major contributor to the early and middle bins.</p>
+<h3>Providence</h3>
+<p>Providence contributes six children, with the earliest scored rows beginning around 11 months. Some Providence children extend into the late 40-month range. This corpus is important for the earliest developmental bin and for linking the infant/toddler range to later preschool ages.</p>
+<img src="../figs/utterance_information/child_developmental_coverage.png" alt="Developmental coverage of individual children">
+<p>This child-level structure is central to the modeling strategy. The same child contributes many utterances over time, so rows should not be treated as independent observations from unrelated speakers. At minimum, child identity must be controlled. Later models may also aggregate by child, age bin, context window, and utterance-length band to make the repeated-observation structure more explicit.</p>
+<h2>Complexity / Effort</h2>
+<p>The first part of the analysis concerns the amount of linguistic material used to produce an utterance. In this document, this is treated as production effort. The central idea is simple: an utterance with more words, more morphemes, more syllables, or more phonemes generally requires more material to produce than a shorter utterance.</p>
+<p>The primary effort measure is the number of lexical words in the cleaned target utterance. This measure is easy to interpret and aligns directly with the matched-length baseline design, since the random, n-gram, and same-length LSTM baselines are generated with the same number of words as the corresponding child utterance.</p>
+<p>Word count is not the only possible measure of effort. Two utterances can have the same number of words but differ in morphological or phonological complexity. The current effort measures are computed from the cleaned target string submitted for surprisal scoring:</p>
+<ul>
+<li><strong>Words</strong>: lexical orthographic tokens counted with a local regex tokenizer;</li>
+<p>punctuation is excluded.</p>
+<li><strong>Morphemes</strong>: <code>auto_morphemes_surface</code>, a surface-aligned heuristic computed</li>
+<p>from the cleaned utterance, not from CHILDES <code>%mor</code> tiers.</p>
+<li><strong>Syllables</strong>: two retained estimates, since after manual validation no clear winner was identified, <code>auto_syllables_cmu_or_pkg</code> and <code>auto_syllables_pkg</code>.</li>
+<p>The first uses CMUdict ARPABET vowel nuclei when available and the <code>syllables</code> package for OOV forms, while the second uses the <code>syllables</code> package throughout.</p>
+<li><strong>Phonemes</strong>: <code>auto_phonemes_cmu_or_g2p</code>; CMUdict ARPABET phone counts are</li>
+<p>used for dictionary-covered words, with <code>g2p-en</code> applied to OOV forms as written.</p>
+</ul>
+<p>These measures are also important because the generated baselines discussed below are matched to children in word count, but not necessarily in morphemes, syllables, or phonemes. A baseline may therefore use the same number of words while still requiring a different amount of phonological or morphological effort.</p>
+<h2>Information</h2>
+<p>The second part of the analysis concerns informational content. Information is measured with Mistral surprisal in bits. Higher surprisal means that the model found the produced utterance less predictable in context, i.e. it contained <em>more information</em>; lower surprisal means that the utterance was more predictable, i.e. it contained <em>less information</em>.</p>
+<p>The main information measure is total utterance surprisal, <code>sum_bits</code>. This is the total amount of information assigned to the produced target utterance under the model. Because longer utterances naturally tend to accumulate more bits and also tend to make individual tokens less surprising, total information must be interpreted alongside effort.</p>
+<p>The analysis therefore also considers information per unit of effort. The simplest version is bits per lexical word, but the same logic can be extended to morphemes, syllables, or phonemes. These ratios ask whether children are packing more or less information into the linguistic material they produce.</p>
+<p>Context is part of the interpretation. The same target utterance can be scored without preceding context or with one, two, or three previous caretaker utterances. This lets us ask whether developmental changes in surprisal reflect the utterance alone, the conversational context, or the relationship between the two.</p>
+<p>Context entropy is also measured in bits, but it captures a different object from target surprisal. Surprisal measures the information in the utterance that was actually produced. Context entropy measures the model&#x27;s uncertainty about what could come next after the preceding context. This can later be used to ask whether children produce longer or more informative utterances in contexts that are themselves more uncertain. It can also be used as a predictor of the informational contents of an utterance.</p>
+<h2>Comparison Baselines</h2>
+<p>To interpret children’s communicative efficiency, it is useful to compare their utterances to baseline language models. The current baselines are designed to ask: given the same number of words per utterance and access to the same age-binned vocabulary, how do baseline-generated utterances differ from children’s actual utterances in informational content and communicative efficiency?</p>
+<p>All these baselines use additive age-bins, where the size of their vocabulary is expanded incrementally with each new age bin.</p>
+<h3>Random Baseline</h3>
+<p>For each age bin, the random baseline samples uniformly from the corresponding additive vocabulary, without using word frequency, local word order, or conversational context.</p>
+<h3>N-Gram Baselines</h3>
+<p>The unigram baseline samples from word frequencies. The bigram and trigram baselines additionally use local word dependencies. At utterance boundaries, they use the immediately preceding caretaker speech as context for the first generated child words, so that the baseline is not completely blind to the conversation turn it is responding to (this is also done when creating the dictionaries of bigrams and trigrams).</p>
+<h3>LSTM Baseline</h3>
+<p>The LSTM baseline is designed as a stronger comparison than the frequency-based models while remaining much simpler than a large language model. It uses an encoder-decoder architecture: the encoder reads a bounded window of preceding caretaker speech, and the decoder generates a child-like response.</p>
+<p>The current LSTM comparison follows the same additive developmental logic as the n-gram baselines. For each age bin, a different LSTM is trained on the current bin plus all previous bins, then used to generate utterances only for the target bin. This keeps the comparison aligned with the developmental information available to the n-gram baselines.</p>
+<p>The LSTM can listen to caretaker language, but it is only allowed to speak using the child-side vocabulary observed in the age-appropriate training data.</p>
+<p>The current LSTM comparison uses same-length generated utterances, so effort is held constant relative to the real child utterance. A later free-length variant can ask a different question: whether the model chooses a similar amount of communicative effort when responding to the same caretaker context.</p>
+<h2>Model 2 Details</h2>
+<p>Model 2 is the main result to interpret at this stage because it controls both production effort and child identity. The formula is:</p>
+<pre><code>sum_bits ~ age + effort + child identity</code></pre>
+<p>The model is fit separately for each effort measure. This avoids putting words, morphemes, syllables, and phonemes in the same regression, where they would be highly correlated measures of the same underlying utterance size.</p>
+<p>The displayed version is an ordinary linear regression. The coefficient for age is in bits per month after effort and child identity are controlled. The coefficient for effort is the expected increase in total bits for one additional unit of that effort measure. The uncertainty estimates use child-clustered robust standard errors to account for repeated utterances from the same child. SES is not included in this version because systematic SES metadata are not available for all children in the current sample.</p>
+<table>
+<thead><tr>
+<th>Effort control</th>
+<th>Age effect, bits/month</th>
+<th>Age p</th>
+<th>Age effect, bits/6 months</th>
+<th>Effort effect, bits/unit</th>
+<th>Model fit</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>Words</td>
+<td>-0.122</td>
+<td>&lt;.001</td>
+<td>-0.735</td>
+<td>6.367</td>
+<td>R2 = 0.626</td>
+</tr>
+<tr>
+<td>Morphemes</td>
+<td>-0.136</td>
+<td>&lt;.001</td>
+<td>-0.813</td>
+<td>5.489</td>
+<td>R2 = 0.613</td>
+</tr>
+<tr>
+<td>Syllables: CMU/pkg</td>
+<td>-0.063</td>
+<td>0.018</td>
+<td>-0.380</td>
+<td>5.236</td>
+<td>R2 = 0.646</td>
+</tr>
+<tr>
+<td>Syllables: pkg</td>
+<td>-0.048</td>
+<td>0.049</td>
+<td>-0.291</td>
+<td>4.831</td>
+<td>R2 = 0.630</td>
+</tr>
+<tr>
+<td>Phonemes</td>
+<td>-0.065</td>
+<td>0.013</td>
+<td>-0.389</td>
+<td>2.084</td>
+<td>R2 = 0.644</td>
+</tr>
+</tbody></table>
+<p>All five age effects are negative and statistically reliable at conventional levels. The word and morpheme versions are the most direct to interpret. The phoneme and syllable versions show that the result is not limited to orthographic word count.</p>
+<p>The effort effects are large and positive, as expected: longer or more complex utterances carry more total information. The important point is that age still has a negative association with total information after this effort effect is controlled.</p>
+<h3>Fixed-Effort Predictions</h3>
+<p>The figures below show the fitted Model 2 age trajectory while holding effort fixed. Within each figure, the colored lines are exact fixed effort levels and the black line is the global adjusted trend. Because Model 2 does not include an age-by-effort interaction, the fixed-effort lines are parallel; the point of the plots is to show that the downward age trend is present at comparable utterance sizes.</p>
+<img src="../figs/m2_simple_plots/m2_words_fixed_effort_and_global_trend.png" alt="Model 2 fixed-effort predictions for word count">
+<img src="../figs/m2_simple_plots/m2_morphemes_fixed_effort_and_global_trend.png" alt="Model 2 fixed-effort predictions for morpheme count">
+<img src="../figs/m2_simple_plots/m2_syllables_cmu_pkg_fixed_effort_and_global_trend.png" alt="Model 2 fixed-effort predictions for CMU/pkg syllable count">
+<img src="../figs/m2_simple_plots/m2_syllables_pkg_fixed_effort_and_global_trend.png" alt="Model 2 fixed-effort predictions for package syllable count">
+<img src="../figs/m2_simple_plots/m2_phonemes_fixed_effort_and_global_trend.png" alt="Model 2 fixed-effort predictions for phoneme count">
+<h3>Robustness Checks</h3>
+<p>The main Model 2 table above is fit at the utterance level with the preceding three caretaker utterances as context. A complementary robustness analysis uses the same context window but aggregates the data into child-session-context units, then tests whether the age effect survives balanced resampling and age-label scrambling. Because this robustness analysis uses an aggregated frame, its coefficients are not numerically identical to the utterance-level coefficients, but the direction of the result is the same.</p>
+<p>Balanced age-bin bootstraps keep the estimated age effect negative for all five effort controls:</p>
+<table>
+<thead><tr>
+<th>Effort control</th>
+<th>Aggregated age effect</th>
+<th>Balanced bootstrap 95% range</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>Words</td>
+<td>-0.040</td>
+<td>-0.168 to -0.036</td>
+</tr>
+<tr>
+<td>Morphemes</td>
+<td>-0.043</td>
+<td>-0.178 to -0.029</td>
+</tr>
+<tr>
+<td>Syllables: CMU/pkg</td>
+<td>-0.029</td>
+<td>-0.143 to -0.004</td>
+</tr>
+<tr>
+<td>Syllables: pkg</td>
+<td>-0.033</td>
+<td>-0.152 to -0.017</td>
+</tr>
+<tr>
+<td>Phonemes</td>
+<td>-0.046</td>
+<td>-0.175 to -0.002</td>
+</tr>
+</tbody></table>
+<p>The same aggregated Model 2 effect was also compared against three scrambled age controls: grouped age-bin label scrambling, unit-level age scrambling, and within-child age scrambling. For every effort measure and every scrambling scheme, the observed age effect fell outside the scrambled null 95% interval. With 100 scramble replicates, the resulting two-sided permutation value was at or below 0.050 in each case, and approximately 0.010 in nearly all cases.</p>
+<img src="../figs/age_scrambling_robustness/m2_clear_robustness_regression_lines.png" alt="Model 2 balanced and age-scrambled robustness checks">
+<h3>Interpretation</h3>
+<p>Model 2 supports a conservative claim:</p>
+<pre><code>After controlling production effort and child identity, older child utterances
+have lower predicted total surprisal than younger child utterances.</code></pre>
+<p>This is an informativeness result, not yet a full communicative-efficiency result. It says that the informational content of the produced utterance changes with age after effort is controlled. It does not yet show whether children choose longer or shorter utterances because a context is more or less predictable.</p>
+<p>That second question needs a model where effort is the outcome, for example:</p>
+<pre><code>production effort ~ age + context uncertainty + child identity</code></pre>
+<p>The next context-uncertainty measure should ideally be response-level: instead of measuring uncertainty about only the next token, it should estimate how many plausible complete child responses the preceding caretaker context allows.</p>
+<h2>Proposed Completion v2: Model-Rich Route 1 Synthesis</h2>
+<p>This section is a proposed replacement for the weaker completion draft. It is intentionally model-rich: it promotes the strongest current analyses, shows what each model family contributes, and keeps the original supervisor-facing report untouched.</p>
+<p>The fixed scientific target remains: estimate conditional utterance information at fixed production effort, using repeated child utterances sampled across sessions and ages. The key distinction is that raw total bits can rise with utterance length, while the main developmental claim is about fitted information at the same effort level.</p>
+<h3>What Should Be Promoted</h3>
+<p>I would promote the evidence in this order:</p>
+<ol>
+<li><strong>Primary row-level fixed-effort model:</strong> age + child effort + child identity, with child-clustered uncertainty.</li>
+<li><strong>Exact-length proof:</strong> exact word-count categories and exact-length age slopes, showing the result is not just MLU.</li>
+<li><strong>Context/confound controls:</strong> parent-context effort, context entropy, question type, and richer interactions.</li>
+<li><strong>Estimator-family checks:</strong> OLS, GEE, GLM, Gamma/log, and MixedLM variants on session/effort cells.</li>
+<li><strong>Age-label robustness:</strong> balanced bootstrap and scrambled-age nulls.</li>
+<li><strong>Source specificity:</strong> real children versus random, n-gram, LSTM, and caretaker targets.</li>
+<li><strong>Heldout prediction:</strong> actual heldout child regression lines versus PBM-trained predicted lines.</li>
+</ol>
+<h3>Main Row-Level Model Ladder</h3>
+<p>The table below is the current real-child k3/word model ladder. It is more important than a single Model 2 paragraph because it shows the age effect surviving the main confound controls. M1 is the pooled sanity check. M2 adds child identity and becomes the primary simple model. M4a/M4b/M4c add parent effort, context entropy, and question type. M5/M6 combine context controls. M15 is the richest current interaction stress test.</p>
+<table>
+<thead><tr>
+<th>model</th>
+<th>role</th>
+<th>R2</th>
+<th>delta R2 vs M2</th>
+<th>age bits/month</th>
+<th>age p</th>
+<th>effort bits/word</th>
+<th>parent effort</th>
+<th>context entropy</th>
+<th>age x effort</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>M1</td>
+<td>Pooled age and effort</td>
+<td>0.613</td>
+<td>-0.013</td>
+<td>3.09e-04</td>
+<td>0.993</td>
+<td>6.354</td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>M2</td>
+<td>Age and effort with child identity</td>
+<td>0.626</td>
+<td>0.000</td>
+<td>-0.122</td>
+<td>&lt;.001</td>
+<td>6.367</td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>M3</td>
+<td>Age by effort</td>
+<td>0.626</td>
+<td>1.83e-05</td>
+<td>-0.122</td>
+<td>&lt;.001</td>
+<td>6.379</td>
+<td></td>
+<td></td>
+<td>-0.004</td>
+</tr>
+<tr>
+<td>M4a</td>
+<td>Parent-context effort added</td>
+<td>0.627</td>
+<td>7.01e-04</td>
+<td>-0.116</td>
+<td>&lt;.001</td>
+<td>6.381</td>
+<td>-0.070</td>
+<td></td>
+<td>-0.004</td>
+</tr>
+<tr>
+<td>M4b</td>
+<td>Context entropy added</td>
+<td>0.627</td>
+<td>6.68e-04</td>
+<td>-0.126</td>
+<td>&lt;.001</td>
+<td>6.374</td>
+<td></td>
+<td>-0.471</td>
+<td>-0.003</td>
+</tr>
+<tr>
+<td>M4c</td>
+<td>Question type added</td>
+<td>0.630</td>
+<td>0.004</td>
+<td>-0.127</td>
+<td>&lt;.001</td>
+<td>6.378</td>
+<td></td>
+<td></td>
+<td>-0.004</td>
+</tr>
+<tr>
+<td>M5</td>
+<td>All context controls</td>
+<td>0.627</td>
+<td>9.47e-04</td>
+<td>-0.122</td>
+<td>&lt;.001</td>
+<td>6.376</td>
+<td>-0.044</td>
+<td>-0.468</td>
+<td>-0.003</td>
+</tr>
+<tr>
+<td>M6</td>
+<td>Context entropy interactions</td>
+<td>0.627</td>
+<td>9.75e-04</td>
+<td>-0.123</td>
+<td>&lt;.001</td>
+<td>6.377</td>
+<td>-0.044</td>
+<td>-0.469</td>
+<td>-0.003</td>
+</tr>
+<tr>
+<td>M7</td>
+<td>Nonlinear age</td>
+<td>0.626</td>
+<td>1.87e-04</td>
+<td>-0.144</td>
+<td>0.002</td>
+<td>6.377</td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>M8</td>
+<td>Nonlinear age by effort</td>
+<td>0.626</td>
+<td>3.15e-04</td>
+<td>-0.152</td>
+<td>&lt;.001</td>
+<td>6.390</td>
+<td></td>
+<td></td>
+<td>-0.016</td>
+</tr>
+<tr>
+<td>M9</td>
+<td>Categorical age-bin trajectory</td>
+<td>0.626</td>
+<td>2.59e-04</td>
+<td></td>
+<td></td>
+<td>6.355</td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>M10</td>
+<td>Age-bin by effort</td>
+<td>0.627</td>
+<td>6.17e-04</td>
+<td></td>
+<td></td>
+<td>6.421</td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>M15</td>
+<td>Expanded context interaction stress test</td>
+<td>0.629</td>
+<td>0.003</td>
+<td>-0.127</td>
+<td>&lt;.001</td>
+<td>6.424</td>
+<td>-0.034</td>
+<td>-0.321</td>
+<td>-0.001</td>
+</tr>
+</tbody></table>
+<img src="../figs/route1_candidate_evidence_gallery/real_k3_words_model_ladder_r2_importance.png" alt="Real-child model ladder R2 and delta R2">
+<p>The clean read is that the age coefficient stays negative once child identity and effort are controlled. Question type improves fit among the simple confound controls; context entropy and parent-context effort matter, but they do not erase the developmental fixed-effort result. The richest stress model still estimates a negative age coefficient.</p>
+<h3>Fixed-Effort Lines To Show First</h3>
+<p>These are the plots I should have put into the proposed completion. They are not raw age means. They are fitted lines asking what happens to predicted k3 <code>sum_bits</code> when word count is held fixed.</p>
+<img src="../figs/route1_child_length_controlled_model_suite/f01_k3_nb_words_row_ols_fe_cluster_fixed_effort_lines.png" alt="F01 row-level fixed-effort lines">
+<img src="../figs/route1_child_length_controlled_model_suite/f07_k3_nb_words_row_ols_fe_cluster_fixed_effort_lines.png" alt="F07 question-type controlled fixed-effort lines">
+<img src="../figs/route1_child_length_controlled_model_suite/f12_k3_nb_words_row_ols_fe_cluster_fixed_effort_lines.png" alt="F12 full context-interaction stress-test fixed-effort lines">
+<p>F01 is the minimal defensible fixed-effort model. F07 adds question type. F12 is a richer context-interaction stress test. The reason to show all three is that the downward fixed-effort story is not limited to the simplest model.</p>
+<h3>Exact-Length Proof That This Is Not Just MLU</h3>
+<p>This is the missing proof layer. The exact-length models replace continuous word count with exact word-count categories. F18 and F20 absorb exact length baselines. F19 and F21 allow separate age slopes inside exact word counts. The well-supported short and middle lengths remain mostly downward.</p>
+<table>
+<thead><tr>
+<th>formula</th>
+<th>min slope/6mo</th>
+<th>max slope/6mo</th>
+<th>downward lines</th>
+<th>upward lengths</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>F18: Exact-length fixed effects</td>
+<td>-0.758</td>
+<td>-0.758</td>
+<td>12/12</td>
+<td>none</td>
+</tr>
+<tr>
+<td>F19: Exact-length age slopes</td>
+<td>-1.043</td>
+<td>0.918</td>
+<td>9/12</td>
+<td>10, 11, 12</td>
+</tr>
+<tr>
+<td>F20: Exact-length fixed effects with context controls</td>
+<td>-0.763</td>
+<td>-0.763</td>
+<td>12/12</td>
+<td>none</td>
+</tr>
+<tr>
+<td>F21: Exact-length age slopes with context controls</td>
+<td>-1.057</td>
+<td>1.199</td>
+<td>8/12</td>
+<td>8, 10, 11, 12</td>
+</tr>
+</tbody></table>
+<img src="../figs/route1_child_length_controlled_model_suite/mlu_proof_exact_length_age_slopes.png" alt="Exact-length age-slope proof plot">
+<img src="../figs/route1_child_length_controlled_model_suite/f19_k3_nb_words_row_ols_fe_cluster_fixed_effort_lines.png" alt="F19 exact-length age slopes">
+<img src="../figs/route1_child_length_controlled_model_suite/f21_k3_nb_words_row_ols_fe_cluster_fixed_effort_lines.png" alt="F21 exact-length age slopes with context controls">
+<p>This is where the report can answer the MLU objection directly: even after exact word-count categories are absorbed, the developmental trend is mostly downward. The upward lines are concentrated at sparse longer lengths, so they should be discussed as support-limited rather than promoted as the main signal.</p>
+<h3>Full Length-Controlled Model Suite</h3>
+<p>The side draft should show that this is not one cherry-picked model. The length-controlled suite fits 21 formulas with row-level and aggregate/repeated-measures estimators. The row-level fixed-effect models all fit 446,985 utterances; aggregate models use session/effort cells.</p>
+<table>
+<thead><tr>
+<th>formula</th>
+<th>tier</th>
+<th>row R2</th>
+<th>agg GEE R2</th>
+<th>mixed age R2</th>
+<th>row slope directions</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>F01: Age at fixed effort</td>
+<td>core</td>
+<td>0.626</td>
+<td>0.774</td>
+<td>0.775</td>
+<td>12 down / 12</td>
+</tr>
+<tr>
+<td>F02: Age by effort</td>
+<td>core</td>
+<td>0.626</td>
+<td>0.774</td>
+<td>0.775</td>
+<td>12 down / 12</td>
+</tr>
+<tr>
+<td>F03: Parent effort control</td>
+<td>core</td>
+<td>0.627</td>
+<td>0.778</td>
+<td>0.780</td>
+<td>12 down / 12</td>
+</tr>
+<tr>
+<td>F04: Age by parent effort</td>
+<td>core</td>
+<td>0.627</td>
+<td>0.778</td>
+<td>0.780</td>
+<td>12 down / 12</td>
+</tr>
+<tr>
+<td>F05: Effort by parent effort</td>
+<td>core</td>
+<td>0.628</td>
+<td>0.778</td>
+<td>0.780</td>
+<td>12 down / 12</td>
+</tr>
+<tr>
+<td>F06: Parent interaction stress test</td>
+<td>core</td>
+<td>0.628</td>
+<td>0.779</td>
+<td>0.780</td>
+<td>12 down / 12</td>
+</tr>
+<tr>
+<td>F07: Question type control</td>
+<td>core</td>
+<td>0.630</td>
+<td>0.781</td>
+<td>0.783</td>
+<td>12 down / 12</td>
+</tr>
+<tr>
+<td>F08: Context entropy control</td>
+<td>core</td>
+<td>0.627</td>
+<td>0.781</td>
+<td>0.782</td>
+<td>12 down / 12</td>
+</tr>
+<tr>
+<td>F09: All context controls</td>
+<td>core</td>
+<td>0.627</td>
+<td>0.781</td>
+<td>0.783</td>
+<td>12 down / 12</td>
+</tr>
+<tr>
+<td>F10: All context controls with age by effort</td>
+<td>core</td>
+<td>0.627</td>
+<td>0.781</td>
+<td>0.783</td>
+<td>12 down / 12</td>
+</tr>
+<tr>
+<td>F11: Entropy interactions</td>
+<td>extended</td>
+<td>0.627</td>
+<td>0.781</td>
+<td>0.783</td>
+<td>12 down / 12</td>
+</tr>
+<tr>
+<td>F12: Full context interaction stress test</td>
+<td>extended</td>
+<td>0.629</td>
+<td>0.781</td>
+<td>0.783</td>
+<td>12 down / 12</td>
+</tr>
+<tr>
+<td>F13: Question interactions</td>
+<td>extended</td>
+<td>0.627</td>
+<td>0.782</td>
+<td>0.783</td>
+<td>12 down / 12</td>
+</tr>
+<tr>
+<td>F14: Curved age trajectory</td>
+<td>extended</td>
+<td>0.626</td>
+<td>0.774</td>
+<td>0.775</td>
+<td>12 down / 12</td>
+</tr>
+<tr>
+<td>F15: Curved age by effort</td>
+<td>extended</td>
+<td>0.626</td>
+<td>0.774</td>
+<td>0.775</td>
+<td>12 down / 12</td>
+</tr>
+<tr>
+<td>F16: Age-bin trajectory</td>
+<td>extended</td>
+<td>0.626</td>
+<td>0.775</td>
+<td>0.776</td>
+<td>12 down / 12</td>
+</tr>
+<tr>
+<td>F17: Age-bin by effort</td>
+<td>extended</td>
+<td>0.627</td>
+<td>0.779</td>
+<td>0.781</td>
+<td>12 down / 12</td>
+</tr>
+<tr>
+<td>F18: Exact-length fixed effects</td>
+<td>mlu_proof</td>
+<td>0.635</td>
+<td>0.803</td>
+<td>0.805</td>
+<td>12 down / 12</td>
+</tr>
+<tr>
+<td>F19: Exact-length age slopes</td>
+<td>mlu_proof</td>
+<td>0.636</td>
+<td>0.806</td>
+<td>0.808</td>
+<td>9 down / 12</td>
+</tr>
+<tr>
+<td>F20: Exact-length fixed effects with context controls</td>
+<td>mlu_proof</td>
+<td>0.637</td>
+<td>0.812</td>
+<td>0.814</td>
+<td>12 down / 12</td>
+</tr>
+<tr>
+<td>F21: Exact-length age slopes with context controls</td>
+<td>mlu_proof</td>
+<td>0.637</td>
+<td>0.816</td>
+<td>0.817</td>
+<td>8 down / 12</td>
+</tr>
+</tbody></table>
+<img src="../figs/route1_child_length_controlled_model_suite/slope_heatmap_formula_by_estimator.png" alt="Formula by estimator slope heatmap">
+<img src="../figs/route1_child_length_controlled_model_suite/variance_explained_by_formula_estimator.png" alt="Variance explained by formula and estimator">
+<h3>Estimator-Family Checks</h3>
+<p>The estimator-family layer is appendix material, but it is powerful. It shows which conclusions are stable across OLS with child fixed effects, GEE, GLM, Gamma/log, and mixed-effects models. This should be used to defend the analysis if a supervisor asks whether ordinary OLS is too fragile for repeated utterance data.</p>
+<table>
+<thead><tr>
+<th>estimator</th>
+<th>frame</th>
+<th>fit formulas</th>
+<th>median R2</th>
+<th>max R2</th>
+<th>median n</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>Row-level OLS with child fixed intercepts and child-clustered SE</td>
+<td>row</td>
+<td>21</td>
+<td>0.627</td>
+<td>0.637</td>
+<td>446,985</td>
+</tr>
+<tr>
+<td>Session/effort-cell OLS with child fixed intercepts and child-clustered SE</td>
+<td>aggregate</td>
+<td>21</td>
+<td>0.781</td>
+<td>0.816</td>
+<td>27,583</td>
+</tr>
+<tr>
+<td>Session/effort-cell Gaussian GEE grouped by child</td>
+<td>aggregate</td>
+<td>21</td>
+<td>0.781</td>
+<td>0.816</td>
+<td>27,583</td>
+</tr>
+<tr>
+<td>Session/effort-cell Gamma/log GEE grouped by child</td>
+<td>aggregate</td>
+<td>21</td>
+<td>0.003</td>
+<td>0.815</td>
+<td>27,583</td>
+</tr>
+<tr>
+<td>Session/effort-cell Gaussian GLM with child fixed intercepts</td>
+<td>aggregate</td>
+<td>21</td>
+<td>0.781</td>
+<td>0.816</td>
+<td>27,583</td>
+</tr>
+<tr>
+<td>Session/effort-cell Gamma/log GLM with child fixed intercepts</td>
+<td>aggregate</td>
+<td>21</td>
+<td>0.003</td>
+<td>0.815</td>
+<td>27,583</td>
+</tr>
+<tr>
+<td>Session/effort-cell mixed model with random child intercept</td>
+<td>aggregate</td>
+<td>21</td>
+<td>0.768</td>
+<td>0.806</td>
+<td>27,583</td>
+</tr>
+<tr>
+<td>Session/effort-cell mixed model with random child age slope</td>
+<td>aggregate</td>
+<td>21</td>
+<td>0.782</td>
+<td>0.817</td>
+<td>27,583</td>
+</tr>
+<tr>
+<td>Session/effort-cell mixed model with child and session intercepts</td>
+<td>aggregate</td>
+<td>21</td>
+<td>0.795</td>
+<td>0.828</td>
+<td>27,583</td>
+</tr>
+</tbody></table>
+<img src="../figs/route1_best_model_robustness_package/aggregate_estimator_age_effect_forest.png" alt="Aggregate estimator age-effect forest">
+<img src="../figs/route1_best_model_robustness_package/m15_aggregate_estimator_fixed_effort_age_lines.png" alt="M15 aggregate estimator fixed-effort lines">
+<p>Important caveat: the aggregate estimator screen is not the same estimand as the row-level fixed-effort Atlas. It is a repeated-measures sensitivity screen over session/effort cells. It belongs as robustness, not as the lead result.</p>
+<h3>Age Scrambling And Balanced Bootstrap</h3>
+<p>This is the best defense against the claim that the result is just age-bin composition or child/session imbalance. For the k3/word checks, observed slopes are compared with balanced and scrambled-age nulls.</p>
+<table>
+<thead><tr>
+<th>model</th>
+<th>check</th>
+<th>observed age</th>
+<th>null 95%</th>
+<th>outside null</th>
+<th>p</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>M2</td>
+<td>Balanced age-bin bootstrap</td>
+<td>-0.040</td>
+<td>-0.168 to -0.036</td>
+<td>no</td>
+<td></td>
+</tr>
+<tr>
+<td>M2</td>
+<td>Grouped age-bin label scramble</td>
+<td>-0.040</td>
+<td>-0.025 to 0.028</td>
+<td>yes</td>
+<td>0.010</td>
+</tr>
+<tr>
+<td>M2</td>
+<td>Unit-level age scramble</td>
+<td>-0.040</td>
+<td>-0.013 to 0.013</td>
+<td>yes</td>
+<td>0.010</td>
+</tr>
+<tr>
+<td>M2</td>
+<td>Within-child age scramble</td>
+<td>-0.040</td>
+<td>-0.020 to 0.018</td>
+<td>yes</td>
+<td>0.010</td>
+</tr>
+<tr>
+<td>M3</td>
+<td>Balanced age-bin bootstrap</td>
+<td>-0.050</td>
+<td>-0.186 to -0.022</td>
+<td>no</td>
+<td></td>
+</tr>
+<tr>
+<td>M3</td>
+<td>Grouped age-bin label scramble</td>
+<td>-0.050</td>
+<td>-0.025 to 0.027</td>
+<td>yes</td>
+<td>0.010</td>
+</tr>
+<tr>
+<td>M3</td>
+<td>Unit-level age scramble</td>
+<td>-0.050</td>
+<td>-0.010 to 0.012</td>
+<td>yes</td>
+<td>0.010</td>
+</tr>
+<tr>
+<td>M3</td>
+<td>Within-child age scramble</td>
+<td>-0.050</td>
+<td>-0.020 to 0.014</td>
+<td>yes</td>
+<td>0.010</td>
+</tr>
+<tr>
+<td>M4</td>
+<td>Balanced age-bin bootstrap</td>
+<td>-0.038</td>
+<td>-0.186 to 0.028</td>
+<td>no</td>
+<td></td>
+</tr>
+<tr>
+<td>M4</td>
+<td>Grouped age-bin label scramble</td>
+<td>-0.038</td>
+<td>-0.032 to 0.037</td>
+<td>yes</td>
+<td>0.020</td>
+</tr>
+<tr>
+<td>M4</td>
+<td>Unit-level age scramble</td>
+<td>-0.038</td>
+<td>-0.010 to 0.010</td>
+<td>yes</td>
+<td>0.010</td>
+</tr>
+<tr>
+<td>M4</td>
+<td>Within-child age scramble</td>
+<td>-0.038</td>
+<td>-0.020 to 0.025</td>
+<td>yes</td>
+<td>0.010</td>
+</tr>
+<tr>
+<td>M5</td>
+<td>Balanced age-bin bootstrap</td>
+<td>-0.033</td>
+<td>-0.181 to 0.022</td>
+<td>no</td>
+<td></td>
+</tr>
+<tr>
+<td>M5</td>
+<td>Grouped age-bin label scramble</td>
+<td>-0.033</td>
+<td>-0.032 to 0.030</td>
+<td>yes</td>
+<td>0.059</td>
+</tr>
+<tr>
+<td>M5</td>
+<td>Unit-level age scramble</td>
+<td>-0.033</td>
+<td>-0.014 to 0.013</td>
+<td>yes</td>
+<td>0.010</td>
+</tr>
+<tr>
+<td>M5</td>
+<td>Within-child age scramble</td>
+<td>-0.033</td>
+<td>-0.013 to 0.026</td>
+<td>yes</td>
+<td>0.010</td>
+</tr>
+<tr>
+<td>M6</td>
+<td>Balanced age-bin bootstrap</td>
+<td>-0.058</td>
+<td>-0.113 to 0.020</td>
+<td>no</td>
+<td></td>
+</tr>
+<tr>
+<td>M6</td>
+<td>Grouped age-bin label scramble</td>
+<td>-0.058</td>
+<td>-0.044 to 0.033</td>
+<td>yes</td>
+<td>0.030</td>
+</tr>
+<tr>
+<td>M6</td>
+<td>Unit-level age scramble</td>
+<td>-0.058</td>
+<td>-0.012 to 0.012</td>
+<td>yes</td>
+<td>0.010</td>
+</tr>
+<tr>
+<td>M6</td>
+<td>Within-child age scramble</td>
+<td>-0.058</td>
+<td>-0.018 to 0.022</td>
+<td>yes</td>
+<td>0.010</td>
+</tr>
+</tbody></table>
+<img src="../figs/age_scrambling_robustness/m2_clear_robustness_regression_lines.png" alt="M2 balanced and age-scrambled robustness">
+<img src="../figs/age_scrambling_robustness/m6_clear_robustness_regression_lines.png" alt="M6 balanced and age-scrambled robustness">
+<img src="../figs/age_scrambling_robustness/robustness_outside_null_heatmap.png" alt="Age-scrambling robustness heatmap">
+<h3>Source Specificity: Real Children Versus Baselines And Caretakers</h3>
+<p>The source-specific layer answers whether the real-child line is a property of real child speech or a mechanical artifact of the scoring pipeline. Random goes in the opposite direction. N-grams and LSTMs are closer but flatter. Caretakers also differ from the child trajectory.</p>
+<table>
+<thead><tr>
+<th>comparison source</th>
+<th>real slope</th>
+<th>source slope</th>
+<th>source - real</th>
+<th>source downward lines</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>Random</td>
+<td>-0.735</td>
+<td>1.068</td>
+<td>1.803</td>
+<td>0/12</td>
+</tr>
+<tr>
+<td>Unigram</td>
+<td>-0.735</td>
+<td>-0.125</td>
+<td>0.610</td>
+<td>12/12</td>
+</tr>
+<tr>
+<td>Bigram</td>
+<td>-0.735</td>
+<td>-0.134</td>
+<td>0.601</td>
+<td>12/12</td>
+</tr>
+<tr>
+<td>Trigram</td>
+<td>-0.735</td>
+<td>-0.092</td>
+<td>0.643</td>
+<td>12/12</td>
+</tr>
+<tr>
+<td>LSTM k3</td>
+<td>-0.735</td>
+<td>-0.279</td>
+<td>0.456</td>
+<td>12/12</td>
+</tr>
+<tr>
+<td>LSTM k4</td>
+<td>-0.735</td>
+<td>-0.351</td>
+<td>0.384</td>
+<td>12/12</td>
+</tr>
+<tr>
+<td>LSTM k5</td>
+<td>-0.735</td>
+<td>-0.363</td>
+<td>0.372</td>
+<td>12/12</td>
+</tr>
+<tr>
+<td>Caretaker</td>
+<td>-0.735</td>
+<td>0.172</td>
+<td>0.907</td>
+<td>0/12</td>
+</tr>
+</tbody></table>
+<img src="../figs/route1_candidate_evidence_gallery/source_comparison_m4c_k3_words_slopes.png" alt="M4c source comparison slopes">
+<p>The visual evidence should be shown source by source. For each comparison, the first panel contrasts no context (<code>k0</code>) with caretaker context (<code>k3</code>), the second panel plots the context gain through age, the third focuses only on the with-context condition, and the regression panels show the fixed-word-count model comparison.</p>
+<h4>Real vs Random</h4>
+<img src="../figs/route1_real_vs_controls_context_report/random_k0_vs_k3_age_means.png" alt="Real vs Random k0 versus k3 age means">
+<img src="../figs/route1_real_vs_controls_context_report/random_context_gain_by_age.png" alt="Real vs Random context gain through age">
+<img src="../figs/route1_real_vs_controls_context_report/random_k3_with_context_focus.png" alt="Real vs Random with-context k3 focus">
+<img src="../figs/route1_real_vs_controls_context_report/random_m2_k3_fixed_word_regression_lines.png" alt="Real vs Random fixed-word regression lines">
+<img src="../figs/route1_real_vs_controls_context_report/random_m2_k3_fixed_word_regression_gaps.png" alt="Real vs Random fixed-word source-minus-real regression gaps">
+<img src="../figs/route1_real_vs_controls_context_report/random_k3_word_model_slope_differences.png" alt="Real vs Random model slope differences">
+<h4>Real vs Unigram</h4>
+<img src="../figs/route1_real_vs_controls_context_report/unigram_k0_vs_k3_age_means.png" alt="Real vs Unigram k0 versus k3 age means">
+<img src="../figs/route1_real_vs_controls_context_report/unigram_context_gain_by_age.png" alt="Real vs Unigram context gain through age">
+<img src="../figs/route1_real_vs_controls_context_report/unigram_k3_with_context_focus.png" alt="Real vs Unigram with-context k3 focus">
+<img src="../figs/route1_real_vs_controls_context_report/unigram_m2_k3_fixed_word_regression_lines.png" alt="Real vs Unigram fixed-word regression lines">
+<img src="../figs/route1_real_vs_controls_context_report/unigram_m2_k3_fixed_word_regression_gaps.png" alt="Real vs Unigram fixed-word source-minus-real regression gaps">
+<img src="../figs/route1_real_vs_controls_context_report/unigram_k3_word_model_slope_differences.png" alt="Real vs Unigram model slope differences">
+<h4>Real vs Bigram</h4>
+<img src="../figs/route1_real_vs_controls_context_report/bigram_k0_vs_k3_age_means.png" alt="Real vs Bigram k0 versus k3 age means">
+<img src="../figs/route1_real_vs_controls_context_report/bigram_context_gain_by_age.png" alt="Real vs Bigram context gain through age">
+<img src="../figs/route1_real_vs_controls_context_report/bigram_k3_with_context_focus.png" alt="Real vs Bigram with-context k3 focus">
+<img src="../figs/route1_real_vs_controls_context_report/bigram_m2_k3_fixed_word_regression_lines.png" alt="Real vs Bigram fixed-word regression lines">
+<img src="../figs/route1_real_vs_controls_context_report/bigram_m2_k3_fixed_word_regression_gaps.png" alt="Real vs Bigram fixed-word source-minus-real regression gaps">
+<img src="../figs/route1_real_vs_controls_context_report/bigram_k3_word_model_slope_differences.png" alt="Real vs Bigram model slope differences">
+<h4>Real vs Trigram</h4>
+<img src="../figs/route1_real_vs_controls_context_report/trigram_k0_vs_k3_age_means.png" alt="Real vs Trigram k0 versus k3 age means">
+<img src="../figs/route1_real_vs_controls_context_report/trigram_context_gain_by_age.png" alt="Real vs Trigram context gain through age">
+<img src="../figs/route1_real_vs_controls_context_report/trigram_k3_with_context_focus.png" alt="Real vs Trigram with-context k3 focus">
+<img src="../figs/route1_real_vs_controls_context_report/trigram_m2_k3_fixed_word_regression_lines.png" alt="Real vs Trigram fixed-word regression lines">
+<img src="../figs/route1_real_vs_controls_context_report/trigram_m2_k3_fixed_word_regression_gaps.png" alt="Real vs Trigram fixed-word source-minus-real regression gaps">
+<img src="../figs/route1_real_vs_controls_context_report/trigram_k3_word_model_slope_differences.png" alt="Real vs Trigram model slope differences">
+<h4>Real vs LSTM family</h4>
+<img src="../figs/route1_real_vs_controls_context_report/lstm_k0_vs_k3_age_means.png" alt="Real vs LSTM family k0 versus k3 age means">
+<img src="../figs/route1_real_vs_controls_context_report/lstm_context_gain_by_age.png" alt="Real vs LSTM family context gain through age">
+<img src="../figs/route1_real_vs_controls_context_report/lstm_k3_with_context_focus.png" alt="Real vs LSTM family with-context k3 focus">
+<img src="../figs/route1_real_vs_controls_context_report/lstm_m2_k3_fixed_word_regression_lines.png" alt="Real vs LSTM family fixed-word regression lines">
+<img src="../figs/route1_real_vs_controls_context_report/lstm_m2_k3_fixed_word_regression_gaps.png" alt="Real vs LSTM family fixed-word source-minus-real regression gaps">
+<img src="../figs/route1_real_vs_controls_context_report/lstm_k3_word_model_slope_differences.png" alt="Real vs LSTM family model slope differences">
+<h4>Real vs Caretakers</h4>
+<img src="../figs/route1_real_vs_controls_context_report/caretaker_k0_vs_k3_age_means.png" alt="Real vs Caretakers k0 versus k3 age means">
+<img src="../figs/route1_real_vs_controls_context_report/caretaker_context_gain_by_age.png" alt="Real vs Caretakers context gain through age">
+<img src="../figs/route1_real_vs_controls_context_report/caretaker_k3_with_context_focus.png" alt="Real vs Caretakers with-context k3 focus">
+<img src="../figs/route1_real_vs_controls_context_report/caretaker_m2_k3_fixed_word_regression_lines.png" alt="Real vs Caretakers fixed-word regression lines">
+<img src="../figs/route1_real_vs_controls_context_report/caretaker_m2_k3_fixed_word_regression_gaps.png" alt="Real vs Caretakers fixed-word source-minus-real regression gaps">
+<img src="../figs/route1_real_vs_controls_context_report/caretaker_k3_word_model_slope_differences.png" alt="Real vs Caretakers model slope differences">
+<p>The source-specific M4c Atlas panels are useful appendix figures because they put each source into the same corrected fixed-effort plotting grammar.</p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/real/real_k3_m4c_nb_words_fixed_effort_atlas.png" alt="Real child source-specific M4c Atlas">
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/random/random_k3_m4c_nb_words_fixed_effort_atlas.png" alt="Random source-specific M4c Atlas">
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/unigram/unigram_k3_m4c_nb_words_fixed_effort_atlas.png" alt="Unigram source-specific M4c Atlas">
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/bigram/bigram_k3_m4c_nb_words_fixed_effort_atlas.png" alt="Bigram source-specific M4c Atlas">
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k3_m4c_nb_words_fixed_effort_atlas.png" alt="Trigram source-specific M4c Atlas">
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/lstm_additive_k3_same_length/lstm_additive_k3_same_length_k3_m4c_nb_words_fixed_effort_atlas.png" alt="LSTM k3 source-specific M4c Atlas">
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/lstm_additive_k4_same_length/lstm_additive_k4_same_length_k3_m4c_nb_words_fixed_effort_atlas.png" alt="LSTM k4 source-specific M4c Atlas">
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/lstm_additive_k5_same_length/lstm_additive_k5_same_length_k3_m4c_nb_words_fixed_effort_atlas.png" alt="LSTM k5 source-specific M4c Atlas">
+<p>Descriptive context means are still useful for orientation, but they are not the main inference because they are not fixed-effort regression estimates.</p>
+<table>
+<thead><tr>
+<th>source</th>
+<th>rows</th>
+<th>mean_k0</th>
+<th>mean_k3</th>
+<th>context_gain</th>
+<th>mean_words</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>Real child</td>
+<td>446,985</td>
+<td>40.33</td>
+<td>26.73</td>
+<td>13.61</td>
+<td>2.66</td>
+</tr>
+<tr>
+<td>Random</td>
+<td>446,508</td>
+<td>68.96</td>
+<td>61.11</td>
+<td>7.85</td>
+<td>2.66</td>
+</tr>
+<tr>
+<td>Unigram</td>
+<td>446,508</td>
+<td>51.17</td>
+<td>41.83</td>
+<td>9.34</td>
+<td>2.66</td>
+</tr>
+<tr>
+<td>Bigram</td>
+<td>446,508</td>
+<td>47.59</td>
+<td>36.79</td>
+<td>10.79</td>
+<td>2.66</td>
+</tr>
+<tr>
+<td>Trigram</td>
+<td>446,508</td>
+<td>45.54</td>
+<td>33.68</td>
+<td>11.86</td>
+<td>2.66</td>
+</tr>
+<tr>
+<td>LSTM k3</td>
+<td>446,508</td>
+<td>39.79</td>
+<td>28.42</td>
+<td>11.37</td>
+<td>2.66</td>
+</tr>
+<tr>
+<td>LSTM k4</td>
+<td>446,508</td>
+<td>39.98</td>
+<td>28.51</td>
+<td>11.47</td>
+<td>2.66</td>
+</tr>
+<tr>
+<td>LSTM k5</td>
+<td>446,508</td>
+<td>39.96</td>
+<td>28.51</td>
+<td>11.45</td>
+<td>2.66</td>
+</tr>
+<tr>
+<td>Caretaker</td>
+<td>668,903</td>
+<td>49.41</td>
+<td>30.00</td>
+<td>19.41</td>
+<td>4.42</td>
+</tr>
+</tbody></table>
+<p>The paired generated-control models use the same original child utterance as the comparison unit. Positive k3 gaps mean that the generated control is more surprising than the real child utterance in the same context.</p>
+<table>
+<thead><tr>
+<th>source</th>
+<th>test</th>
+<th>mean</th>
+<th>age slope</th>
+<th>p</th>
+<th>n</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>Random</td>
+<td>k3 source-real gap</td>
+<td>34.402</td>
+<td>0.302</td>
+<td>&lt;.001</td>
+<td>446,508</td>
+</tr>
+<tr>
+<td>Random</td>
+<td>context-gain source-real gap</td>
+<td>-5.759</td>
+<td>0.009</td>
+<td>0.512</td>
+<td>446,508</td>
+</tr>
+<tr>
+<td>Unigram</td>
+<td>k3 source-real gap</td>
+<td>15.119</td>
+<td>0.103</td>
+<td>&lt;.001</td>
+<td>446,508</td>
+</tr>
+<tr>
+<td>Unigram</td>
+<td>context-gain source-real gap</td>
+<td>-4.269</td>
+<td>0.018</td>
+<td>0.109</td>
+<td>446,508</td>
+</tr>
+<tr>
+<td>Bigram</td>
+<td>k3 source-real gap</td>
+<td>10.082</td>
+<td>0.102</td>
+<td>&lt;.001</td>
+<td>446,508</td>
+</tr>
+<tr>
+<td>Bigram</td>
+<td>context-gain source-real gap</td>
+<td>-2.814</td>
+<td>3.15e-04</td>
+<td>0.982</td>
+<td>446,508</td>
+</tr>
+<tr>
+<td>Trigram</td>
+<td>k3 source-real gap</td>
+<td>6.964</td>
+<td>0.109</td>
+<td>&lt;.001</td>
+<td>446,508</td>
+</tr>
+<tr>
+<td>Trigram</td>
+<td>context-gain source-real gap</td>
+<td>-1.747</td>
+<td>-0.013</td>
+<td>0.325</td>
+<td>446,508</td>
+</tr>
+<tr>
+<td>LSTM k3</td>
+<td>k3 source-real gap</td>
+<td>1.707</td>
+<td>0.078</td>
+<td>0.020</td>
+<td>446,508</td>
+</tr>
+<tr>
+<td>LSTM k3</td>
+<td>context-gain source-real gap</td>
+<td>-2.241</td>
+<td>0.026</td>
+<td>0.028</td>
+<td>446,508</td>
+</tr>
+<tr>
+<td>LSTM k4</td>
+<td>k3 source-real gap</td>
+<td>1.798</td>
+<td>0.066</td>
+<td>0.066</td>
+<td>446,508</td>
+</tr>
+<tr>
+<td>LSTM k4</td>
+<td>context-gain source-real gap</td>
+<td>-2.142</td>
+<td>0.033</td>
+<td>0.002</td>
+<td>446,508</td>
+</tr>
+<tr>
+<td>LSTM k5</td>
+<td>k3 source-real gap</td>
+<td>1.799</td>
+<td>0.064</td>
+<td>0.074</td>
+<td>446,508</td>
+</tr>
+<tr>
+<td>LSTM k5</td>
+<td>context-gain source-real gap</td>
+<td>-2.159</td>
+<td>0.033</td>
+<td>0.003</td>
+<td>446,508</td>
+</tr>
+</tbody></table>
+<p>Caretakers are a different comparison because they are not generated alternatives for the same child row. They ask whether adult speech in the same families has the same child-age trajectory.</p>
+<table>
+<thead><tr>
+<th>outcome</th>
+<th>real mean</th>
+<th>caretaker mean</th>
+<th>source x age</th>
+<th>p</th>
+<th>n</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>sum_bits_k3</td>
+<td>26.726</td>
+<td>29.998</td>
+<td>-0.033</td>
+<td>0.327</td>
+<td>1,115,888</td>
+</tr>
+<tr>
+<td>context_gain</td>
+<td>13.607</td>
+<td>19.410</td>
+<td>-0.005</td>
+<td>0.817</td>
+<td>1,115,888</td>
+</tr>
+</tbody></table>
+<h3>Heldout Children</h3>
+<p>The heldout panel is not the cleanest proof, but it is important because it makes generalization inspectable. Black lines are actual heldout child trends; dashed teal lines are PBM-trained predictions.</p>
+<table>
+<thead><tr>
+<th>child</th>
+<th>effort band</th>
+<th>actual slope/month</th>
+<th>predicted slope/month</th>
+<th>month points</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>Forrester/Ella</td>
+<td>1-4</td>
+<td>0.027</td>
+<td>-0.014</td>
+<td>25</td>
+</tr>
+<tr>
+<td>Forrester/Ella</td>
+<td>5-8</td>
+<td>-0.419</td>
+<td>-2.47e-04</td>
+<td>25</td>
+</tr>
+<tr>
+<td>Forrester/Ella</td>
+<td>9-12</td>
+<td>-1.239</td>
+<td>0.014</td>
+<td>14</td>
+</tr>
+<tr>
+<td>Sachs/Naomi</td>
+<td>1-4</td>
+<td>0.115</td>
+<td>-0.014</td>
+<td>24</td>
+</tr>
+<tr>
+<td>Sachs/Naomi</td>
+<td>5-8</td>
+<td>0.028</td>
+<td>-2.47e-04</td>
+<td>21</td>
+</tr>
+<tr>
+<td>Sachs/Naomi</td>
+<td>9-12</td>
+<td>0.829</td>
+<td>0.014</td>
+<td>14</td>
+</tr>
+<tr>
+<td>MPI-EVA-Manchester/Helen</td>
+<td>1-4</td>
+<td>0.048</td>
+<td>-0.014</td>
+<td>26</td>
+</tr>
+<tr>
+<td>MPI-EVA-Manchester/Helen</td>
+<td>5-8</td>
+<td>-0.082</td>
+<td>-2.47e-04</td>
+<td>26</td>
+</tr>
+<tr>
+<td>MPI-EVA-Manchester/Helen</td>
+<td>9-12</td>
+<td>-0.069</td>
+<td>0.014</td>
+<td>26</td>
+</tr>
+</tbody></table>
+<img src="../figs/route1_candidate_evidence_gallery/heldout_pop_m4c_actual_vs_predicted_regression_lines.png" alt="Heldout actual versus predicted regression lines">
+<img src="../figs/route1_candidate_evidence_gallery/heldout_pop_m4c_calibration_residuals.png" alt="Heldout calibration and residual diagnostics">
+<h3>Candidate Supervisor Claim</h3>
+<blockquote><p>At the same production-effort level, older children produce utterances that are more predictable in context than younger children. This fixed-effort developmental decrease appears in the primary row-level child-identity model, survives major context/form controls, remains visible in exact-length checks for well-supported word counts, is defended by age-scrambling robustness, and differs from random, n-gram, LSTM, and caretaker comparison patterns.</p></blockquote>
+<p>The claim must stay conditional. It is not saying older children communicate less overall. Older children often produce longer utterances, and longer utterances carry more total bits. The claim is that among utterances of comparable effort, the model finds older children&#x27;s utterances more contextually predictable.</p>
+<h3>What To Cut Or Keep For The Final Supervisor Version</h3>
+<p>Keep in the main text: one primary fixed-effort figure, the exact-length proof figure, one compact model-ladder table, one age-scrambling figure, and one source-comparison figure.</p>
+<p>Move to appendix: the full F01-F21 table, the estimator-family table, heldout calibration, all paired source-gap model tables, and individual source-specific Atlas figures.</p>
+<p>Do not overclaim yet: Route 2 effort choice. The current report controls effort; it does not yet prove that children choose effort as a function of response-space context uncertainty.</p>
+<h2>Possible Next Steps</h2>
+<h3>Expand Beyond the Initial Three Corpora</h3>
+<p>The present report focuses on Providence, Brown, and Manchester because they form the current dense longitudinal analysis set. The larger naturalistic dataset now includes additional caregiver-child corpora and can be used to ask whether the Model 2 pattern generalizes beyond these three corpora. Clinical and control corpora are also available, but they should be handled as a separate extension because their sampling designs differ from naturalistic home-interaction data.</p>
+<h3>Stronger Generated Baselines</h3>
+<p>The same-length random and n-gram baselines are useful because they control utterance length and developmental vocabulary access. A stronger generated baseline would use a small child-language model, such as an LSTM or BabyLM-like transformer, trained under the same developmental constraints. This would test whether the child pattern differs from a model that has learned more than local word frequencies.</p>
+<h3>Word-Level Surprisal</h3>
+<p>The current result uses total utterance information. Word-level surprisal would make it possible to ask where the age effect comes from inside the utterance: early versus late words, function versus content words, or particular lexical and morphological positions. This would help distinguish a broad utterance-level predictability effect from a small number of highly surprising words.</p>
+</main>
+</body>
+</html>

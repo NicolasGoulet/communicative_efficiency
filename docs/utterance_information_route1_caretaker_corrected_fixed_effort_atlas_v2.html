@@ -1,0 +1,483 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Route 1 Caretaker Corrected Fixed-Effort Atlas v2</title>
+<style>
+:root {
+  color-scheme: light;
+  --ink: #1e2528;
+  --muted: #5e686d;
+  --line: #d9e0df;
+  --paper: #ffffff;
+  --soft: #f5f7f6;
+  --accent: #2f6f73;
+  --accent2: #c76f2c;
+}
+body {
+  margin: 0;
+  background: #eef2f1;
+  color: var(--ink);
+  font: 16px/1.58 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+main {
+  max-width: 980px;
+  margin: 34px auto 56px;
+  padding: 48px 58px;
+  background: var(--paper);
+  box-shadow: 0 18px 50px rgba(31, 45, 48, 0.12);
+}
+h1, h2, h3, h4 {
+  line-height: 1.18;
+  margin: 1.6em 0 0.55em;
+}
+h1 {
+  margin-top: 0;
+  font-size: 2.25rem;
+  border-bottom: 3px solid var(--accent);
+  padding-bottom: 0.45em;
+}
+h2 {
+  font-size: 1.55rem;
+  color: var(--accent);
+}
+h3 {
+  font-size: 1.18rem;
+}
+p {
+  margin: 0.75em 0;
+}
+a {
+  color: var(--accent);
+}
+blockquote {
+  border-left: 4px solid var(--accent2);
+  margin: 1.1em 0;
+  padding: 0.05em 1.1em;
+  color: var(--muted);
+  background: #fff8f2;
+}
+code {
+  background: var(--soft);
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  padding: 0.08em 0.3em;
+  font-family: "SFMono-Regular", Consolas, monospace;
+  font-size: 0.92em;
+}
+pre {
+  background: #f5f7f6;
+  color: var(--ink);
+  border: 1px solid var(--line);
+  padding: 1em;
+  overflow-x: auto;
+  border-radius: 7px;
+}
+pre code {
+  background: transparent;
+  border: 0;
+  padding: 0;
+  color: inherit;
+}
+table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 1.15em 0 1.45em;
+  font-size: 0.95em;
+}
+th, td {
+  border: 1px solid var(--line);
+  padding: 0.54em 0.68em;
+  vertical-align: top;
+}
+th {
+  background: #e7efed;
+  text-align: left;
+}
+tr:nth-child(even) td {
+  background: #fafbfb;
+}
+img {
+  max-width: 100%;
+  display: block;
+  margin: 1.1em auto 0.45em;
+}
+ul, ol {
+  padding-left: 1.4em;
+}
+.caption {
+  color: var(--muted);
+  font-size: 0.92em;
+  margin-top: -0.15em;
+}
+@media print {
+  body {
+    background: white;
+  }
+  main {
+    box-shadow: none;
+    margin: 0;
+    max-width: none;
+    padding: 28px;
+  }
+}
+</style>
+</head>
+<body>
+<main>
+<h1>Route 1 Caretaker Corrected Fixed-Effort Atlas v2</h1>
+<p>This is the caretaker-target analogue of the corrected child/source atlases. The developmental timeline is the focal child&#x27;s age. The target utterance is the caretaker utterance, fit independently from the child real/random/ngram/LSTM source reports.</p>
+<h2>Implementation</h2>
+<ul>
+<li>Estimator: linear ordinary least squares regression.</li>
+<li>Library: <code>statsmodels.formula.api.ols</code>.</li>
+<li>Uncertainty: child/dyad-cluster robust standard errors.</li>
+<li>Outcome: caretaker <code>sum_bits</code>, the total information for the caretaker target utterance.</li>
+<li>Context: k0/k1/k2/k3 are fit independently; k0 correctly skips models that require preceding context effort or question type.</li>
+<li>Fixed slices: models are fit on all eligible rows; fixed effort values only define plotted prediction lines.</li>
+</ul>
+<h2>Start Here</h2>
+<p>Each section below is one caretaker model. It starts with the model question, formula, regression type, library, uncertainty structure, and then the plots. Long tables are kept out of the report body and saved as CSV artifacts.</p>
+<h2>Model Atlas</h2>
+<h3>CM1: Pooled age and caretaker effort</h3>
+<p><strong>Question.</strong> Does child age predict caretaker utterance information after controlling caretaker effort?</p>
+<p><strong>Conceptual formula.</strong> <code>caretaker_sum_bits ~ child_age_c + caretaker_effort_c</code></p>
+<p><strong>Fitted formula.</strong> <code>sum_bits ~ age_c + effort_c</code></p>
+<p><strong>Estimator.</strong> Linear regression: ordinary least squares via <code>statsmodels.formula.api.ols</code>.</p>
+<p><strong>Uncertainty.</strong> Child/dyad-cluster robust standard errors.</p>
+<p><strong>Outcome.</strong> Caretaker <code>sum_bits</code>, the total information in the caretaker target utterance.</p>
+<p><strong>Coverage.</strong> 20/20 fitted combinations across K0, K1, K2, K3; effort axes: Morphemes, Phonemes, Syllables: CMU/pkg, Syllables: pkg, Words. Observations per fitted combination: 668,903-668,903. Mean descriptive R2: 0.712.</p>
+<p><strong>Plots below.</strong> Each plot uses this same caretaker model family for one effort unit, then draws prediction lines at fixed observed caretaker-effort values.</p>
+<h4>K0 plots</h4>
+<p><strong>Morphemes</strong></p>
+<img src="../figs/route1_caretaker_corrected_fixed_effort_atlas/caretaker_k0_cm1_nb_morphemes_fixed_effort_atlas.png" alt="k0 CM1 Morphemes">
+<p><strong>Phonemes</strong></p>
+<img src="../figs/route1_caretaker_corrected_fixed_effort_atlas/caretaker_k0_cm1_nb_phonemes_fixed_effort_atlas.png" alt="k0 CM1 Phonemes">
+<p><strong>Syllables: CMU/pkg</strong></p>
+<img src="../figs/route1_caretaker_corrected_fixed_effort_atlas/caretaker_k0_cm1_nb_syllables_cmu_or_pkg_fixed_effort_atlas.png" alt="k0 CM1 Syllables: CMU/pkg">
+<p><strong>Syllables: pkg</strong></p>
+<img src="../figs/route1_caretaker_corrected_fixed_effort_atlas/caretaker_k0_cm1_nb_syllables_pkg_fixed_effort_atlas.png" alt="k0 CM1 Syllables: pkg">
+<p><strong>Words</strong></p>
+<img src="../figs/route1_caretaker_corrected_fixed_effort_atlas/caretaker_k0_cm1_nb_words_fixed_effort_atlas.png" alt="k0 CM1 Words">
+<h4>K1 plots</h4>
+<p><strong>Morphemes</strong></p>
+<img src="../figs/route1_caretaker_corrected_fixed_effort_atlas/caretaker_k1_cm1_nb_morphemes_fixed_effort_atlas.png" alt="k1 CM1 Morphemes">
+<p><strong>Phonemes</strong></p>
+<img src="../figs/route1_caretaker_corrected_fixed_effort_atlas/caretaker_k1_cm1_nb_phonemes_fixed_effort_atlas.png" alt="k1 CM1 Phonemes">
+<p><strong>Syllables: CMU/pkg</strong></p>
+<img src="../figs/route1_caretaker_corrected_fixed_effort_atlas/caretaker_k1_cm1_nb_syllables_cmu_or_pkg_fixed_effort_atlas.png" alt="k1 CM1 Syllables: CMU/pkg">
+<p><strong>Syllables: pkg</strong></p>
+<img src="../figs/route1_caretaker_corrected_fixed_effort_atlas/caretaker_k1_cm1_nb_syllables_pkg_fixed_effort_atlas.png" alt="k1 CM1 Syllables: pkg">
+<p><strong>Words</strong></p>
+<img src="../figs/route1_caretaker_corrected_fixed_effort_atlas/caretaker_k1_cm1_nb_words_fixed_effort_atlas.png" alt="k1 CM1 Words">
+<h4>K2 plots</h4>
+<p><strong>Morphemes</strong></p>
+<img src="../figs/route1_caretaker_corrected_fixed_effort_atlas/caretaker_k2_cm1_nb_morphemes_fixed_effort_atlas.png" alt="k2 CM1 Morphemes">
+<p><strong>Phonemes</strong></p>
+<img src="../figs/route1_caretaker_corrected_fixed_effort_atlas/caretaker_k2_cm1_nb_phonemes_fixed_effort_atlas.png" alt="k2 CM1 Phonemes">
+<p><strong>Syllables: CMU/pkg</strong></p>
+<img src="../figs/route1_caretaker_corrected_fixed_effort_atlas/caretaker_k2_cm1_nb_syllables_cmu_or_pkg_fixed_effort_atlas.png" alt="k2 CM1 Syllables: CMU/pkg">
+<p><strong>Syllables: pkg</strong></p>
+<img src="../figs/route1_caretaker_corrected_fixed_effort_atlas/caretaker_k2_cm1_nb_syllables_pkg_fixed_effort_atlas.png" alt="k2 CM1 Syllables: pkg">
+<p><strong>Words</strong></p>
+<img src="../figs/route1_caretaker_corrected_fixed_effort_atlas/caretaker_k2_cm1_nb_words_fixed_effort_atlas.png" alt="k2 CM1 Words">
+<h4>K3 plots</h4>
+<p><strong>Morphemes</strong></p>
+<img src="../figs/route1_caretaker_corrected_fixed_effort_atlas/caretaker_k3_cm1_nb_morphemes_fixed_effort_atlas.png" alt="k3 CM1 Morphemes">
+<p><strong>Phonemes</strong></p>
+<img src="../figs/route1_caretaker_corrected_fixed_effort_atlas/caretaker_k3_cm1_nb_phonemes_fixed_effort_atlas.png" alt="k3 CM1 Phonemes">
+<p><strong>Syllables: CMU/pkg</strong></p>
+<img src="../figs/route1_caretaker_corrected_fixed_effort_atlas/caretaker_k3_cm1_nb_syllables_cmu_or_pkg_fixed_effort_atlas.png" alt="k3 CM1 Syllables: CMU/pkg">
+<p><strong>Syllables: pkg</strong></p>
+<img src="../figs/route1_caretaker_corrected_fixed_effort_atlas/caretaker_k3_cm1_nb_syllables_pkg_fixed_effort_atlas.png" alt="k3 CM1 Syllables: pkg">
+<p><strong>Words</strong></p>
+<img src="../figs/route1_caretaker_corrected_fixed_effort_atlas/caretaker_k3_cm1_nb_words_fixed_effort_atlas.png" alt="k3 CM1 Words">
+<h3>CM2: Age and caretaker effort with dyad identity</h3>
+<p><strong>Question.</strong> Does the child-age effect remain after dyad/family identity is controlled?</p>
+<p><strong>Conceptual formula.</strong> <code>caretaker_sum_bits ~ child_age_c + caretaker_effort_c + C(dyad_child_id)</code></p>
+<p><strong>Fitted formula.</strong> <code>sum_bits ~ age_c + effort_c + C(child_id)</code></p>
+<p><strong>Estimator.</strong> Linear regression: ordinary least squares via <code>statsmodels.formula.api.ols</code>.</p>
+<p><strong>Uncertainty.</strong> Child/dyad-cluster robust standard errors.</p>
+<p><strong>Outcome.</strong> Caretaker <code>sum_bits</code>, the total information in the caretaker target utterance.</p>
+<p><strong>Coverage.</strong> 20/20 fitted combinations across K0, K1, K2, K3; effort axes: Morphemes, Phonemes, Syllables: CMU/pkg, Syllables: pkg, Words. Observations per fitted combination: 668,903-668,903. Mean descriptive R2: 0.714.</p>
+<p><strong>Plots below.</strong> Each plot uses this same caretaker model family for one effort unit, then draws prediction lines at fixed observed caretaker-effort values.</p>
+<h4>K0 plots</h4>
+<p><strong>Morphemes</strong></p>
+<img src="../figs/route1_caretaker_corrected_fixed_effort_atlas/caretaker_k0_cm2_nb_morphemes_fixed_effort_atlas.png" alt="k0 CM2 Morphemes">
+<p><strong>Phonemes</strong></p>
+<img src="../figs/route1_caretaker_corrected_fixed_effort_atlas/caretaker_k0_cm2_nb_phonemes_fixed_effort_atlas.png" alt="k0 CM2 Phonemes">
+<p><strong>Syllables: CMU/pkg</strong></p>
+<img src="../figs/route1_caretaker_corrected_fixed_effort_atlas/caretaker_k0_cm2_nb_syllables_cmu_or_pkg_fixed_effort_atlas.png" alt="k0 CM2 Syllables: CMU/pkg">
+<p><strong>Syllables: pkg</strong></p>
+<img src="../figs/route1_caretaker_corrected_fixed_effort_atlas/caretaker_k0_cm2_nb_syllables_pkg_fixed_effort_atlas.png" alt="k0 CM2 Syllables: pkg">
+<p><strong>Words</strong></p>
+<img src="../figs/route1_caretaker_corrected_fixed_effort_atlas/caretaker_k0_cm2_nb_words_fixed_effort_atlas.png" alt="k0 CM2 Words">
+<h4>K1 plots</h4>
+<p><strong>Morphemes</strong></p>
+<img src="../figs/route1_caretaker_corrected_fixed_effort_atlas/caretaker_k1_cm2_nb_morphemes_fixed_effort_atlas.png" alt="k1 CM2 Morphemes">
+<p><strong>Phonemes</strong></p>
+<img src="../figs/route1_caretaker_corrected_fixed_effort_atlas/caretaker_k1_cm2_nb_phonemes_fixed_effort_atlas.png" alt="k1 CM2 Phonemes">
+<p><strong>Syllables: CMU/pkg</strong></p>
+<img src="../figs/route1_caretaker_corrected_fixed_effort_atlas/caretaker_k1_cm2_nb_syllables_cmu_or_pkg_fixed_effort_atlas.png" alt="k1 CM2 Syllables: CMU/pkg">
+<p><strong>Syllables: pkg</strong></p>
+<img src="../figs/route1_caretaker_corrected_fixed_effort_atlas/caretaker_k1_cm2_nb_syllables_pkg_fixed_effort_atlas.png" alt="k1 CM2 Syllables: pkg">
+<p><strong>Words</strong></p>
+<img src="../figs/route1_caretaker_corrected_fixed_effort_atlas/caretaker_k1_cm2_nb_words_fixed_effort_atlas.png" alt="k1 CM2 Words">
+<h4>K2 plots</h4>
+<p><strong>Morphemes</strong></p>
+<img src="../figs/route1_caretaker_corrected_fixed_effort_atlas/caretaker_k2_cm2_nb_morphemes_fixed_effort_atlas.png" alt="k2 CM2 Morphemes">
+<p><strong>Phonemes</strong></p>
+<img src="../figs/route1_caretaker_corrected_fixed_effort_atlas/caretaker_k2_cm2_nb_phonemes_fixed_effort_atlas.png" alt="k2 CM2 Phonemes">
+<p><strong>Syllables: CMU/pkg</strong></p>
+<img src="../figs/route1_caretaker_corrected_fixed_effort_atlas/caretaker_k2_cm2_nb_syllables_cmu_or_pkg_fixed_effort_atlas.png" alt="k2 CM2 Syllables: CMU/pkg">
+<p><strong>Syllables: pkg</strong></p>
+<img src="../figs/route1_caretaker_corrected_fixed_effort_atlas/caretaker_k2_cm2_nb_syllables_pkg_fixed_effort_atlas.png" alt="k2 CM2 Syllables: pkg">
+<p><strong>Words</strong></p>
+<img src="../figs/route1_caretaker_corrected_fixed_effort_atlas/caretaker_k2_cm2_nb_words_fixed_effort_atlas.png" alt="k2 CM2 Words">
+<h4>K3 plots</h4>
+<p><strong>Morphemes</strong></p>
+<img src="../figs/route1_caretaker_corrected_fixed_effort_atlas/caretaker_k3_cm2_nb_morphemes_fixed_effort_atlas.png" alt="k3 CM2 Morphemes">
+<p><strong>Phonemes</strong></p>
+<img src="../figs/route1_caretaker_corrected_fixed_effort_atlas/caretaker_k3_cm2_nb_phonemes_fixed_effort_atlas.png" alt="k3 CM2 Phonemes">
+<p><strong>Syllables: CMU/pkg</strong></p>
+<img src="../figs/route1_caretaker_corrected_fixed_effort_atlas/caretaker_k3_cm2_nb_syllables_cmu_or_pkg_fixed_effort_atlas.png" alt="k3 CM2 Syllables: CMU/pkg">
+<p><strong>Syllables: pkg</strong></p>
+<img src="../figs/route1_caretaker_corrected_fixed_effort_atlas/caretaker_k3_cm2_nb_syllables_pkg_fixed_effort_atlas.png" alt="k3 CM2 Syllables: pkg">
+<p><strong>Words</strong></p>
+<img src="../figs/route1_caretaker_corrected_fixed_effort_atlas/caretaker_k3_cm2_nb_words_fixed_effort_atlas.png" alt="k3 CM2 Words">
+<h3>CM3: Age by caretaker effort</h3>
+<p><strong>Question.</strong> Does the caretaker effort-information relation change over the child&#x27;s development?</p>
+<p><strong>Conceptual formula.</strong> <code>caretaker_sum_bits ~ child_age_c * caretaker_effort_c + C(dyad_child_id)</code></p>
+<p><strong>Fitted formula.</strong> <code>sum_bits ~ age_c * effort_c + C(child_id)</code></p>
+<p><strong>Estimator.</strong> Linear regression: ordinary least squares via <code>statsmodels.formula.api.ols</code>.</p>
+<p><strong>Uncertainty.</strong> Child/dyad-cluster robust standard errors.</p>
+<p><strong>Outcome.</strong> Caretaker <code>sum_bits</code>, the total information in the caretaker target utterance.</p>
+<p><strong>Coverage.</strong> 20/20 fitted combinations across K0, K1, K2, K3; effort axes: Morphemes, Phonemes, Syllables: CMU/pkg, Syllables: pkg, Words. Observations per fitted combination: 668,903-668,903. Mean descriptive R2: 0.714.</p>
+<p><strong>Plots below.</strong> Each plot uses this same caretaker model family for one effort unit, then draws prediction lines at fixed observed caretaker-effort values.</p>
+<h4>K0 plots</h4>
+<p><strong>Morphemes</strong></p>
+<img src="../figs/route1_caretaker_corrected_fixed_effort_atlas/caretaker_k0_cm3_nb_morphemes_fixed_effort_atlas.png" alt="k0 CM3 Morphemes">
+<p><strong>Phonemes</strong></p>
+<img src="../figs/route1_caretaker_corrected_fixed_effort_atlas/caretaker_k0_cm3_nb_phonemes_fixed_effort_atlas.png" alt="k0 CM3 Phonemes">
+<p><strong>Syllables: CMU/pkg</strong></p>
+<img src="../figs/route1_caretaker_corrected_fixed_effort_atlas/caretaker_k0_cm3_nb_syllables_cmu_or_pkg_fixed_effort_atlas.png" alt="k0 CM3 Syllables: CMU/pkg">
+<p><strong>Syllables: pkg</strong></p>
+<img src="../figs/route1_caretaker_corrected_fixed_effort_atlas/caretaker_k0_cm3_nb_syllables_pkg_fixed_effort_atlas.png" alt="k0 CM3 Syllables: pkg">
+<p><strong>Words</strong></p>
+<img src="../figs/route1_caretaker_corrected_fixed_effort_atlas/caretaker_k0_cm3_nb_words_fixed_effort_atlas.png" alt="k0 CM3 Words">
+<h4>K1 plots</h4>
+<p><strong>Morphemes</strong></p>
+<img src="../figs/route1_caretaker_corrected_fixed_effort_atlas/caretaker_k1_cm3_nb_morphemes_fixed_effort_atlas.png" alt="k1 CM3 Morphemes">
+<p><strong>Phonemes</strong></p>
+<img src="../figs/route1_caretaker_corrected_fixed_effort_atlas/caretaker_k1_cm3_nb_phonemes_fixed_effort_atlas.png" alt="k1 CM3 Phonemes">
+<p><strong>Syllables: CMU/pkg</strong></p>
+<img src="../figs/route1_caretaker_corrected_fixed_effort_atlas/caretaker_k1_cm3_nb_syllables_cmu_or_pkg_fixed_effort_atlas.png" alt="k1 CM3 Syllables: CMU/pkg">
+<p><strong>Syllables: pkg</strong></p>
+<img src="../figs/route1_caretaker_corrected_fixed_effort_atlas/caretaker_k1_cm3_nb_syllables_pkg_fixed_effort_atlas.png" alt="k1 CM3 Syllables: pkg">
+<p><strong>Words</strong></p>
+<img src="../figs/route1_caretaker_corrected_fixed_effort_atlas/caretaker_k1_cm3_nb_words_fixed_effort_atlas.png" alt="k1 CM3 Words">
+<h4>K2 plots</h4>
+<p><strong>Morphemes</strong></p>
+<img src="../figs/route1_caretaker_corrected_fixed_effort_atlas/caretaker_k2_cm3_nb_morphemes_fixed_effort_atlas.png" alt="k2 CM3 Morphemes">
+<p><strong>Phonemes</strong></p>
+<img src="../figs/route1_caretaker_corrected_fixed_effort_atlas/caretaker_k2_cm3_nb_phonemes_fixed_effort_atlas.png" alt="k2 CM3 Phonemes">
+<p><strong>Syllables: CMU/pkg</strong></p>
+<img src="../figs/route1_caretaker_corrected_fixed_effort_atlas/caretaker_k2_cm3_nb_syllables_cmu_or_pkg_fixed_effort_atlas.png" alt="k2 CM3 Syllables: CMU/pkg">
+<p><strong>Syllables: pkg</strong></p>
+<img src="../figs/route1_caretaker_corrected_fixed_effort_atlas/caretaker_k2_cm3_nb_syllables_pkg_fixed_effort_atlas.png" alt="k2 CM3 Syllables: pkg">
+<p><strong>Words</strong></p>
+<img src="../figs/route1_caretaker_corrected_fixed_effort_atlas/caretaker_k2_cm3_nb_words_fixed_effort_atlas.png" alt="k2 CM3 Words">
+<h4>K3 plots</h4>
+<p><strong>Morphemes</strong></p>
+<img src="../figs/route1_caretaker_corrected_fixed_effort_atlas/caretaker_k3_cm3_nb_morphemes_fixed_effort_atlas.png" alt="k3 CM3 Morphemes">
+<p><strong>Phonemes</strong></p>
+<img src="../figs/route1_caretaker_corrected_fixed_effort_atlas/caretaker_k3_cm3_nb_phonemes_fixed_effort_atlas.png" alt="k3 CM3 Phonemes">
+<p><strong>Syllables: CMU/pkg</strong></p>
+<img src="../figs/route1_caretaker_corrected_fixed_effort_atlas/caretaker_k3_cm3_nb_syllables_cmu_or_pkg_fixed_effort_atlas.png" alt="k3 CM3 Syllables: CMU/pkg">
+<p><strong>Syllables: pkg</strong></p>
+<img src="../figs/route1_caretaker_corrected_fixed_effort_atlas/caretaker_k3_cm3_nb_syllables_pkg_fixed_effort_atlas.png" alt="k3 CM3 Syllables: pkg">
+<p><strong>Words</strong></p>
+<img src="../figs/route1_caretaker_corrected_fixed_effort_atlas/caretaker_k3_cm3_nb_words_fixed_effort_atlas.png" alt="k3 CM3 Words">
+<h3>CM4a: Preceding-context effort added</h3>
+<p><strong>Question.</strong> Does preceding conversational-context effort explain additional caretaker information?</p>
+<p><strong>Conceptual formula.</strong> <code>caretaker_sum_bits ~ child_age_c * caretaker_effort_c + C(dyad_child_id) + preceding_context_caretaker_effort_c</code></p>
+<p><strong>Fitted formula.</strong> <code>sum_bits ~ age_c * effort_c + C(child_id) + preceding_context_effort_c</code></p>
+<p><strong>Estimator.</strong> Linear regression: ordinary least squares via <code>statsmodels.formula.api.ols</code>.</p>
+<p><strong>Uncertainty.</strong> Child/dyad-cluster robust standard errors.</p>
+<p><strong>Outcome.</strong> Caretaker <code>sum_bits</code>, the total information in the caretaker target utterance.</p>
+<p><strong>Coverage.</strong> 15/20 fitted combinations across K0, K1, K2, K3; effort axes: Morphemes, Phonemes, Syllables: CMU/pkg, Syllables: pkg, Words. Observations per fitted combination: 668,903-668,903. Mean descriptive R2: 0.692.</p>
+<p><strong>Plots below.</strong> Each plot uses this same caretaker model family for one effort unit, then draws prediction lines at fixed observed caretaker-effort values.</p>
+<h4>K1 plots</h4>
+<p><strong>Morphemes</strong></p>
+<img src="../figs/route1_caretaker_corrected_fixed_effort_atlas/caretaker_k1_cm4a_nb_morphemes_fixed_effort_atlas.png" alt="k1 CM4a Morphemes">
+<p><strong>Phonemes</strong></p>
+<img src="../figs/route1_caretaker_corrected_fixed_effort_atlas/caretaker_k1_cm4a_nb_phonemes_fixed_effort_atlas.png" alt="k1 CM4a Phonemes">
+<p><strong>Syllables: CMU/pkg</strong></p>
+<img src="../figs/route1_caretaker_corrected_fixed_effort_atlas/caretaker_k1_cm4a_nb_syllables_cmu_or_pkg_fixed_effort_atlas.png" alt="k1 CM4a Syllables: CMU/pkg">
+<p><strong>Syllables: pkg</strong></p>
+<img src="../figs/route1_caretaker_corrected_fixed_effort_atlas/caretaker_k1_cm4a_nb_syllables_pkg_fixed_effort_atlas.png" alt="k1 CM4a Syllables: pkg">
+<p><strong>Words</strong></p>
+<img src="../figs/route1_caretaker_corrected_fixed_effort_atlas/caretaker_k1_cm4a_nb_words_fixed_effort_atlas.png" alt="k1 CM4a Words">
+<h4>K2 plots</h4>
+<p><strong>Morphemes</strong></p>
+<img src="../figs/route1_caretaker_corrected_fixed_effort_atlas/caretaker_k2_cm4a_nb_morphemes_fixed_effort_atlas.png" alt="k2 CM4a Morphemes">
+<p><strong>Phonemes</strong></p>
+<img src="../figs/route1_caretaker_corrected_fixed_effort_atlas/caretaker_k2_cm4a_nb_phonemes_fixed_effort_atlas.png" alt="k2 CM4a Phonemes">
+<p><strong>Syllables: CMU/pkg</strong></p>
+<img src="../figs/route1_caretaker_corrected_fixed_effort_atlas/caretaker_k2_cm4a_nb_syllables_cmu_or_pkg_fixed_effort_atlas.png" alt="k2 CM4a Syllables: CMU/pkg">
+<p><strong>Syllables: pkg</strong></p>
+<img src="../figs/route1_caretaker_corrected_fixed_effort_atlas/caretaker_k2_cm4a_nb_syllables_pkg_fixed_effort_atlas.png" alt="k2 CM4a Syllables: pkg">
+<p><strong>Words</strong></p>
+<img src="../figs/route1_caretaker_corrected_fixed_effort_atlas/caretaker_k2_cm4a_nb_words_fixed_effort_atlas.png" alt="k2 CM4a Words">
+<h4>K3 plots</h4>
+<p><strong>Morphemes</strong></p>
+<img src="../figs/route1_caretaker_corrected_fixed_effort_atlas/caretaker_k3_cm4a_nb_morphemes_fixed_effort_atlas.png" alt="k3 CM4a Morphemes">
+<p><strong>Phonemes</strong></p>
+<img src="../figs/route1_caretaker_corrected_fixed_effort_atlas/caretaker_k3_cm4a_nb_phonemes_fixed_effort_atlas.png" alt="k3 CM4a Phonemes">
+<p><strong>Syllables: CMU/pkg</strong></p>
+<img src="../figs/route1_caretaker_corrected_fixed_effort_atlas/caretaker_k3_cm4a_nb_syllables_cmu_or_pkg_fixed_effort_atlas.png" alt="k3 CM4a Syllables: CMU/pkg">
+<p><strong>Syllables: pkg</strong></p>
+<img src="../figs/route1_caretaker_corrected_fixed_effort_atlas/caretaker_k3_cm4a_nb_syllables_pkg_fixed_effort_atlas.png" alt="k3 CM4a Syllables: pkg">
+<p><strong>Words</strong></p>
+<img src="../figs/route1_caretaker_corrected_fixed_effort_atlas/caretaker_k3_cm4a_nb_words_fixed_effort_atlas.png" alt="k3 CM4a Words">
+<h3>CM4c: Question type added</h3>
+<p><strong>Question.</strong> Does broad preceding-context question type explain additional caretaker information?</p>
+<p><strong>Conceptual formula.</strong> <code>caretaker_sum_bits ~ child_age_c * caretaker_effort_c + C(dyad_child_id) + C(question_type)</code></p>
+<p><strong>Fitted formula.</strong> <code>sum_bits ~ age_c * effort_c + C(child_id) + C(question_type)</code></p>
+<p><strong>Estimator.</strong> Linear regression: ordinary least squares via <code>statsmodels.formula.api.ols</code>.</p>
+<p><strong>Uncertainty.</strong> Child/dyad-cluster robust standard errors.</p>
+<p><strong>Outcome.</strong> Caretaker <code>sum_bits</code>, the total information in the caretaker target utterance.</p>
+<p><strong>Coverage.</strong> 15/20 fitted combinations across K0, K1, K2, K3; effort axes: Morphemes, Phonemes, Syllables: CMU/pkg, Syllables: pkg, Words. Observations per fitted combination: 668,903-668,903. Mean descriptive R2: 0.687.</p>
+<p><strong>Plots below.</strong> Each plot uses this same caretaker model family for one effort unit, then draws prediction lines at fixed observed caretaker-effort values.</p>
+<h4>K1 plots</h4>
+<p><strong>Morphemes</strong></p>
+<img src="../figs/route1_caretaker_corrected_fixed_effort_atlas/caretaker_k1_cm4c_nb_morphemes_fixed_effort_atlas.png" alt="k1 CM4c Morphemes">
+<p><strong>Phonemes</strong></p>
+<img src="../figs/route1_caretaker_corrected_fixed_effort_atlas/caretaker_k1_cm4c_nb_phonemes_fixed_effort_atlas.png" alt="k1 CM4c Phonemes">
+<p><strong>Syllables: CMU/pkg</strong></p>
+<img src="../figs/route1_caretaker_corrected_fixed_effort_atlas/caretaker_k1_cm4c_nb_syllables_cmu_or_pkg_fixed_effort_atlas.png" alt="k1 CM4c Syllables: CMU/pkg">
+<p><strong>Syllables: pkg</strong></p>
+<img src="../figs/route1_caretaker_corrected_fixed_effort_atlas/caretaker_k1_cm4c_nb_syllables_pkg_fixed_effort_atlas.png" alt="k1 CM4c Syllables: pkg">
+<p><strong>Words</strong></p>
+<img src="../figs/route1_caretaker_corrected_fixed_effort_atlas/caretaker_k1_cm4c_nb_words_fixed_effort_atlas.png" alt="k1 CM4c Words">
+<h4>K2 plots</h4>
+<p><strong>Morphemes</strong></p>
+<img src="../figs/route1_caretaker_corrected_fixed_effort_atlas/caretaker_k2_cm4c_nb_morphemes_fixed_effort_atlas.png" alt="k2 CM4c Morphemes">
+<p><strong>Phonemes</strong></p>
+<img src="../figs/route1_caretaker_corrected_fixed_effort_atlas/caretaker_k2_cm4c_nb_phonemes_fixed_effort_atlas.png" alt="k2 CM4c Phonemes">
+<p><strong>Syllables: CMU/pkg</strong></p>
+<img src="../figs/route1_caretaker_corrected_fixed_effort_atlas/caretaker_k2_cm4c_nb_syllables_cmu_or_pkg_fixed_effort_atlas.png" alt="k2 CM4c Syllables: CMU/pkg">
+<p><strong>Syllables: pkg</strong></p>
+<img src="../figs/route1_caretaker_corrected_fixed_effort_atlas/caretaker_k2_cm4c_nb_syllables_pkg_fixed_effort_atlas.png" alt="k2 CM4c Syllables: pkg">
+<p><strong>Words</strong></p>
+<img src="../figs/route1_caretaker_corrected_fixed_effort_atlas/caretaker_k2_cm4c_nb_words_fixed_effort_atlas.png" alt="k2 CM4c Words">
+<h4>K3 plots</h4>
+<p><strong>Morphemes</strong></p>
+<img src="../figs/route1_caretaker_corrected_fixed_effort_atlas/caretaker_k3_cm4c_nb_morphemes_fixed_effort_atlas.png" alt="k3 CM4c Morphemes">
+<p><strong>Phonemes</strong></p>
+<img src="../figs/route1_caretaker_corrected_fixed_effort_atlas/caretaker_k3_cm4c_nb_phonemes_fixed_effort_atlas.png" alt="k3 CM4c Phonemes">
+<p><strong>Syllables: CMU/pkg</strong></p>
+<img src="../figs/route1_caretaker_corrected_fixed_effort_atlas/caretaker_k3_cm4c_nb_syllables_cmu_or_pkg_fixed_effort_atlas.png" alt="k3 CM4c Syllables: CMU/pkg">
+<p><strong>Syllables: pkg</strong></p>
+<img src="../figs/route1_caretaker_corrected_fixed_effort_atlas/caretaker_k3_cm4c_nb_syllables_pkg_fixed_effort_atlas.png" alt="k3 CM4c Syllables: pkg">
+<p><strong>Words</strong></p>
+<img src="../figs/route1_caretaker_corrected_fixed_effort_atlas/caretaker_k3_cm4c_nb_words_fixed_effort_atlas.png" alt="k3 CM4c Words">
+<h3>CM5: Context effort and question type</h3>
+<p><strong>Question.</strong> Do context effort and question type matter after age, caretaker effort, and dyad identity?</p>
+<p><strong>Conceptual formula.</strong> <code>caretaker_sum_bits ~ child_age_c * caretaker_effort_c + C(dyad_child_id) + preceding_context_caretaker_effort_c + C(question_type)</code></p>
+<p><strong>Fitted formula.</strong> <code>sum_bits ~ age_c * effort_c + C(child_id) + preceding_context_effort_c + C(question_type)</code></p>
+<p><strong>Estimator.</strong> Linear regression: ordinary least squares via <code>statsmodels.formula.api.ols</code>.</p>
+<p><strong>Uncertainty.</strong> Child/dyad-cluster robust standard errors.</p>
+<p><strong>Outcome.</strong> Caretaker <code>sum_bits</code>, the total information in the caretaker target utterance.</p>
+<p><strong>Coverage.</strong> 15/20 fitted combinations across K0, K1, K2, K3; effort axes: Morphemes, Phonemes, Syllables: CMU/pkg, Syllables: pkg, Words. Observations per fitted combination: 668,903-668,903. Mean descriptive R2: 0.693.</p>
+<p><strong>Plots below.</strong> Each plot uses this same caretaker model family for one effort unit, then draws prediction lines at fixed observed caretaker-effort values.</p>
+<h4>K1 plots</h4>
+<p><strong>Morphemes</strong></p>
+<img src="../figs/route1_caretaker_corrected_fixed_effort_atlas/caretaker_k1_cm5_nb_morphemes_fixed_effort_atlas.png" alt="k1 CM5 Morphemes">
+<p><strong>Phonemes</strong></p>
+<img src="../figs/route1_caretaker_corrected_fixed_effort_atlas/caretaker_k1_cm5_nb_phonemes_fixed_effort_atlas.png" alt="k1 CM5 Phonemes">
+<p><strong>Syllables: CMU/pkg</strong></p>
+<img src="../figs/route1_caretaker_corrected_fixed_effort_atlas/caretaker_k1_cm5_nb_syllables_cmu_or_pkg_fixed_effort_atlas.png" alt="k1 CM5 Syllables: CMU/pkg">
+<p><strong>Syllables: pkg</strong></p>
+<img src="../figs/route1_caretaker_corrected_fixed_effort_atlas/caretaker_k1_cm5_nb_syllables_pkg_fixed_effort_atlas.png" alt="k1 CM5 Syllables: pkg">
+<p><strong>Words</strong></p>
+<img src="../figs/route1_caretaker_corrected_fixed_effort_atlas/caretaker_k1_cm5_nb_words_fixed_effort_atlas.png" alt="k1 CM5 Words">
+<h4>K2 plots</h4>
+<p><strong>Morphemes</strong></p>
+<img src="../figs/route1_caretaker_corrected_fixed_effort_atlas/caretaker_k2_cm5_nb_morphemes_fixed_effort_atlas.png" alt="k2 CM5 Morphemes">
+<p><strong>Phonemes</strong></p>
+<img src="../figs/route1_caretaker_corrected_fixed_effort_atlas/caretaker_k2_cm5_nb_phonemes_fixed_effort_atlas.png" alt="k2 CM5 Phonemes">
+<p><strong>Syllables: CMU/pkg</strong></p>
+<img src="../figs/route1_caretaker_corrected_fixed_effort_atlas/caretaker_k2_cm5_nb_syllables_cmu_or_pkg_fixed_effort_atlas.png" alt="k2 CM5 Syllables: CMU/pkg">
+<p><strong>Syllables: pkg</strong></p>
+<img src="../figs/route1_caretaker_corrected_fixed_effort_atlas/caretaker_k2_cm5_nb_syllables_pkg_fixed_effort_atlas.png" alt="k2 CM5 Syllables: pkg">
+<p><strong>Words</strong></p>
+<img src="../figs/route1_caretaker_corrected_fixed_effort_atlas/caretaker_k2_cm5_nb_words_fixed_effort_atlas.png" alt="k2 CM5 Words">
+<h4>K3 plots</h4>
+<p><strong>Morphemes</strong></p>
+<img src="../figs/route1_caretaker_corrected_fixed_effort_atlas/caretaker_k3_cm5_nb_morphemes_fixed_effort_atlas.png" alt="k3 CM5 Morphemes">
+<p><strong>Phonemes</strong></p>
+<img src="../figs/route1_caretaker_corrected_fixed_effort_atlas/caretaker_k3_cm5_nb_phonemes_fixed_effort_atlas.png" alt="k3 CM5 Phonemes">
+<p><strong>Syllables: CMU/pkg</strong></p>
+<img src="../figs/route1_caretaker_corrected_fixed_effort_atlas/caretaker_k3_cm5_nb_syllables_cmu_or_pkg_fixed_effort_atlas.png" alt="k3 CM5 Syllables: CMU/pkg">
+<p><strong>Syllables: pkg</strong></p>
+<img src="../figs/route1_caretaker_corrected_fixed_effort_atlas/caretaker_k3_cm5_nb_syllables_pkg_fixed_effort_atlas.png" alt="k3 CM5 Syllables: pkg">
+<p><strong>Words</strong></p>
+<img src="../figs/route1_caretaker_corrected_fixed_effort_atlas/caretaker_k3_cm5_nb_words_fixed_effort_atlas.png" alt="k3 CM5 Words">
+<h3>CM6: Context-effort interactions</h3>
+<p><strong>Question.</strong> Does context-effort sensitivity change with child age or caretaker target effort?</p>
+<p><strong>Conceptual formula.</strong> <code>caretaker_sum_bits ~ child_age_c * caretaker_effort_c + C(dyad_child_id) + preceding_context_caretaker_effort_c + C(question_type) + child_age_c:preceding_context_caretaker_effort_c + caretaker_effort_c:preceding_context_caretaker_effort_c</code></p>
+<p><strong>Fitted formula.</strong> <code>sum_bits ~ age_c * effort_c + C(child_id) + preceding_context_effort_c + C(question_type) + age_c:preceding_context_effort_c + effort_c:preceding_context_effort_c</code></p>
+<p><strong>Estimator.</strong> Linear regression: ordinary least squares via <code>statsmodels.formula.api.ols</code>.</p>
+<p><strong>Uncertainty.</strong> Child/dyad-cluster robust standard errors.</p>
+<p><strong>Outcome.</strong> Caretaker <code>sum_bits</code>, the total information in the caretaker target utterance.</p>
+<p><strong>Coverage.</strong> 15/20 fitted combinations across K0, K1, K2, K3; effort axes: Morphemes, Phonemes, Syllables: CMU/pkg, Syllables: pkg, Words. Observations per fitted combination: 668,903-668,903. Mean descriptive R2: 0.699.</p>
+<p><strong>Plots below.</strong> Each plot uses this same caretaker model family for one effort unit, then draws prediction lines at fixed observed caretaker-effort values.</p>
+<h4>K1 plots</h4>
+<p><strong>Morphemes</strong></p>
+<img src="../figs/route1_caretaker_corrected_fixed_effort_atlas/caretaker_k1_cm6_nb_morphemes_fixed_effort_atlas.png" alt="k1 CM6 Morphemes">
+<p><strong>Phonemes</strong></p>
+<img src="../figs/route1_caretaker_corrected_fixed_effort_atlas/caretaker_k1_cm6_nb_phonemes_fixed_effort_atlas.png" alt="k1 CM6 Phonemes">
+<p><strong>Syllables: CMU/pkg</strong></p>
+<img src="../figs/route1_caretaker_corrected_fixed_effort_atlas/caretaker_k1_cm6_nb_syllables_cmu_or_pkg_fixed_effort_atlas.png" alt="k1 CM6 Syllables: CMU/pkg">
+<p><strong>Syllables: pkg</strong></p>
+<img src="../figs/route1_caretaker_corrected_fixed_effort_atlas/caretaker_k1_cm6_nb_syllables_pkg_fixed_effort_atlas.png" alt="k1 CM6 Syllables: pkg">
+<p><strong>Words</strong></p>
+<img src="../figs/route1_caretaker_corrected_fixed_effort_atlas/caretaker_k1_cm6_nb_words_fixed_effort_atlas.png" alt="k1 CM6 Words">
+<h4>K2 plots</h4>
+<p><strong>Morphemes</strong></p>
+<img src="../figs/route1_caretaker_corrected_fixed_effort_atlas/caretaker_k2_cm6_nb_morphemes_fixed_effort_atlas.png" alt="k2 CM6 Morphemes">
+<p><strong>Phonemes</strong></p>
+<img src="../figs/route1_caretaker_corrected_fixed_effort_atlas/caretaker_k2_cm6_nb_phonemes_fixed_effort_atlas.png" alt="k2 CM6 Phonemes">
+<p><strong>Syllables: CMU/pkg</strong></p>
+<img src="../figs/route1_caretaker_corrected_fixed_effort_atlas/caretaker_k2_cm6_nb_syllables_cmu_or_pkg_fixed_effort_atlas.png" alt="k2 CM6 Syllables: CMU/pkg">
+<p><strong>Syllables: pkg</strong></p>
+<img src="../figs/route1_caretaker_corrected_fixed_effort_atlas/caretaker_k2_cm6_nb_syllables_pkg_fixed_effort_atlas.png" alt="k2 CM6 Syllables: pkg">
+<p><strong>Words</strong></p>
+<img src="../figs/route1_caretaker_corrected_fixed_effort_atlas/caretaker_k2_cm6_nb_words_fixed_effort_atlas.png" alt="k2 CM6 Words">
+<h4>K3 plots</h4>
+<p><strong>Morphemes</strong></p>
+<img src="../figs/route1_caretaker_corrected_fixed_effort_atlas/caretaker_k3_cm6_nb_morphemes_fixed_effort_atlas.png" alt="k3 CM6 Morphemes">
+<p><strong>Phonemes</strong></p>
+<img src="../figs/route1_caretaker_corrected_fixed_effort_atlas/caretaker_k3_cm6_nb_phonemes_fixed_effort_atlas.png" alt="k3 CM6 Phonemes">
+<p><strong>Syllables: CMU/pkg</strong></p>
+<img src="../figs/route1_caretaker_corrected_fixed_effort_atlas/caretaker_k3_cm6_nb_syllables_cmu_or_pkg_fixed_effort_atlas.png" alt="k3 CM6 Syllables: CMU/pkg">
+<p><strong>Syllables: pkg</strong></p>
+<img src="../figs/route1_caretaker_corrected_fixed_effort_atlas/caretaker_k3_cm6_nb_syllables_pkg_fixed_effort_atlas.png" alt="k3 CM6 Syllables: pkg">
+<p><strong>Words</strong></p>
+<img src="../figs/route1_caretaker_corrected_fixed_effort_atlas/caretaker_k3_cm6_nb_words_fixed_effort_atlas.png" alt="k3 CM6 Words">
+<h2>Skipped Or Failed Fits</h2>
+<p>Some requested model/context/effort combinations did not fit. This is expected for k0 models that require preceding context. Exact rows are saved in <code>caretaker_model_summary.csv</code>.</p>
+<h2>Saved Tables And Artifacts</h2>
+<p>The long coefficient tables, fixed-effort prediction grids, slice definitions, and slope summaries are saved as CSV artifacts. They are intentionally not printed in this HTML report because the consultation layer is the model cards and plots above.</p>
+<pre><code>results/route1_caretaker_atlas/full_fit/caretaker_model_summary.csv
+results/route1_caretaker_atlas/full_fit/caretaker_coefficient_long.csv
+results/route1_caretaker_atlas/full_fit/caretaker_fixed_effort_bin_definitions.csv
+results/route1_caretaker_atlas/full_fit/caretaker_fixed_effort_predictions.csv.gz
+results/route1_caretaker_atlas/full_fit/caretaker_fixed_slice_slopes.csv
+results/route1_caretaker_atlas/full_fit/caretaker_figure_manifest.csv
+figs/route1_caretaker_corrected_fixed_effort_atlas/</code></pre>
+</main>
+</body>
+</html>

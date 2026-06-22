@@ -1,0 +1,1712 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Route 1: Real Children Versus Baselines, LSTMs, and Caretakers</title>
+<style>
+:root {
+  color-scheme: light;
+  --ink: #1e2528;
+  --muted: #5e686d;
+  --line: #d9e0df;
+  --paper: #ffffff;
+  --soft: #f5f7f6;
+  --accent: #2f6f73;
+  --accent2: #c76f2c;
+}
+body {
+  margin: 0;
+  background: #eef2f1;
+  color: var(--ink);
+  font: 16px/1.58 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+main {
+  max-width: 980px;
+  margin: 34px auto 56px;
+  padding: 48px 58px;
+  background: var(--paper);
+  box-shadow: 0 18px 50px rgba(31, 45, 48, 0.12);
+}
+h1, h2, h3, h4 {
+  line-height: 1.18;
+  margin: 1.6em 0 0.55em;
+}
+h1 {
+  margin-top: 0;
+  font-size: 2.25rem;
+  border-bottom: 3px solid var(--accent);
+  padding-bottom: 0.45em;
+}
+h2 {
+  font-size: 1.55rem;
+  color: var(--accent);
+}
+h3 {
+  font-size: 1.18rem;
+}
+p {
+  margin: 0.75em 0;
+}
+a {
+  color: var(--accent);
+}
+blockquote {
+  border-left: 4px solid var(--accent2);
+  margin: 1.1em 0;
+  padding: 0.05em 1.1em;
+  color: var(--muted);
+  background: #fff8f2;
+}
+code {
+  background: var(--soft);
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  padding: 0.08em 0.3em;
+  font-family: "SFMono-Regular", Consolas, monospace;
+  font-size: 0.92em;
+}
+pre {
+  background: #f5f7f6;
+  color: var(--ink);
+  border: 1px solid var(--line);
+  padding: 1em;
+  overflow-x: auto;
+  border-radius: 7px;
+}
+pre code {
+  background: transparent;
+  border: 0;
+  padding: 0;
+  color: inherit;
+}
+table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 1.15em 0 1.45em;
+  font-size: 0.95em;
+}
+th, td {
+  border: 1px solid var(--line);
+  padding: 0.54em 0.68em;
+  vertical-align: top;
+}
+th {
+  background: #e7efed;
+  text-align: left;
+}
+tr:nth-child(even) td {
+  background: #fafbfb;
+}
+img {
+  max-width: 100%;
+  display: block;
+  margin: 1.1em auto 0.45em;
+}
+ul, ol {
+  padding-left: 1.4em;
+}
+.caption {
+  color: var(--muted);
+  font-size: 0.92em;
+  margin-top: -0.15em;
+}
+@media print {
+  body {
+    background: white;
+  }
+  main {
+    box-shadow: none;
+    margin: 0;
+    max-width: none;
+    padding: 28px;
+  }
+}
+</style>
+</head>
+<body>
+<main>
+<h1>Route 1: Real Children Versus Baselines, LSTMs, and Caretakers</h1>
+<p>This report systematically contrasts real child utterances with matched generated baselines, LSTM same-length baselines, and caretaker speech over the same developmental age bins.</p>
+<p>The main quantities are:</p>
+<ul>
+<li><strong>No-context information:</strong> <code>sum_bits</code> with <code>context_k = k0</code>.</li>
+<li><strong>With-context information:</strong> <code>sum_bits</code> with <code>context_k = k3</code>, using the preceding three caretaker utterances.</li>
+<li><strong>Context gain:</strong> <code>k0 sum_bits - k3 sum_bits</code>; positive values mean the preceding context made the target more predictable to the scoring model.</li>
+<li><strong>Source gap:</strong> source <code>k3 sum_bits - real-child k3 sum_bits</code>; positive values mean the source is more unpredictable than the real child utterance under the same context.</li>
+<li><strong>Regression-line gap:</strong> source model-predicted k3 bits minus real-child model-predicted k3 bits at the same fixed word count.</li>
+</ul>
+<p>For random, n-gram, and LSTM conditions, comparisons are paired by the same original child utterance. Caretaker comparisons are not utterance-paired; they compare caretaker utterances from the same corpus/session age structure.</p>
+<p>The regression-line layer uses the saved corrected fixed-effort Atlas predictions. The primary line plots use the identity-controlled fixed-effort model (<code>M2</code> for child sources, <code>CM2</code> for caretakers) at 2, 6, and 10 words. The slope-difference plot then asks whether the same downward or upward developmental tendency holds across richer model variants. A downward fixed-effort line means the model predicts fewer information bits at older ages for utterances of the same length.</p>
+<h2>Overview</h2>
+<table>
+<thead><tr>
+<th>source</th>
+<th>rows</th>
+<th>children</th>
+<th>mean_k0</th>
+<th>mean_k3</th>
+<th>mean_gain</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>Bigram</td>
+<td>446508</td>
+<td>21</td>
+<td>54.54</td>
+<td>43.55</td>
+<td>10.99</td>
+</tr>
+<tr>
+<td>Caretaker</td>
+<td>668903</td>
+<td>21</td>
+<td>51.07</td>
+<td>32.16</td>
+<td>18.92</td>
+</tr>
+<tr>
+<td>LSTM k3</td>
+<td>446508</td>
+<td>21</td>
+<td>44.65</td>
+<td>33.06</td>
+<td>11.60</td>
+</tr>
+<tr>
+<td>LSTM k4</td>
+<td>446508</td>
+<td>21</td>
+<td>44.72</td>
+<td>33.09</td>
+<td>11.64</td>
+</tr>
+<tr>
+<td>LSTM k5</td>
+<td>446508</td>
+<td>21</td>
+<td>44.76</td>
+<td>33.08</td>
+<td>11.69</td>
+</tr>
+<tr>
+<td>Random</td>
+<td>446508</td>
+<td>21</td>
+<td>83.29</td>
+<td>75.20</td>
+<td>8.09</td>
+</tr>
+<tr>
+<td>Real child</td>
+<td>446985</td>
+<td>21</td>
+<td>44.24</td>
+<td>31.02</td>
+<td>13.22</td>
+</tr>
+<tr>
+<td>Trigram</td>
+<td>446508</td>
+<td>21</td>
+<td>51.79</td>
+<td>39.86</td>
+<td>11.93</td>
+</tr>
+<tr>
+<td>Unigram</td>
+<td>446508</td>
+<td>21</td>
+<td>59.48</td>
+<td>49.92</td>
+<td>9.56</td>
+</tr>
+</tbody></table>
+<h2>Real vs Random</h2>
+<p>This section shows the no-context trajectory, the with-context trajectory, the context-gain trajectory, and the source-minus-real gap through age.</p>
+<img src="../figs/route1_real_vs_controls_context_report/random_k0_vs_k3_age_means.png" alt="Real vs Random k0 vs k3">
+<img src="../figs/route1_real_vs_controls_context_report/random_k3_with_context_focus.png" alt="Real vs Random with context">
+<img src="../figs/route1_real_vs_controls_context_report/random_context_gain_by_age.png" alt="Real vs Random context gain">
+<img src="../figs/route1_real_vs_controls_context_report/random_real_gap_by_age.png" alt="Real vs Random gaps">
+<h3>Difference Models</h3>
+<p>For generated sources, <code>gap_k3</code> models ask whether the source-real contextual surprisal gap changes with age after child effort and child identity are controlled. <code>gain_gap</code> models ask whether the source benefits more or less from context than real children, and whether that difference changes with age.</p>
+<table>
+<thead><tr>
+<th>source</th>
+<th>test</th>
+<th>mean</th>
+<th>age_slope</th>
+<th>p</th>
+<th>n</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>Random</td>
+<td>gap_k3</td>
+<td>34.402</td>
+<td>0.302</td>
+<td>&lt;.001</td>
+<td>446508</td>
+</tr>
+<tr>
+<td>Random</td>
+<td>gain_gap</td>
+<td>-5.759</td>
+<td>0.009</td>
+<td>0.512</td>
+<td>446508</td>
+</tr>
+</tbody></table>
+<h3>Fixed-Effort Regression Lines</h3>
+<p>These figures show model-based developmental lines at the same production effort. This is the layer that separates communicative-efficiency evidence from ordinary age-related growth in utterance length.</p>
+<img src="../figs/route1_real_vs_controls_context_report/random_m2_k3_fixed_word_regression_lines.png" alt="Real vs Random fixed-effort regression lines">
+<img src="../figs/route1_real_vs_controls_context_report/random_m2_k3_fixed_word_regression_gaps.png" alt="Real vs Random fixed-effort regression gaps">
+<img src="../figs/route1_real_vs_controls_context_report/random_k3_word_model_slope_differences.png" alt="Real vs Random model slope differences">
+<p>Primary fixed-effort slope read under M2/CM2: Random: source slope 1.068 vs real slope -0.735 bits per 6 months (source-real 1.803; real 12/12 downward lines, source 0/12).</p>
+<p>Compact slope read: slopes are average bits per 6 months across the 12 fixed word-count lines. More negative values mean a stronger developmental decrease at fixed effort.</p>
+<table>
+<thead><tr>
+<th>source_label</th>
+<th>model</th>
+<th>real_slope_bits_per_6_months</th>
+<th>source_slope_bits_per_6_months</th>
+<th>source_minus_real_slope</th>
+<th>real_line_directions</th>
+<th>source_line_directions</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>Random</td>
+<td>M2: identity + effort</td>
+<td>-0.735</td>
+<td>1.068</td>
+<td>1.803</td>
+<td>12 down / 12</td>
+<td>0 down / 12</td>
+</tr>
+<tr>
+<td>Random</td>
+<td>M3: age x effort</td>
+<td>-0.817</td>
+<td>1.265</td>
+<td>2.081</td>
+<td>12 down / 12</td>
+<td>0 down / 12</td>
+</tr>
+<tr>
+<td>Random</td>
+<td>M4c: question type</td>
+<td>-0.854</td>
+<td>1.243</td>
+<td>2.096</td>
+<td>12 down / 12</td>
+<td>0 down / 12</td>
+</tr>
+<tr>
+<td>Random</td>
+<td>M5: context controls</td>
+<td>-0.800</td>
+<td>1.282</td>
+<td>2.082</td>
+<td>12 down / 12</td>
+<td>0 down / 12</td>
+</tr>
+<tr>
+<td>Random</td>
+<td>M6: context interactions</td>
+<td>-0.802</td>
+<td>1.303</td>
+<td>2.105</td>
+<td>12 down / 12</td>
+<td>0 down / 12</td>
+</tr>
+<tr>
+<td>Random</td>
+<td>M7: nonlinear age</td>
+<td>-0.714</td>
+<td>1.045</td>
+<td>1.759</td>
+<td>12 down / 12</td>
+<td>0 down / 12</td>
+</tr>
+<tr>
+<td>Random</td>
+<td>M11: age x parent effort</td>
+<td>-0.766</td>
+<td>1.292</td>
+<td>2.058</td>
+<td>12 down / 12</td>
+<td>0 down / 12</td>
+</tr>
+<tr>
+<td>Random</td>
+<td>M15: expanded interactions</td>
+<td>-0.791</td>
+<td>1.301</td>
+<td>2.092</td>
+<td>12 down / 12</td>
+<td>0 down / 12</td>
+</tr>
+</tbody></table>
+<h3>Matched Examples</h3>
+<p>These are illustrative matched rows where the real child utterance has much lower with-context surprisal than the control utterance in the same preceding context. They are examples, not statistical tests.</p>
+<table>
+<thead><tr>
+<th>source_label</th>
+<th>dataset</th>
+<th>child_id</th>
+<th>age_months</th>
+<th>context</th>
+<th>real_child_utterance</th>
+<th>control_utterance</th>
+<th>real_k3_bits</th>
+<th>control_k3_bits</th>
+<th>control_minus_real_k3</th>
+<th>real_context_gain</th>
+<th>control_context_gain</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>Random</td>
+<td>Providence</td>
+<td>Alex</td>
+<td>37.6</td>
+<td>can&#x27;t you sit still for two seconds? Alex you&#x27;re gonna break those honey don&#x27;t bang em. please.</td>
+<td>don&#x27;t don&#x27;t drink the water don&#x27;t don&#x27;t drink the water don&#x27;t don&#x27;t drink the water don&#x27;t don&#x27;t drink the water don&#x27;t d...</td>
+<td>lane flipflop bobby&#x27;s splendid cleaned supermarket baduper picture&#x27;s belonged nuddy peas picture&#x27;s hog mummige sweeties...</td>
+<td>68.93</td>
+<td>1258.22</td>
+<td>1189.29</td>
+<td>3.75</td>
+<td>9.31</td>
+</tr>
+<tr>
+<td>Random</td>
+<td>Providence</td>
+<td>William</td>
+<td>36.9</td>
+<td>yeah. we haven&#x27;t done that. yay.</td>
+<td>a b c d e f g h i j k l m n o p q r s s for q r s t u v w x y and z now I know my abcs next time won&#x27;t you sing with me.</td>
+<td>we&#x27;d punching deet ticktock donkeys pediatric paying climbers cwy weater drums bathios nocchio&#x27;s salamanders coving lic...</td>
+<td>118.16</td>
+<td>859.04</td>
+<td>740.88</td>
+<td>0.3</td>
+<td>8.85</td>
+</tr>
+<tr>
+<td>Random</td>
+<td>Brown</td>
+<td>Adam</td>
+<td>43.2</td>
+<td>did I put that in there? yes. all set.</td>
+<td>chug a chug a chug a chug a chug a chug a chug a chug a chug a chug a chug a chug a chug a chug a chug a chug a chug a...</td>
+<td>napkins mummys battery nan cauldron glennis dodies turtle&#x27;s nanna hoo copaz squigglies pentagon longs lugging polly&#x27;s j...</td>
+<td>52.05</td>
+<td>783.23</td>
+<td>731.18</td>
+<td>12.72</td>
+<td>0.03</td>
+</tr>
+<tr>
+<td>Random</td>
+<td>Manchester</td>
+<td>Anne</td>
+<td>33.3</td>
+<td>you&#x27;re too heavy. yeah. okay.</td>
+<td>one two three four five six seven eight nine ten eleven twelve sixty forty eight nine ten eleven twelve thirty six fort...</td>
+<td>groan genie crashed rouge ratty sw climbers righto likely dog&#x27;s stack gumma uncle tattah chuff akbar jill&#x27;s hopper myst...</td>
+<td>122.01</td>
+<td>812.6</td>
+<td>690.59</td>
+<td>11.89</td>
+<td>13.48</td>
+</tr>
+<tr>
+<td>Random</td>
+<td>Providence</td>
+<td>Naima</td>
+<td>34.6</td>
+<td>here you go. there&#x27;s a puzzle piece. oh.</td>
+<td>hop up my ladies three in a row hop up my ladies three in a row hop up my ladies three in a row hop up my ladies three...</td>
+<td>yellowy head&#x27;s washa burning goofy lizard&#x27;s je carwen chewing fluff pumpkin&#x27;s iceskating tapes crossed whacking lambcho...</td>
+<td>97.51</td>
+<td>740.29</td>
+<td>642.78</td>
+<td>2.5</td>
+<td>7.82</td>
+</tr>
+</tbody></table>
+<h2>Real vs Unigram</h2>
+<p>This section shows the no-context trajectory, the with-context trajectory, the context-gain trajectory, and the source-minus-real gap through age.</p>
+<img src="../figs/route1_real_vs_controls_context_report/unigram_k0_vs_k3_age_means.png" alt="Real vs Unigram k0 vs k3">
+<img src="../figs/route1_real_vs_controls_context_report/unigram_k3_with_context_focus.png" alt="Real vs Unigram with context">
+<img src="../figs/route1_real_vs_controls_context_report/unigram_context_gain_by_age.png" alt="Real vs Unigram context gain">
+<img src="../figs/route1_real_vs_controls_context_report/unigram_real_gap_by_age.png" alt="Real vs Unigram gaps">
+<h3>Difference Models</h3>
+<p>For generated sources, <code>gap_k3</code> models ask whether the source-real contextual surprisal gap changes with age after child effort and child identity are controlled. <code>gain_gap</code> models ask whether the source benefits more or less from context than real children, and whether that difference changes with age.</p>
+<table>
+<thead><tr>
+<th>source</th>
+<th>test</th>
+<th>mean</th>
+<th>age_slope</th>
+<th>p</th>
+<th>n</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>Unigram</td>
+<td>gap_k3</td>
+<td>15.119</td>
+<td>0.103</td>
+<td>&lt;.001</td>
+<td>446508</td>
+</tr>
+<tr>
+<td>Unigram</td>
+<td>gain_gap</td>
+<td>-4.269</td>
+<td>0.018</td>
+<td>0.109</td>
+<td>446508</td>
+</tr>
+</tbody></table>
+<h3>Fixed-Effort Regression Lines</h3>
+<p>These figures show model-based developmental lines at the same production effort. This is the layer that separates communicative-efficiency evidence from ordinary age-related growth in utterance length.</p>
+<img src="../figs/route1_real_vs_controls_context_report/unigram_m2_k3_fixed_word_regression_lines.png" alt="Real vs Unigram fixed-effort regression lines">
+<img src="../figs/route1_real_vs_controls_context_report/unigram_m2_k3_fixed_word_regression_gaps.png" alt="Real vs Unigram fixed-effort regression gaps">
+<img src="../figs/route1_real_vs_controls_context_report/unigram_k3_word_model_slope_differences.png" alt="Real vs Unigram model slope differences">
+<p>Primary fixed-effort slope read under M2/CM2: Unigram: source slope -0.125 vs real slope -0.735 bits per 6 months (source-real 0.610; real 12/12 downward lines, source 12/12).</p>
+<p>Compact slope read: slopes are average bits per 6 months across the 12 fixed word-count lines. More negative values mean a stronger developmental decrease at fixed effort.</p>
+<table>
+<thead><tr>
+<th>source_label</th>
+<th>model</th>
+<th>real_slope_bits_per_6_months</th>
+<th>source_slope_bits_per_6_months</th>
+<th>source_minus_real_slope</th>
+<th>real_line_directions</th>
+<th>source_line_directions</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>Unigram</td>
+<td>M2: identity + effort</td>
+<td>-0.735</td>
+<td>-0.125</td>
+<td>0.610</td>
+<td>12 down / 12</td>
+<td>12 down / 12</td>
+</tr>
+<tr>
+<td>Unigram</td>
+<td>M3: age x effort</td>
+<td>-0.817</td>
+<td>-0.754</td>
+<td>0.063</td>
+<td>12 down / 12</td>
+<td>10 down / 12</td>
+</tr>
+<tr>
+<td>Unigram</td>
+<td>M4c: question type</td>
+<td>-0.854</td>
+<td>-0.778</td>
+<td>0.075</td>
+<td>12 down / 12</td>
+<td>10 down / 12</td>
+</tr>
+<tr>
+<td>Unigram</td>
+<td>M5: context controls</td>
+<td>-0.800</td>
+<td>-0.870</td>
+<td>-0.070</td>
+<td>12 down / 12</td>
+<td>11 down / 12</td>
+</tr>
+<tr>
+<td>Unigram</td>
+<td>M6: context interactions</td>
+<td>-0.802</td>
+<td>-0.846</td>
+<td>-0.044</td>
+<td>12 down / 12</td>
+<td>11 down / 12</td>
+</tr>
+<tr>
+<td>Unigram</td>
+<td>M7: nonlinear age</td>
+<td>-0.714</td>
+<td>-0.114</td>
+<td>0.600</td>
+<td>12 down / 12</td>
+<td>12 down / 12</td>
+</tr>
+<tr>
+<td>Unigram</td>
+<td>M11: age x parent effort</td>
+<td>-0.766</td>
+<td>-0.872</td>
+<td>-0.106</td>
+<td>12 down / 12</td>
+<td>11 down / 12</td>
+</tr>
+<tr>
+<td>Unigram</td>
+<td>M15: expanded interactions</td>
+<td>-0.791</td>
+<td>-0.858</td>
+<td>-0.067</td>
+<td>12 down / 12</td>
+<td>11 down / 12</td>
+</tr>
+</tbody></table>
+<h3>Matched Examples</h3>
+<p>These are illustrative matched rows where the real child utterance has much lower with-context surprisal than the control utterance in the same preceding context. They are examples, not statistical tests.</p>
+<table>
+<thead><tr>
+<th>source_label</th>
+<th>dataset</th>
+<th>child_id</th>
+<th>age_months</th>
+<th>context</th>
+<th>real_child_utterance</th>
+<th>control_utterance</th>
+<th>real_k3_bits</th>
+<th>control_k3_bits</th>
+<th>control_minus_real_k3</th>
+<th>real_context_gain</th>
+<th>control_context_gain</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>Unigram</td>
+<td>Providence</td>
+<td>Alex</td>
+<td>37.6</td>
+<td>Alex you&#x27;re gonna break those honey don&#x27;t bang em. please. ooh I&#x27;m cold cold in here.</td>
+<td>don&#x27;t don&#x27;t drink the water don&#x27;t don&#x27;t drink the water don&#x27;t don&#x27;t drink the water don&#x27;t don&#x27;t drink the water don&#x27;t d...</td>
+<td>no drop jump one taperecorder few in wanna camera wow green school open is underwear eye the paf spell on fit nose thre...</td>
+<td>62.5</td>
+<td>693.96</td>
+<td>631.46</td>
+<td>9.51</td>
+<td>11.84</td>
+</tr>
+<tr>
+<td>Unigram</td>
+<td>Brown</td>
+<td>Adam</td>
+<td>43.2</td>
+<td>did I put that in there? yes. all set.</td>
+<td>chug a chug a chug a chug a chug a chug a chug a chug a chug a chug a chug a chug a chug a chug a chug a chug a chug a...</td>
+<td>has roll is and have not huh spraying whoops what&#x27;s fraser car a night no apples climb a tomato but done tissue bun a d...</td>
+<td>52.05</td>
+<td>523.69</td>
+<td>471.64</td>
+<td>12.72</td>
+<td>8.09</td>
+</tr>
+<tr>
+<td>Unigram</td>
+<td>Providence</td>
+<td>Naima</td>
+<td>34.6</td>
+<td>here you go. there&#x27;s a puzzle piece. oh.</td>
+<td>hop up my ladies three in a row hop up my ladies three in a row hop up my ladies three in a row hop up my ladies three...</td>
+<td>like the oh what what will another gonna daddy bit yes popsicles in who three to on there stool what&#x27;s commydit go blue...</td>
+<td>97.51</td>
+<td>494.32</td>
+<td>396.82</td>
+<td>2.5</td>
+<td>17.04</td>
+</tr>
+<tr>
+<td>Unigram</td>
+<td>Providence</td>
+<td>William</td>
+<td>36.9</td>
+<td>we haven&#x27;t done the alphabet. yeah. we haven&#x27;t done that.</td>
+<td>a b c d e f g h i j k l m n o p q r s t u v w x y and z now I know my abcs next time won&#x27;t you sing with me okay.</td>
+<td>falling a inside brumm train it my i i yeah in bear choo track up the my home do lunch that doesn&#x27;t this yeah those fri...</td>
+<td>82.14</td>
+<td>470.83</td>
+<td>388.69</td>
+<td>12.42</td>
+<td>-3.63</td>
+</tr>
+<tr>
+<td>Unigram</td>
+<td>Manchester</td>
+<td>Anne</td>
+<td>33.3</td>
+<td>you&#x27;re too heavy. yeah. okay.</td>
+<td>one two three four five six seven eight nine ten eleven twelve sixty forty eight nine ten eleven twelve thirty six fort...</td>
+<td>yeah like that what&#x27;s he not what foggy to get way daddy get it a go birthday this play wants no it&#x27;s and do about oh i...</td>
+<td>122.01</td>
+<td>485.63</td>
+<td>363.61</td>
+<td>11.89</td>
+<td>20.28</td>
+</tr>
+</tbody></table>
+<h2>Real vs Bigram</h2>
+<p>This section shows the no-context trajectory, the with-context trajectory, the context-gain trajectory, and the source-minus-real gap through age.</p>
+<img src="../figs/route1_real_vs_controls_context_report/bigram_k0_vs_k3_age_means.png" alt="Real vs Bigram k0 vs k3">
+<img src="../figs/route1_real_vs_controls_context_report/bigram_k3_with_context_focus.png" alt="Real vs Bigram with context">
+<img src="../figs/route1_real_vs_controls_context_report/bigram_context_gain_by_age.png" alt="Real vs Bigram context gain">
+<img src="../figs/route1_real_vs_controls_context_report/bigram_real_gap_by_age.png" alt="Real vs Bigram gaps">
+<h3>Difference Models</h3>
+<p>For generated sources, <code>gap_k3</code> models ask whether the source-real contextual surprisal gap changes with age after child effort and child identity are controlled. <code>gain_gap</code> models ask whether the source benefits more or less from context than real children, and whether that difference changes with age.</p>
+<table>
+<thead><tr>
+<th>source</th>
+<th>test</th>
+<th>mean</th>
+<th>age_slope</th>
+<th>p</th>
+<th>n</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>Bigram</td>
+<td>gap_k3</td>
+<td>10.082</td>
+<td>0.102</td>
+<td>&lt;.001</td>
+<td>446508</td>
+</tr>
+<tr>
+<td>Bigram</td>
+<td>gain_gap</td>
+<td>-2.814</td>
+<td>3.15e-04</td>
+<td>0.982</td>
+<td>446508</td>
+</tr>
+</tbody></table>
+<h3>Fixed-Effort Regression Lines</h3>
+<p>These figures show model-based developmental lines at the same production effort. This is the layer that separates communicative-efficiency evidence from ordinary age-related growth in utterance length.</p>
+<img src="../figs/route1_real_vs_controls_context_report/bigram_m2_k3_fixed_word_regression_lines.png" alt="Real vs Bigram fixed-effort regression lines">
+<img src="../figs/route1_real_vs_controls_context_report/bigram_m2_k3_fixed_word_regression_gaps.png" alt="Real vs Bigram fixed-effort regression gaps">
+<img src="../figs/route1_real_vs_controls_context_report/bigram_k3_word_model_slope_differences.png" alt="Real vs Bigram model slope differences">
+<p>Primary fixed-effort slope read under M2/CM2: Bigram: source slope -0.134 vs real slope -0.735 bits per 6 months (source-real 0.601; real 12/12 downward lines, source 12/12).</p>
+<p>Compact slope read: slopes are average bits per 6 months across the 12 fixed word-count lines. More negative values mean a stronger developmental decrease at fixed effort.</p>
+<table>
+<thead><tr>
+<th>source_label</th>
+<th>model</th>
+<th>real_slope_bits_per_6_months</th>
+<th>source_slope_bits_per_6_months</th>
+<th>source_minus_real_slope</th>
+<th>real_line_directions</th>
+<th>source_line_directions</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>Bigram</td>
+<td>M2: identity + effort</td>
+<td>-0.735</td>
+<td>-0.134</td>
+<td>0.601</td>
+<td>12 down / 12</td>
+<td>12 down / 12</td>
+</tr>
+<tr>
+<td>Bigram</td>
+<td>M3: age x effort</td>
+<td>-0.817</td>
+<td>-0.662</td>
+<td>0.154</td>
+<td>12 down / 12</td>
+<td>11 down / 12</td>
+</tr>
+<tr>
+<td>Bigram</td>
+<td>M4c: question type</td>
+<td>-0.854</td>
+<td>-0.690</td>
+<td>0.164</td>
+<td>12 down / 12</td>
+<td>11 down / 12</td>
+</tr>
+<tr>
+<td>Bigram</td>
+<td>M5: context controls</td>
+<td>-0.800</td>
+<td>-0.751</td>
+<td>0.049</td>
+<td>12 down / 12</td>
+<td>11 down / 12</td>
+</tr>
+<tr>
+<td>Bigram</td>
+<td>M6: context interactions</td>
+<td>-0.802</td>
+<td>-0.725</td>
+<td>0.077</td>
+<td>12 down / 12</td>
+<td>11 down / 12</td>
+</tr>
+<tr>
+<td>Bigram</td>
+<td>M7: nonlinear age</td>
+<td>-0.714</td>
+<td>-0.130</td>
+<td>0.584</td>
+<td>12 down / 12</td>
+<td>12 down / 12</td>
+</tr>
+<tr>
+<td>Bigram</td>
+<td>M11: age x parent effort</td>
+<td>-0.766</td>
+<td>-0.745</td>
+<td>0.020</td>
+<td>12 down / 12</td>
+<td>11 down / 12</td>
+</tr>
+<tr>
+<td>Bigram</td>
+<td>M15: expanded interactions</td>
+<td>-0.791</td>
+<td>-0.731</td>
+<td>0.060</td>
+<td>12 down / 12</td>
+<td>11 down / 12</td>
+</tr>
+</tbody></table>
+<h3>Matched Examples</h3>
+<p>These are illustrative matched rows where the real child utterance has much lower with-context surprisal than the control utterance in the same preceding context. They are examples, not statistical tests.</p>
+<table>
+<thead><tr>
+<th>source_label</th>
+<th>dataset</th>
+<th>child_id</th>
+<th>age_months</th>
+<th>context</th>
+<th>real_child_utterance</th>
+<th>control_utterance</th>
+<th>real_k3_bits</th>
+<th>control_k3_bits</th>
+<th>control_minus_real_k3</th>
+<th>real_context_gain</th>
+<th>control_context_gain</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>Bigram</td>
+<td>Providence</td>
+<td>Alex</td>
+<td>37.6</td>
+<td>Alex you&#x27;re gonna break those honey don&#x27;t bang em. please. ooh I&#x27;m cold cold in here.</td>
+<td>don&#x27;t don&#x27;t drink the water don&#x27;t don&#x27;t drink the water don&#x27;t don&#x27;t drink the water don&#x27;t don&#x27;t drink the water don&#x27;t d...</td>
+<td>doctor yeah red pepper pepper ah again what&#x27;s the train bye doggie bird there yeah alice mommy read this is who who you...</td>
+<td>62.5</td>
+<td>611.43</td>
+<td>548.93</td>
+<td>9.51</td>
+<td>7.37</td>
+</tr>
+<tr>
+<td>Bigram</td>
+<td>Brown</td>
+<td>Adam</td>
+<td>43.2</td>
+<td>did I put that in there? yes. all set.</td>
+<td>chug a chug a chug a chug a chug a chug a chug a chug a chug a chug a chug a chug a chug a chug a chug a chug a chug a...</td>
+<td>and bump my baby ah catch him to stabilize it my shopping bag yet it&#x27;s not broked another caterpillar not working littl...</td>
+<td>52.05</td>
+<td>474.93</td>
+<td>422.88</td>
+<td>12.72</td>
+<td>13.47</td>
+</tr>
+<tr>
+<td>Bigram</td>
+<td>Providence</td>
+<td>William</td>
+<td>36.9</td>
+<td>yeah. we haven&#x27;t done that. yay.</td>
+<td>a b c d e f g h i j k l m n o p q r s s for q r s t u v w x y and z now I know my abcs next time won&#x27;t you sing with me.</td>
+<td>flap flap book could put this tractor trailer shed no bees he&#x27;s a star there that&#x27;s green shoes and um raspberries and...</td>
+<td>118.16</td>
+<td>412.26</td>
+<td>294.11</td>
+<td>0.3</td>
+<td>9.92</td>
+</tr>
+<tr>
+<td>Bigram</td>
+<td>Manchester</td>
+<td>Anne</td>
+<td>33.3</td>
+<td>you&#x27;re too heavy. yeah. okay.</td>
+<td>one two three four five six seven eight nine ten eleven twelve sixty forty eight nine ten eleven twelve thirty six fort...</td>
+<td>right yes i fell out here oh it yeah come with toys yes does sit here why it yeah it&#x27;s a firefighter it i can&#x27;t put on...</td>
+<td>122.01</td>
+<td>408.95</td>
+<td>286.94</td>
+<td>11.89</td>
+<td>17.05</td>
+</tr>
+<tr>
+<td>Bigram</td>
+<td>Providence</td>
+<td>Naima</td>
+<td>34.6</td>
+<td>here you go. there&#x27;s a puzzle piece. oh.</td>
+<td>hop up my ladies three in a row hop up my ladies three in a row hop up my ladies three in a row hop up my ladies three...</td>
+<td>other one for my head banana go like that green i wanna come from i don&#x27;t know get him up to mummy ow sit down i&#x27;m put...</td>
+<td>97.51</td>
+<td>378.19</td>
+<td>280.69</td>
+<td>2.5</td>
+<td>13.31</td>
+</tr>
+</tbody></table>
+<h2>Real vs Trigram</h2>
+<p>This section shows the no-context trajectory, the with-context trajectory, the context-gain trajectory, and the source-minus-real gap through age.</p>
+<img src="../figs/route1_real_vs_controls_context_report/trigram_k0_vs_k3_age_means.png" alt="Real vs Trigram k0 vs k3">
+<img src="../figs/route1_real_vs_controls_context_report/trigram_k3_with_context_focus.png" alt="Real vs Trigram with context">
+<img src="../figs/route1_real_vs_controls_context_report/trigram_context_gain_by_age.png" alt="Real vs Trigram context gain">
+<img src="../figs/route1_real_vs_controls_context_report/trigram_real_gap_by_age.png" alt="Real vs Trigram gaps">
+<h3>Difference Models</h3>
+<p>For generated sources, <code>gap_k3</code> models ask whether the source-real contextual surprisal gap changes with age after child effort and child identity are controlled. <code>gain_gap</code> models ask whether the source benefits more or less from context than real children, and whether that difference changes with age.</p>
+<table>
+<thead><tr>
+<th>source</th>
+<th>test</th>
+<th>mean</th>
+<th>age_slope</th>
+<th>p</th>
+<th>n</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>Trigram</td>
+<td>gap_k3</td>
+<td>6.964</td>
+<td>0.109</td>
+<td>&lt;.001</td>
+<td>446508</td>
+</tr>
+<tr>
+<td>Trigram</td>
+<td>gain_gap</td>
+<td>-1.747</td>
+<td>-0.013</td>
+<td>0.325</td>
+<td>446508</td>
+</tr>
+</tbody></table>
+<h3>Fixed-Effort Regression Lines</h3>
+<p>These figures show model-based developmental lines at the same production effort. This is the layer that separates communicative-efficiency evidence from ordinary age-related growth in utterance length.</p>
+<img src="../figs/route1_real_vs_controls_context_report/trigram_m2_k3_fixed_word_regression_lines.png" alt="Real vs Trigram fixed-effort regression lines">
+<img src="../figs/route1_real_vs_controls_context_report/trigram_m2_k3_fixed_word_regression_gaps.png" alt="Real vs Trigram fixed-effort regression gaps">
+<img src="../figs/route1_real_vs_controls_context_report/trigram_k3_word_model_slope_differences.png" alt="Real vs Trigram model slope differences">
+<p>Primary fixed-effort slope read under M2/CM2: Trigram: source slope -0.092 vs real slope -0.735 bits per 6 months (source-real 0.643; real 12/12 downward lines, source 12/12).</p>
+<p>Compact slope read: slopes are average bits per 6 months across the 12 fixed word-count lines. More negative values mean a stronger developmental decrease at fixed effort.</p>
+<table>
+<thead><tr>
+<th>source_label</th>
+<th>model</th>
+<th>real_slope_bits_per_6_months</th>
+<th>source_slope_bits_per_6_months</th>
+<th>source_minus_real_slope</th>
+<th>real_line_directions</th>
+<th>source_line_directions</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>Trigram</td>
+<td>M2: identity + effort</td>
+<td>-0.735</td>
+<td>-0.092</td>
+<td>0.643</td>
+<td>12 down / 12</td>
+<td>12 down / 12</td>
+</tr>
+<tr>
+<td>Trigram</td>
+<td>M3: age x effort</td>
+<td>-0.817</td>
+<td>-0.354</td>
+<td>0.463</td>
+<td>12 down / 12</td>
+<td>11 down / 12</td>
+</tr>
+<tr>
+<td>Trigram</td>
+<td>M4c: question type</td>
+<td>-0.854</td>
+<td>-0.386</td>
+<td>0.467</td>
+<td>12 down / 12</td>
+<td>11 down / 12</td>
+</tr>
+<tr>
+<td>Trigram</td>
+<td>M5: context controls</td>
+<td>-0.800</td>
+<td>-0.425</td>
+<td>0.375</td>
+<td>12 down / 12</td>
+<td>11 down / 12</td>
+</tr>
+<tr>
+<td>Trigram</td>
+<td>M6: context interactions</td>
+<td>-0.802</td>
+<td>-0.389</td>
+<td>0.413</td>
+<td>12 down / 12</td>
+<td>11 down / 12</td>
+</tr>
+<tr>
+<td>Trigram</td>
+<td>M7: nonlinear age</td>
+<td>-0.714</td>
+<td>-0.092</td>
+<td>0.622</td>
+<td>12 down / 12</td>
+<td>12 down / 12</td>
+</tr>
+<tr>
+<td>Trigram</td>
+<td>M11: age x parent effort</td>
+<td>-0.766</td>
+<td>-0.413</td>
+<td>0.352</td>
+<td>12 down / 12</td>
+<td>11 down / 12</td>
+</tr>
+<tr>
+<td>Trigram</td>
+<td>M15: expanded interactions</td>
+<td>-0.791</td>
+<td>-0.391</td>
+<td>0.400</td>
+<td>12 down / 12</td>
+<td>11 down / 12</td>
+</tr>
+</tbody></table>
+<h3>Matched Examples</h3>
+<p>These are illustrative matched rows where the real child utterance has much lower with-context surprisal than the control utterance in the same preceding context. They are examples, not statistical tests.</p>
+<table>
+<thead><tr>
+<th>source_label</th>
+<th>dataset</th>
+<th>child_id</th>
+<th>age_months</th>
+<th>context</th>
+<th>real_child_utterance</th>
+<th>control_utterance</th>
+<th>real_k3_bits</th>
+<th>control_k3_bits</th>
+<th>control_minus_real_k3</th>
+<th>real_context_gain</th>
+<th>control_context_gain</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>Trigram</td>
+<td>Providence</td>
+<td>Alex</td>
+<td>37.6</td>
+<td>can&#x27;t you sit still for two seconds? Alex you&#x27;re gonna break those honey don&#x27;t bang em. please.</td>
+<td>don&#x27;t don&#x27;t drink the water don&#x27;t don&#x27;t drink the water don&#x27;t don&#x27;t drink the water don&#x27;t don&#x27;t drink the water don&#x27;t d...</td>
+<td>please i&#x27;m too little it&#x27;s too heavy here re some crayons for you glue it now brumm warren look at live in barn mommy w...</td>
+<td>68.93</td>
+<td>615.96</td>
+<td>547.03</td>
+<td>3.75</td>
+<td>40.56</td>
+</tr>
+<tr>
+<td>Trigram</td>
+<td>Brown</td>
+<td>Adam</td>
+<td>43.2</td>
+<td>did I put that in there? yes. all set.</td>
+<td>chug a chug a chug a chug a chug a chug a chug a chug a chug a chug a chug a chug a chug a chug a chug a chug a chug a...</td>
+<td>daddy daddy daddy daddy daddy wanna build castle um i draw this for mummy that&#x27;s line and go round my tape downstairs g...</td>
+<td>52.05</td>
+<td>383.74</td>
+<td>331.7</td>
+<td>12.72</td>
+<td>12.21</td>
+</tr>
+<tr>
+<td>Trigram</td>
+<td>Providence</td>
+<td>William</td>
+<td>36.9</td>
+<td>we haven&#x27;t done the alphabet. yeah. we haven&#x27;t done that.</td>
+<td>a b c d e f g h i j k l m n o p q r s t u v w x y and z now I know my abcs next time won&#x27;t you sing with me okay.</td>
+<td>what mummy egg lid on there nice tiger come ditiduck story one more going get the door i making it now this come from i...</td>
+<td>82.14</td>
+<td>413.72</td>
+<td>331.58</td>
+<td>12.42</td>
+<td>5.1</td>
+</tr>
+<tr>
+<td>Trigram</td>
+<td>Providence</td>
+<td>Naima</td>
+<td>34.6</td>
+<td>here you go. there&#x27;s a puzzle piece. oh.</td>
+<td>hop up my ladies three in a row hop up my ladies three in a row hop up my ladies three in a row hop up my ladies three...</td>
+<td>it&#x27;s lemon no no you&#x27;re a bird bird tweet tweet tweet tweet tweet tweet tweet tweet tweet what&#x27;s that for the cows are...</td>
+<td>97.51</td>
+<td>319.99</td>
+<td>222.48</td>
+<td>2.5</td>
+<td>21.38</td>
+</tr>
+<tr>
+<td>Trigram</td>
+<td>Providence</td>
+<td>Lily</td>
+<td>43.8</td>
+<td>you got that extra piece. yeah two more. uh huh.</td>
+<td>and then we put the the one in and then you put the one in and then we put the and then we put the other last one in.</td>
+<td>clips i&#x27;ll beat you my friend yeah play basketball camp okay i broke this more happy you you got another bit come from...</td>
+<td>95.31</td>
+<td>305.03</td>
+<td>209.72</td>
+<td>28.82</td>
+<td>24.31</td>
+</tr>
+</tbody></table>
+<h2>Real vs LSTMs</h2>
+<p>This section shows the no-context trajectory, the with-context trajectory, the context-gain trajectory, and the source-minus-real gap through age.</p>
+<img src="../figs/route1_real_vs_controls_context_report/lstm_k0_vs_k3_age_means.png" alt="Real vs LSTMs k0 vs k3">
+<img src="../figs/route1_real_vs_controls_context_report/lstm_k3_with_context_focus.png" alt="Real vs LSTMs with context">
+<img src="../figs/route1_real_vs_controls_context_report/lstm_context_gain_by_age.png" alt="Real vs LSTMs context gain">
+<img src="../figs/route1_real_vs_controls_context_report/lstm_real_gap_by_age.png" alt="Real vs LSTMs gaps">
+<h3>Difference Models</h3>
+<p>For generated sources, <code>gap_k3</code> models ask whether the source-real contextual surprisal gap changes with age after child effort and child identity are controlled. <code>gain_gap</code> models ask whether the source benefits more or less from context than real children, and whether that difference changes with age.</p>
+<table>
+<thead><tr>
+<th>source</th>
+<th>test</th>
+<th>mean</th>
+<th>age_slope</th>
+<th>p</th>
+<th>n</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>LSTM k3</td>
+<td>gap_k3</td>
+<td>1.707</td>
+<td>0.078</td>
+<td>0.020</td>
+<td>446508</td>
+</tr>
+<tr>
+<td>LSTM k3</td>
+<td>gain_gap</td>
+<td>-2.241</td>
+<td>0.026</td>
+<td>0.028</td>
+<td>446508</td>
+</tr>
+<tr>
+<td>LSTM k4</td>
+<td>gap_k3</td>
+<td>1.798</td>
+<td>0.066</td>
+<td>0.066</td>
+<td>446508</td>
+</tr>
+<tr>
+<td>LSTM k4</td>
+<td>gain_gap</td>
+<td>-2.142</td>
+<td>0.033</td>
+<td>0.002</td>
+<td>446508</td>
+</tr>
+<tr>
+<td>LSTM k5</td>
+<td>gap_k3</td>
+<td>1.799</td>
+<td>0.064</td>
+<td>0.074</td>
+<td>446508</td>
+</tr>
+<tr>
+<td>LSTM k5</td>
+<td>gain_gap</td>
+<td>-2.159</td>
+<td>0.033</td>
+<td>0.003</td>
+<td>446508</td>
+</tr>
+</tbody></table>
+<h3>Fixed-Effort Regression Lines</h3>
+<p>These figures show model-based developmental lines at the same production effort. This is the layer that separates communicative-efficiency evidence from ordinary age-related growth in utterance length.</p>
+<img src="../figs/route1_real_vs_controls_context_report/lstm_m2_k3_fixed_word_regression_lines.png" alt="Real vs LSTMs fixed-effort regression lines">
+<img src="../figs/route1_real_vs_controls_context_report/lstm_m2_k3_fixed_word_regression_gaps.png" alt="Real vs LSTMs fixed-effort regression gaps">
+<img src="../figs/route1_real_vs_controls_context_report/lstm_k3_word_model_slope_differences.png" alt="Real vs LSTMs model slope differences">
+<p>Primary fixed-effort slope read under M2/CM2: LSTM k3: source slope -0.279 vs real slope -0.735 bits per 6 months (source-real 0.456; real 12/12 downward lines, source 12/12). LSTM k4: source slope -0.351 vs real slope -0.735 bits per 6 months (source-real 0.384; real 12/12 downward lines, source 12/12). LSTM k5: source slope -0.363 vs real slope -0.735 bits per 6 months (source-real 0.372; real 12/12 downward lines, source 12/12).</p>
+<p>Compact slope read: slopes are average bits per 6 months across the 12 fixed word-count lines. More negative values mean a stronger developmental decrease at fixed effort.</p>
+<table>
+<thead><tr>
+<th>source_label</th>
+<th>model</th>
+<th>real_slope_bits_per_6_months</th>
+<th>source_slope_bits_per_6_months</th>
+<th>source_minus_real_slope</th>
+<th>real_line_directions</th>
+<th>source_line_directions</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>LSTM k3</td>
+<td>M2: identity + effort</td>
+<td>-0.735</td>
+<td>-0.279</td>
+<td>0.456</td>
+<td>12 down / 12</td>
+<td>12 down / 12</td>
+</tr>
+<tr>
+<td>LSTM k4</td>
+<td>M2: identity + effort</td>
+<td>-0.735</td>
+<td>-0.351</td>
+<td>0.384</td>
+<td>12 down / 12</td>
+<td>12 down / 12</td>
+</tr>
+<tr>
+<td>LSTM k5</td>
+<td>M2: identity + effort</td>
+<td>-0.735</td>
+<td>-0.363</td>
+<td>0.372</td>
+<td>12 down / 12</td>
+<td>12 down / 12</td>
+</tr>
+<tr>
+<td>LSTM k3</td>
+<td>M3: age x effort</td>
+<td>-0.817</td>
+<td>-0.744</td>
+<td>0.073</td>
+<td>12 down / 12</td>
+<td>12 down / 12</td>
+</tr>
+<tr>
+<td>LSTM k4</td>
+<td>M3: age x effort</td>
+<td>-0.817</td>
+<td>-0.879</td>
+<td>-0.062</td>
+<td>12 down / 12</td>
+<td>12 down / 12</td>
+</tr>
+<tr>
+<td>LSTM k5</td>
+<td>M3: age x effort</td>
+<td>-0.817</td>
+<td>-0.816</td>
+<td>8.83e-04</td>
+<td>12 down / 12</td>
+<td>12 down / 12</td>
+</tr>
+<tr>
+<td>LSTM k3</td>
+<td>M4c: question type</td>
+<td>-0.854</td>
+<td>-0.776</td>
+<td>0.078</td>
+<td>12 down / 12</td>
+<td>12 down / 12</td>
+</tr>
+<tr>
+<td>LSTM k4</td>
+<td>M4c: question type</td>
+<td>-0.854</td>
+<td>-0.913</td>
+<td>-0.059</td>
+<td>12 down / 12</td>
+<td>12 down / 12</td>
+</tr>
+<tr>
+<td>LSTM k5</td>
+<td>M4c: question type</td>
+<td>-0.854</td>
+<td>-0.848</td>
+<td>0.005</td>
+<td>12 down / 12</td>
+<td>12 down / 12</td>
+</tr>
+<tr>
+<td>LSTM k3</td>
+<td>M5: context controls</td>
+<td>-0.800</td>
+<td>-0.862</td>
+<td>-0.062</td>
+<td>12 down / 12</td>
+<td>12 down / 12</td>
+</tr>
+<tr>
+<td>LSTM k4</td>
+<td>M5: context controls</td>
+<td>-0.800</td>
+<td>-0.965</td>
+<td>-0.165</td>
+<td>12 down / 12</td>
+<td>12 down / 12</td>
+</tr>
+<tr>
+<td>LSTM k5</td>
+<td>M5: context controls</td>
+<td>-0.800</td>
+<td>-0.923</td>
+<td>-0.123</td>
+<td>12 down / 12</td>
+<td>12 down / 12</td>
+</tr>
+<tr>
+<td>LSTM k3</td>
+<td>M6: context interactions</td>
+<td>-0.802</td>
+<td>-0.841</td>
+<td>-0.039</td>
+<td>12 down / 12</td>
+<td>12 down / 12</td>
+</tr>
+<tr>
+<td>LSTM k4</td>
+<td>M6: context interactions</td>
+<td>-0.802</td>
+<td>-0.950</td>
+<td>-0.148</td>
+<td>12 down / 12</td>
+<td>12 down / 12</td>
+</tr>
+<tr>
+<td>LSTM k5</td>
+<td>M6: context interactions</td>
+<td>-0.802</td>
+<td>-0.908</td>
+<td>-0.106</td>
+<td>12 down / 12</td>
+<td>12 down / 12</td>
+</tr>
+<tr>
+<td>LSTM k3</td>
+<td>M7: nonlinear age</td>
+<td>-0.714</td>
+<td>-0.261</td>
+<td>0.453</td>
+<td>12 down / 12</td>
+<td>12 down / 12</td>
+</tr>
+<tr>
+<td>LSTM k4</td>
+<td>M7: nonlinear age</td>
+<td>-0.714</td>
+<td>-0.327</td>
+<td>0.387</td>
+<td>12 down / 12</td>
+<td>12 down / 12</td>
+</tr>
+<tr>
+<td>LSTM k5</td>
+<td>M7: nonlinear age</td>
+<td>-0.714</td>
+<td>-0.340</td>
+<td>0.374</td>
+<td>12 down / 12</td>
+<td>12 down / 12</td>
+</tr>
+<tr>
+<td>LSTM k3</td>
+<td>M11: age x parent effort</td>
+<td>-0.766</td>
+<td>-0.857</td>
+<td>-0.092</td>
+<td>12 down / 12</td>
+<td>12 down / 12</td>
+</tr>
+<tr>
+<td>LSTM k4</td>
+<td>M11: age x parent effort</td>
+<td>-0.766</td>
+<td>-0.973</td>
+<td>-0.207</td>
+<td>12 down / 12</td>
+<td>12 down / 12</td>
+</tr>
+<tr>
+<td>LSTM k5</td>
+<td>M11: age x parent effort</td>
+<td>-0.766</td>
+<td>-0.921</td>
+<td>-0.156</td>
+<td>12 down / 12</td>
+<td>12 down / 12</td>
+</tr>
+<tr>
+<td>LSTM k3</td>
+<td>M15: expanded interactions</td>
+<td>-0.791</td>
+<td>-0.845</td>
+<td>-0.054</td>
+<td>12 down / 12</td>
+<td>12 down / 12</td>
+</tr>
+<tr>
+<td>LSTM k4</td>
+<td>M15: expanded interactions</td>
+<td>-0.791</td>
+<td>-0.968</td>
+<td>-0.177</td>
+<td>12 down / 12</td>
+<td>12 down / 12</td>
+</tr>
+<tr>
+<td>LSTM k5</td>
+<td>M15: expanded interactions</td>
+<td>-0.791</td>
+<td>-0.914</td>
+<td>-0.123</td>
+<td>12 down / 12</td>
+<td>12 down / 12</td>
+</tr>
+</tbody></table>
+<h3>Matched Examples</h3>
+<p>These are illustrative matched rows where the real child utterance has much lower with-context surprisal than the control utterance in the same preceding context. They are examples, not statistical tests.</p>
+<table>
+<thead><tr>
+<th>source_label</th>
+<th>dataset</th>
+<th>child_id</th>
+<th>age_months</th>
+<th>context</th>
+<th>real_child_utterance</th>
+<th>control_utterance</th>
+<th>real_k3_bits</th>
+<th>control_k3_bits</th>
+<th>control_minus_real_k3</th>
+<th>real_context_gain</th>
+<th>control_context_gain</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>LSTM k3</td>
+<td>Providence</td>
+<td>Alex</td>
+<td>37.6</td>
+<td>can&#x27;t you sit still for two seconds? Alex you&#x27;re gonna break those honey don&#x27;t bang em. please.</td>
+<td>don&#x27;t don&#x27;t drink the water don&#x27;t don&#x27;t drink the water don&#x27;t don&#x27;t drink the water don&#x27;t don&#x27;t drink the water don&#x27;t d...</td>
+<td>what have that noise too day mommy mommy to do this trick one this this like this or this one no this one this one this...</td>
+<td>68.93</td>
+<td>470.34</td>
+<td>401.41</td>
+<td>3.75</td>
+<td>23.26</td>
+</tr>
+<tr>
+<td>LSTM k3</td>
+<td>Brown</td>
+<td>Adam</td>
+<td>43.2</td>
+<td>did I put that in there? yes. all set.</td>
+<td>chug a chug a chug a chug a chug a chug a chug a chug a chug a chug a chug a chug a chug a chug a chug a chug a chug a...</td>
+<td>i not going to find some milk milk mommy bear i have a drink of milk in there to eat you and a lunch for daddy to you c...</td>
+<td>52.05</td>
+<td>300.83</td>
+<td>248.78</td>
+<td>12.72</td>
+<td>5.78</td>
+</tr>
+<tr>
+<td>LSTM k3</td>
+<td>Brown</td>
+<td>Eve</td>
+<td>18.0</td>
+<td>would you like your milk over there? that&#x27;s a skunk. skunk.</td>
+<td>paper pencil pencil pencil pencil pencil pencil pencil pencil paper paper pencil pencil pencil pencil pencil pencil pen...</td>
+<td>more juice there juice back out car car there daddy in fraser too big up water paper out out the boat outside the water.</td>
+<td>62.76</td>
+<td>233.86</td>
+<td>171.1</td>
+<td>15.23</td>
+<td>23.92</td>
+</tr>
+<tr>
+<td>LSTM k3</td>
+<td>Providence</td>
+<td>Naima</td>
+<td>34.6</td>
+<td>here you go. there&#x27;s a puzzle piece. oh.</td>
+<td>hop up my ladies three in a row hop up my ladies three in a row hop up my ladies three in a row hop up my ladies three...</td>
+<td>um daddy lives to sleep at the top in the sky and the um um the orange and green bean and her and that&#x27;s a purple and u...</td>
+<td>97.51</td>
+<td>259.77</td>
+<td>162.27</td>
+<td>2.5</td>
+<td>23.81</td>
+</tr>
+<tr>
+<td>LSTM k3</td>
+<td>Providence</td>
+<td>William</td>
+<td>36.9</td>
+<td>we haven&#x27;t done the alphabet. yeah. we haven&#x27;t done that.</td>
+<td>a b c d e f g h i j k l m n o p q r s t u v w x y and z now I know my abcs next time won&#x27;t you sing with me okay.</td>
+<td>a b one day a piece o e f g j j j j j j j j j k k k k k a little car don&#x27;t don&#x27;t know that we will want to put that ove...</td>
+<td>82.14</td>
+<td>238.55</td>
+<td>156.41</td>
+<td>12.42</td>
+<td>1.76</td>
+</tr>
+<tr>
+<td>LSTM k4</td>
+<td>Providence</td>
+<td>Alex</td>
+<td>37.6</td>
+<td>can&#x27;t you sit still for two seconds? Alex you&#x27;re gonna break those honey don&#x27;t bang em. please.</td>
+<td>don&#x27;t don&#x27;t drink the water don&#x27;t don&#x27;t drink the water don&#x27;t don&#x27;t drink the water don&#x27;t don&#x27;t drink the water don&#x27;t d...</td>
+<td>see it with me daddy with it and it&#x27;s it is a cat and this is um this is a black one white black white white triangle b...</td>
+<td>68.93</td>
+<td>486.74</td>
+<td>417.8</td>
+<td>3.75</td>
+<td>10.18</td>
+</tr>
+<tr>
+<td>LSTM k4</td>
+<td>Brown</td>
+<td>Adam</td>
+<td>43.2</td>
+<td>did I put that in there? yes. all set.</td>
+<td>chug a chug a chug a chug a chug a chug a chug a chug a chug a chug a chug a chug a chug a chug a chug a chug a chug a...</td>
+<td>yes please please please please please now a ball for warren while a lady with a drink the water don&#x27;t don&#x27;t don&#x27;t spil...</td>
+<td>52.05</td>
+<td>336.93</td>
+<td>284.88</td>
+<td>12.72</td>
+<td>11.19</td>
+</tr>
+<tr>
+<td>LSTM k4</td>
+<td>Providence</td>
+<td>Naima</td>
+<td>34.6</td>
+<td>here you go. there&#x27;s a puzzle piece. oh.</td>
+<td>hop up my ladies three in a row hop up my ladies three in a row hop up my ladies three in a row hop up my ladies three...</td>
+<td>there the neenaw is going to park on her on the floor then he didn&#x27;t he says he&#x27;s saying a a big present to you you&#x27;re...</td>
+<td>97.51</td>
+<td>303.71</td>
+<td>206.2</td>
+<td>2.5</td>
+<td>24.41</td>
+</tr>
+</tbody></table>
+<h2>Real vs Caretakers</h2>
+<p>This section shows the no-context trajectory, the with-context trajectory, the context-gain trajectory, and the source-minus-real gap through age.</p>
+<img src="../figs/route1_real_vs_controls_context_report/caretaker_k0_vs_k3_age_means.png" alt="Real vs Caretakers k0 vs k3">
+<img src="../figs/route1_real_vs_controls_context_report/caretaker_k3_with_context_focus.png" alt="Real vs Caretakers with context">
+<img src="../figs/route1_real_vs_controls_context_report/caretaker_context_gain_by_age.png" alt="Real vs Caretakers context gain">
+<img src="../figs/route1_real_vs_controls_context_report/caretaker_real_gap_by_age.png" alt="Real vs Caretakers gaps">
+<h3>Difference Models</h3>
+<p>For generated sources, <code>gap_k3</code> models ask whether the source-real contextual surprisal gap changes with age after child effort and child identity are controlled. <code>gain_gap</code> models ask whether the source benefits more or less from context than real children, and whether that difference changes with age.</p>
+<table>
+<thead><tr>
+<th>source</th>
+<th>test</th>
+<th>mean</th>
+<th>age_slope</th>
+<th>p</th>
+<th>n</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>Caretaker</td>
+<td>sum_bits_k3</td>
+<td>real 26.726; source 29.998</td>
+<td>source x age -0.033</td>
+<td>0.327</td>
+<td>1115888</td>
+</tr>
+<tr>
+<td>Caretaker</td>
+<td>context_gain</td>
+<td>real 13.607; source 19.410</td>
+<td>source x age -0.005</td>
+<td>0.817</td>
+<td>1115888</td>
+</tr>
+</tbody></table>
+<h3>Fixed-Effort Regression Lines</h3>
+<p>These figures show model-based developmental lines at the same production effort. This is the layer that separates communicative-efficiency evidence from ordinary age-related growth in utterance length.</p>
+<img src="../figs/route1_real_vs_controls_context_report/caretaker_m2_k3_fixed_word_regression_lines.png" alt="Real vs Caretakers fixed-effort regression lines">
+<img src="../figs/route1_real_vs_controls_context_report/caretaker_m2_k3_fixed_word_regression_gaps.png" alt="Real vs Caretakers fixed-effort regression gaps">
+<img src="../figs/route1_real_vs_controls_context_report/caretaker_k3_word_model_slope_differences.png" alt="Real vs Caretakers model slope differences">
+<p>Primary fixed-effort slope read under M2/CM2: Caretaker: source slope 0.172 vs real slope -0.735 bits per 6 months (source-real 0.907; real 12/12 downward lines, source 0/12).</p>
+<p>Compact slope read: slopes are average bits per 6 months across the 12 fixed word-count lines. More negative values mean a stronger developmental decrease at fixed effort.</p>
+<table>
+<thead><tr>
+<th>source_label</th>
+<th>model</th>
+<th>real_slope_bits_per_6_months</th>
+<th>source_slope_bits_per_6_months</th>
+<th>source_minus_real_slope</th>
+<th>real_line_directions</th>
+<th>source_line_directions</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>Caretaker</td>
+<td>M2: identity + effort</td>
+<td>-0.735</td>
+<td>0.172</td>
+<td>0.907</td>
+<td>12 down / 12</td>
+<td>0 down / 12</td>
+</tr>
+<tr>
+<td>Caretaker</td>
+<td>M3: age x effort</td>
+<td>-0.817</td>
+<td>0.192</td>
+<td>1.009</td>
+<td>12 down / 12</td>
+<td>0 down / 12</td>
+</tr>
+<tr>
+<td>Caretaker</td>
+<td>M4c: question type</td>
+<td>-0.854</td>
+<td>0.174</td>
+<td>1.027</td>
+<td>12 down / 12</td>
+<td>0 down / 12</td>
+</tr>
+<tr>
+<td>Caretaker</td>
+<td>M5: context controls</td>
+<td>-0.800</td>
+<td>0.337</td>
+<td>1.137</td>
+<td>12 down / 12</td>
+<td>0 down / 12</td>
+</tr>
+<tr>
+<td>Caretaker</td>
+<td>M6: context interactions</td>
+<td>-0.802</td>
+<td>0.358</td>
+<td>1.160</td>
+<td>12 down / 12</td>
+<td>0 down / 12</td>
+</tr>
+</tbody></table>
+<h3>Representative Context-Gain Examples</h3>
+<p>Caretaker utterances are not matched generated alternatives for the same child row, so examples are shown as representative high context-gain utterances for each source.</p>
+<table>
+<thead><tr>
+<th>source</th>
+<th>dataset</th>
+<th>child_id</th>
+<th>age_months</th>
+<th>context</th>
+<th>utterance</th>
+<th>k3_bits</th>
+<th>context_gain</th>
+<th>nb_words</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>Real child</td>
+<td>Brown</td>
+<td>Eve</td>
+<td>25.0</td>
+<td>we do:n&#x27;t ha:ve a:ny gree:n bea:ns we will uhhuh.</td>
+<td>we do:n&#x27;t ha:ve a:ny gree:n bea:ns</td>
+<td>10.06</td>
+<td>95.39</td>
+<td>11</td>
+</tr>
+<tr>
+<td>Real child</td>
+<td>Manchester</td>
+<td>Becky</td>
+<td>26.5</td>
+<td>they&#x27;re sitting on the um the. here you are. th-th-th↫there&#x27;s one of them.</td>
+<td>th-th-th↫there&#x27;s one of them.</td>
+<td>12.38</td>
+<td>92.96</td>
+<td>7</td>
+</tr>
+<tr>
+<td>Real child</td>
+<td>Providence</td>
+<td>Lily</td>
+<td>29.2</td>
+<td>oh the barrette&#x27;s gonna go into the store with the elephant? oh well that&#x27;s nice. gonna ask him?</td>
+<td>the barrette&#x27;s gonn ask the elephant if he wants to go into the store with the elephant.</td>
+<td>51.62</td>
+<td>88.09</td>
+<td>17</td>
+</tr>
+<tr>
+<td>Caretaker</td>
+<td>Providence</td>
+<td>Lily</td>
+<td>27.6</td>
+<td>is that all? no that&#x27;s not all I love you said mamma brown bear more than you love to catch this striped fish and this spotted fish. that&#x27;s two fish said little brown bear.</td>
+<td>right said mamma brown bear and I love you more than I love to rub my back against this tree and this tree and this tree mm that&#x27;...</td>
+<td>71.74</td>
+<td>151.9</td>
+<td>34</td>
+</tr>
+<tr>
+<td>Caretaker</td>
+<td>Providence</td>
+<td>Naima</td>
+<td>23.7</td>
+<td>Max waned red hot marshmallow squirters. for his earth worm cake so he wrote red hot marshmallow squirters on the list. he wrote it with a red crayon except he&#x27;s a little bunny an...</td>
+<td>he can&#x27;t write he&#x27;s a bunny but he&#x27;s trying he&#x27;s trying to write he wants to add red hot marshmallows squirters to the list so th...</td>
+<td>115.68</td>
+<td>120.08</td>
+<td>32</td>
+</tr>
+<tr>
+<td>Caretaker</td>
+<td>Providence</td>
+<td>William</td>
+<td>29.5</td>
+<td>down by the bay where the watermelons grow back to my home I dare not go for if I do my mother will say did ya ever see a fly wearing a tie down by the bay. down by the bay where...</td>
+<td>down by the bay where the watermelons grow back to my home I dare not go for if I do my mother will say did ya ever see an apple...</td>
+<td>119.89</td>
+<td>119.66</td>
+<td>58</td>
+</tr>
+</tbody></table>
+<h2>Saved Artifacts</h2>
+<pre><code>results/route1_real_vs_controls_context_report/source_age_summary.csv
+results/route1_real_vs_controls_context_report/paired_gap_summary.csv
+results/route1_real_vs_controls_context_report/difference_model_summary.csv
+results/route1_real_vs_controls_context_report/matched_examples.csv
+results/route1_real_vs_controls_context_report/caretaker_examples.csv
+results/route1_real_vs_controls_context_report/*_regression_line_predictions.csv
+results/route1_real_vs_controls_context_report/*_regression_line_slopes.csv
+results/route1_real_vs_controls_context_report/*_regression_line_slope_differences.csv
+results/route1_real_vs_controls_context_report/*_regression_line_gaps.csv
+figs/route1_real_vs_controls_context_report/</code></pre>
+</main>
+</body>
+</html>

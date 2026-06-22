@@ -1,0 +1,566 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Route 1 Focused Candidate Regression-Line Gallery</title>
+<style>
+:root {
+  color-scheme: light;
+  --ink: #1e2528;
+  --muted: #5e686d;
+  --line: #d9e0df;
+  --paper: #ffffff;
+  --soft: #f5f7f6;
+  --accent: #2f6f73;
+  --accent2: #c76f2c;
+}
+body {
+  margin: 0;
+  background: #eef2f1;
+  color: var(--ink);
+  font: 16px/1.58 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+main {
+  max-width: 980px;
+  margin: 34px auto 56px;
+  padding: 48px 58px;
+  background: var(--paper);
+  box-shadow: 0 18px 50px rgba(31, 45, 48, 0.12);
+}
+h1, h2, h3, h4 {
+  line-height: 1.18;
+  margin: 1.6em 0 0.55em;
+}
+h1 {
+  margin-top: 0;
+  font-size: 2.25rem;
+  border-bottom: 3px solid var(--accent);
+  padding-bottom: 0.45em;
+}
+h2 {
+  font-size: 1.55rem;
+  color: var(--accent);
+}
+h3 {
+  font-size: 1.18rem;
+}
+p {
+  margin: 0.75em 0;
+}
+a {
+  color: var(--accent);
+}
+blockquote {
+  border-left: 4px solid var(--accent2);
+  margin: 1.1em 0;
+  padding: 0.05em 1.1em;
+  color: var(--muted);
+  background: #fff8f2;
+}
+code {
+  background: var(--soft);
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  padding: 0.08em 0.3em;
+  font-family: "SFMono-Regular", Consolas, monospace;
+  font-size: 0.92em;
+}
+pre {
+  background: #f5f7f6;
+  color: var(--ink);
+  border: 1px solid var(--line);
+  padding: 1em;
+  overflow-x: auto;
+  border-radius: 7px;
+}
+pre code {
+  background: transparent;
+  border: 0;
+  padding: 0;
+  color: inherit;
+}
+table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 1.15em 0 1.45em;
+  font-size: 0.95em;
+}
+th, td {
+  border: 1px solid var(--line);
+  padding: 0.54em 0.68em;
+  vertical-align: top;
+}
+th {
+  background: #e7efed;
+  text-align: left;
+}
+tr:nth-child(even) td {
+  background: #fafbfb;
+}
+img {
+  max-width: 100%;
+  display: block;
+  margin: 1.1em auto 0.45em;
+}
+ul, ol {
+  padding-left: 1.4em;
+}
+.caption {
+  color: var(--muted);
+  font-size: 0.92em;
+  margin-top: -0.15em;
+}
+@media print {
+  body {
+    background: white;
+  }
+  main {
+    box-shadow: none;
+    margin: 0;
+    max-width: none;
+    padding: 28px;
+  }
+}
+</style>
+</head>
+<body>
+<main>
+<h1>Route 1 Focused Candidate Regression-Line Gallery</h1>
+<p>This is a pre-supervisor evidence gallery for choosing the strongest Route 1 figures. It is intentionally plot-first and candidate-focused, not a dump of every M1-M15 Atlas section.</p>
+<p>The report keeps the scientific target fixed: estimate conditional utterance information at fixed production effort from repeated utterances sampled from the same children across sessions and ages.</p>
+<h2>Scope Lock</h2>
+<ul>
+<li>Main Route 1 estimand: age-related change in <code>sum_bits</code> after conditioning on child production effort and other controls.</li>
+<li>This is communicative efficiency, not MLU. Raw total bits can increase with age simply because children say longer utterances.</li>
+<li>Main effort control: child production effort, shown here with the word-count effort axis already used in the fixed-effort Atlas.</li>
+<li>Parent/caretaker effort means the amount of preceding caretaker context production.</li>
+<li>Child identity matters because the same children are observed repeatedly across sessions; child fixed effects or child-level random effects are used to avoid treating children as interchangeable single rows.</li>
+<li>Tables are kept minimal. The central evidence objects are regression/fixed-effort age lines.</li>
+<li>Bits per token, such as <code>mean_bits_per_token</code> or <code>sum_bits / nb_words</code>, is a secondary rate outcome and is not the same question as conditional total bits at fixed effort.</li>
+<li>Raw observed-vs-fitted total-bit diagnostics are not promoted here because they mostly show the mechanical relation between length and total bits.</li>
+<li>Whenever an interaction appears below, the lower-level predictors are written explicitly.</li>
+</ul>
+<h2>Estimator Rationale</h2>
+<ul>
+<li><strong>OLS + child fixed effects + clustered SE:</strong> main Atlas-compatible view; controls stable child identity and clusters uncertainty by child.</li>
+<li><strong>GEE Gaussian by child:</strong> population-average repeated-measures check for a continuous bits outcome.</li>
+<li><strong>GEE Gamma/log by child:</strong> robustness check for positive, skewed bit outcomes; interpret through prediction lines rather than raw coefficient scale.</li>
+<li><strong>GLM Gaussian and GLM Gamma/log:</strong> distribution/link sensitivity checks where feasible.</li>
+<li><strong>MixedLM random child intercept:</strong> lets each child have a different baseline information level.</li>
+<li><strong>MixedLM random child age slope:</strong> lets each child have a different developmental trajectory; convergence warnings matter.</li>
+<li><strong>Month/session aggregation:</strong> useful only as robustness against pseudo-replication, not as the main row-level result.</li>
+</ul>
+<h2>Candidate Formula Family</h2>
+<p>The focused parent-effort family requested for model selection is about conditional information, not raw length growth:</p>
+<pre><code>sum_bits ~ age_c + effort_c + C(child_id)
+sum_bits ~ age_c + effort_c + parent_context_effort_c + C(child_id)
+sum_bits ~ age_c + effort_c + age_c:effort_c + parent_context_effort_c + C(child_id)
+sum_bits ~ age_c + effort_c + parent_context_effort_c + age_c:parent_context_effort_c + C(child_id)
+sum_bits ~ age_c + effort_c + parent_context_effort_c + effort_c:parent_context_effort_c + C(child_id)
+sum_bits ~ age_c + effort_c + parent_context_effort_c + age_c:effort_c + age_c:parent_context_effort_c + effort_c:parent_context_effort_c + C(child_id)</code></pre>
+<p>Existing promising Atlas candidates are used when they match this logic or answer an adjacent necessary control question: M2, M3, M4a, M4c, M5, M6, M7, M11, and M15.</p>
+<h2>Source Reports Used</h2>
+<ul>
+<li>Real-child Atlas v2: <a href="utterance_information_route1_real_corrected_fixed_effort_atlas_v2.html">utterance_information_route1_real_corrected_fixed_effort_atlas_v2.html</a></li>
+<li>Source-specific Atlas v2 index: <a href="utterance_information_route1_source_specific_corrected_fixed_effort_atlas_v2_index.html">utterance_information_route1_source_specific_corrected_fixed_effort_atlas_v2_index.html</a></li>
+<li>Heldout prediction report: <a href="utterance_information_route1_heldout_real_child_prediction_report.html">utterance_information_route1_heldout_real_child_prediction_report.html</a></li>
+<li>Age-scrambling robustness report: <a href="utterance_information_age_scrambling_robustness.html">utterance_information_age_scrambling_robustness.html</a></li>
+<li>Caretaker Atlas v2: <a href="utterance_information_route1_caretaker_corrected_fixed_effort_atlas_v2.html">utterance_information_route1_caretaker_corrected_fixed_effort_atlas_v2.html</a></li>
+</ul>
+<h2>Reading Rule</h2>
+<p>Each fixed-effort line is a row-level model prediction for utterance <code>sum_bits</code> at a fixed child-effort or caretaker-effort value. Read the slope as conditional information at the same effort level; do not read it as children simply producing longer utterances.</p>
+<h2>Multiple Age Effects Can Coexist</h2>
+<p>The report keeps both effects visible because they answer different questions.</p>
+<ul>
+<li><strong>Pooled effort-only question:</strong> if we control child production effort but do not control child identity, what is the age trend across the pooled corpus?</li>
+<li><strong>Child-controlled question:</strong> within the repeated-measures design, after controlling stable child identity, what is the age trend at the same effort level?</li>
+</ul>
+<h3>Pooled Effort-Only Contrast</h3>
+<p><strong>M1 row-level Atlas.</strong> <code>sum_bits ~ age_c + effort_c</code>; age coefficient 0.0003 bits/month, p=0.993; observed-vs-fitted R2 0.6130.</p>
+<p><strong>M1 fixed-effort slope read.</strong> upward; 0.000 to 0.000 bits/month. In the row-level Atlas this is essentially flat/slightly upward, not the child-controlled decrease.</p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/real/real_k3_m1_nb_words_fixed_effort_atlas.png" alt="M1 pooled effort-only fixed-effort regression lines">
+<p><strong>M1 balanced/scrambled robustness read.</strong> age-bin/unit robustness observed age coefficient 0.0542; balanced bootstrap 95% interval [-0.0144, 0.0550], median 0.0205; observed inside; age-bin label scramble 95% interval [-0.0538, 0.0423], median 0.0026; observed outside, p=0.040; unit-age scramble 95% interval [-0.0165, 0.0170], median -0.0008; observed outside, p=0.010; within-child age scramble 95% interval [0.0599, 0.0823], median 0.0731; observed outside, p=1.000.</p>
+<p><strong>M1 within-child scramble note.</strong> The within-child age-scramble null is even more positive than the observed M1 slope. That is exactly why M1 is treated as a pooled/compositional contrast, not as the within-child communicative-efficiency result.</p>
+<img src="../figs/age_scrambling_robustness/m1_clear_robustness_regression_lines.png" alt="M1 balanced and scrambled robustness lines">
+<h3>Child-Controlled Contrast</h3>
+<p><strong>M2 row-level Atlas.</strong> <code>sum_bits ~ age_c + effort_c + C(child_id)</code>; age coefficient -0.1225 bits/month, p=&lt;.001; observed-vs-fitted R2 0.6259.</p>
+<p><strong>M2 fixed-effort slope read.</strong> downward; -0.122 to -0.122 bits/month.</p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/real/real_k3_m2_nb_words_fixed_effort_atlas.png" alt="M2 child-identity fixed-effort regression lines">
+<p><strong>M2 balanced/scrambled robustness read.</strong> age-bin/unit robustness observed age coefficient -0.0400; balanced bootstrap 95% interval [-0.1675, -0.0357], median -0.0867; observed inside; age-bin label scramble 95% interval [-0.0252, 0.0283], median 0.0002; observed outside, p=0.010; unit-age scramble 95% interval [-0.0131, 0.0133], median 0.0003; observed outside, p=0.010; within-child age scramble 95% interval [-0.0202, 0.0182], median -0.0009; observed outside, p=0.010.</p>
+<img src="../figs/age_scrambling_robustness/m2_clear_robustness_regression_lines.png" alt="M2 balanced and scrambled robustness lines">
+<p><strong>M3 row-level Atlas.</strong> <code>sum_bits ~ age_c + effort_c + age_c:effort_c + C(child_id)</code>; age coefficient -0.1216 bits/month, p=&lt;.001; observed-vs-fitted R2 0.6259.</p>
+<p><strong>M3 fixed-effort slope read.</strong> downward; -0.157 to -0.115 bits/month.</p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/real/real_k3_m3_nb_words_fixed_effort_atlas.png" alt="M3 age-by-effort fixed-effort regression lines">
+<img src="../figs/age_scrambling_robustness/m3_clear_robustness_regression_lines.png" alt="M3 balanced and scrambled robustness lines">
+<p><strong>Interpretation.</strong> The pooled M1 effect is a real descriptive/compositional effect of the sampled corpus. The Route 1 efficiency claim is the child-controlled effect: at the same effort level, with child identity handled, the fixed-effort slopes go downward. Both belong in the model-selection report because they explain why controlling child identity changes the story.</p>
+<h2>M2. Base fixed-effort child model</h2>
+<p><strong>Why this candidate is here.</strong> Baseline candidate: asks the communicative-efficiency question directly by comparing conditional information at fixed child effort and stable child identity.</p>
+<p><strong>Natural-language test.</strong> At the same child effort level, are older sessions lower or higher in conditional utterance information for the same child identities?</p>
+<p><strong>Row-level formula.</strong> <code>sum_bits ~ age_c + effort_c + C(child_id)</code></p>
+<p>Primary row-level result: the outcome is utterance-level <code>sum_bits</code>, not an aggregate mean. The age coefficient is -0.122 bits/month (p=&lt;.001) after the listed controls. Existing row-level Atlas fixed-effort slopes are downward: -0.122 to -0.122 bits/month across the fixed word-effort values.</p>
+<h3>Real Child Regression Lines</h3>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/real/real_k3_m2_nb_words_fixed_effort_atlas.png" alt="M2 real child fixed-effort regression lines">
+<p><strong>Real-child read.</strong> downward; -0.122 to -0.122 bits/month This is the main child-language plot for this candidate.</p>
+<h3>Generated Baseline Regression Lines</h3>
+<h4>Random matched-length baseline</h4>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/random/random_k3_m2_nb_words_fixed_effort_atlas.png" alt="M2 Random matched-length baseline fixed-effort regression lines">
+<p><strong>Line read.</strong> upward; 0.178 to 0.178 bits/month</p>
+<h4>Unigram baseline</h4>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/unigram/unigram_k3_m2_nb_words_fixed_effort_atlas.png" alt="M2 Unigram baseline fixed-effort regression lines">
+<p><strong>Line read.</strong> downward; -0.021 to -0.021 bits/month</p>
+<h4>Bigram baseline</h4>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/bigram/bigram_k3_m2_nb_words_fixed_effort_atlas.png" alt="M2 Bigram baseline fixed-effort regression lines">
+<p><strong>Line read.</strong> downward; -0.022 to -0.022 bits/month</p>
+<h4>Trigram baseline</h4>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k3_m2_nb_words_fixed_effort_atlas.png" alt="M2 Trigram baseline fixed-effort regression lines">
+<p><strong>Line read.</strong> downward; -0.015 to -0.015 bits/month</p>
+<h4>LSTM k3 same-length baseline</h4>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/lstm_additive_k3_same_length/lstm_additive_k3_same_length_k3_m2_nb_words_fixed_effort_atlas.png" alt="M2 LSTM k3 same-length baseline fixed-effort regression lines">
+<p><strong>Line read.</strong> downward; -0.046 to -0.046 bits/month</p>
+<h4>LSTM k4 same-length baseline</h4>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/lstm_additive_k4_same_length/lstm_additive_k4_same_length_k3_m2_nb_words_fixed_effort_atlas.png" alt="M2 LSTM k4 same-length baseline fixed-effort regression lines">
+<p><strong>Line read.</strong> downward; -0.058 to -0.058 bits/month</p>
+<h4>LSTM k5 same-length baseline</h4>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/lstm_additive_k5_same_length/lstm_additive_k5_same_length_k3_m2_nb_words_fixed_effort_atlas.png" alt="M2 LSTM k5 same-length baseline fixed-effort regression lines">
+<p><strong>Line read.</strong> downward; -0.061 to -0.061 bits/month</p>
+<h3>Caretaker Contrast Regression Lines</h3>
+<img src="../figs/route1_caretaker_corrected_fixed_effort_atlas/caretaker_k3_cm2_nb_words_fixed_effort_atlas.png" alt="M2 caretaker contrast fixed-effort regression lines">
+<p><strong>Caretaker read.</strong> This asks the analogous fixed-effort question for caretaker speech from the same developmental axis. It is a contrast for whether the child-age pattern also appears in adult/caretaker utterances.</p>
+<h3>Repeated-Measurement Estimator Checks</h3>
+<p>Row-level repeated-measures sensitivity available: CS0: ols nonrobust (fit); CS0c: ols cluster_child (fit); CS1: ols cluster_child (fit); CS2: ols cluster_child (fit); CS3: gee_gaussian robust (fit); CS4: mixedlm random effects 1 (fit); CS5: mixedlm random effects ~age_c (fit); CS6: ols cluster_child (fit); CS7: ols cluster_child (fit).</p>
+<h3>All-Estimator Screening Lines</h3>
+<img src="../figs/route1_best_model_robustness_package/m2_aggregate_estimator_fixed_effort_age_lines.png" alt="M2 all-estimator fixed-effort screening lines">
+<p><strong>Estimator read.</strong> This plot compares OLS fixed effects, GEE Gaussian, GEE Gamma/log, GLM Gaussian, GLM Gamma/log, MixedLM random intercept, and MixedLM random age slope on the same candidate formula. It is a fixed-effort screening/robustness plot for repeated utterance measurements, not a raw total-bits growth plot and not a replacement for the row-level source-specific Atlas line above.</p>
+<h2>M3. Child effort interaction model</h2>
+<p><strong>Why this candidate is here.</strong> Tests the user&#x27;s core interaction concern: older children generally produce longer utterances, so the model asks whether the age slope changes at different child-effort levels.</p>
+<p><strong>Natural-language test.</strong> Does the age-information relation depend on the child utterance effort level?</p>
+<p><strong>Row-level formula.</strong> <code>sum_bits ~ age_c + effort_c + age_c:effort_c + C(child_id)</code></p>
+<p>Primary row-level result: the outcome is utterance-level <code>sum_bits</code>, not an aggregate mean. The age coefficient is -0.122 bits/month (p=&lt;.001) after the listed controls. Existing row-level Atlas fixed-effort slopes are downward: -0.157 to -0.115 bits/month across the fixed word-effort values.</p>
+<h3>Real Child Regression Lines</h3>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/real/real_k3_m3_nb_words_fixed_effort_atlas.png" alt="M3 real child fixed-effort regression lines">
+<p><strong>Real-child read.</strong> downward; -0.157 to -0.115 bits/month This is the main child-language plot for this candidate.</p>
+<h3>Generated Baseline Regression Lines</h3>
+<h4>Random matched-length baseline</h4>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/random/random_k3_m3_nb_words_fixed_effort_atlas.png" alt="M3 Random matched-length baseline fixed-effort regression lines">
+<p><strong>Line read.</strong> upward; 0.161 to 0.261 bits/month</p>
+<h4>Unigram baseline</h4>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/unigram/unigram_k3_m3_nb_words_fixed_effort_atlas.png" alt="M3 Unigram baseline fixed-effort regression lines">
+<p><strong>Line read.</strong> downward, upward; -0.285 to 0.034 bits/month</p>
+<h4>Bigram baseline</h4>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/bigram/bigram_k3_m3_nb_words_fixed_effort_atlas.png" alt="M3 Bigram baseline fixed-effort regression lines">
+<p><strong>Line read.</strong> downward, upward; -0.245 to 0.024 bits/month</p>
+<h4>Trigram baseline</h4>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k3_m3_nb_words_fixed_effort_atlas.png" alt="M3 Trigram baseline fixed-effort regression lines">
+<p><strong>Line read.</strong> downward, upward; -0.126 to 0.008 bits/month</p>
+<h4>LSTM k3 same-length baseline</h4>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/lstm_additive_k3_same_length/lstm_additive_k3_same_length_k3_m3_nb_words_fixed_effort_atlas.png" alt="M3 LSTM k3 same-length baseline fixed-effort regression lines">
+<p><strong>Line read.</strong> downward; -0.242 to -0.006 bits/month</p>
+<h4>LSTM k4 same-length baseline</h4>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/lstm_additive_k4_same_length/lstm_additive_k4_same_length_k3_m3_nb_words_fixed_effort_atlas.png" alt="M3 LSTM k4 same-length baseline fixed-effort regression lines">
+<p><strong>Line read.</strong> downward; -0.281 to -0.012 bits/month</p>
+<h4>LSTM k5 same-length baseline</h4>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/lstm_additive_k5_same_length/lstm_additive_k5_same_length_k3_m3_nb_words_fixed_effort_atlas.png" alt="M3 LSTM k5 same-length baseline fixed-effort regression lines">
+<p><strong>Line read.</strong> downward; -0.251 to -0.021 bits/month</p>
+<h3>Caretaker Contrast Regression Lines</h3>
+<img src="../figs/route1_caretaker_corrected_fixed_effort_atlas/caretaker_k3_cm3_nb_words_fixed_effort_atlas.png" alt="M3 caretaker contrast fixed-effort regression lines">
+<p><strong>Caretaker read.</strong> This asks the analogous fixed-effort question for caretaker speech from the same developmental axis. It is a contrast for whether the child-age pattern also appears in adult/caretaker utterances.</p>
+<h3>Repeated-Measurement Estimator Checks</h3>
+<p>Row-level repeated-measures sensitivity available: CS0: ols nonrobust (fit); CS0c: ols cluster_child (fit); CS1: ols cluster_child (fit); CS2: ols cluster_child (fit); CS3: gee_gaussian robust (fit); CS4: mixedlm random effects 1 (fit); CS5: mixedlm random effects ~age_c (fit); CS6: ols cluster_child (fit); CS7: ols cluster_child (fit).</p>
+<h3>All-Estimator Screening Lines</h3>
+<img src="../figs/route1_best_model_robustness_package/m3_aggregate_estimator_fixed_effort_age_lines.png" alt="M3 all-estimator fixed-effort screening lines">
+<p><strong>Estimator read.</strong> This plot compares OLS fixed effects, GEE Gaussian, GEE Gamma/log, GLM Gaussian, GLM Gamma/log, MixedLM random intercept, and MixedLM random age slope on the same candidate formula. It is a fixed-effort screening/robustness plot for repeated utterance measurements, not a raw total-bits growth plot and not a replacement for the row-level source-specific Atlas line above.</p>
+<h2>M4a. Parent-context effort model</h2>
+<p><strong>Why this candidate is here.</strong> Closest existing row-level Atlas candidate to the simple formula <code>sum_bits ~ age + child effort + parent effort + child identity</code>; it adds preceding parent/caretaker effort while keeping the age-by-child-effort term already used in the Atlas ladder.</p>
+<p><strong>Natural-language test.</strong> Does the age pattern remain after accounting for how much the parent/caretaker just said?</p>
+<h3>Real Child Regression Lines</h3>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/real/real_k3_m4a_nb_words_fixed_effort_atlas.png" alt="M4a real child fixed-effort regression lines">
+<p><strong>Real-child read.</strong> downward; -0.154 to -0.109 bits/month This is the main child-language plot for this candidate.</p>
+<h3>Generated Baseline Regression Lines</h3>
+<h4>Random matched-length baseline</h4>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/random/random_k3_m4a_nb_words_fixed_effort_atlas.png" alt="M4a Random matched-length baseline fixed-effort regression lines">
+<p><strong>Line read.</strong> upward; 0.157 to 0.259 bits/month</p>
+<h4>Unigram baseline</h4>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/unigram/unigram_k3_m4a_nb_words_fixed_effort_atlas.png" alt="M4a Unigram baseline fixed-effort regression lines">
+<p><strong>Line read.</strong> downward, upward; -0.287 to 0.032 bits/month</p>
+<h4>Bigram baseline</h4>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/bigram/bigram_k3_m4a_nb_words_fixed_effort_atlas.png" alt="M4a Bigram baseline fixed-effort regression lines">
+<p><strong>Line read.</strong> downward, upward; -0.246 to 0.022 bits/month</p>
+<h4>Trigram baseline</h4>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k3_m4a_nb_words_fixed_effort_atlas.png" alt="M4a Trigram baseline fixed-effort regression lines">
+<p><strong>Line read.</strong> downward, upward; -0.125 to 0.009 bits/month</p>
+<h4>LSTM k3 same-length baseline</h4>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/lstm_additive_k3_same_length/lstm_additive_k3_same_length_k3_m4a_nb_words_fixed_effort_atlas.png" alt="M4a LSTM k3 same-length baseline fixed-effort regression lines">
+<p><strong>Line read.</strong> downward; -0.242 to -0.005 bits/month</p>
+<h4>LSTM k4 same-length baseline</h4>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/lstm_additive_k4_same_length/lstm_additive_k4_same_length_k3_m4a_nb_words_fixed_effort_atlas.png" alt="M4a LSTM k4 same-length baseline fixed-effort regression lines">
+<p><strong>Line read.</strong> downward; -0.280 to -0.011 bits/month</p>
+<h4>LSTM k5 same-length baseline</h4>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/lstm_additive_k5_same_length/lstm_additive_k5_same_length_k3_m4a_nb_words_fixed_effort_atlas.png" alt="M4a LSTM k5 same-length baseline fixed-effort regression lines">
+<p><strong>Line read.</strong> downward; -0.251 to -0.021 bits/month</p>
+<h3>Caretaker Contrast Regression Lines</h3>
+<img src="../figs/route1_caretaker_corrected_fixed_effort_atlas/caretaker_k3_cm4a_nb_words_fixed_effort_atlas.png" alt="M4a caretaker contrast fixed-effort regression lines">
+<p><strong>Caretaker read.</strong> This asks the analogous fixed-effort question for caretaker speech from the same developmental axis. It is a contrast for whether the child-age pattern also appears in adult/caretaker utterances.</p>
+<h3>Repeated-Measurement Estimator Checks</h3>
+<p>Row-level repeated-measures sensitivity available: CS0: ols nonrobust (fit); CS0c: ols cluster_child (fit); CS1: ols cluster_child (fit); CS2: ols cluster_child (fit); CS3: gee_gaussian robust (fit); CS4: mixedlm random effects 1 (fit); CS5: mixedlm random effects ~age_c (fit); CS6: ols cluster_child (fit); CS7: ols cluster_child (fit).</p>
+<h2>M4c. Question/form control model</h2>
+<p><strong>Why this candidate is here.</strong> Checks whether the fixed-effort age pattern is just a question/statement or prompt-form artifact.</p>
+<p><strong>Natural-language test.</strong> Does the age effect survive broad context-form controls?</p>
+<p><strong>Row-level formula.</strong> <code>sum_bits ~ age_c + effort_c + age_c:effort_c + C(question_type) + C(child_id)</code></p>
+<p>Primary row-level result: the outcome is utterance-level <code>sum_bits</code>, not an aggregate mean. The age coefficient is -0.127 bits/month (p=&lt;.001) after the listed controls. Existing row-level Atlas fixed-effort slopes are downward: -0.164 to -0.121 bits/month across the fixed word-effort values.</p>
+<h3>Real Child Regression Lines</h3>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/real/real_k3_m4c_nb_words_fixed_effort_atlas.png" alt="M4c real child fixed-effort regression lines">
+<p><strong>Real-child read.</strong> downward; -0.164 to -0.121 bits/month This is the main child-language plot for this candidate.</p>
+<h3>Generated Baseline Regression Lines</h3>
+<h4>Random matched-length baseline</h4>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/random/random_k3_m4c_nb_words_fixed_effort_atlas.png" alt="M4c Random matched-length baseline fixed-effort regression lines">
+<p><strong>Line read.</strong> upward; 0.158 to 0.256 bits/month</p>
+<h4>Unigram baseline</h4>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/unigram/unigram_k3_m4c_nb_words_fixed_effort_atlas.png" alt="M4c Unigram baseline fixed-effort regression lines">
+<p><strong>Line read.</strong> downward, upward; -0.291 to 0.031 bits/month</p>
+<h4>Bigram baseline</h4>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/bigram/bigram_k3_m4c_nb_words_fixed_effort_atlas.png" alt="M4c Bigram baseline fixed-effort regression lines">
+<p><strong>Line read.</strong> downward, upward; -0.251 to 0.021 bits/month</p>
+<h4>Trigram baseline</h4>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k3_m4c_nb_words_fixed_effort_atlas.png" alt="M4c Trigram baseline fixed-effort regression lines">
+<p><strong>Line read.</strong> downward, upward; -0.133 to 0.004 bits/month</p>
+<h4>LSTM k3 same-length baseline</h4>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/lstm_additive_k3_same_length/lstm_additive_k3_same_length_k3_m4c_nb_words_fixed_effort_atlas.png" alt="M4c LSTM k3 same-length baseline fixed-effort regression lines">
+<p><strong>Line read.</strong> downward; -0.248 to -0.011 bits/month</p>
+<h4>LSTM k4 same-length baseline</h4>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/lstm_additive_k4_same_length/lstm_additive_k4_same_length_k3_m4c_nb_words_fixed_effort_atlas.png" alt="M4c LSTM k4 same-length baseline fixed-effort regression lines">
+<p><strong>Line read.</strong> downward; -0.287 to -0.017 bits/month</p>
+<h4>LSTM k5 same-length baseline</h4>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/lstm_additive_k5_same_length/lstm_additive_k5_same_length_k3_m4c_nb_words_fixed_effort_atlas.png" alt="M4c LSTM k5 same-length baseline fixed-effort regression lines">
+<p><strong>Line read.</strong> downward; -0.257 to -0.026 bits/month</p>
+<h3>Caretaker Contrast Regression Lines</h3>
+<img src="../figs/route1_caretaker_corrected_fixed_effort_atlas/caretaker_k3_cm4c_nb_words_fixed_effort_atlas.png" alt="M4c caretaker contrast fixed-effort regression lines">
+<p><strong>Caretaker read.</strong> This asks the analogous fixed-effort question for caretaker speech from the same developmental axis. It is a contrast for whether the child-age pattern also appears in adult/caretaker utterances.</p>
+<h3>Repeated-Measurement Estimator Checks</h3>
+<p>Row-level repeated-measures sensitivity available: CS0: ols nonrobust (fit); CS0c: ols cluster_child (fit); CS1: ols cluster_child (fit); CS2: ols cluster_child (fit); CS3: gee_gaussian robust (fit); CS4: mixedlm random effects 1 (fit); CS5: mixedlm random effects ~age_c (fit); CS6: ols cluster_child (fit); CS7: ols cluster_child (fit).</p>
+<h3>All-Estimator Screening Lines</h3>
+<img src="../figs/route1_best_model_robustness_package/m4c_aggregate_estimator_fixed_effort_age_lines.png" alt="M4c all-estimator fixed-effort screening lines">
+<p><strong>Estimator read.</strong> This plot compares OLS fixed effects, GEE Gaussian, GEE Gamma/log, GLM Gaussian, GLM Gamma/log, MixedLM random intercept, and MixedLM random age slope on the same candidate formula. It is a fixed-effort screening/robustness plot for repeated utterance measurements, not a raw total-bits growth plot and not a replacement for the row-level source-specific Atlas line above.</p>
+<h2>M5. Combined parent/context control model</h2>
+<p><strong>Why this candidate is here.</strong> Promising fuller candidate: keeps child effort, parent effort, context entropy, question type, and child identity in one row-level model.</p>
+<p><strong>Natural-language test.</strong> Does the age pattern remain when the main parent-context and predictability controls are in the same model?</p>
+<p><strong>Row-level formula.</strong> <code>sum_bits ~ age_c + effort_c + age_c:effort_c + parent_context_effort_c + context_entropy_c + C(question_type) + C(child_id)</code></p>
+<p>Primary row-level result: the outcome is utterance-level <code>sum_bits</code>, not an aggregate mean. The age coefficient is -0.122 bits/month (p=&lt;.001) after the listed controls. Existing row-level Atlas fixed-effort slopes are downward: -0.149 to -0.118 bits/month across the fixed word-effort values.</p>
+<h3>Real Child Regression Lines</h3>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/real/real_k3_m5_nb_words_fixed_effort_atlas.png" alt="M5 real child fixed-effort regression lines">
+<p><strong>Real-child read.</strong> downward; -0.149 to -0.118 bits/month This is the main child-language plot for this candidate.</p>
+<h3>Generated Baseline Regression Lines</h3>
+<h4>Random matched-length baseline</h4>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/random/random_k3_m5_nb_words_fixed_effort_atlas.png" alt="M5 Random matched-length baseline fixed-effort regression lines">
+<p><strong>Line read.</strong> upward; 0.159 to 0.268 bits/month</p>
+<h4>Unigram baseline</h4>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/unigram/unigram_k3_m5_nb_words_fixed_effort_atlas.png" alt="M5 Unigram baseline fixed-effort regression lines">
+<p><strong>Line read.</strong> downward, upward; -0.320 to 0.030 bits/month</p>
+<h4>Bigram baseline</h4>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/bigram/bigram_k3_m5_nb_words_fixed_effort_atlas.png" alt="M5 Bigram baseline fixed-effort regression lines">
+<p><strong>Line read.</strong> downward, upward; -0.269 to 0.018 bits/month</p>
+<h4>Trigram baseline</h4>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k3_m5_nb_words_fixed_effort_atlas.png" alt="M5 Trigram baseline fixed-effort regression lines">
+<p><strong>Line read.</strong> downward, upward; -0.148 to 0.006 bits/month</p>
+<h4>LSTM k3 same-length baseline</h4>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/lstm_additive_k3_same_length/lstm_additive_k3_same_length_k3_m5_nb_words_fixed_effort_atlas.png" alt="M5 LSTM k3 same-length baseline fixed-effort regression lines">
+<p><strong>Line read.</strong> downward; -0.277 to -0.010 bits/month</p>
+<h4>LSTM k4 same-length baseline</h4>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/lstm_additive_k4_same_length/lstm_additive_k4_same_length_k3_m5_nb_words_fixed_effort_atlas.png" alt="M5 LSTM k4 same-length baseline fixed-effort regression lines">
+<p><strong>Line read.</strong> downward; -0.305 to -0.016 bits/month</p>
+<h4>LSTM k5 same-length baseline</h4>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/lstm_additive_k5_same_length/lstm_additive_k5_same_length_k3_m5_nb_words_fixed_effort_atlas.png" alt="M5 LSTM k5 same-length baseline fixed-effort regression lines">
+<p><strong>Line read.</strong> downward; -0.281 to -0.027 bits/month</p>
+<h3>Caretaker Contrast Regression Lines</h3>
+<img src="../figs/route1_caretaker_corrected_fixed_effort_atlas/caretaker_k3_cm5_nb_words_fixed_effort_atlas.png" alt="M5 caretaker contrast fixed-effort regression lines">
+<p><strong>Caretaker read.</strong> This asks the analogous fixed-effort question for caretaker speech from the same developmental axis. It is a contrast for whether the child-age pattern also appears in adult/caretaker utterances.</p>
+<h3>Repeated-Measurement Estimator Checks</h3>
+<p>Row-level repeated-measures sensitivity available: CS0: ols nonrobust (fit); CS0c: ols cluster_child (fit); CS1: ols cluster_child (fit); CS2: ols cluster_child (fit); CS3: gee_gaussian robust (fit); CS4: mixedlm random effects 1 (fit); CS5: mixedlm random effects ~age_c (fit); CS6: ols cluster_child (fit); CS7: ols cluster_child (fit).</p>
+<h3>All-Estimator Screening Lines</h3>
+<img src="../figs/route1_best_model_robustness_package/m5_aggregate_estimator_fixed_effort_age_lines.png" alt="M5 all-estimator fixed-effort screening lines">
+<p><strong>Estimator read.</strong> This plot compares OLS fixed effects, GEE Gaussian, GEE Gamma/log, GLM Gaussian, GLM Gamma/log, MixedLM random intercept, and MixedLM random age slope on the same candidate formula. It is a fixed-effort screening/robustness plot for repeated utterance measurements, not a raw total-bits growth plot and not a replacement for the row-level source-specific Atlas line above.</p>
+<h2>M6. Context entropy interaction model</h2>
+<p><strong>Why this candidate is here.</strong> Promising robustness candidate from M1-M15: lets the relation with context entropy vary by age and child effort while preserving lower-order predictors.</p>
+<p><strong>Natural-language test.</strong> Is the age pattern robust when context predictability can interact with age and effort?</p>
+<h3>Real Child Regression Lines</h3>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/real/real_k3_m6_nb_words_fixed_effort_atlas.png" alt="M6 real child fixed-effort regression lines">
+<p><strong>Real-child read.</strong> downward; -0.148 to -0.119 bits/month This is the main child-language plot for this candidate.</p>
+<h3>Generated Baseline Regression Lines</h3>
+<h4>Random matched-length baseline</h4>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/random/random_k3_m6_nb_words_fixed_effort_atlas.png" alt="M6 Random matched-length baseline fixed-effort regression lines">
+<p><strong>Line read.</strong> upward; 0.160 to 0.275 bits/month</p>
+<h4>Unigram baseline</h4>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/unigram/unigram_k3_m6_nb_words_fixed_effort_atlas.png" alt="M6 Unigram baseline fixed-effort regression lines">
+<p><strong>Line read.</strong> downward, upward; -0.311 to 0.029 bits/month</p>
+<h4>Bigram baseline</h4>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/bigram/bigram_k3_m6_nb_words_fixed_effort_atlas.png" alt="M6 Bigram baseline fixed-effort regression lines">
+<p><strong>Line read.</strong> downward, upward; -0.259 to 0.017 bits/month</p>
+<h4>Trigram baseline</h4>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k3_m6_nb_words_fixed_effort_atlas.png" alt="M6 Trigram baseline fixed-effort regression lines">
+<p><strong>Line read.</strong> downward, upward; -0.135 to 0.005 bits/month</p>
+<h4>LSTM k3 same-length baseline</h4>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/lstm_additive_k3_same_length/lstm_additive_k3_same_length_k3_m6_nb_words_fixed_effort_atlas.png" alt="M6 LSTM k3 same-length baseline fixed-effort regression lines">
+<p><strong>Line read.</strong> downward; -0.269 to -0.012 bits/month</p>
+<h4>LSTM k4 same-length baseline</h4>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/lstm_additive_k4_same_length/lstm_additive_k4_same_length_k3_m6_nb_words_fixed_effort_atlas.png" alt="M6 LSTM k4 same-length baseline fixed-effort regression lines">
+<p><strong>Line read.</strong> downward; -0.299 to -0.018 bits/month</p>
+<h4>LSTM k5 same-length baseline</h4>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/lstm_additive_k5_same_length/lstm_additive_k5_same_length_k3_m6_nb_words_fixed_effort_atlas.png" alt="M6 LSTM k5 same-length baseline fixed-effort regression lines">
+<p><strong>Line read.</strong> downward; -0.274 to -0.028 bits/month</p>
+<h3>Caretaker Contrast Regression Lines</h3>
+<img src="../figs/route1_caretaker_corrected_fixed_effort_atlas/caretaker_k3_cm6_nb_words_fixed_effort_atlas.png" alt="M6 caretaker contrast fixed-effort regression lines">
+<p><strong>Caretaker read.</strong> This asks the analogous fixed-effort question for caretaker speech from the same developmental axis. It is a contrast for whether the child-age pattern also appears in adult/caretaker utterances.</p>
+<h3>Repeated-Measurement Estimator Checks</h3>
+<p>Row-level repeated-measures sensitivity available: CS0: ols nonrobust (fit); CS0c: ols cluster_child (fit); CS1: ols cluster_child (fit); CS2: ols cluster_child (fit); CS3: gee_gaussian robust (fit); CS4: mixedlm random effects 1 (fit); CS5: mixedlm random effects ~age_c (fit); CS6: ols cluster_child (fit); CS7: ols cluster_child (fit).</p>
+<h2>M7. Nonlinear age model</h2>
+<p><strong>Why this candidate is here.</strong> Checks whether development is being forced into one straight line.</p>
+<p><strong>Natural-language test.</strong> Is the developmental pattern approximately linear, or does a curved age term matter?</p>
+<p><strong>Row-level formula.</strong> <code>sum_bits ~ age_c + effort_c + I(age_c ** 2) + C(child_id)</code></p>
+<p>Primary row-level result: the outcome is utterance-level <code>sum_bits</code>, not an aggregate mean. The age coefficient is -0.144 bits/month (p=0.002) after the listed controls. Existing row-level Atlas fixed-effort slopes are downward: -0.119 to -0.119 bits/month across the fixed word-effort values.</p>
+<h3>Real Child Regression Lines</h3>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/real/real_k3_m7_nb_words_fixed_effort_atlas.png" alt="M7 real child fixed-effort regression lines">
+<p><strong>Real-child read.</strong> downward; -0.119 to -0.119 bits/month This is the main child-language plot for this candidate.</p>
+<h3>Generated Baseline Regression Lines</h3>
+<h4>Random matched-length baseline</h4>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/random/random_k3_m7_nb_words_fixed_effort_atlas.png" alt="M7 Random matched-length baseline fixed-effort regression lines">
+<p><strong>Line read.</strong> upward; 0.174 to 0.174 bits/month</p>
+<h4>Unigram baseline</h4>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/unigram/unigram_k3_m7_nb_words_fixed_effort_atlas.png" alt="M7 Unigram baseline fixed-effort regression lines">
+<p><strong>Line read.</strong> downward; -0.019 to -0.019 bits/month</p>
+<h4>Bigram baseline</h4>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/bigram/bigram_k3_m7_nb_words_fixed_effort_atlas.png" alt="M7 Bigram baseline fixed-effort regression lines">
+<p><strong>Line read.</strong> downward; -0.022 to -0.022 bits/month</p>
+<h4>Trigram baseline</h4>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k3_m7_nb_words_fixed_effort_atlas.png" alt="M7 Trigram baseline fixed-effort regression lines">
+<p><strong>Line read.</strong> downward; -0.015 to -0.015 bits/month</p>
+<h4>LSTM k3 same-length baseline</h4>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/lstm_additive_k3_same_length/lstm_additive_k3_same_length_k3_m7_nb_words_fixed_effort_atlas.png" alt="M7 LSTM k3 same-length baseline fixed-effort regression lines">
+<p><strong>Line read.</strong> downward; -0.043 to -0.043 bits/month</p>
+<h4>LSTM k4 same-length baseline</h4>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/lstm_additive_k4_same_length/lstm_additive_k4_same_length_k3_m7_nb_words_fixed_effort_atlas.png" alt="M7 LSTM k4 same-length baseline fixed-effort regression lines">
+<p><strong>Line read.</strong> downward; -0.055 to -0.055 bits/month</p>
+<h4>LSTM k5 same-length baseline</h4>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/lstm_additive_k5_same_length/lstm_additive_k5_same_length_k3_m7_nb_words_fixed_effort_atlas.png" alt="M7 LSTM k5 same-length baseline fixed-effort regression lines">
+<p><strong>Line read.</strong> downward; -0.057 to -0.057 bits/month</p>
+<h3>Repeated-Measurement Estimator Checks</h3>
+<p>No row-level all-estimator sensitivity table is currently available for this candidate. The fixed-effort source plots shown here are the OLS child-fixed-effect Atlas view.</p>
+<h2>M11. Age by parent-context effort model</h2>
+<p><strong>Why this candidate is here.</strong> Directly addresses whether children react differently to parent context effort as they age.</p>
+<p><strong>Natural-language test.</strong> Does the parent-context-effort relation change with child age?</p>
+<h3>Real Child Regression Lines</h3>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/real/real_k3_m11_nb_words_fixed_effort_atlas.png" alt="M11 real child fixed-effort regression lines">
+<p><strong>Real-child read.</strong> downward; -0.139 to -0.117 bits/month This is the main child-language plot for this candidate.</p>
+<h3>Generated Baseline Regression Lines</h3>
+<h4>Random matched-length baseline</h4>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/random/random_k3_m11_nb_words_fixed_effort_atlas.png" alt="M11 Random matched-length baseline fixed-effort regression lines">
+<p><strong>Line read.</strong> upward; 0.160 to 0.271 bits/month</p>
+<h4>Unigram baseline</h4>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/unigram/unigram_k3_m11_nb_words_fixed_effort_atlas.png" alt="M11 Unigram baseline fixed-effort regression lines">
+<p><strong>Line read.</strong> downward, upward; -0.321 to 0.030 bits/month</p>
+<h4>Bigram baseline</h4>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/bigram/bigram_k3_m11_nb_words_fixed_effort_atlas.png" alt="M11 Bigram baseline fixed-effort regression lines">
+<p><strong>Line read.</strong> downward, upward; -0.267 to 0.019 bits/month</p>
+<h4>Trigram baseline</h4>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k3_m11_nb_words_fixed_effort_atlas.png" alt="M11 Trigram baseline fixed-effort regression lines">
+<p><strong>Line read.</strong> downward, upward; -0.145 to 0.007 bits/month</p>
+<h4>LSTM k3 same-length baseline</h4>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/lstm_additive_k3_same_length/lstm_additive_k3_same_length_k3_m11_nb_words_fixed_effort_atlas.png" alt="M11 LSTM k3 same-length baseline fixed-effort regression lines">
+<p><strong>Line read.</strong> downward; -0.276 to -0.010 bits/month</p>
+<h4>LSTM k4 same-length baseline</h4>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/lstm_additive_k4_same_length/lstm_additive_k4_same_length_k3_m11_nb_words_fixed_effort_atlas.png" alt="M11 LSTM k4 same-length baseline fixed-effort regression lines">
+<p><strong>Line read.</strong> downward; -0.308 to -0.017 bits/month</p>
+<h4>LSTM k5 same-length baseline</h4>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/lstm_additive_k5_same_length/lstm_additive_k5_same_length_k3_m11_nb_words_fixed_effort_atlas.png" alt="M11 LSTM k5 same-length baseline fixed-effort regression lines">
+<p><strong>Line read.</strong> downward; -0.280 to -0.027 bits/month</p>
+<h3>Repeated-Measurement Estimator Checks</h3>
+<p>No row-level all-estimator sensitivity table is currently available for this candidate. The fixed-effort source plots shown here are the OLS child-fixed-effect Atlas view.</p>
+<h2>M15. Rich interaction stress test</h2>
+<p><strong>Why this candidate is here.</strong> Stress-test candidate, not the cleanest supervisor story: keeps the main age, child-effort, parent-effort, context-entropy, and context-form interactions together.</p>
+<p><strong>Natural-language test.</strong> Does the fixed-effort age pattern survive the richest currently available row-level interaction model?</p>
+<p><strong>Row-level formula.</strong> <code>sum_bits ~ age_c + effort_c + age_c:effort_c + parent_context_effort_c + context_entropy_c + C(question_type) + age_c:context_entropy_c + effort_c:context_entropy_c + age_c:parent_context_effort_c + effort_c:parent_context_effort_c + context_entropy_c:C(question_type) + C(child_id)</code></p>
+<p>Primary row-level result: the outcome is utterance-level <code>sum_bits</code>, not an aggregate mean. The age coefficient is -0.127 bits/month (p=&lt;.001) after the listed controls. Existing row-level Atlas fixed-effort slopes are downward: -0.139 to -0.125 bits/month across the fixed word-effort values.</p>
+<h3>Real Child Regression Lines</h3>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/real/real_k3_m15_nb_words_fixed_effort_atlas.png" alt="M15 real child fixed-effort regression lines">
+<p><strong>Real-child read.</strong> downward; -0.139 to -0.125 bits/month This is the main child-language plot for this candidate.</p>
+<h3>Generated Baseline Regression Lines</h3>
+<h4>Random matched-length baseline</h4>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/random/random_k3_m15_nb_words_fixed_effort_atlas.png" alt="M15 Random matched-length baseline fixed-effort regression lines">
+<p><strong>Line read.</strong> upward; 0.156 to 0.278 bits/month</p>
+<h4>Unigram baseline</h4>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/unigram/unigram_k3_m15_nb_words_fixed_effort_atlas.png" alt="M15 Unigram baseline fixed-effort regression lines">
+<p><strong>Line read.</strong> downward, upward; -0.311 to 0.025 bits/month</p>
+<h4>Bigram baseline</h4>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/bigram/bigram_k3_m15_nb_words_fixed_effort_atlas.png" alt="M15 Bigram baseline fixed-effort regression lines">
+<p><strong>Line read.</strong> downward, upward; -0.257 to 0.014 bits/month</p>
+<h4>Trigram baseline</h4>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k3_m15_nb_words_fixed_effort_atlas.png" alt="M15 Trigram baseline fixed-effort regression lines">
+<p><strong>Line read.</strong> downward, upward; -0.132 to 0.002 bits/month</p>
+<h4>LSTM k3 same-length baseline</h4>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/lstm_additive_k3_same_length/lstm_additive_k3_same_length_k3_m15_nb_words_fixed_effort_atlas.png" alt="M15 LSTM k3 same-length baseline fixed-effort regression lines">
+<p><strong>Line read.</strong> downward; -0.267 to -0.014 bits/month</p>
+<h4>LSTM k4 same-length baseline</h4>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/lstm_additive_k4_same_length/lstm_additive_k4_same_length_k3_m15_nb_words_fixed_effort_atlas.png" alt="M15 LSTM k4 same-length baseline fixed-effort regression lines">
+<p><strong>Line read.</strong> downward; -0.301 to -0.022 bits/month</p>
+<h4>LSTM k5 same-length baseline</h4>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/lstm_additive_k5_same_length/lstm_additive_k5_same_length_k3_m15_nb_words_fixed_effort_atlas.png" alt="M15 LSTM k5 same-length baseline fixed-effort regression lines">
+<p><strong>Line read.</strong> downward; -0.274 to -0.031 bits/month</p>
+<h3>Repeated-Measurement Estimator Checks</h3>
+<p>No row-level all-estimator sensitivity table is currently available for this candidate. The fixed-effort source plots shown here are the OLS child-fixed-effect Atlas view.</p>
+<h3>All-Estimator Screening Lines</h3>
+<img src="../figs/route1_best_model_robustness_package/m15_aggregate_estimator_fixed_effort_age_lines.png" alt="M15 all-estimator fixed-effort screening lines">
+<p><strong>Estimator read.</strong> This plot compares OLS fixed effects, GEE Gaussian, GEE Gamma/log, GLM Gaussian, GLM Gamma/log, MixedLM random intercept, and MixedLM random age slope on the same candidate formula. It is a fixed-effort screening/robustness plot for repeated utterance measurements, not a raw total-bits growth plot and not a replacement for the row-level source-specific Atlas line above.</p>
+<h2>Exact Parent-Effort Interaction Screening</h2>
+<h2>M5_no_question. Exact context-control model without question type</h2>
+<p><strong>Why this candidate is here.</strong> Separates the parent/context controls from question type so question coding is not doing hidden work.</p>
+<p><strong>Formula.</strong> <code>sum_bits ~ age_c + effort_c + context_entropy_c + parent_context_effort_c + C(child_id)</code></p>
+<p><strong>Status.</strong> These are all-estimator screening artifacts for the requested parent-effort variants. They are useful for model choice, but the row-level source-specific Atlas should be regenerated for any variant promoted to the supervisor report.</p>
+<h3>All-Estimator Screening Lines</h3>
+<img src="../figs/route1_best_model_robustness_package/m5_no_question_aggregate_estimator_fixed_effort_age_lines.png" alt="M5_no_question all-estimator fixed-effort screening lines">
+<p><strong>Estimator read.</strong> This plot compares OLS fixed effects, GEE Gaussian, GEE Gamma/log, GLM Gaussian, GLM Gamma/log, MixedLM random intercept, and MixedLM random age slope on the same candidate formula. It is a fixed-effort screening/robustness plot for repeated utterance measurements, not a raw total-bits growth plot and not a replacement for the row-level source-specific Atlas line above.</p>
+<h2>M5_age_effort_no_question. Age by child-effort interaction without question type</h2>
+<p><strong>Why this candidate is here.</strong> Tests whether child effort changes the age relation while excluding question type.</p>
+<p><strong>Formula.</strong> <code>sum_bits ~ age_c + effort_c + age_c:effort_c + context_entropy_c + parent_context_effort_c + C(child_id)</code></p>
+<p><strong>Status.</strong> These are all-estimator screening artifacts for the requested parent-effort variants. They are useful for model choice, but the row-level source-specific Atlas should be regenerated for any variant promoted to the supervisor report.</p>
+<h3>All-Estimator Screening Lines</h3>
+<img src="../figs/route1_best_model_robustness_package/m5_age_effort_no_question_aggregate_estimator_fixed_effort_age_lines.png" alt="M5_age_effort_no_question all-estimator fixed-effort screening lines">
+<p><strong>Estimator read.</strong> This plot compares OLS fixed effects, GEE Gaussian, GEE Gamma/log, GLM Gaussian, GLM Gamma/log, MixedLM random intercept, and MixedLM random age slope on the same candidate formula. It is a fixed-effort screening/robustness plot for repeated utterance measurements, not a raw total-bits growth plot and not a replacement for the row-level source-specific Atlas line above.</p>
+<h2>M5_parent_reaction_no_question. Parent-reaction interaction model without question type</h2>
+<p><strong>Why this candidate is here.</strong> Directly tests whether parent context effort relates differently to child bits by age and by child effort.</p>
+<p><strong>Formula.</strong> <code>sum_bits ~ age_c + effort_c + context_entropy_c + parent_context_effort_c + age_c:parent_context_effort_c + effort_c:parent_context_effort_c + C(child_id)</code></p>
+<p><strong>Status.</strong> These are all-estimator screening artifacts for the requested parent-effort variants. They are useful for model choice, but the row-level source-specific Atlas should be regenerated for any variant promoted to the supervisor report.</p>
+<h3>All-Estimator Screening Lines</h3>
+<img src="../figs/route1_best_model_robustness_package/m5_parent_reaction_no_question_aggregate_estimator_fixed_effort_age_lines.png" alt="M5_parent_reaction_no_question all-estimator fixed-effort screening lines">
+<p><strong>Estimator read.</strong> This plot compares OLS fixed effects, GEE Gaussian, GEE Gamma/log, GLM Gaussian, GLM Gamma/log, MixedLM random intercept, and MixedLM random age slope on the same candidate formula. It is a fixed-effort screening/robustness plot for repeated utterance measurements, not a raw total-bits growth plot and not a replacement for the row-level source-specific Atlas line above.</p>
+<h2>M5_parent_reaction_question. Parent-reaction interaction model with question type</h2>
+<p><strong>Why this candidate is here.</strong> Same parent-reaction test, but with question/form controls added.</p>
+<p><strong>Formula.</strong> <code>sum_bits ~ age_c + effort_c + context_entropy_c + parent_context_effort_c + age_c:parent_context_effort_c + effort_c:parent_context_effort_c + C(question_type) + C(child_id)</code></p>
+<p><strong>Status.</strong> These are all-estimator screening artifacts for the requested parent-effort variants. They are useful for model choice, but the row-level source-specific Atlas should be regenerated for any variant promoted to the supervisor report.</p>
+<h3>All-Estimator Screening Lines</h3>
+<img src="../figs/route1_best_model_robustness_package/m5_parent_reaction_question_aggregate_estimator_fixed_effort_age_lines.png" alt="M5_parent_reaction_question all-estimator fixed-effort screening lines">
+<p><strong>Estimator read.</strong> This plot compares OLS fixed effects, GEE Gaussian, GEE Gamma/log, GLM Gaussian, GLM Gamma/log, MixedLM random intercept, and MixedLM random age slope on the same candidate formula. It is a fixed-effort screening/robustness plot for repeated utterance measurements, not a raw total-bits growth plot and not a replacement for the row-level source-specific Atlas line above.</p>
+<h2>Heldout Prediction</h2>
+<p>These are the prediction plots that matter here: actual heldout child regression lines and PBM-trained predicted regression lines in the same panel.</p>
+<img src="../figs/supervisor_candidate_report/heldout_pop_m4c_actual_vs_predicted_regression_lines.png" alt="Heldout actual vs predicted regression lines">
+<p><strong>Heldout read.</strong> These are the prediction plots that matter for generalization: actual heldout child regression lines and PBM-trained predicted regression lines in the same panel.</p>
+<img src="../figs/supervisor_candidate_report/heldout_pop_m4c_calibration_residuals.png" alt="Heldout calibration and residuals">
+<h2>Robustness Regression-Line Checks</h2>
+<img src="../figs/age_scrambling_robustness/m2_clear_robustness_regression_lines.png" alt="Age-scrambling regression-line robustness">
+<img src="../figs/age_scrambling_robustness/robustness_outside_null_heatmap.png" alt="Age-scrambling outside-null heatmap">
+<h2>Contrast Plots</h2>
+<img src="../figs/supervisor_candidate_report/source_comparison_m4c_k3_words_slopes.png" alt="Source comparison fixed-effort slopes">
+<img src="../figs/route1_caretaker_corrected_fixed_effort_atlas/caretaker_k3_cm2_nb_words_fixed_effort_atlas.png" alt="Caretaker fixed-effort CM2">
+<img src="../figs/route1_caretaker_corrected_fixed_effort_atlas/caretaker_k3_cm6_nb_words_fixed_effort_atlas.png" alt="Caretaker fixed-effort CM6">
+<h2>Secondary Rate Outcome Status</h2>
+<p><code>mean_bits_per_token</code> is available in the long scored dataset and can be modeled as a separate rate outcome. It should not be mixed into the main fixed-effort total-bits claim. The next rate-outcome check should reuse the strongest total-bits candidate formula and label the result as bits-per-token evidence.</p>
+<h2>Saved Row-Level Artifacts</h2>
+<pre><code>results/route1_source_specific_corrected_fixed_effort_atlas/real/model_summary.csv
+results/route1_source_specific_corrected_fixed_effort_atlas/real/fixed_slice_slopes.csv
+results/route1_source_specific_corrected_fixed_effort_atlas/real/fixed_effort_predictions.csv.gz
+results/route1_source_specific_corrected_fixed_effort_atlas
+results/route1_caretaker_atlas/full_fit/caretaker_model_summary.csv
+results/route1_heldout_real_child_prediction/heldout_prediction_fit_summary.csv
+results/route1_corrected_baseline_atlas/full_child_structure_sensitivity/source_specific_model_summary.csv
+figs/route1_best_model_robustness_package</code></pre>
+</main>
+</body>
+</html>

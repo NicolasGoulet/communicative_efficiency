@@ -1,0 +1,1642 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Route 1 Exhaustive Group-Comparison ANCOVA Gallery</title>
+<style>
+:root {
+  color-scheme: light;
+  --ink: #1e2528;
+  --muted: #5e686d;
+  --line: #d9e0df;
+  --paper: #ffffff;
+  --soft: #f5f7f6;
+  --accent: #2f6f73;
+  --accent2: #c76f2c;
+}
+body {
+  margin: 0;
+  background: #eef2f1;
+  color: var(--ink);
+  font: 16px/1.58 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+main {
+  max-width: 980px;
+  margin: 34px auto 56px;
+  padding: 48px 58px;
+  background: var(--paper);
+  box-shadow: 0 18px 50px rgba(31, 45, 48, 0.12);
+}
+h1, h2, h3, h4 {
+  line-height: 1.18;
+  margin: 1.6em 0 0.55em;
+}
+h1 {
+  margin-top: 0;
+  font-size: 2.25rem;
+  border-bottom: 3px solid var(--accent);
+  padding-bottom: 0.45em;
+}
+h2 {
+  font-size: 1.55rem;
+  color: var(--accent);
+}
+h3 {
+  font-size: 1.18rem;
+}
+p {
+  margin: 0.75em 0;
+}
+a {
+  color: var(--accent);
+}
+blockquote {
+  border-left: 4px solid var(--accent2);
+  margin: 1.1em 0;
+  padding: 0.05em 1.1em;
+  color: var(--muted);
+  background: #fff8f2;
+}
+code {
+  background: var(--soft);
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  padding: 0.08em 0.3em;
+  font-family: "SFMono-Regular", Consolas, monospace;
+  font-size: 0.92em;
+}
+pre {
+  background: #f5f7f6;
+  color: var(--ink);
+  border: 1px solid var(--line);
+  padding: 1em;
+  overflow-x: auto;
+  border-radius: 7px;
+}
+pre code {
+  background: transparent;
+  border: 0;
+  padding: 0;
+  color: inherit;
+}
+table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 1.15em 0 1.45em;
+  font-size: 0.95em;
+}
+th, td {
+  border: 1px solid var(--line);
+  padding: 0.54em 0.68em;
+  vertical-align: top;
+}
+th {
+  background: #e7efed;
+  text-align: left;
+}
+tr:nth-child(even) td {
+  background: #fafbfb;
+}
+img {
+  max-width: 100%;
+  display: block;
+  margin: 1.1em auto 0.45em;
+}
+ul, ol {
+  padding-left: 1.4em;
+}
+.caption {
+  color: var(--muted);
+  font-size: 0.92em;
+  margin-top: -0.15em;
+}
+@media print {
+  body {
+    background: white;
+  }
+  main {
+    box-shadow: none;
+    margin: 0;
+    max-width: none;
+    padding: 28px;
+  }
+}
+</style>
+</head>
+<body>
+<main>
+<h1>Route 1 Exhaustive Group-Comparison ANCOVA Gallery</h1>
+<p>This is a pre-supervisor selection gallery. It is intentionally built for choosing figures and language for the later supervisor report. The current supervisor-facing report is not modified.</p>
+<p>The central question is the Route 1 question: at the same production effort, do older children produce utterances that are less unpredictable in context? The answer in this gallery is yes for the main real-child adjusted means and mostly yes in exact-effort checks.</p>
+<h2>What The ANCOVA Is Doing</h2>
+<p>This report uses ANCOVA-style models because raw ANOVA would mostly ask whether age bins differ in total information, without separating that from the fact that older children produce longer utterances. Here, effort is controlled directly.</p>
+<p>The real-child age-bin model is fit separately for each effort scale:</p>
+<pre><code>sum_bits_k3 ~ C(age_bin) + effort_z + C(child_id)
+context_gain ~ C(age_bin) + effort_z + C(child_id)</code></pre>
+<p><code>effort_z</code> is one effort measure at a time: words, morphemes, CMU/pkg syllables, package syllables, or phonemes. The plotted adjusted means are predictions at average effort for that scale, averaged over child identities. So these plots are not raw age means.</p>
+<p>The source-comparison models use:</p>
+<pre><code>outcome ~ C(source_label) * C(age_bin) + effort_z + C(child_id)</code></pre>
+<p>The exact-effort models use exact effort values instead of only average effort:</p>
+<pre><code>outcome ~ C(age_bin) * C(exact_effort) + C(child_id)</code></pre>
+<p>These exact-effort panels are the strongest check against the objection that the result is just MLU or utterance-length growth.</p>
+<h2>Main Reading</h2>
+<ul>
+<li><strong>Real child same-effort information:</strong> Across effort scales, the adjusted start-to-end change ranges from -5.46 to -3.19 bits; the fitted linear age slope ranges from -0.62 to -0.29 bits per 6 months.</li>
+<li><strong>Exact-effort support:</strong> Across the top exact effort values and all five effort scales, 51/60 exact-effort age slopes are downward; median slopes by effort scale range from -0.44 to -0.15 bits per 6 months.</li>
+<li><strong>Real child context gain:</strong> Across effort scales, the adjusted start-to-end change ranges from -1.98 to -1.52 bits; the fitted linear age slope ranges from -0.31 to -0.25 bits per 6 months.</li>
+<li><strong>Generated controls:</strong> random, n-gram, and LSTM controls are source-specific comparisons. Random is most different; LSTMs are closest; n-grams sit in between.</li>
+<li><strong>Caretakers:</strong> the caregiver/CDS comparison is not a direct replication of the phonological CDS paper. That paper asks whether caregiver speech becomes more phonologically informative with child age. This report asks whether caretaker utterances are more Mistral-surprising at fixed utterance effort in local conversational context.</li>
+</ul>
+<h2>Relation To The Frequency/Informativity Paper</h2>
+<p>The paper excerpt argues that caregiver-directed speech becomes phonologically more informative/less redundant as children age, while phone frequencies are comparatively stable. That is a parent-input result at the phonological-structure level.</p>
+<p>Our current Route 1 result is a child-output result at the utterance-information level: children&#x27;s own utterances become less unpredictable in context at the same production effort. These can coexist. A plausible developmental story is that input to children may become less redundant as children can process more, while children’s own productions become more conventional and contextually recoverable as they learn the language.</p>
+<p>This report therefore separates the two claims: real-child fixed-effort output trajectories are the main Route 1 evidence; caretaker trajectories are a comparison; and frequency/informativity predictors are being saved for later frequency-control models.</p>
+<h2>Part I: Figure Gallery</h2>
+<p>The figures are the main product, but each figure now has a short card explaining the model, how to read it, and why it matters.</p>
+<h3>Real Child Age</h3>
+<h4>Real children adjusted With-context information</h4>
+<p><strong>What is controlled:</strong> Each panel is a separate ANCOVA, <code>sum_bits_k3 ~ C(age_bin) + effort_z + C(child_id)</code>. The effort variable is the panel title, centered/scaled within that model; plotted means are at average effort and averaged over child identities.</p>
+<p><strong>How to read it:</strong> Downward lines mean that, at the same effort scale and child-adjusted baseline, older children are less unpredictable in the preceding caretaker context.</p>
+<p><strong>What it says here:</strong> Across effort scales, the adjusted start-to-end change ranges from -5.46 to -3.19 bits; the fitted linear age slope ranges from -0.62 to -0.29 bits per 6 months. This is the ANCOVA version of the Route 1 fixed-effort claim.</p>
+<img src="../figs/route1_exhaustive_ancova_gallery/real_age_adjusted_sum_bits_k3_by_effort.png" alt="Real children adjusted With-context information">
+<h4>Real children adjusted Context gain</h4>
+<p><strong>What is controlled:</strong> Same real-child ANCOVA structure, but the outcome is <code>context_gain = sum_bits_k0 - sum_bits_k3</code>.</p>
+<p><strong>How to read it:</strong> Higher values mean the preceding context reduces surprisal more. A downward line means the k0-to-k3 reduction is smaller for older children at matched effort.</p>
+<p><strong>What it says here:</strong> Across effort scales, the adjusted start-to-end change ranges from -1.98 to -1.52 bits; the fitted linear age slope ranges from -0.31 to -0.25 bits per 6 months. This suggests the developmental decrease in k3 bits is not simply because older children receive more helpful local context.</p>
+<img src="../figs/route1_exhaustive_ancova_gallery/real_age_adjusted_context_gain_by_effort.png" alt="Real children adjusted Context gain">
+<h3>Source Comparisons</h3>
+<p><strong>Important reading note:</strong> in every source-minus-real plot, real child utterances are the reference line at <code>0</code>. The real utterance value has been subtracted away, so the colored lines are not raw surprisal. They answer: at the same controlled effort, how many bits above or below real child utterances is this control source?</p>
+<p>For example, a random line at <code>+20</code> means the random utterances are estimated to be 20 bits more surprising than real child utterances in that age bin and effort-controlled model. An LSTM line near <code>+3</code> means the LSTM is much closer to real children. A caretaker line below <code>0</code> means caretaker utterances are estimated to be less surprising than real child utterances under this same fixed-effort contrast.</p>
+<h4>Real vs generated adjusted With-context information</h4>
+<p><strong>What is controlled:</strong> Omnibus child-source ANCOVA, <code>sum_bits_k3 ~ C(source) * C(age_bin) + effort_z + C(child_id)</code>, fit separately for each effort scale.</p>
+<p><strong>How to read it:</strong> The real-child line is compared with matched generated sources at the same adjusted effort. If controls sit above real children, they are more unpredictable than real utterances under the same context.</p>
+<p><strong>What it says here:</strong> Random is far above real children; n-grams are closer but still generally more surprising; LSTMs are closest but do not remove the real-child developmental pattern. This supports source specificity.</p>
+<img src="../figs/route1_exhaustive_ancova_gallery/child_sources_adjusted_sum_bits_k3_by_effort.png" alt="Real vs generated adjusted With-context information">
+<h4>Real vs generated adjusted Context gain</h4>
+<p><strong>What is controlled:</strong> Same source-by-age ANCOVA, but the outcome is context gain rather than k3 information.</p>
+<p><strong>How to read it:</strong> This separates “the utterance is predictable with context” from “the source benefits from context.”</p>
+<p><strong>What it says here:</strong> The generated controls do not all exploit context like real children. This is useful for arguing that the result is not only a scoring artifact.</p>
+<img src="../figs/route1_exhaustive_ancova_gallery/child_sources_adjusted_context_gain_by_effort.png" alt="Real vs generated adjusted Context gain">
+<h4>Source-minus-real With-context information heatmaps</h4>
+<p><strong>What is controlled:</strong> Pairwise source-vs-real ANCOVAs control effort and child identity before taking source-minus-real adjusted means.</p>
+<p><strong>How to read it:</strong> Red/positive cells mean the source is more unpredictable than real child utterances; blue/negative cells mean less unpredictable.</p>
+<p><strong>What it says here:</strong> The generated baselines are mostly positive, especially random and unigram. This is the broad visual screen for which controls are most different from real children.</p>
+<img src="../figs/route1_exhaustive_ancova_gallery/source_minus_real_sum_bits_k3_heatmaps_by_effort.png" alt="Source-minus-real With-context information heatmaps">
+<h4>Source-minus-real Context gain heatmaps</h4>
+<p><strong>What is controlled:</strong> Pairwise source-vs-real ANCOVAs for context gain.</p>
+<p><strong>How to read it:</strong> Positive cells mean the source gains more from context than real children; negative cells mean less.</p>
+<p><strong>What it says here:</strong> This helps separate high surprisal from poor context use. Some sources are more surprising and also benefit differently from context.</p>
+<img src="../figs/route1_exhaustive_ancova_gallery/source_minus_real_context_gain_heatmaps_by_effort.png" alt="Source-minus-real Context gain heatmaps">
+<h4>Words source-minus-real With-context information lines</h4>
+<p><strong>What is controlled:</strong> The model first estimates adjusted with-context information for real child utterances and for one comparison source at the same age bin, child-adjusted baseline, and effort scale. It then subtracts the real-child adjusted mean.</p>
+<p><strong>How to read it:</strong> The black zero line is real child utterances. A positive value means the comparison source is that many bits more surprising than real child utterances at the same controlled effort. A negative value means it is less surprising than real child utterances. Upward lines mean the source is moving farther away from real children over development.</p>
+<p><strong>What it says here:</strong> For words, Random changes from 22.59 to 57.27 bits (delta 34.68); Trigram changes from 3.93 to 12.60 bits (delta 8.67); the closest LSTM at the last age bin is LSTM k4 with a 3.13 bit gap. Use these line plots to pick the clearest source-comparison figure.</p>
+<img src="../figs/route1_exhaustive_ancova_gallery/nb_words_sum_bits_k3_source_minus_real_gap_lines.png" alt="Words source-minus-real With-context information lines">
+<h4>Morphemes source-minus-real With-context information lines</h4>
+<p><strong>What is controlled:</strong> The model first estimates adjusted with-context information for real child utterances and for one comparison source at the same age bin, child-adjusted baseline, and effort scale. It then subtracts the real-child adjusted mean.</p>
+<p><strong>How to read it:</strong> The black zero line is real child utterances. A positive value means the comparison source is that many bits more surprising than real child utterances at the same controlled effort. A negative value means it is less surprising than real child utterances. Upward lines mean the source is moving farther away from real children over development.</p>
+<p><strong>What it says here:</strong> For morphemes, Random changes from 19.54 to 47.91 bits (delta 28.36); Trigram changes from 3.97 to 12.68 bits (delta 8.70); the closest LSTM at the last age bin is LSTM k4 with a 3.88 bit gap. Use these line plots to pick the clearest source-comparison figure.</p>
+<img src="../figs/route1_exhaustive_ancova_gallery/nb_morphemes_sum_bits_k3_source_minus_real_gap_lines.png" alt="Morphemes source-minus-real With-context information lines">
+<h4>Syllables: CMU/pkg source-minus-real With-context information lines</h4>
+<p><strong>What is controlled:</strong> The model first estimates adjusted with-context information for real child utterances and for one comparison source at the same age bin, child-adjusted baseline, and effort scale. It then subtracts the real-child adjusted mean.</p>
+<p><strong>How to read it:</strong> The black zero line is real child utterances. A positive value means the comparison source is that many bits more surprising than real child utterances at the same controlled effort. A negative value means it is less surprising than real child utterances. Upward lines mean the source is moving farther away from real children over development.</p>
+<p><strong>What it says here:</strong> For syllables: cmu/pkg, Random changes from 16.09 to 33.25 bits (delta 17.15); Trigram changes from 3.95 to 12.04 bits (delta 8.09); the closest LSTM at the last age bin is LSTM k4 with a 4.72 bit gap. Use these line plots to pick the clearest source-comparison figure.</p>
+<img src="../figs/route1_exhaustive_ancova_gallery/nb_syllables_cmu_or_pkg_sum_bits_k3_source_minus_real_gap_lines.png" alt="Syllables: CMU/pkg source-minus-real With-context information lines">
+<h4>Syllables: pkg source-minus-real With-context information lines</h4>
+<p><strong>What is controlled:</strong> The model first estimates adjusted with-context information for real child utterances and for one comparison source at the same age bin, child-adjusted baseline, and effort scale. It then subtracts the real-child adjusted mean.</p>
+<p><strong>How to read it:</strong> The black zero line is real child utterances. A positive value means the comparison source is that many bits more surprising than real child utterances at the same controlled effort. A negative value means it is less surprising than real child utterances. Upward lines mean the source is moving farther away from real children over development.</p>
+<p><strong>What it says here:</strong> For syllables: pkg, Random changes from 16.83 to 34.37 bits (delta 17.54); Trigram changes from 3.99 to 12.11 bits (delta 8.12); the closest LSTM at the last age bin is LSTM k4 with a 4.98 bit gap. Use these line plots to pick the clearest source-comparison figure.</p>
+<img src="../figs/route1_exhaustive_ancova_gallery/nb_syllables_pkg_sum_bits_k3_source_minus_real_gap_lines.png" alt="Syllables: pkg source-minus-real With-context information lines">
+<h4>Phonemes source-minus-real With-context information lines</h4>
+<p><strong>What is controlled:</strong> The model first estimates adjusted with-context information for real child utterances and for one comparison source at the same age bin, child-adjusted baseline, and effort scale. It then subtracts the real-child adjusted mean.</p>
+<p><strong>How to read it:</strong> The black zero line is real child utterances. A positive value means the comparison source is that many bits more surprising than real child utterances at the same controlled effort. A negative value means it is less surprising than real child utterances. Upward lines mean the source is moving farther away from real children over development.</p>
+<p><strong>What it says here:</strong> For phonemes, Random changes from 14.62 to 29.23 bits (delta 14.61); Trigram changes from 4.08 to 12.19 bits (delta 8.11); the closest LSTM at the last age bin is LSTM k4 with a 6.05 bit gap. Use these line plots to pick the clearest source-comparison figure.</p>
+<img src="../figs/route1_exhaustive_ancova_gallery/nb_phonemes_sum_bits_k3_source_minus_real_gap_lines.png" alt="Phonemes source-minus-real With-context information lines">
+<h4>Words source-minus-real Context gain lines</h4>
+<p><strong>What is controlled:</strong> The same source-minus-real subtraction, but for context gain instead of total with-context information.</p>
+<p><strong>How to read it:</strong> Zero is real child utterances. Positive values mean the comparison source gains more from context than real children; negative values mean it gains less from context.</p>
+<p><strong>What it says here:</strong> For words, the largest final absolute context-gain gap is Caretaker at 4.43 bits. These are secondary to the k3 information gap lines.</p>
+<img src="../figs/route1_exhaustive_ancova_gallery/nb_words_context_gain_source_minus_real_gap_lines.png" alt="Words source-minus-real Context gain lines">
+<h4>Morphemes source-minus-real Context gain lines</h4>
+<p><strong>What is controlled:</strong> The same source-minus-real subtraction, but for context gain instead of total with-context information.</p>
+<p><strong>How to read it:</strong> Zero is real child utterances. Positive values mean the comparison source gains more from context than real children; negative values mean it gains less from context.</p>
+<p><strong>What it says here:</strong> For morphemes, the largest final absolute context-gain gap is Random at -4.58 bits. These are secondary to the k3 information gap lines.</p>
+<img src="../figs/route1_exhaustive_ancova_gallery/nb_morphemes_context_gain_source_minus_real_gap_lines.png" alt="Morphemes source-minus-real Context gain lines">
+<h4>Syllables: CMU/pkg source-minus-real Context gain lines</h4>
+<p><strong>What is controlled:</strong> The same source-minus-real subtraction, but for context gain instead of total with-context information.</p>
+<p><strong>How to read it:</strong> Zero is real child utterances. Positive values mean the comparison source gains more from context than real children; negative values mean it gains less from context.</p>
+<p><strong>What it says here:</strong> For syllables: cmu/pkg, the largest final absolute context-gain gap is Random at -5.09 bits. These are secondary to the k3 information gap lines.</p>
+<img src="../figs/route1_exhaustive_ancova_gallery/nb_syllables_cmu_or_pkg_context_gain_source_minus_real_gap_lines.png" alt="Syllables: CMU/pkg source-minus-real Context gain lines">
+<h4>Syllables: pkg source-minus-real Context gain lines</h4>
+<p><strong>What is controlled:</strong> The same source-minus-real subtraction, but for context gain instead of total with-context information.</p>
+<p><strong>How to read it:</strong> Zero is real child utterances. Positive values mean the comparison source gains more from context than real children; negative values mean it gains less from context.</p>
+<p><strong>What it says here:</strong> For syllables: pkg, the largest final absolute context-gain gap is Random at -5.05 bits. These are secondary to the k3 information gap lines.</p>
+<img src="../figs/route1_exhaustive_ancova_gallery/nb_syllables_pkg_context_gain_source_minus_real_gap_lines.png" alt="Syllables: pkg source-minus-real Context gain lines">
+<h4>Phonemes source-minus-real Context gain lines</h4>
+<p><strong>What is controlled:</strong> The same source-minus-real subtraction, but for context gain instead of total with-context information.</p>
+<p><strong>How to read it:</strong> Zero is real child utterances. Positive values mean the comparison source gains more from context than real children; negative values mean it gains less from context.</p>
+<p><strong>What it says here:</strong> For phonemes, the largest final absolute context-gain gap is Random at -5.26 bits. These are secondary to the k3 information gap lines.</p>
+<img src="../figs/route1_exhaustive_ancova_gallery/nb_phonemes_context_gain_source_minus_real_gap_lines.png" alt="Phonemes source-minus-real Context gain lines">
+<h3>Caretaker/CDS Comparison</h3>
+<h4>Real child vs caretaker adjusted With-context information</h4>
+<p><strong>What is controlled:</strong> Pairwise ANCOVA for real child vs caretaker speech, <code>sum_bits_k3 ~ C(source) * C(age_bin) + effort_z + C(child_id)</code>, fit separately for each effort scale.</p>
+<p><strong>How to read it:</strong> This is not the same as the phonological CDS paper. That paper asks whether caregiver speech becomes more phonologically informative with child age; this plot asks whether caretaker utterances become more Mistral-surprising at the same utterance effort in our Route 1 setup.</p>
+<p><strong>What it says here:</strong> Caretaker k3 bits show this pattern: Across effort scales, the adjusted start-to-end change ranges from -1.30 to -0.91 bits; the fitted linear age slope ranges from -0.14 to -0.11 bits per 6 months. This does not reproduce the paper&#x27;s phone-level CDS-informativity claim; it is a different outcome and a fixed-effort utterance-level contrast.</p>
+<img src="../figs/route1_exhaustive_ancova_gallery/real_caretaker_adjusted_sum_bits_k3_by_effort.png" alt="Real child vs caretaker adjusted With-context information">
+<h4>Real child vs caretaker adjusted Context gain</h4>
+<p><strong>What is controlled:</strong> Same real-vs-caretaker pairwise ANCOVA, with context gain as the outcome.</p>
+<p><strong>How to read it:</strong> This asks whether caretaker speech benefits more or less from local context across the child-age timeline.</p>
+<p><strong>What it says here:</strong> Caretaker context gain shows this pattern: Across effort scales, the adjusted start-to-end change ranges from -2.50 to -2.38 bits; the fitted linear age slope ranges from -0.32 to -0.30 bits per 6 months. Treat this as a caregiver contrast, not as a direct replication of the phonological CDS paper.</p>
+<img src="../figs/route1_exhaustive_ancova_gallery/real_caretaker_adjusted_context_gain_by_effort.png" alt="Real child vs caretaker adjusted Context gain">
+<h3>Model Tests</h3>
+<h4>real_age_ancova term-test heatmap</h4>
+<p><strong>What is tested:</strong> The age-bin term in <code>outcome ~ C(age_bin) + effort_z + C(child_id)</code>.</p>
+<p><strong>How to read it:</strong> Darker cells mean stronger FDR-adjusted evidence that age bins differ after effort and child identity are controlled.</p>
+<p><strong>What it says here:</strong> This is the table-like statistical confirmation of the real-child adjusted age plots.</p>
+<img src="../figs/route1_exhaustive_ancova_gallery/real_age_ancova_term_test_fdr_heatmap.png" alt="real_age_ancova term-test heatmap">
+<h4>child_source_omnibus term-test heatmap</h4>
+<p><strong>What is tested:</strong> Source, age bin, and source-by-age interaction in the generated-source omnibus ANCOVA.</p>
+<p><strong>How to read it:</strong> Strong source-by-age cells mean the developmental trajectory differs by source, not just by overall source level.</p>
+<p><strong>What it says here:</strong> This is the omnibus support for comparing real children against generated baselines.</p>
+<img src="../figs/route1_exhaustive_ancova_gallery/child_source_omnibus_term_test_fdr_heatmap.png" alt="child_source_omnibus term-test heatmap">
+<h4>pairwise_source_ancova term-test heatmap</h4>
+<p><strong>What is tested:</strong> Pairwise real-vs-source ANCOVA terms for each source and effort scale.</p>
+<p><strong>How to read it:</strong> Use this as an audit map for which comparisons have strong age/source/source-by-age terms.</p>
+<p><strong>What it says here:</strong> The strongest rows are candidates for supervisor-report figures; the heatmap itself is appendix material.</p>
+<img src="../figs/route1_exhaustive_ancova_gallery/pairwise_source_ancova_term_test_fdr_heatmap.png" alt="pairwise_source_ancova term-test heatmap">
+<h3>Exact Effort</h3>
+<h4>Real exact-effort With-context information age slopes</h4>
+<p><strong>What is controlled:</strong> Exact-effort ANCOVA, <code>sum_bits_k3 ~ C(age_bin) * C(exact_effort) + C(child_id)</code>, for the 12 most frequent exact effort values in each effort scale.</p>
+<p><strong>How to read it:</strong> Each cell is an age slope within one exact effort value. Downward cells mean older children are less unpredictable at the exact same effort value.</p>
+<p><strong>What it says here:</strong> Across the top exact effort values and all five effort scales, 51/60 exact-effort age slopes are downward; median slopes by effort scale range from -0.44 to -0.15 bits per 6 months. This is the strongest guard against the result being only MLU.</p>
+<img src="../figs/route1_exhaustive_ancova_gallery/real_exact_effort_age_slopes_sum_bits_k3.png" alt="Real exact-effort With-context information age slopes">
+<h4>Words exact-effort source gap slopes for With-context information</h4>
+<p><strong>What is controlled:</strong> Exact-effort source-vs-real models, so source gaps are compared inside exact effort values rather than at only average effort.</p>
+<p><strong>How to read it:</strong> Positive cells mean the source-real unpredictability gap grows with age at that exact effort value.</p>
+<p><strong>What it says here:</strong> These are candidate appendix figures for showing that source-specific effects are not just effort-distribution artifacts.</p>
+<img src="../figs/route1_exhaustive_ancova_gallery/nb_words_exact_source_real_gap_slopes_sum_bits_k3.png" alt="Words exact-effort source gap slopes for With-context information">
+<h4>Morphemes exact-effort source gap slopes for With-context information</h4>
+<p><strong>What is controlled:</strong> Exact-effort source-vs-real models, so source gaps are compared inside exact effort values rather than at only average effort.</p>
+<p><strong>How to read it:</strong> Positive cells mean the source-real unpredictability gap grows with age at that exact effort value.</p>
+<p><strong>What it says here:</strong> These are candidate appendix figures for showing that source-specific effects are not just effort-distribution artifacts.</p>
+<img src="../figs/route1_exhaustive_ancova_gallery/nb_morphemes_exact_source_real_gap_slopes_sum_bits_k3.png" alt="Morphemes exact-effort source gap slopes for With-context information">
+<h4>Syllables: CMU/pkg exact-effort source gap slopes for With-context information</h4>
+<p><strong>What is controlled:</strong> Exact-effort source-vs-real models, so source gaps are compared inside exact effort values rather than at only average effort.</p>
+<p><strong>How to read it:</strong> Positive cells mean the source-real unpredictability gap grows with age at that exact effort value.</p>
+<p><strong>What it says here:</strong> These are candidate appendix figures for showing that source-specific effects are not just effort-distribution artifacts.</p>
+<img src="../figs/route1_exhaustive_ancova_gallery/nb_syllables_cmu_or_pkg_exact_source_real_gap_slopes_sum_bits_k3.png" alt="Syllables: CMU/pkg exact-effort source gap slopes for With-context information">
+<h4>Syllables: pkg exact-effort source gap slopes for With-context information</h4>
+<p><strong>What is controlled:</strong> Exact-effort source-vs-real models, so source gaps are compared inside exact effort values rather than at only average effort.</p>
+<p><strong>How to read it:</strong> Positive cells mean the source-real unpredictability gap grows with age at that exact effort value.</p>
+<p><strong>What it says here:</strong> These are candidate appendix figures for showing that source-specific effects are not just effort-distribution artifacts.</p>
+<img src="../figs/route1_exhaustive_ancova_gallery/nb_syllables_pkg_exact_source_real_gap_slopes_sum_bits_k3.png" alt="Syllables: pkg exact-effort source gap slopes for With-context information">
+<h4>Phonemes exact-effort source gap slopes for With-context information</h4>
+<p><strong>What is controlled:</strong> Exact-effort source-vs-real models, so source gaps are compared inside exact effort values rather than at only average effort.</p>
+<p><strong>How to read it:</strong> Positive cells mean the source-real unpredictability gap grows with age at that exact effort value.</p>
+<p><strong>What it says here:</strong> These are candidate appendix figures for showing that source-specific effects are not just effort-distribution artifacts.</p>
+<img src="../figs/route1_exhaustive_ancova_gallery/nb_phonemes_exact_source_real_gap_slopes_sum_bits_k3.png" alt="Phonemes exact-effort source gap slopes for With-context information">
+<h4>Real exact-effort Context gain age slopes</h4>
+<p><strong>What is controlled:</strong> Same exact-effort model, but the outcome is context gain.</p>
+<p><strong>How to read it:</strong> Each cell shows whether context gain changes with age within the exact same effort value.</p>
+<p><strong>What it says here:</strong> Across the top exact effort values and all five effort scales, 56/60 exact-effort age slopes are downward; median slopes by effort scale range from -0.55 to -0.36 bits per 6 months. This is a secondary context-use check.</p>
+<img src="../figs/route1_exhaustive_ancova_gallery/real_exact_effort_age_slopes_context_gain.png" alt="Real exact-effort Context gain age slopes">
+<h4>Words exact-effort source gap slopes for Context gain</h4>
+<p><strong>What is controlled:</strong> Exact-effort source-vs-real models for context gain.</p>
+<p><strong>How to read it:</strong> These show whether source differences in context benefit grow or shrink within exact effort values.</p>
+<p><strong>What it says here:</strong> Use these only if the supervisor wants the context-gain story; they are not the primary fixed-effort information claim.</p>
+<img src="../figs/route1_exhaustive_ancova_gallery/nb_words_exact_source_real_gap_slopes_context_gain.png" alt="Words exact-effort source gap slopes for Context gain">
+<h4>Morphemes exact-effort source gap slopes for Context gain</h4>
+<p><strong>What is controlled:</strong> Exact-effort source-vs-real models for context gain.</p>
+<p><strong>How to read it:</strong> These show whether source differences in context benefit grow or shrink within exact effort values.</p>
+<p><strong>What it says here:</strong> Use these only if the supervisor wants the context-gain story; they are not the primary fixed-effort information claim.</p>
+<img src="../figs/route1_exhaustive_ancova_gallery/nb_morphemes_exact_source_real_gap_slopes_context_gain.png" alt="Morphemes exact-effort source gap slopes for Context gain">
+<h4>Syllables: CMU/pkg exact-effort source gap slopes for Context gain</h4>
+<p><strong>What is controlled:</strong> Exact-effort source-vs-real models for context gain.</p>
+<p><strong>How to read it:</strong> These show whether source differences in context benefit grow or shrink within exact effort values.</p>
+<p><strong>What it says here:</strong> Use these only if the supervisor wants the context-gain story; they are not the primary fixed-effort information claim.</p>
+<img src="../figs/route1_exhaustive_ancova_gallery/nb_syllables_cmu_or_pkg_exact_source_real_gap_slopes_context_gain.png" alt="Syllables: CMU/pkg exact-effort source gap slopes for Context gain">
+<h4>Syllables: pkg exact-effort source gap slopes for Context gain</h4>
+<p><strong>What is controlled:</strong> Exact-effort source-vs-real models for context gain.</p>
+<p><strong>How to read it:</strong> These show whether source differences in context benefit grow or shrink within exact effort values.</p>
+<p><strong>What it says here:</strong> Use these only if the supervisor wants the context-gain story; they are not the primary fixed-effort information claim.</p>
+<img src="../figs/route1_exhaustive_ancova_gallery/nb_syllables_pkg_exact_source_real_gap_slopes_context_gain.png" alt="Syllables: pkg exact-effort source gap slopes for Context gain">
+<h4>Phonemes exact-effort source gap slopes for Context gain</h4>
+<p><strong>What is controlled:</strong> Exact-effort source-vs-real models for context gain.</p>
+<p><strong>How to read it:</strong> These show whether source differences in context benefit grow or shrink within exact effort values.</p>
+<p><strong>What it says here:</strong> Use these only if the supervisor wants the context-gain story; they are not the primary fixed-effort information claim.</p>
+<img src="../figs/route1_exhaustive_ancova_gallery/nb_phonemes_exact_source_real_gap_slopes_context_gain.png" alt="Phonemes exact-effort source gap slopes for Context gain">
+<h2>Part II: Audit Tables</h2>
+<p>The tables are here only to make the figures auditable. The full tables are CSV artifacts; the Markdown shows compact previews.</p>
+<h3>CSV Artifacts</h3>
+<ul>
+<li><code>results/route1_exhaustive_ancova_gallery/effort_cell_summary.csv.gz</code>: aggregate k0/k3/context-gain cells by source, child, session, age bin, and exact effort value.</li>
+<li><code>results/route1_exhaustive_ancova_gallery/ancova_term_tests.csv</code>: Wald term tests for age, source, and source-by-age ANCOVA terms.</li>
+<li><code>results/route1_exhaustive_ancova_gallery/adjusted_marginal_means.csv</code>: adjusted marginal means used in the line figures.</li>
+<li><code>results/route1_exhaustive_ancova_gallery/source_real_adjusted_contrasts.csv</code>: source-minus-real adjusted contrasts by age bin.</li>
+<li><code>results/route1_exhaustive_ancova_gallery/top_exact_effort_values.csv</code>: top 12 exact real-child effort values per effort scale.</li>
+<li><code>results/route1_exhaustive_ancova_gallery/exact_effort_adjusted_means.csv</code>: exact-effort adjusted real-child means.</li>
+<li><code>results/route1_exhaustive_ancova_gallery/exact_effort_source_real_gaps.csv</code>: exact-effort source-minus-real gaps.</li>
+<li><code>results/route1_exhaustive_ancova_gallery/figure_manifest.csv</code>: figure inventory.</li>
+<li><code>results/route1_frequency_informativity_predictors/hash_frequency_predictors.csv.gz</code>: joinable exact-target frequency predictors keyed by <code>target_text_hash</code>, created as the safe first frequency-control layer inspired by the phonological CDS paper.</li>
+</ul>
+<h3>Weighted Cell Counts</h3>
+<table>
+<thead><tr>
+<th>source_label</th>
+<th>Morphemes</th>
+<th>Phonemes</th>
+<th>Syllables: CMU/pkg</th>
+<th>Syllables: pkg</th>
+<th>Words</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>Real child</td>
+<td>446,985</td>
+<td>446,985</td>
+<td>446,985</td>
+<td>446,985</td>
+<td>446,985</td>
+</tr>
+<tr>
+<td>Random</td>
+<td>446,508</td>
+<td>446,508</td>
+<td>446,508</td>
+<td>446,508</td>
+<td>446,508</td>
+</tr>
+<tr>
+<td>Unigram</td>
+<td>446,508</td>
+<td>446,508</td>
+<td>446,508</td>
+<td>446,508</td>
+<td>446,508</td>
+</tr>
+<tr>
+<td>Bigram</td>
+<td>446,508</td>
+<td>446,508</td>
+<td>446,508</td>
+<td>446,508</td>
+<td>446,508</td>
+</tr>
+<tr>
+<td>Trigram</td>
+<td>446,508</td>
+<td>446,508</td>
+<td>446,508</td>
+<td>446,508</td>
+<td>446,508</td>
+</tr>
+<tr>
+<td>LSTM k3</td>
+<td>446,508</td>
+<td>446,508</td>
+<td>446,508</td>
+<td>446,508</td>
+<td>446,508</td>
+</tr>
+<tr>
+<td>LSTM k4</td>
+<td>446,508</td>
+<td>446,508</td>
+<td>446,508</td>
+<td>446,508</td>
+<td>446,508</td>
+</tr>
+<tr>
+<td>LSTM k5</td>
+<td>446,508</td>
+<td>446,508</td>
+<td>446,508</td>
+<td>446,508</td>
+<td>446,508</td>
+</tr>
+<tr>
+<td>Caretaker</td>
+<td>668,903</td>
+<td>668,903</td>
+<td>668,903</td>
+<td>668,903</td>
+<td>668,903</td>
+</tr>
+</tbody></table>
+<h3>Exact Effort Values Used</h3>
+<table>
+<thead><tr>
+<th>effort_col</th>
+<th>effort_label</th>
+<th>effort_value</th>
+<th>real_weighted_rows</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>nb_words</td>
+<td>Words</td>
+<td>1</td>
+<td>164,264</td>
+</tr>
+<tr>
+<td>nb_words</td>
+<td>Words</td>
+<td>2</td>
+<td>93,824</td>
+</tr>
+<tr>
+<td>nb_words</td>
+<td>Words</td>
+<td>3</td>
+<td>74,048</td>
+</tr>
+<tr>
+<td>nb_words</td>
+<td>Words</td>
+<td>4</td>
+<td>49,421</td>
+</tr>
+<tr>
+<td>nb_words</td>
+<td>Words</td>
+<td>5</td>
+<td>28,966</td>
+</tr>
+<tr>
+<td>nb_words</td>
+<td>Words</td>
+<td>6</td>
+<td>15,966</td>
+</tr>
+<tr>
+<td>nb_words</td>
+<td>Words</td>
+<td>7</td>
+<td>8,606</td>
+</tr>
+<tr>
+<td>nb_words</td>
+<td>Words</td>
+<td>8</td>
+<td>4,725</td>
+</tr>
+<tr>
+<td>nb_words</td>
+<td>Words</td>
+<td>9</td>
+<td>2,656</td>
+</tr>
+<tr>
+<td>nb_words</td>
+<td>Words</td>
+<td>10</td>
+<td>1,594</td>
+</tr>
+<tr>
+<td>nb_words</td>
+<td>Words</td>
+<td>11</td>
+<td>896</td>
+</tr>
+<tr>
+<td>nb_words</td>
+<td>Words</td>
+<td>12</td>
+<td>591</td>
+</tr>
+<tr>
+<td>nb_morphemes</td>
+<td>Morphemes</td>
+<td>1</td>
+<td>153,917</td>
+</tr>
+<tr>
+<td>nb_morphemes</td>
+<td>Morphemes</td>
+<td>2</td>
+<td>81,932</td>
+</tr>
+<tr>
+<td>nb_morphemes</td>
+<td>Morphemes</td>
+<td>3</td>
+<td>69,111</td>
+</tr>
+<tr>
+<td>nb_morphemes</td>
+<td>Morphemes</td>
+<td>4</td>
+<td>52,894</td>
+</tr>
+<tr>
+<td>nb_morphemes</td>
+<td>Morphemes</td>
+<td>5</td>
+<td>35,618</td>
+</tr>
+<tr>
+<td>nb_morphemes</td>
+<td>Morphemes</td>
+<td>6</td>
+<td>21,774</td>
+</tr>
+<tr>
+<td>nb_morphemes</td>
+<td>Morphemes</td>
+<td>7</td>
+<td>12,587</td>
+</tr>
+<tr>
+<td>nb_morphemes</td>
+<td>Morphemes</td>
+<td>8</td>
+<td>7,378</td>
+</tr>
+<tr>
+<td>nb_morphemes</td>
+<td>Morphemes</td>
+<td>9</td>
+<td>4,295</td>
+</tr>
+<tr>
+<td>nb_morphemes</td>
+<td>Morphemes</td>
+<td>10</td>
+<td>2,526</td>
+</tr>
+<tr>
+<td>nb_morphemes</td>
+<td>Morphemes</td>
+<td>11</td>
+<td>1,568</td>
+</tr>
+<tr>
+<td>nb_morphemes</td>
+<td>Morphemes</td>
+<td>12</td>
+<td>1,020</td>
+</tr>
+<tr>
+<td>nb_syllables_cmu_or_pkg</td>
+<td>Syllables: CMU/pkg</td>
+<td>1</td>
+<td>121,839</td>
+</tr>
+<tr>
+<td>nb_syllables_cmu_or_pkg</td>
+<td>Syllables: CMU/pkg</td>
+<td>2</td>
+<td>94,414</td>
+</tr>
+<tr>
+<td>nb_syllables_cmu_or_pkg</td>
+<td>Syllables: CMU/pkg</td>
+<td>3</td>
+<td>72,346</td>
+</tr>
+<tr>
+<td>nb_syllables_cmu_or_pkg</td>
+<td>Syllables: CMU/pkg</td>
+<td>4</td>
+<td>55,990</td>
+</tr>
+<tr>
+<td>nb_syllables_cmu_or_pkg</td>
+<td>Syllables: CMU/pkg</td>
+<td>5</td>
+<td>37,176</td>
+</tr>
+<tr>
+<td>nb_syllables_cmu_or_pkg</td>
+<td>Syllables: CMU/pkg</td>
+<td>6</td>
+<td>25,149</td>
+</tr>
+<tr>
+<td>nb_syllables_cmu_or_pkg</td>
+<td>Syllables: CMU/pkg</td>
+<td>7</td>
+<td>14,786</td>
+</tr>
+<tr>
+<td>nb_syllables_cmu_or_pkg</td>
+<td>Syllables: CMU/pkg</td>
+<td>8</td>
+<td>9,357</td>
+</tr>
+<tr>
+<td>nb_syllables_cmu_or_pkg</td>
+<td>Syllables: CMU/pkg</td>
+<td>9</td>
+<td>5,500</td>
+</tr>
+<tr>
+<td>nb_syllables_cmu_or_pkg</td>
+<td>Syllables: CMU/pkg</td>
+<td>10</td>
+<td>3,433</td>
+</tr>
+<tr>
+<td>nb_syllables_cmu_or_pkg</td>
+<td>Syllables: CMU/pkg</td>
+<td>11</td>
+<td>2,261</td>
+</tr>
+<tr>
+<td>nb_syllables_cmu_or_pkg</td>
+<td>Syllables: CMU/pkg</td>
+<td>12</td>
+<td>1,468</td>
+</tr>
+<tr>
+<td>nb_syllables_pkg</td>
+<td>Syllables: pkg</td>
+<td>1</td>
+<td>116,868</td>
+</tr>
+<tr>
+<td>nb_syllables_pkg</td>
+<td>Syllables: pkg</td>
+<td>2</td>
+<td>87,470</td>
+</tr>
+<tr>
+<td>nb_syllables_pkg</td>
+<td>Syllables: pkg</td>
+<td>3</td>
+<td>67,784</td>
+</tr>
+<tr>
+<td>nb_syllables_pkg</td>
+<td>Syllables: pkg</td>
+<td>4</td>
+<td>57,850</td>
+</tr>
+<tr>
+<td>nb_syllables_pkg</td>
+<td>Syllables: pkg</td>
+<td>5</td>
+<td>40,416</td>
+</tr>
+<tr>
+<td>nb_syllables_pkg</td>
+<td>Syllables: pkg</td>
+<td>6</td>
+<td>28,337</td>
+</tr>
+<tr>
+<td>nb_syllables_pkg</td>
+<td>Syllables: pkg</td>
+<td>7</td>
+<td>17,456</td>
+</tr>
+<tr>
+<td>nb_syllables_pkg</td>
+<td>Syllables: pkg</td>
+<td>8</td>
+<td>11,345</td>
+</tr>
+<tr>
+<td>nb_syllables_pkg</td>
+<td>Syllables: pkg</td>
+<td>9</td>
+<td>6,545</td>
+</tr>
+<tr>
+<td>nb_syllables_pkg</td>
+<td>Syllables: pkg</td>
+<td>10</td>
+<td>4,337</td>
+</tr>
+<tr>
+<td>nb_syllables_pkg</td>
+<td>Syllables: pkg</td>
+<td>11</td>
+<td>2,639</td>
+</tr>
+<tr>
+<td>nb_syllables_pkg</td>
+<td>Syllables: pkg</td>
+<td>12</td>
+<td>1,836</td>
+</tr>
+<tr>
+<td>nb_phonemes</td>
+<td>Phonemes</td>
+<td>2</td>
+<td>58,082</td>
+</tr>
+<tr>
+<td>nb_phonemes</td>
+<td>Phonemes</td>
+<td>3</td>
+<td>46,836</td>
+</tr>
+<tr>
+<td>nb_phonemes</td>
+<td>Phonemes</td>
+<td>4</td>
+<td>36,656</td>
+</tr>
+<tr>
+<td>nb_phonemes</td>
+<td>Phonemes</td>
+<td>5</td>
+<td>33,496</td>
+</tr>
+<tr>
+<td>nb_phonemes</td>
+<td>Phonemes</td>
+<td>6</td>
+<td>32,426</td>
+</tr>
+<tr>
+<td>nb_phonemes</td>
+<td>Phonemes</td>
+<td>7</td>
+<td>32,405</td>
+</tr>
+<tr>
+<td>nb_phonemes</td>
+<td>Phonemes</td>
+<td>8</td>
+<td>29,827</td>
+</tr>
+<tr>
+<td>nb_phonemes</td>
+<td>Phonemes</td>
+<td>9</td>
+<td>24,255</td>
+</tr>
+<tr>
+<td>nb_phonemes</td>
+<td>Phonemes</td>
+<td>10</td>
+<td>22,351</td>
+</tr>
+<tr>
+<td>nb_phonemes</td>
+<td>Phonemes</td>
+<td>11</td>
+<td>20,107</td>
+</tr>
+<tr>
+<td>nb_phonemes</td>
+<td>Phonemes</td>
+<td>12</td>
+<td>17,339</td>
+</tr>
+<tr>
+<td>nb_phonemes</td>
+<td>Phonemes</td>
+<td>13</td>
+<td>14,198</td>
+</tr>
+</tbody></table>
+<h3>Strongest Adjusted Source-Real Gaps</h3>
+<table>
+<thead><tr>
+<th>source</th>
+<th>effort</th>
+<th>outcome</th>
+<th>age bin</th>
+<th>source-real</th>
+<th>real adj</th>
+<th>source adj</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>Bigram</td>
+<td>Morphemes</td>
+<td>Context gain</td>
+<td>030-035</td>
+<td>-3.11</td>
+<td>13.82</td>
+<td>10.71</td>
+</tr>
+<tr>
+<td>Bigram</td>
+<td>Phonemes</td>
+<td>Context gain</td>
+<td>030-035</td>
+<td>-3.14</td>
+<td>13.86</td>
+<td>10.72</td>
+</tr>
+<tr>
+<td>Bigram</td>
+<td>Syllables: CMU/pkg</td>
+<td>Context gain</td>
+<td>030-035</td>
+<td>-3.15</td>
+<td>13.88</td>
+<td>10.73</td>
+</tr>
+<tr>
+<td>Bigram</td>
+<td>Syllables: pkg</td>
+<td>Context gain</td>
+<td>030-035</td>
+<td>-3.15</td>
+<td>13.88</td>
+<td>10.73</td>
+</tr>
+<tr>
+<td>Bigram</td>
+<td>Words</td>
+<td>Context gain</td>
+<td>030-035</td>
+<td>-3.12</td>
+<td>13.83</td>
+<td>10.72</td>
+</tr>
+<tr>
+<td>Caretaker</td>
+<td>Morphemes</td>
+<td>Context gain</td>
+<td>054-059</td>
+<td>4.89</td>
+<td>12.15</td>
+<td>17.05</td>
+</tr>
+<tr>
+<td>Caretaker</td>
+<td>Phonemes</td>
+<td>Context gain</td>
+<td>054-059</td>
+<td>4.72</td>
+<td>12.34</td>
+<td>17.06</td>
+</tr>
+<tr>
+<td>Caretaker</td>
+<td>Syllables: CMU/pkg</td>
+<td>Context gain</td>
+<td>054-059</td>
+<td>4.82</td>
+<td>12.31</td>
+<td>17.13</td>
+</tr>
+<tr>
+<td>Caretaker</td>
+<td>Syllables: pkg</td>
+<td>Context gain</td>
+<td>054-059</td>
+<td>4.82</td>
+<td>12.32</td>
+<td>17.15</td>
+</tr>
+<tr>
+<td>Caretaker</td>
+<td>Words</td>
+<td>Context gain</td>
+<td>054-059</td>
+<td>4.89</td>
+<td>12.20</td>
+<td>17.09</td>
+</tr>
+<tr>
+<td>LSTM k3</td>
+<td>Morphemes</td>
+<td>Context gain</td>
+<td>006-023</td>
+<td>-2.86</td>
+<td>13.96</td>
+<td>11.10</td>
+</tr>
+<tr>
+<td>LSTM k3</td>
+<td>Phonemes</td>
+<td>Context gain</td>
+<td>006-023</td>
+<td>-2.68</td>
+<td>13.72</td>
+<td>11.05</td>
+</tr>
+<tr>
+<td>LSTM k3</td>
+<td>Syllables: CMU/pkg</td>
+<td>Context gain</td>
+<td>006-023</td>
+<td>-2.78</td>
+<td>13.73</td>
+<td>10.95</td>
+</tr>
+<tr>
+<td>LSTM k3</td>
+<td>Syllables: pkg</td>
+<td>Context gain</td>
+<td>006-023</td>
+<td>-2.82</td>
+<td>13.72</td>
+<td>10.90</td>
+</tr>
+<tr>
+<td>LSTM k3</td>
+<td>Words</td>
+<td>Context gain</td>
+<td>006-023</td>
+<td>-2.92</td>
+<td>13.90</td>
+<td>10.98</td>
+</tr>
+<tr>
+<td>LSTM k4</td>
+<td>Morphemes</td>
+<td>Context gain</td>
+<td>006-023</td>
+<td>-2.90</td>
+<td>13.96</td>
+<td>11.07</td>
+</tr>
+<tr>
+<td>LSTM k4</td>
+<td>Phonemes</td>
+<td>Context gain</td>
+<td>006-023</td>
+<td>-2.71</td>
+<td>13.73</td>
+<td>11.02</td>
+</tr>
+<tr>
+<td>LSTM k4</td>
+<td>Syllables: CMU/pkg</td>
+<td>Context gain</td>
+<td>006-023</td>
+<td>-2.80</td>
+<td>13.73</td>
+<td>10.93</td>
+</tr>
+<tr>
+<td>LSTM k4</td>
+<td>Syllables: pkg</td>
+<td>Context gain</td>
+<td>006-023</td>
+<td>-2.83</td>
+<td>13.72</td>
+<td>10.89</td>
+</tr>
+<tr>
+<td>LSTM k4</td>
+<td>Words</td>
+<td>Context gain</td>
+<td>006-023</td>
+<td>-2.96</td>
+<td>13.91</td>
+<td>10.94</td>
+</tr>
+<tr>
+<td>LSTM k5</td>
+<td>Morphemes</td>
+<td>Context gain</td>
+<td>006-023</td>
+<td>-2.78</td>
+<td>13.98</td>
+<td>11.20</td>
+</tr>
+<tr>
+<td>LSTM k5</td>
+<td>Phonemes</td>
+<td>Context gain</td>
+<td>006-023</td>
+<td>-2.58</td>
+<td>13.74</td>
+<td>11.16</td>
+</tr>
+<tr>
+<td>LSTM k5</td>
+<td>Syllables: CMU/pkg</td>
+<td>Context gain</td>
+<td>006-023</td>
+<td>-2.68</td>
+<td>13.74</td>
+<td>11.06</td>
+</tr>
+<tr>
+<td>LSTM k5</td>
+<td>Syllables: pkg</td>
+<td>Context gain</td>
+<td>006-023</td>
+<td>-2.71</td>
+<td>13.73</td>
+<td>11.02</td>
+</tr>
+<tr>
+<td>LSTM k5</td>
+<td>Words</td>
+<td>Context gain</td>
+<td>006-023</td>
+<td>-2.84</td>
+<td>13.91</td>
+<td>11.07</td>
+</tr>
+<tr>
+<td>Random</td>
+<td>Morphemes</td>
+<td>Context gain</td>
+<td>030-035</td>
+<td>-6.40</td>
+<td>13.98</td>
+<td>7.59</td>
+</tr>
+<tr>
+<td>Random</td>
+<td>Phonemes</td>
+<td>Context gain</td>
+<td>030-035</td>
+<td>-6.82</td>
+<td>14.21</td>
+<td>7.39</td>
+</tr>
+<tr>
+<td>Random</td>
+<td>Syllables: CMU/pkg</td>
+<td>Context gain</td>
+<td>030-035</td>
+<td>-6.69</td>
+<td>14.16</td>
+<td>7.47</td>
+</tr>
+<tr>
+<td>Random</td>
+<td>Syllables: pkg</td>
+<td>Context gain</td>
+<td>030-035</td>
+<td>-6.67</td>
+<td>14.15</td>
+<td>7.47</td>
+</tr>
+<tr>
+<td>Random</td>
+<td>Words</td>
+<td>Context gain</td>
+<td>030-035</td>
+<td>-6.10</td>
+<td>13.84</td>
+<td>7.74</td>
+</tr>
+<tr>
+<td>Trigram</td>
+<td>Morphemes</td>
+<td>Context gain</td>
+<td>030-035</td>
+<td>-2.08</td>
+<td>13.82</td>
+<td>11.74</td>
+</tr>
+<tr>
+<td>Trigram</td>
+<td>Phonemes</td>
+<td>Context gain</td>
+<td>030-035</td>
+<td>-2.09</td>
+<td>13.86</td>
+<td>11.76</td>
+</tr>
+<tr>
+<td>Trigram</td>
+<td>Syllables: CMU/pkg</td>
+<td>Context gain</td>
+<td>030-035</td>
+<td>-2.11</td>
+<td>13.88</td>
+<td>11.77</td>
+</tr>
+<tr>
+<td>Trigram</td>
+<td>Syllables: pkg</td>
+<td>Context gain</td>
+<td>030-035</td>
+<td>-2.11</td>
+<td>13.88</td>
+<td>11.77</td>
+</tr>
+<tr>
+<td>Trigram</td>
+<td>Words</td>
+<td>Context gain</td>
+<td>030-035</td>
+<td>-2.09</td>
+<td>13.83</td>
+<td>11.75</td>
+</tr>
+<tr>
+<td>Unigram</td>
+<td>Morphemes</td>
+<td>Context gain</td>
+<td>006-023</td>
+<td>-4.54</td>
+<td>13.91</td>
+<td>9.37</td>
+</tr>
+<tr>
+<td>Unigram</td>
+<td>Phonemes</td>
+<td>Context gain</td>
+<td>030-035</td>
+<td>-4.56</td>
+<td>13.88</td>
+<td>9.32</td>
+</tr>
+<tr>
+<td>Unigram</td>
+<td>Syllables: CMU/pkg</td>
+<td>Context gain</td>
+<td>030-035</td>
+<td>-4.56</td>
+<td>13.89</td>
+<td>9.33</td>
+</tr>
+<tr>
+<td>Unigram</td>
+<td>Syllables: pkg</td>
+<td>Context gain</td>
+<td>030-035</td>
+<td>-4.56</td>
+<td>13.89</td>
+<td>9.33</td>
+</tr>
+<tr>
+<td>Unigram</td>
+<td>Words</td>
+<td>Context gain</td>
+<td>006-023</td>
+<td>-4.55</td>
+<td>13.87</td>
+<td>9.32</td>
+</tr>
+<tr>
+<td>Bigram</td>
+<td>Morphemes</td>
+<td>With-context information</td>
+<td>060-065</td>
+<td>16.76</td>
+<td>21.07</td>
+<td>37.83</td>
+</tr>
+<tr>
+<td>Bigram</td>
+<td>Phonemes</td>
+<td>With-context information</td>
+<td>060-065</td>
+<td>15.76</td>
+<td>22.92</td>
+<td>38.68</td>
+</tr>
+<tr>
+<td>Bigram</td>
+<td>Syllables: CMU/pkg</td>
+<td>With-context information</td>
+<td>060-065</td>
+<td>15.65</td>
+<td>23.14</td>
+<td>38.78</td>
+</tr>
+<tr>
+<td>Bigram</td>
+<td>Syllables: pkg</td>
+<td>With-context information</td>
+<td>060-065</td>
+<td>15.70</td>
+<td>23.18</td>
+<td>38.88</td>
+</tr>
+<tr>
+<td>Bigram</td>
+<td>Words</td>
+<td>With-context information</td>
+<td>060-065</td>
+<td>16.64</td>
+<td>21.12</td>
+<td>37.77</td>
+</tr>
+<tr>
+<td>Caretaker</td>
+<td>Morphemes</td>
+<td>With-context information</td>
+<td>048-053</td>
+<td>-7.50</td>
+<td>33.57</td>
+<td>26.07</td>
+</tr>
+<tr>
+<td>Caretaker</td>
+<td>Phonemes</td>
+<td>With-context information</td>
+<td>048-053</td>
+<td>-8.42</td>
+<td>34.37</td>
+<td>25.95</td>
+</tr>
+<tr>
+<td>Caretaker</td>
+<td>Syllables: CMU/pkg</td>
+<td>With-context information</td>
+<td>048-053</td>
+<td>-7.94</td>
+<td>34.11</td>
+<td>26.16</td>
+</tr>
+<tr>
+<td>Caretaker</td>
+<td>Syllables: pkg</td>
+<td>With-context information</td>
+<td>048-053</td>
+<td>-7.85</td>
+<td>34.17</td>
+<td>26.32</td>
+</tr>
+<tr>
+<td>Caretaker</td>
+<td>Words</td>
+<td>With-context information</td>
+<td>048-053</td>
+<td>-7.49</td>
+<td>33.57</td>
+<td>26.08</td>
+</tr>
+<tr>
+<td>LSTM k3</td>
+<td>Morphemes</td>
+<td>With-context information</td>
+<td>060-065</td>
+<td>4.84</td>
+<td>23.00</td>
+<td>27.84</td>
+</tr>
+<tr>
+<td>LSTM k3</td>
+<td>Phonemes</td>
+<td>With-context information</td>
+<td>060-065</td>
+<td>6.67</td>
+<td>22.90</td>
+<td>29.58</td>
+</tr>
+<tr>
+<td>LSTM k3</td>
+<td>Syllables: CMU/pkg</td>
+<td>With-context information</td>
+<td>042-047</td>
+<td>5.78</td>
+<td>23.62</td>
+<td>29.40</td>
+</tr>
+<tr>
+<td>LSTM k3</td>
+<td>Syllables: pkg</td>
+<td>With-context information</td>
+<td>060-065</td>
+<td>5.58</td>
+<td>23.71</td>
+<td>29.29</td>
+</tr>
+<tr>
+<td>LSTM k3</td>
+<td>Words</td>
+<td>With-context information</td>
+<td>060-065</td>
+<td>3.92</td>
+<td>23.43</td>
+<td>27.36</td>
+</tr>
+<tr>
+<td>LSTM k4</td>
+<td>Morphemes</td>
+<td>With-context information</td>
+<td>042-047</td>
+<td>4.57</td>
+<td>23.36</td>
+<td>27.93</td>
+</tr>
+<tr>
+<td>LSTM k4</td>
+<td>Phonemes</td>
+<td>With-context information</td>
+<td>042-047</td>
+<td>6.29</td>
+<td>23.25</td>
+<td>29.54</td>
+</tr>
+<tr>
+<td>LSTM k4</td>
+<td>Syllables: CMU/pkg</td>
+<td>With-context information</td>
+<td>042-047</td>
+<td>5.56</td>
+<td>23.59</td>
+<td>29.14</td>
+</tr>
+<tr>
+<td>LSTM k4</td>
+<td>Syllables: pkg</td>
+<td>With-context information</td>
+<td>042-047</td>
+<td>5.26</td>
+<td>24.02</td>
+<td>29.27</td>
+</tr>
+<tr>
+<td>LSTM k4</td>
+<td>Words</td>
+<td>With-context information</td>
+<td>042-047</td>
+<td>3.66</td>
+<td>23.79</td>
+<td>27.45</td>
+</tr>
+</tbody></table>
+<h3>Strongest Term Tests</h3>
+<table>
+<thead><tr>
+<th>model</th>
+<th>comparison</th>
+<th>outcome</th>
+<th>effort</th>
+<th>term</th>
+<th>p</th>
+<th>FDR p</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>child_source_omnibus</td>
+<td>Real vs generated child sources</td>
+<td>Context gain</td>
+<td>Syllables: CMU/pkg</td>
+<td>C(source_label):C(age_bin)</td>
+<td>&lt;.001</td>
+<td>&lt;.001</td>
+</tr>
+<tr>
+<td>pairwise_source_ancova</td>
+<td>Real vs Unigram</td>
+<td>With-context information</td>
+<td>Words</td>
+<td>C(source_label):C(age_bin)</td>
+<td>&lt;.001</td>
+<td>&lt;.001</td>
+</tr>
+<tr>
+<td>pairwise_source_ancova</td>
+<td>Real vs Unigram</td>
+<td>With-context information</td>
+<td>Phonemes</td>
+<td>C(source_label):C(age_bin)</td>
+<td>&lt;.001</td>
+<td>&lt;.001</td>
+</tr>
+<tr>
+<td>pairwise_source_ancova</td>
+<td>Real vs Unigram</td>
+<td>With-context information</td>
+<td>Syllables: pkg</td>
+<td>C(source_label):C(age_bin)</td>
+<td>&lt;.001</td>
+<td>&lt;.001</td>
+</tr>
+<tr>
+<td>pairwise_source_ancova</td>
+<td>Real vs Unigram</td>
+<td>With-context information</td>
+<td>Syllables: CMU/pkg</td>
+<td>C(source_label):C(age_bin)</td>
+<td>&lt;.001</td>
+<td>&lt;.001</td>
+</tr>
+<tr>
+<td>pairwise_source_ancova</td>
+<td>Real vs Bigram</td>
+<td>With-context information</td>
+<td>Words</td>
+<td>C(source_label):C(age_bin)</td>
+<td>&lt;.001</td>
+<td>&lt;.001</td>
+</tr>
+<tr>
+<td>pairwise_source_ancova</td>
+<td>Real vs Trigram</td>
+<td>With-context information</td>
+<td>Phonemes</td>
+<td>C(source_label):C(age_bin)</td>
+<td>&lt;.001</td>
+<td>&lt;.001</td>
+</tr>
+<tr>
+<td>child_source_omnibus</td>
+<td>Real vs generated child sources</td>
+<td>With-context information</td>
+<td>Words</td>
+<td>C(source_label):C(age_bin)</td>
+<td>&lt;.001</td>
+<td>&lt;.001</td>
+</tr>
+<tr>
+<td>pairwise_source_ancova</td>
+<td>Real vs Bigram</td>
+<td>With-context information</td>
+<td>Phonemes</td>
+<td>C(source_label):C(age_bin)</td>
+<td>&lt;.001</td>
+<td>&lt;.001</td>
+</tr>
+<tr>
+<td>child_source_omnibus</td>
+<td>Real vs generated child sources</td>
+<td>Context gain</td>
+<td>Syllables: CMU/pkg</td>
+<td>C(source_label)</td>
+<td>&lt;.001</td>
+<td>&lt;.001</td>
+</tr>
+<tr>
+<td>child_source_omnibus</td>
+<td>Real vs generated child sources</td>
+<td>Context gain</td>
+<td>Words</td>
+<td>C(source_label)</td>
+<td>&lt;.001</td>
+<td>&lt;.001</td>
+</tr>
+<tr>
+<td>child_source_omnibus</td>
+<td>Real vs generated child sources</td>
+<td>Context gain</td>
+<td>Morphemes</td>
+<td>C(source_label)</td>
+<td>&lt;.001</td>
+<td>&lt;.001</td>
+</tr>
+<tr>
+<td>child_source_omnibus</td>
+<td>Real vs generated child sources</td>
+<td>Context gain</td>
+<td>Syllables: pkg</td>
+<td>C(source_label)</td>
+<td>&lt;.001</td>
+<td>&lt;.001</td>
+</tr>
+<tr>
+<td>pairwise_source_ancova</td>
+<td>Real vs Trigram</td>
+<td>With-context information</td>
+<td>Words</td>
+<td>C(source_label):C(age_bin)</td>
+<td>&lt;.001</td>
+<td>&lt;.001</td>
+</tr>
+<tr>
+<td>child_source_omnibus</td>
+<td>Real vs generated child sources</td>
+<td>Context gain</td>
+<td>Phonemes</td>
+<td>C(source_label)</td>
+<td>&lt;.001</td>
+<td>&lt;.001</td>
+</tr>
+<tr>
+<td>pairwise_source_ancova</td>
+<td>Real vs Trigram</td>
+<td>With-context information</td>
+<td>Syllables: CMU/pkg</td>
+<td>C(source_label):C(age_bin)</td>
+<td>&lt;.001</td>
+<td>&lt;.001</td>
+</tr>
+<tr>
+<td>pairwise_source_ancova</td>
+<td>Real vs Bigram</td>
+<td>With-context information</td>
+<td>Syllables: pkg</td>
+<td>C(source_label):C(age_bin)</td>
+<td>&lt;.001</td>
+<td>&lt;.001</td>
+</tr>
+<tr>
+<td>pairwise_source_ancova</td>
+<td>Real vs Trigram</td>
+<td>With-context information</td>
+<td>Morphemes</td>
+<td>C(source_label):C(age_bin)</td>
+<td>&lt;.001</td>
+<td>&lt;.001</td>
+</tr>
+<tr>
+<td>child_source_omnibus</td>
+<td>Real vs generated child sources</td>
+<td>With-context information</td>
+<td>Morphemes</td>
+<td>C(source_label):C(age_bin)</td>
+<td>&lt;.001</td>
+<td>&lt;.001</td>
+</tr>
+<tr>
+<td>pairwise_source_ancova</td>
+<td>Real vs Random</td>
+<td>With-context information</td>
+<td>Phonemes</td>
+<td>C(source_label):C(age_bin)</td>
+<td>&lt;.001</td>
+<td>&lt;.001</td>
+</tr>
+<tr>
+<td>pairwise_source_ancova</td>
+<td>Real vs Random</td>
+<td>With-context information</td>
+<td>Phonemes</td>
+<td>C(age_bin)</td>
+<td>&lt;.001</td>
+<td>&lt;.001</td>
+</tr>
+<tr>
+<td>child_source_omnibus</td>
+<td>Real vs generated child sources</td>
+<td>With-context information</td>
+<td>Syllables: CMU/pkg</td>
+<td>C(source_label):C(age_bin)</td>
+<td>&lt;.001</td>
+<td>&lt;.001</td>
+</tr>
+<tr>
+<td>pairwise_source_ancova</td>
+<td>Real vs Bigram</td>
+<td>With-context information</td>
+<td>Morphemes</td>
+<td>C(source_label):C(age_bin)</td>
+<td>&lt;.001</td>
+<td>&lt;.001</td>
+</tr>
+<tr>
+<td>pairwise_source_ancova</td>
+<td>Real vs Bigram</td>
+<td>With-context information</td>
+<td>Syllables: CMU/pkg</td>
+<td>C(source_label):C(age_bin)</td>
+<td>&lt;.001</td>
+<td>&lt;.001</td>
+</tr>
+<tr>
+<td>pairwise_source_ancova</td>
+<td>Real vs Unigram</td>
+<td>With-context information</td>
+<td>Morphemes</td>
+<td>C(source_label):C(age_bin)</td>
+<td>&lt;.001</td>
+<td>&lt;.001</td>
+</tr>
+<tr>
+<td>pairwise_source_ancova</td>
+<td>Real vs Random</td>
+<td>With-context information</td>
+<td>Syllables: pkg</td>
+<td>C(age_bin)</td>
+<td>&lt;.001</td>
+<td>&lt;.001</td>
+</tr>
+<tr>
+<td>child_source_omnibus</td>
+<td>Real vs generated child sources</td>
+<td>With-context information</td>
+<td>Phonemes</td>
+<td>C(source_label):C(age_bin)</td>
+<td>&lt;.001</td>
+<td>&lt;.001</td>
+</tr>
+<tr>
+<td>pairwise_source_ancova</td>
+<td>Real vs Trigram</td>
+<td>With-context information</td>
+<td>Syllables: pkg</td>
+<td>C(source_label):C(age_bin)</td>
+<td>&lt;.001</td>
+<td>&lt;.001</td>
+</tr>
+<tr>
+<td>child_source_omnibus</td>
+<td>Real vs generated child sources</td>
+<td>With-context information</td>
+<td>Syllables: pkg</td>
+<td>C(source_label):C(age_bin)</td>
+<td>&lt;.001</td>
+<td>&lt;.001</td>
+</tr>
+<tr>
+<td>pairwise_source_ancova</td>
+<td>Real vs Random</td>
+<td>With-context information</td>
+<td>Syllables: CMU/pkg</td>
+<td>C(age_bin)</td>
+<td>&lt;.001</td>
+<td>&lt;.001</td>
+</tr>
+</tbody></table>
+<h2>Reading Notes</h2>
+<ul>
+<li>Positive source-minus-real values mean the comparison source is more surprising than real child utterances after the model adjustment.</li>
+<li>The exact-effort heatmaps are the most direct guard against a pure MLU explanation because they avoid mixing different utterance sizes.</li>
+<li>These are candidate-selection figures. The final supervisor report should pick a much smaller subset.</li>
+<li>A separate predictor layer should be used for paper-style frequency controls. The safe first layer now exists as exact-target hash frequency; lexical frequency, phone unigram frequency, and phone-sequence informativity need a safer text-streaming pass because pandas&#x27; C parser segfaulted on the large text column in this environment.</li>
+</ul>
+</main>
+</body>
+</html>

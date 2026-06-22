@@ -1,0 +1,906 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Route 1 Corrected Fixed-Effort Atlas v2: trigram</title>
+<style>
+:root {
+  color-scheme: light;
+  --ink: #1e2528;
+  --muted: #5e686d;
+  --line: #d9e0df;
+  --paper: #ffffff;
+  --soft: #f5f7f6;
+  --accent: #2f6f73;
+  --accent2: #c76f2c;
+}
+body {
+  margin: 0;
+  background: #eef2f1;
+  color: var(--ink);
+  font: 16px/1.58 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+main {
+  max-width: 980px;
+  margin: 34px auto 56px;
+  padding: 48px 58px;
+  background: var(--paper);
+  box-shadow: 0 18px 50px rgba(31, 45, 48, 0.12);
+}
+h1, h2, h3, h4 {
+  line-height: 1.18;
+  margin: 1.6em 0 0.55em;
+}
+h1 {
+  margin-top: 0;
+  font-size: 2.25rem;
+  border-bottom: 3px solid var(--accent);
+  padding-bottom: 0.45em;
+}
+h2 {
+  font-size: 1.55rem;
+  color: var(--accent);
+}
+h3 {
+  font-size: 1.18rem;
+}
+p {
+  margin: 0.75em 0;
+}
+a {
+  color: var(--accent);
+}
+blockquote {
+  border-left: 4px solid var(--accent2);
+  margin: 1.1em 0;
+  padding: 0.05em 1.1em;
+  color: var(--muted);
+  background: #fff8f2;
+}
+code {
+  background: var(--soft);
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  padding: 0.08em 0.3em;
+  font-family: "SFMono-Regular", Consolas, monospace;
+  font-size: 0.92em;
+}
+pre {
+  background: #f5f7f6;
+  color: var(--ink);
+  border: 1px solid var(--line);
+  padding: 1em;
+  overflow-x: auto;
+  border-radius: 7px;
+}
+pre code {
+  background: transparent;
+  border: 0;
+  padding: 0;
+  color: inherit;
+}
+table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 1.15em 0 1.45em;
+  font-size: 0.95em;
+}
+th, td {
+  border: 1px solid var(--line);
+  padding: 0.54em 0.68em;
+  vertical-align: top;
+}
+th {
+  background: #e7efed;
+  text-align: left;
+}
+tr:nth-child(even) td {
+  background: #fafbfb;
+}
+img {
+  max-width: 100%;
+  display: block;
+  margin: 1.1em auto 0.45em;
+}
+ul, ol {
+  padding-left: 1.4em;
+}
+.caption {
+  color: var(--muted);
+  font-size: 0.92em;
+  margin-top: -0.15em;
+}
+@media print {
+  body {
+    background: white;
+  }
+  main {
+    box-shadow: none;
+    margin: 0;
+    max-width: none;
+    padding: 28px;
+  }
+}
+</style>
+</head>
+<body>
+<main>
+<h1>Route 1 Corrected Fixed-Effort Atlas v2: trigram</h1>
+<p>This report rebuilds the old plot-heavy M1-M6 atlas style for one target source, with the corrected extended M1-M15 model ladder. The model ladder is fit independently for this source, not pooled across real/generated conditions.</p>
+<h2>Implementation</h2>
+<ul>
+<li>Estimator: linear ordinary least squares regression.</li>
+<li>Library: <code>statsmodels.formula.api.ols</code> through the corrected Route 1 atlas code.</li>
+<li>Uncertainty: child-cluster robust standard errors for the primary child-adjusted models.</li>
+<li>Outcome: <code>sum_bits</code>, the total utterance information for this target source.</li>
+<li>Fixed slices: the model is fit on all eligible rows; fixed effort values only define plotted prediction lines.</li>
+<li>Context predictors in prediction slices are held at their fitted-data means; question type is held at its modal level.</li>
+</ul>
+<h2>Start Here</h2>
+<p>Each section below is one model. It starts with the model question, formula, regression type, library, uncertainty structure, and then the plots. Long tables are kept out of the report body and saved as CSV artifacts.</p>
+<h2>Model Atlas</h2>
+<h3>M1: Pooled age and effort</h3>
+<p><strong>Question.</strong> Does age predict target information after controlling target effort, pooling children?</p>
+<p><strong>Regression type.</strong> Linear regression / ordinary least squares.</p>
+<p><strong>Library.</strong> <code>statsmodels.formula.api.ols</code>; primary uncertainty uses child-cluster robust standard errors where available.</p>
+<p><strong>Outcome.</strong> <code>sum_bits</code>: total information of the target utterance for this source.</p>
+<p><strong>Formula.</strong> <code>sum_bits ~ age + effort</code></p>
+<p><strong>Statsmodels formula.</strong> <code>sum_bits ~ age_c + effort_c</code></p>
+<p><strong>Core controls.</strong> <code>age_c</code>: child age in months, centered; <code>effort_c</code>: the centered effort measure named under each plot.</p>
+<p><strong>Coverage.</strong> 15/15 fitted combinations across K1, K2, K3; effort axes: Morphemes, Phonemes, Syllables: CMU/pkg, Syllables: pkg, Words. Observations per fitted combination: 446,508-446,508. Mean descriptive R2: 0.799.</p>
+<p><strong>Plain read.</strong> Pooled age and effort baseline. Useful as a sanity check, but not sufficient for developmental interpretation because child identity is not controlled.</p>
+<p><strong>Plots below.</strong> Each plot uses this same model family for one effort unit, then draws prediction lines at fixed observed effort values.</p>
+<h4>K1 plots</h4>
+<p><strong>Morphemes</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k1_m1_nb_morphemes_fixed_effort_atlas.png" alt="k1 M1 Morphemes">
+<p><strong>Phonemes</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k1_m1_nb_phonemes_fixed_effort_atlas.png" alt="k1 M1 Phonemes">
+<p><strong>Syllables: CMU/pkg</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k1_m1_nb_syllables_cmu_or_pkg_fixed_effort_atlas.png" alt="k1 M1 Syllables: CMU/pkg">
+<p><strong>Syllables: pkg</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k1_m1_nb_syllables_pkg_fixed_effort_atlas.png" alt="k1 M1 Syllables: pkg">
+<p><strong>Words</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k1_m1_nb_words_fixed_effort_atlas.png" alt="k1 M1 Words">
+<h4>K2 plots</h4>
+<p><strong>Morphemes</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k2_m1_nb_morphemes_fixed_effort_atlas.png" alt="k2 M1 Morphemes">
+<p><strong>Phonemes</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k2_m1_nb_phonemes_fixed_effort_atlas.png" alt="k2 M1 Phonemes">
+<p><strong>Syllables: CMU/pkg</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k2_m1_nb_syllables_cmu_or_pkg_fixed_effort_atlas.png" alt="k2 M1 Syllables: CMU/pkg">
+<p><strong>Syllables: pkg</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k2_m1_nb_syllables_pkg_fixed_effort_atlas.png" alt="k2 M1 Syllables: pkg">
+<p><strong>Words</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k2_m1_nb_words_fixed_effort_atlas.png" alt="k2 M1 Words">
+<h4>K3 plots</h4>
+<p><strong>Morphemes</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k3_m1_nb_morphemes_fixed_effort_atlas.png" alt="k3 M1 Morphemes">
+<p><strong>Phonemes</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k3_m1_nb_phonemes_fixed_effort_atlas.png" alt="k3 M1 Phonemes">
+<p><strong>Syllables: CMU/pkg</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k3_m1_nb_syllables_cmu_or_pkg_fixed_effort_atlas.png" alt="k3 M1 Syllables: CMU/pkg">
+<p><strong>Syllables: pkg</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k3_m1_nb_syllables_pkg_fixed_effort_atlas.png" alt="k3 M1 Syllables: pkg">
+<p><strong>Words</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k3_m1_nb_words_fixed_effort_atlas.png" alt="k3 M1 Words">
+<h3>M2: Age and effort with child identity</h3>
+<p><strong>Question.</strong> Does the age effect remain after child identity is controlled?</p>
+<p><strong>Regression type.</strong> Linear regression / ordinary least squares.</p>
+<p><strong>Library.</strong> <code>statsmodels.formula.api.ols</code>; primary uncertainty uses child-cluster robust standard errors where available.</p>
+<p><strong>Outcome.</strong> <code>sum_bits</code>: total information of the target utterance for this source.</p>
+<p><strong>Formula.</strong> <code>sum_bits ~ age + effort + C(child_id)</code></p>
+<p><strong>Statsmodels formula.</strong> <code>sum_bits ~ age_c + effort_c + C(child_id)</code></p>
+<p><strong>Core controls.</strong> <code>age_c</code>: child age in months, centered; <code>effort_c</code>: the centered effort measure named under each plot.</p>
+<p><strong>Coverage.</strong> 15/15 fitted combinations across K1, K2, K3; effort axes: Morphemes, Phonemes, Syllables: CMU/pkg, Syllables: pkg, Words. Observations per fitted combination: 446,508-446,508. Mean descriptive R2: 0.800.</p>
+<p><strong>Plain read.</strong> First child-adjusted model. This is the compact test of whether the age effect remains after target effort and child identity are controlled.</p>
+<p><strong>Plots below.</strong> Each plot uses this same model family for one effort unit, then draws prediction lines at fixed observed effort values.</p>
+<h4>K1 plots</h4>
+<p><strong>Morphemes</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k1_m2_nb_morphemes_fixed_effort_atlas.png" alt="k1 M2 Morphemes">
+<p><strong>Phonemes</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k1_m2_nb_phonemes_fixed_effort_atlas.png" alt="k1 M2 Phonemes">
+<p><strong>Syllables: CMU/pkg</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k1_m2_nb_syllables_cmu_or_pkg_fixed_effort_atlas.png" alt="k1 M2 Syllables: CMU/pkg">
+<p><strong>Syllables: pkg</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k1_m2_nb_syllables_pkg_fixed_effort_atlas.png" alt="k1 M2 Syllables: pkg">
+<p><strong>Words</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k1_m2_nb_words_fixed_effort_atlas.png" alt="k1 M2 Words">
+<h4>K2 plots</h4>
+<p><strong>Morphemes</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k2_m2_nb_morphemes_fixed_effort_atlas.png" alt="k2 M2 Morphemes">
+<p><strong>Phonemes</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k2_m2_nb_phonemes_fixed_effort_atlas.png" alt="k2 M2 Phonemes">
+<p><strong>Syllables: CMU/pkg</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k2_m2_nb_syllables_cmu_or_pkg_fixed_effort_atlas.png" alt="k2 M2 Syllables: CMU/pkg">
+<p><strong>Syllables: pkg</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k2_m2_nb_syllables_pkg_fixed_effort_atlas.png" alt="k2 M2 Syllables: pkg">
+<p><strong>Words</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k2_m2_nb_words_fixed_effort_atlas.png" alt="k2 M2 Words">
+<h4>K3 plots</h4>
+<p><strong>Morphemes</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k3_m2_nb_morphemes_fixed_effort_atlas.png" alt="k3 M2 Morphemes">
+<p><strong>Phonemes</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k3_m2_nb_phonemes_fixed_effort_atlas.png" alt="k3 M2 Phonemes">
+<p><strong>Syllables: CMU/pkg</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k3_m2_nb_syllables_cmu_or_pkg_fixed_effort_atlas.png" alt="k3 M2 Syllables: CMU/pkg">
+<p><strong>Syllables: pkg</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k3_m2_nb_syllables_pkg_fixed_effort_atlas.png" alt="k3 M2 Syllables: pkg">
+<p><strong>Words</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k3_m2_nb_words_fixed_effort_atlas.png" alt="k3 M2 Words">
+<h3>M3: Age by effort</h3>
+<p><strong>Question.</strong> Does the effort-information relation change with age?</p>
+<p><strong>Regression type.</strong> Linear regression / ordinary least squares.</p>
+<p><strong>Library.</strong> <code>statsmodels.formula.api.ols</code>; primary uncertainty uses child-cluster robust standard errors where available.</p>
+<p><strong>Outcome.</strong> <code>sum_bits</code>: total information of the target utterance for this source.</p>
+<p><strong>Formula.</strong> <code>sum_bits ~ age * effort + C(child_id)</code></p>
+<p><strong>Statsmodels formula.</strong> <code>sum_bits ~ age_c * effort_c + C(child_id)</code></p>
+<p><strong>Core controls.</strong> <code>age_c</code>: child age in months, centered; <code>effort_c</code>: the centered effort measure named under each plot.</p>
+<p><strong>Coverage.</strong> 15/15 fitted combinations across K1, K2, K3; effort axes: Morphemes, Phonemes, Syllables: CMU/pkg, Syllables: pkg, Words. Observations per fitted combination: 446,508-446,508. Mean descriptive R2: 0.800.</p>
+<p><strong>Plain read.</strong> Age-by-effort model. The fixed-effort plots are central here because they show whether the age trend depends on utterance size.</p>
+<p><strong>Plots below.</strong> Each plot uses this same model family for one effort unit, then draws prediction lines at fixed observed effort values.</p>
+<h4>K1 plots</h4>
+<p><strong>Morphemes</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k1_m3_nb_morphemes_fixed_effort_atlas.png" alt="k1 M3 Morphemes">
+<p><strong>Phonemes</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k1_m3_nb_phonemes_fixed_effort_atlas.png" alt="k1 M3 Phonemes">
+<p><strong>Syllables: CMU/pkg</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k1_m3_nb_syllables_cmu_or_pkg_fixed_effort_atlas.png" alt="k1 M3 Syllables: CMU/pkg">
+<p><strong>Syllables: pkg</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k1_m3_nb_syllables_pkg_fixed_effort_atlas.png" alt="k1 M3 Syllables: pkg">
+<p><strong>Words</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k1_m3_nb_words_fixed_effort_atlas.png" alt="k1 M3 Words">
+<h4>K2 plots</h4>
+<p><strong>Morphemes</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k2_m3_nb_morphemes_fixed_effort_atlas.png" alt="k2 M3 Morphemes">
+<p><strong>Phonemes</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k2_m3_nb_phonemes_fixed_effort_atlas.png" alt="k2 M3 Phonemes">
+<p><strong>Syllables: CMU/pkg</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k2_m3_nb_syllables_cmu_or_pkg_fixed_effort_atlas.png" alt="k2 M3 Syllables: CMU/pkg">
+<p><strong>Syllables: pkg</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k2_m3_nb_syllables_pkg_fixed_effort_atlas.png" alt="k2 M3 Syllables: pkg">
+<p><strong>Words</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k2_m3_nb_words_fixed_effort_atlas.png" alt="k2 M3 Words">
+<h4>K3 plots</h4>
+<p><strong>Morphemes</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k3_m3_nb_morphemes_fixed_effort_atlas.png" alt="k3 M3 Morphemes">
+<p><strong>Phonemes</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k3_m3_nb_phonemes_fixed_effort_atlas.png" alt="k3 M3 Phonemes">
+<p><strong>Syllables: CMU/pkg</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k3_m3_nb_syllables_cmu_or_pkg_fixed_effort_atlas.png" alt="k3 M3 Syllables: CMU/pkg">
+<p><strong>Syllables: pkg</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k3_m3_nb_syllables_pkg_fixed_effort_atlas.png" alt="k3 M3 Syllables: pkg">
+<p><strong>Words</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k3_m3_nb_words_fixed_effort_atlas.png" alt="k3 M3 Words">
+<h3>M4a: Parent-context effort added</h3>
+<p><strong>Question.</strong> Does preceding caretaker effort explain additional target information?</p>
+<p><strong>Regression type.</strong> Linear regression / ordinary least squares.</p>
+<p><strong>Library.</strong> <code>statsmodels.formula.api.ols</code>; primary uncertainty uses child-cluster robust standard errors where available.</p>
+<p><strong>Outcome.</strong> <code>sum_bits</code>: total information of the target utterance for this source.</p>
+<p><strong>Formula.</strong> <code>sum_bits ~ age * effort + parent_context_effort + C(child_id)</code></p>
+<p><strong>Statsmodels formula.</strong> <code>sum_bits ~ age_c * effort_c + parent_context_effort_c + C(child_id)</code></p>
+<p><strong>Core controls.</strong> <code>age_c</code>: child age in months, centered; <code>effort_c</code>: the centered effort measure named under each plot.</p>
+<p><strong>Coverage.</strong> 15/15 fitted combinations across K1, K2, K3; effort axes: Morphemes, Phonemes, Syllables: CMU/pkg, Syllables: pkg, Words. Observations per fitted combination: 446,508-446,508. Mean descriptive R2: 0.800.</p>
+<p><strong>Plain read.</strong> Adds preceding caretaker-context effort. This checks whether local context amount explains additional target information.</p>
+<p><strong>Plots below.</strong> Each plot uses this same model family for one effort unit, then draws prediction lines at fixed observed effort values.</p>
+<h4>K1 plots</h4>
+<p><strong>Morphemes</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k1_m4a_nb_morphemes_fixed_effort_atlas.png" alt="k1 M4a Morphemes">
+<p><strong>Phonemes</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k1_m4a_nb_phonemes_fixed_effort_atlas.png" alt="k1 M4a Phonemes">
+<p><strong>Syllables: CMU/pkg</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k1_m4a_nb_syllables_cmu_or_pkg_fixed_effort_atlas.png" alt="k1 M4a Syllables: CMU/pkg">
+<p><strong>Syllables: pkg</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k1_m4a_nb_syllables_pkg_fixed_effort_atlas.png" alt="k1 M4a Syllables: pkg">
+<p><strong>Words</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k1_m4a_nb_words_fixed_effort_atlas.png" alt="k1 M4a Words">
+<h4>K2 plots</h4>
+<p><strong>Morphemes</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k2_m4a_nb_morphemes_fixed_effort_atlas.png" alt="k2 M4a Morphemes">
+<p><strong>Phonemes</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k2_m4a_nb_phonemes_fixed_effort_atlas.png" alt="k2 M4a Phonemes">
+<p><strong>Syllables: CMU/pkg</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k2_m4a_nb_syllables_cmu_or_pkg_fixed_effort_atlas.png" alt="k2 M4a Syllables: CMU/pkg">
+<p><strong>Syllables: pkg</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k2_m4a_nb_syllables_pkg_fixed_effort_atlas.png" alt="k2 M4a Syllables: pkg">
+<p><strong>Words</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k2_m4a_nb_words_fixed_effort_atlas.png" alt="k2 M4a Words">
+<h4>K3 plots</h4>
+<p><strong>Morphemes</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k3_m4a_nb_morphemes_fixed_effort_atlas.png" alt="k3 M4a Morphemes">
+<p><strong>Phonemes</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k3_m4a_nb_phonemes_fixed_effort_atlas.png" alt="k3 M4a Phonemes">
+<p><strong>Syllables: CMU/pkg</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k3_m4a_nb_syllables_cmu_or_pkg_fixed_effort_atlas.png" alt="k3 M4a Syllables: CMU/pkg">
+<p><strong>Syllables: pkg</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k3_m4a_nb_syllables_pkg_fixed_effort_atlas.png" alt="k3 M4a Syllables: pkg">
+<p><strong>Words</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k3_m4a_nb_words_fixed_effort_atlas.png" alt="k3 M4a Words">
+<h3>M4b: Context entropy added</h3>
+<p><strong>Question.</strong> Does context entropy explain additional target information?</p>
+<p><strong>Regression type.</strong> Linear regression / ordinary least squares.</p>
+<p><strong>Library.</strong> <code>statsmodels.formula.api.ols</code>; primary uncertainty uses child-cluster robust standard errors where available.</p>
+<p><strong>Outcome.</strong> <code>sum_bits</code>: total information of the target utterance for this source.</p>
+<p><strong>Formula.</strong> <code>sum_bits ~ age * effort + context_entropy + C(child_id)</code></p>
+<p><strong>Statsmodels formula.</strong> <code>sum_bits ~ age_c * effort_c + context_entropy_c + C(child_id)</code></p>
+<p><strong>Core controls.</strong> <code>age_c</code>: child age in months, centered; <code>effort_c</code>: the centered effort measure named under each plot.</p>
+<p><strong>Coverage.</strong> 15/15 fitted combinations across K1, K2, K3; effort axes: Morphemes, Phonemes, Syllables: CMU/pkg, Syllables: pkg, Words. Observations per fitted combination: 441,413-442,111. Mean descriptive R2: 0.801.</p>
+<p><strong>Plain read.</strong> Adds context entropy. This checks whether the age pattern survives the available next-token context-entropy control.</p>
+<p><strong>Plots below.</strong> Each plot uses this same model family for one effort unit, then draws prediction lines at fixed observed effort values.</p>
+<h4>K1 plots</h4>
+<p><strong>Morphemes</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k1_m4b_nb_morphemes_fixed_effort_atlas.png" alt="k1 M4b Morphemes">
+<p><strong>Phonemes</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k1_m4b_nb_phonemes_fixed_effort_atlas.png" alt="k1 M4b Phonemes">
+<p><strong>Syllables: CMU/pkg</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k1_m4b_nb_syllables_cmu_or_pkg_fixed_effort_atlas.png" alt="k1 M4b Syllables: CMU/pkg">
+<p><strong>Syllables: pkg</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k1_m4b_nb_syllables_pkg_fixed_effort_atlas.png" alt="k1 M4b Syllables: pkg">
+<p><strong>Words</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k1_m4b_nb_words_fixed_effort_atlas.png" alt="k1 M4b Words">
+<h4>K2 plots</h4>
+<p><strong>Morphemes</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k2_m4b_nb_morphemes_fixed_effort_atlas.png" alt="k2 M4b Morphemes">
+<p><strong>Phonemes</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k2_m4b_nb_phonemes_fixed_effort_atlas.png" alt="k2 M4b Phonemes">
+<p><strong>Syllables: CMU/pkg</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k2_m4b_nb_syllables_cmu_or_pkg_fixed_effort_atlas.png" alt="k2 M4b Syllables: CMU/pkg">
+<p><strong>Syllables: pkg</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k2_m4b_nb_syllables_pkg_fixed_effort_atlas.png" alt="k2 M4b Syllables: pkg">
+<p><strong>Words</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k2_m4b_nb_words_fixed_effort_atlas.png" alt="k2 M4b Words">
+<h4>K3 plots</h4>
+<p><strong>Morphemes</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k3_m4b_nb_morphemes_fixed_effort_atlas.png" alt="k3 M4b Morphemes">
+<p><strong>Phonemes</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k3_m4b_nb_phonemes_fixed_effort_atlas.png" alt="k3 M4b Phonemes">
+<p><strong>Syllables: CMU/pkg</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k3_m4b_nb_syllables_cmu_or_pkg_fixed_effort_atlas.png" alt="k3 M4b Syllables: CMU/pkg">
+<p><strong>Syllables: pkg</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k3_m4b_nb_syllables_pkg_fixed_effort_atlas.png" alt="k3 M4b Syllables: pkg">
+<p><strong>Words</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k3_m4b_nb_words_fixed_effort_atlas.png" alt="k3 M4b Words">
+<h3>M4c: Question type added</h3>
+<p><strong>Question.</strong> Does preceding caretaker question type explain additional target information?</p>
+<p><strong>Regression type.</strong> Linear regression / ordinary least squares.</p>
+<p><strong>Library.</strong> <code>statsmodels.formula.api.ols</code>; primary uncertainty uses child-cluster robust standard errors where available.</p>
+<p><strong>Outcome.</strong> <code>sum_bits</code>: total information of the target utterance for this source.</p>
+<p><strong>Formula.</strong> <code>sum_bits ~ age * effort + C(question_type) + C(child_id)</code></p>
+<p><strong>Statsmodels formula.</strong> <code>sum_bits ~ age_c * effort_c + C(question_type) + C(child_id)</code></p>
+<p><strong>Core controls.</strong> <code>age_c</code>: child age in months, centered; <code>effort_c</code>: the centered effort measure named under each plot.</p>
+<p><strong>Coverage.</strong> 15/15 fitted combinations across K1, K2, K3; effort axes: Morphemes, Phonemes, Syllables: CMU/pkg, Syllables: pkg, Words. Observations per fitted combination: 446,508-446,508. Mean descriptive R2: 0.802.</p>
+<p><strong>Plain read.</strong> Adds broad question type. This checks whether local interrogative structure explains additional target information.</p>
+<p><strong>Plots below.</strong> Each plot uses this same model family for one effort unit, then draws prediction lines at fixed observed effort values.</p>
+<h4>K1 plots</h4>
+<p><strong>Morphemes</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k1_m4c_nb_morphemes_fixed_effort_atlas.png" alt="k1 M4c Morphemes">
+<p><strong>Phonemes</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k1_m4c_nb_phonemes_fixed_effort_atlas.png" alt="k1 M4c Phonemes">
+<p><strong>Syllables: CMU/pkg</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k1_m4c_nb_syllables_cmu_or_pkg_fixed_effort_atlas.png" alt="k1 M4c Syllables: CMU/pkg">
+<p><strong>Syllables: pkg</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k1_m4c_nb_syllables_pkg_fixed_effort_atlas.png" alt="k1 M4c Syllables: pkg">
+<p><strong>Words</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k1_m4c_nb_words_fixed_effort_atlas.png" alt="k1 M4c Words">
+<h4>K2 plots</h4>
+<p><strong>Morphemes</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k2_m4c_nb_morphemes_fixed_effort_atlas.png" alt="k2 M4c Morphemes">
+<p><strong>Phonemes</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k2_m4c_nb_phonemes_fixed_effort_atlas.png" alt="k2 M4c Phonemes">
+<p><strong>Syllables: CMU/pkg</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k2_m4c_nb_syllables_cmu_or_pkg_fixed_effort_atlas.png" alt="k2 M4c Syllables: CMU/pkg">
+<p><strong>Syllables: pkg</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k2_m4c_nb_syllables_pkg_fixed_effort_atlas.png" alt="k2 M4c Syllables: pkg">
+<p><strong>Words</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k2_m4c_nb_words_fixed_effort_atlas.png" alt="k2 M4c Words">
+<h4>K3 plots</h4>
+<p><strong>Morphemes</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k3_m4c_nb_morphemes_fixed_effort_atlas.png" alt="k3 M4c Morphemes">
+<p><strong>Phonemes</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k3_m4c_nb_phonemes_fixed_effort_atlas.png" alt="k3 M4c Phonemes">
+<p><strong>Syllables: CMU/pkg</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k3_m4c_nb_syllables_cmu_or_pkg_fixed_effort_atlas.png" alt="k3 M4c Syllables: CMU/pkg">
+<p><strong>Syllables: pkg</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k3_m4c_nb_syllables_pkg_fixed_effort_atlas.png" alt="k3 M4c Syllables: pkg">
+<p><strong>Words</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k3_m4c_nb_words_fixed_effort_atlas.png" alt="k3 M4c Words">
+<h3>M5: All context controls</h3>
+<p><strong>Question.</strong> Do parent effort, context entropy, and question type each matter after age, target effort, and child identity?</p>
+<p><strong>Regression type.</strong> Linear regression / ordinary least squares.</p>
+<p><strong>Library.</strong> <code>statsmodels.formula.api.ols</code>; primary uncertainty uses child-cluster robust standard errors where available.</p>
+<p><strong>Outcome.</strong> <code>sum_bits</code>: total information of the target utterance for this source.</p>
+<p><strong>Formula.</strong> <code>sum_bits ~ age * effort + parent_context_effort + context_entropy + C(question_type) + C(child_id)</code></p>
+<p><strong>Statsmodels formula.</strong> <code>sum_bits ~ age_c * effort_c + parent_context_effort_c + context_entropy_c + C(question_type) + C(child_id)</code></p>
+<p><strong>Core controls.</strong> <code>age_c</code>: child age in months, centered; <code>effort_c</code>: the centered effort measure named under each plot.</p>
+<p><strong>Coverage.</strong> 15/15 fitted combinations across K1, K2, K3; effort axes: Morphemes, Phonemes, Syllables: CMU/pkg, Syllables: pkg, Words. Observations per fitted combination: 441,413-442,111. Mean descriptive R2: 0.801.</p>
+<p><strong>Plain read.</strong> Combines context effort, context entropy, and question type with the age-by-effort child-adjusted model.</p>
+<p><strong>Plots below.</strong> Each plot uses this same model family for one effort unit, then draws prediction lines at fixed observed effort values.</p>
+<h4>K1 plots</h4>
+<p><strong>Morphemes</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k1_m5_nb_morphemes_fixed_effort_atlas.png" alt="k1 M5 Morphemes">
+<p><strong>Phonemes</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k1_m5_nb_phonemes_fixed_effort_atlas.png" alt="k1 M5 Phonemes">
+<p><strong>Syllables: CMU/pkg</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k1_m5_nb_syllables_cmu_or_pkg_fixed_effort_atlas.png" alt="k1 M5 Syllables: CMU/pkg">
+<p><strong>Syllables: pkg</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k1_m5_nb_syllables_pkg_fixed_effort_atlas.png" alt="k1 M5 Syllables: pkg">
+<p><strong>Words</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k1_m5_nb_words_fixed_effort_atlas.png" alt="k1 M5 Words">
+<h4>K2 plots</h4>
+<p><strong>Morphemes</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k2_m5_nb_morphemes_fixed_effort_atlas.png" alt="k2 M5 Morphemes">
+<p><strong>Phonemes</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k2_m5_nb_phonemes_fixed_effort_atlas.png" alt="k2 M5 Phonemes">
+<p><strong>Syllables: CMU/pkg</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k2_m5_nb_syllables_cmu_or_pkg_fixed_effort_atlas.png" alt="k2 M5 Syllables: CMU/pkg">
+<p><strong>Syllables: pkg</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k2_m5_nb_syllables_pkg_fixed_effort_atlas.png" alt="k2 M5 Syllables: pkg">
+<p><strong>Words</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k2_m5_nb_words_fixed_effort_atlas.png" alt="k2 M5 Words">
+<h4>K3 plots</h4>
+<p><strong>Morphemes</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k3_m5_nb_morphemes_fixed_effort_atlas.png" alt="k3 M5 Morphemes">
+<p><strong>Phonemes</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k3_m5_nb_phonemes_fixed_effort_atlas.png" alt="k3 M5 Phonemes">
+<p><strong>Syllables: CMU/pkg</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k3_m5_nb_syllables_cmu_or_pkg_fixed_effort_atlas.png" alt="k3 M5 Syllables: CMU/pkg">
+<p><strong>Syllables: pkg</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k3_m5_nb_syllables_pkg_fixed_effort_atlas.png" alt="k3 M5 Syllables: pkg">
+<p><strong>Words</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k3_m5_nb_words_fixed_effort_atlas.png" alt="k3 M5 Words">
+<h3>M6: Context entropy interactions</h3>
+<p><strong>Question.</strong> Does context-entropy sensitivity change with age or target effort?</p>
+<p><strong>Regression type.</strong> Linear regression / ordinary least squares.</p>
+<p><strong>Library.</strong> <code>statsmodels.formula.api.ols</code>; primary uncertainty uses child-cluster robust standard errors where available.</p>
+<p><strong>Outcome.</strong> <code>sum_bits</code>: total information of the target utterance for this source.</p>
+<p><strong>Formula.</strong> <code>sum_bits ~ age * effort + parent_context_effort + context_entropy + C(question_type) + age:context_entropy + effort:context_entropy + C(child_id)</code></p>
+<p><strong>Statsmodels formula.</strong> <code>sum_bits ~ age_c * effort_c + parent_context_effort_c + context_entropy_c + C(question_type) + age_c:context_entropy_c + effort_c:context_entropy_c + C(child_id)</code></p>
+<p><strong>Core controls.</strong> <code>age_c</code>: child age in months, centered; <code>effort_c</code>: the centered effort measure named under each plot.</p>
+<p><strong>Coverage.</strong> 15/15 fitted combinations across K1, K2, K3; effort axes: Morphemes, Phonemes, Syllables: CMU/pkg, Syllables: pkg, Words. Observations per fitted combination: 441,413-442,111. Mean descriptive R2: 0.801.</p>
+<p><strong>Plain read.</strong> Interaction stress test for age/effort with context entropy. Useful for robustness, not a first-pass headline by itself.</p>
+<p><strong>Plots below.</strong> Each plot uses this same model family for one effort unit, then draws prediction lines at fixed observed effort values.</p>
+<h4>K1 plots</h4>
+<p><strong>Morphemes</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k1_m6_nb_morphemes_fixed_effort_atlas.png" alt="k1 M6 Morphemes">
+<p><strong>Phonemes</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k1_m6_nb_phonemes_fixed_effort_atlas.png" alt="k1 M6 Phonemes">
+<p><strong>Syllables: CMU/pkg</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k1_m6_nb_syllables_cmu_or_pkg_fixed_effort_atlas.png" alt="k1 M6 Syllables: CMU/pkg">
+<p><strong>Syllables: pkg</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k1_m6_nb_syllables_pkg_fixed_effort_atlas.png" alt="k1 M6 Syllables: pkg">
+<p><strong>Words</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k1_m6_nb_words_fixed_effort_atlas.png" alt="k1 M6 Words">
+<h4>K2 plots</h4>
+<p><strong>Morphemes</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k2_m6_nb_morphemes_fixed_effort_atlas.png" alt="k2 M6 Morphemes">
+<p><strong>Phonemes</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k2_m6_nb_phonemes_fixed_effort_atlas.png" alt="k2 M6 Phonemes">
+<p><strong>Syllables: CMU/pkg</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k2_m6_nb_syllables_cmu_or_pkg_fixed_effort_atlas.png" alt="k2 M6 Syllables: CMU/pkg">
+<p><strong>Syllables: pkg</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k2_m6_nb_syllables_pkg_fixed_effort_atlas.png" alt="k2 M6 Syllables: pkg">
+<p><strong>Words</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k2_m6_nb_words_fixed_effort_atlas.png" alt="k2 M6 Words">
+<h4>K3 plots</h4>
+<p><strong>Morphemes</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k3_m6_nb_morphemes_fixed_effort_atlas.png" alt="k3 M6 Morphemes">
+<p><strong>Phonemes</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k3_m6_nb_phonemes_fixed_effort_atlas.png" alt="k3 M6 Phonemes">
+<p><strong>Syllables: CMU/pkg</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k3_m6_nb_syllables_cmu_or_pkg_fixed_effort_atlas.png" alt="k3 M6 Syllables: CMU/pkg">
+<p><strong>Syllables: pkg</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k3_m6_nb_syllables_pkg_fixed_effort_atlas.png" alt="k3 M6 Syllables: pkg">
+<p><strong>Words</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k3_m6_nb_words_fixed_effort_atlas.png" alt="k3 M6 Words">
+<h3>M7: Nonlinear age</h3>
+<p><strong>Question.</strong> Does a curved age trajectory explain target information beyond linear age and effort?</p>
+<p><strong>Regression type.</strong> Linear regression / ordinary least squares.</p>
+<p><strong>Library.</strong> <code>statsmodels.formula.api.ols</code>; primary uncertainty uses child-cluster robust standard errors where available.</p>
+<p><strong>Outcome.</strong> <code>sum_bits</code>: total information of the target utterance for this source.</p>
+<p><strong>Formula.</strong> <code>sum_bits ~ age + effort + I(age ** 2) + C(child_id)</code></p>
+<p><strong>Statsmodels formula.</strong> <code>sum_bits ~ age_c + effort_c + I(age_c ** 2) + C(child_id)</code></p>
+<p><strong>Core controls.</strong> <code>age_c</code>: child age in months, centered; <code>effort_c</code>: the centered effort measure named under each plot.</p>
+<p><strong>Coverage.</strong> 15/15 fitted combinations across K1, K2, K3; effort axes: Morphemes, Phonemes, Syllables: CMU/pkg, Syllables: pkg, Words. Observations per fitted combination: 446,508-446,508. Mean descriptive R2: 0.800.</p>
+<p><strong>Plain read.</strong> Nonlinear age model. Checks whether a curved developmental trajectory fits better than a straight age slope.</p>
+<p><strong>Plots below.</strong> Each plot uses this same model family for one effort unit, then draws prediction lines at fixed observed effort values.</p>
+<h4>K1 plots</h4>
+<p><strong>Morphemes</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k1_m7_nb_morphemes_fixed_effort_atlas.png" alt="k1 M7 Morphemes">
+<p><strong>Phonemes</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k1_m7_nb_phonemes_fixed_effort_atlas.png" alt="k1 M7 Phonemes">
+<p><strong>Syllables: CMU/pkg</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k1_m7_nb_syllables_cmu_or_pkg_fixed_effort_atlas.png" alt="k1 M7 Syllables: CMU/pkg">
+<p><strong>Syllables: pkg</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k1_m7_nb_syllables_pkg_fixed_effort_atlas.png" alt="k1 M7 Syllables: pkg">
+<p><strong>Words</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k1_m7_nb_words_fixed_effort_atlas.png" alt="k1 M7 Words">
+<h4>K2 plots</h4>
+<p><strong>Morphemes</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k2_m7_nb_morphemes_fixed_effort_atlas.png" alt="k2 M7 Morphemes">
+<p><strong>Phonemes</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k2_m7_nb_phonemes_fixed_effort_atlas.png" alt="k2 M7 Phonemes">
+<p><strong>Syllables: CMU/pkg</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k2_m7_nb_syllables_cmu_or_pkg_fixed_effort_atlas.png" alt="k2 M7 Syllables: CMU/pkg">
+<p><strong>Syllables: pkg</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k2_m7_nb_syllables_pkg_fixed_effort_atlas.png" alt="k2 M7 Syllables: pkg">
+<p><strong>Words</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k2_m7_nb_words_fixed_effort_atlas.png" alt="k2 M7 Words">
+<h4>K3 plots</h4>
+<p><strong>Morphemes</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k3_m7_nb_morphemes_fixed_effort_atlas.png" alt="k3 M7 Morphemes">
+<p><strong>Phonemes</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k3_m7_nb_phonemes_fixed_effort_atlas.png" alt="k3 M7 Phonemes">
+<p><strong>Syllables: CMU/pkg</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k3_m7_nb_syllables_cmu_or_pkg_fixed_effort_atlas.png" alt="k3 M7 Syllables: CMU/pkg">
+<p><strong>Syllables: pkg</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k3_m7_nb_syllables_pkg_fixed_effort_atlas.png" alt="k3 M7 Syllables: pkg">
+<p><strong>Words</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k3_m7_nb_words_fixed_effort_atlas.png" alt="k3 M7 Words">
+<h3>M8: Nonlinear age by effort</h3>
+<p><strong>Question.</strong> Does the effort-information relation change along a curved age trajectory?</p>
+<p><strong>Regression type.</strong> Linear regression / ordinary least squares.</p>
+<p><strong>Library.</strong> <code>statsmodels.formula.api.ols</code>; primary uncertainty uses child-cluster robust standard errors where available.</p>
+<p><strong>Outcome.</strong> <code>sum_bits</code>: total information of the target utterance for this source.</p>
+<p><strong>Formula.</strong> <code>sum_bits ~ age * effort + I(age ** 2) + I(age ** 2):effort + C(child_id)</code></p>
+<p><strong>Statsmodels formula.</strong> <code>sum_bits ~ age_c * effort_c + I(age_c ** 2) + I(age_c ** 2):effort_c + C(child_id)</code></p>
+<p><strong>Core controls.</strong> <code>age_c</code>: child age in months, centered; <code>effort_c</code>: the centered effort measure named under each plot.</p>
+<p><strong>Coverage.</strong> 15/15 fitted combinations across K1, K2, K3; effort axes: Morphemes, Phonemes, Syllables: CMU/pkg, Syllables: pkg, Words. Observations per fitted combination: 446,508-446,508. Mean descriptive R2: 0.800.</p>
+<p><strong>Plain read.</strong> Nonlinear age-by-effort model. Checks whether curved developmental change depends on target utterance effort.</p>
+<p><strong>Plots below.</strong> Each plot uses this same model family for one effort unit, then draws prediction lines at fixed observed effort values.</p>
+<h4>K1 plots</h4>
+<p><strong>Morphemes</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k1_m8_nb_morphemes_fixed_effort_atlas.png" alt="k1 M8 Morphemes">
+<p><strong>Phonemes</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k1_m8_nb_phonemes_fixed_effort_atlas.png" alt="k1 M8 Phonemes">
+<p><strong>Syllables: CMU/pkg</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k1_m8_nb_syllables_cmu_or_pkg_fixed_effort_atlas.png" alt="k1 M8 Syllables: CMU/pkg">
+<p><strong>Syllables: pkg</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k1_m8_nb_syllables_pkg_fixed_effort_atlas.png" alt="k1 M8 Syllables: pkg">
+<p><strong>Words</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k1_m8_nb_words_fixed_effort_atlas.png" alt="k1 M8 Words">
+<h4>K2 plots</h4>
+<p><strong>Morphemes</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k2_m8_nb_morphemes_fixed_effort_atlas.png" alt="k2 M8 Morphemes">
+<p><strong>Phonemes</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k2_m8_nb_phonemes_fixed_effort_atlas.png" alt="k2 M8 Phonemes">
+<p><strong>Syllables: CMU/pkg</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k2_m8_nb_syllables_cmu_or_pkg_fixed_effort_atlas.png" alt="k2 M8 Syllables: CMU/pkg">
+<p><strong>Syllables: pkg</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k2_m8_nb_syllables_pkg_fixed_effort_atlas.png" alt="k2 M8 Syllables: pkg">
+<p><strong>Words</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k2_m8_nb_words_fixed_effort_atlas.png" alt="k2 M8 Words">
+<h4>K3 plots</h4>
+<p><strong>Morphemes</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k3_m8_nb_morphemes_fixed_effort_atlas.png" alt="k3 M8 Morphemes">
+<p><strong>Phonemes</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k3_m8_nb_phonemes_fixed_effort_atlas.png" alt="k3 M8 Phonemes">
+<p><strong>Syllables: CMU/pkg</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k3_m8_nb_syllables_cmu_or_pkg_fixed_effort_atlas.png" alt="k3 M8 Syllables: CMU/pkg">
+<p><strong>Syllables: pkg</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k3_m8_nb_syllables_pkg_fixed_effort_atlas.png" alt="k3 M8 Syllables: pkg">
+<p><strong>Words</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k3_m8_nb_words_fixed_effort_atlas.png" alt="k3 M8 Words">
+<h3>M9: Categorical age-bin trajectory</h3>
+<p><strong>Question.</strong> Do age-bin differences remain after target effort and child identity are controlled?</p>
+<p><strong>Regression type.</strong> Linear regression / ordinary least squares.</p>
+<p><strong>Library.</strong> <code>statsmodels.formula.api.ols</code>; primary uncertainty uses child-cluster robust standard errors where available.</p>
+<p><strong>Outcome.</strong> <code>sum_bits</code>: total information of the target utterance for this source.</p>
+<p><strong>Formula.</strong> <code>sum_bits ~ C(age_bin) + effort + C(child_id)</code></p>
+<p><strong>Statsmodels formula.</strong> <code>sum_bits ~ C(age_bin) + effort_c + C(child_id)</code></p>
+<p><strong>Core controls.</strong> <code>age_c</code>: child age in months, centered; <code>effort_c</code>: the centered effort measure named under each plot.</p>
+<p><strong>Coverage.</strong> 15/15 fitted combinations across K1, K2, K3; effort axes: Morphemes, Phonemes, Syllables: CMU/pkg, Syllables: pkg, Words. Observations per fitted combination: 446,508-446,508. Mean descriptive R2: 0.800.</p>
+<p><strong>Plain read.</strong> Categorical age-bin trajectory. Checks developmental shape without forcing one continuous age slope.</p>
+<p><strong>Plots below.</strong> Each plot uses this same model family for one effort unit, then draws prediction lines at fixed observed effort values.</p>
+<h4>K1 plots</h4>
+<p><strong>Morphemes</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k1_m9_nb_morphemes_fixed_effort_atlas.png" alt="k1 M9 Morphemes">
+<p><strong>Phonemes</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k1_m9_nb_phonemes_fixed_effort_atlas.png" alt="k1 M9 Phonemes">
+<p><strong>Syllables: CMU/pkg</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k1_m9_nb_syllables_cmu_or_pkg_fixed_effort_atlas.png" alt="k1 M9 Syllables: CMU/pkg">
+<p><strong>Syllables: pkg</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k1_m9_nb_syllables_pkg_fixed_effort_atlas.png" alt="k1 M9 Syllables: pkg">
+<p><strong>Words</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k1_m9_nb_words_fixed_effort_atlas.png" alt="k1 M9 Words">
+<h4>K2 plots</h4>
+<p><strong>Morphemes</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k2_m9_nb_morphemes_fixed_effort_atlas.png" alt="k2 M9 Morphemes">
+<p><strong>Phonemes</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k2_m9_nb_phonemes_fixed_effort_atlas.png" alt="k2 M9 Phonemes">
+<p><strong>Syllables: CMU/pkg</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k2_m9_nb_syllables_cmu_or_pkg_fixed_effort_atlas.png" alt="k2 M9 Syllables: CMU/pkg">
+<p><strong>Syllables: pkg</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k2_m9_nb_syllables_pkg_fixed_effort_atlas.png" alt="k2 M9 Syllables: pkg">
+<p><strong>Words</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k2_m9_nb_words_fixed_effort_atlas.png" alt="k2 M9 Words">
+<h4>K3 plots</h4>
+<p><strong>Morphemes</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k3_m9_nb_morphemes_fixed_effort_atlas.png" alt="k3 M9 Morphemes">
+<p><strong>Phonemes</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k3_m9_nb_phonemes_fixed_effort_atlas.png" alt="k3 M9 Phonemes">
+<p><strong>Syllables: CMU/pkg</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k3_m9_nb_syllables_cmu_or_pkg_fixed_effort_atlas.png" alt="k3 M9 Syllables: CMU/pkg">
+<p><strong>Syllables: pkg</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k3_m9_nb_syllables_pkg_fixed_effort_atlas.png" alt="k3 M9 Syllables: pkg">
+<p><strong>Words</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k3_m9_nb_words_fixed_effort_atlas.png" alt="k3 M9 Words">
+<h3>M10: Age-bin by effort</h3>
+<p><strong>Question.</strong> Does the effort-information relation differ across developmental age bins?</p>
+<p><strong>Regression type.</strong> Linear regression / ordinary least squares.</p>
+<p><strong>Library.</strong> <code>statsmodels.formula.api.ols</code>; primary uncertainty uses child-cluster robust standard errors where available.</p>
+<p><strong>Outcome.</strong> <code>sum_bits</code>: total information of the target utterance for this source.</p>
+<p><strong>Formula.</strong> <code>sum_bits ~ C(age_bin) * effort + C(child_id)</code></p>
+<p><strong>Statsmodels formula.</strong> <code>sum_bits ~ C(age_bin) * effort_c + C(child_id)</code></p>
+<p><strong>Core controls.</strong> <code>age_c</code>: child age in months, centered; <code>effort_c</code>: the centered effort measure named under each plot.</p>
+<p><strong>Coverage.</strong> 15/15 fitted combinations across K1, K2, K3; effort axes: Morphemes, Phonemes, Syllables: CMU/pkg, Syllables: pkg, Words. Observations per fitted combination: 446,508-446,508. Mean descriptive R2: 0.800.</p>
+<p><strong>Plain read.</strong> Age-bin-by-effort model. Checks whether age-bin differences vary across target effort.</p>
+<p><strong>Plots below.</strong> Each plot uses this same model family for one effort unit, then draws prediction lines at fixed observed effort values.</p>
+<h4>K1 plots</h4>
+<p><strong>Morphemes</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k1_m10_nb_morphemes_fixed_effort_atlas.png" alt="k1 M10 Morphemes">
+<p><strong>Phonemes</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k1_m10_nb_phonemes_fixed_effort_atlas.png" alt="k1 M10 Phonemes">
+<p><strong>Syllables: CMU/pkg</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k1_m10_nb_syllables_cmu_or_pkg_fixed_effort_atlas.png" alt="k1 M10 Syllables: CMU/pkg">
+<p><strong>Syllables: pkg</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k1_m10_nb_syllables_pkg_fixed_effort_atlas.png" alt="k1 M10 Syllables: pkg">
+<p><strong>Words</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k1_m10_nb_words_fixed_effort_atlas.png" alt="k1 M10 Words">
+<h4>K2 plots</h4>
+<p><strong>Morphemes</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k2_m10_nb_morphemes_fixed_effort_atlas.png" alt="k2 M10 Morphemes">
+<p><strong>Phonemes</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k2_m10_nb_phonemes_fixed_effort_atlas.png" alt="k2 M10 Phonemes">
+<p><strong>Syllables: CMU/pkg</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k2_m10_nb_syllables_cmu_or_pkg_fixed_effort_atlas.png" alt="k2 M10 Syllables: CMU/pkg">
+<p><strong>Syllables: pkg</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k2_m10_nb_syllables_pkg_fixed_effort_atlas.png" alt="k2 M10 Syllables: pkg">
+<p><strong>Words</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k2_m10_nb_words_fixed_effort_atlas.png" alt="k2 M10 Words">
+<h4>K3 plots</h4>
+<p><strong>Morphemes</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k3_m10_nb_morphemes_fixed_effort_atlas.png" alt="k3 M10 Morphemes">
+<p><strong>Phonemes</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k3_m10_nb_phonemes_fixed_effort_atlas.png" alt="k3 M10 Phonemes">
+<p><strong>Syllables: CMU/pkg</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k3_m10_nb_syllables_cmu_or_pkg_fixed_effort_atlas.png" alt="k3 M10 Syllables: CMU/pkg">
+<p><strong>Syllables: pkg</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k3_m10_nb_syllables_pkg_fixed_effort_atlas.png" alt="k3 M10 Syllables: pkg">
+<p><strong>Words</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k3_m10_nb_words_fixed_effort_atlas.png" alt="k3 M10 Words">
+<h3>M11: Age by parent-context effort</h3>
+<p><strong>Question.</strong> Does preceding caretaker effort matter differently across development?</p>
+<p><strong>Regression type.</strong> Linear regression / ordinary least squares.</p>
+<p><strong>Library.</strong> <code>statsmodels.formula.api.ols</code>; primary uncertainty uses child-cluster robust standard errors where available.</p>
+<p><strong>Outcome.</strong> <code>sum_bits</code>: total information of the target utterance for this source.</p>
+<p><strong>Formula.</strong> <code>sum_bits ~ age * effort + parent_context_effort + context_entropy + C(question_type) + age:parent_context_effort + C(child_id)</code></p>
+<p><strong>Statsmodels formula.</strong> <code>sum_bits ~ age_c * effort_c + parent_context_effort_c + context_entropy_c + C(question_type) + age_c:parent_context_effort_c + C(child_id)</code></p>
+<p><strong>Core controls.</strong> <code>age_c</code>: child age in months, centered; <code>effort_c</code>: the centered effort measure named under each plot.</p>
+<p><strong>Coverage.</strong> 15/15 fitted combinations across K1, K2, K3; effort axes: Morphemes, Phonemes, Syllables: CMU/pkg, Syllables: pkg, Words. Observations per fitted combination: 441,413-442,111. Mean descriptive R2: 0.801.</p>
+<p><strong>Plain read.</strong> Age-by-parent-context-effort model. Tests whether the age pattern changes with preceding context effort.</p>
+<p><strong>Plots below.</strong> Each plot uses this same model family for one effort unit, then draws prediction lines at fixed observed effort values.</p>
+<h4>K1 plots</h4>
+<p><strong>Morphemes</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k1_m11_nb_morphemes_fixed_effort_atlas.png" alt="k1 M11 Morphemes">
+<p><strong>Phonemes</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k1_m11_nb_phonemes_fixed_effort_atlas.png" alt="k1 M11 Phonemes">
+<p><strong>Syllables: CMU/pkg</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k1_m11_nb_syllables_cmu_or_pkg_fixed_effort_atlas.png" alt="k1 M11 Syllables: CMU/pkg">
+<p><strong>Syllables: pkg</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k1_m11_nb_syllables_pkg_fixed_effort_atlas.png" alt="k1 M11 Syllables: pkg">
+<p><strong>Words</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k1_m11_nb_words_fixed_effort_atlas.png" alt="k1 M11 Words">
+<h4>K2 plots</h4>
+<p><strong>Morphemes</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k2_m11_nb_morphemes_fixed_effort_atlas.png" alt="k2 M11 Morphemes">
+<p><strong>Phonemes</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k2_m11_nb_phonemes_fixed_effort_atlas.png" alt="k2 M11 Phonemes">
+<p><strong>Syllables: CMU/pkg</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k2_m11_nb_syllables_cmu_or_pkg_fixed_effort_atlas.png" alt="k2 M11 Syllables: CMU/pkg">
+<p><strong>Syllables: pkg</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k2_m11_nb_syllables_pkg_fixed_effort_atlas.png" alt="k2 M11 Syllables: pkg">
+<p><strong>Words</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k2_m11_nb_words_fixed_effort_atlas.png" alt="k2 M11 Words">
+<h4>K3 plots</h4>
+<p><strong>Morphemes</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k3_m11_nb_morphemes_fixed_effort_atlas.png" alt="k3 M11 Morphemes">
+<p><strong>Phonemes</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k3_m11_nb_phonemes_fixed_effort_atlas.png" alt="k3 M11 Phonemes">
+<p><strong>Syllables: CMU/pkg</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k3_m11_nb_syllables_cmu_or_pkg_fixed_effort_atlas.png" alt="k3 M11 Syllables: CMU/pkg">
+<p><strong>Syllables: pkg</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k3_m11_nb_syllables_pkg_fixed_effort_atlas.png" alt="k3 M11 Syllables: pkg">
+<p><strong>Words</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k3_m11_nb_words_fixed_effort_atlas.png" alt="k3 M11 Words">
+<h3>M12: Age by question type</h3>
+<p><strong>Question.</strong> Does the developmental trajectory differ by broad preceding caretaker question type?</p>
+<p><strong>Regression type.</strong> Linear regression / ordinary least squares.</p>
+<p><strong>Library.</strong> <code>statsmodels.formula.api.ols</code>; primary uncertainty uses child-cluster robust standard errors where available.</p>
+<p><strong>Outcome.</strong> <code>sum_bits</code>: total information of the target utterance for this source.</p>
+<p><strong>Formula.</strong> <code>sum_bits ~ age * effort + parent_context_effort + context_entropy + C(question_type) + age:C(question_type) + C(child_id)</code></p>
+<p><strong>Statsmodels formula.</strong> <code>sum_bits ~ age_c * effort_c + parent_context_effort_c + context_entropy_c + C(question_type) + age_c:C(question_type) + C(child_id)</code></p>
+<p><strong>Core controls.</strong> <code>age_c</code>: child age in months, centered; <code>effort_c</code>: the centered effort measure named under each plot.</p>
+<p><strong>Coverage.</strong> 15/15 fitted combinations across K1, K2, K3; effort axes: Morphemes, Phonemes, Syllables: CMU/pkg, Syllables: pkg, Words. Observations per fitted combination: 441,413-442,111. Mean descriptive R2: 0.801.</p>
+<p><strong>Plain read.</strong> Age-by-question-type model. Tests whether the age pattern differs across broad preceding-context question types.</p>
+<p><strong>Plots below.</strong> Each plot uses this same model family for one effort unit, then draws prediction lines at fixed observed effort values.</p>
+<h4>K1 plots</h4>
+<p><strong>Morphemes</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k1_m12_nb_morphemes_fixed_effort_atlas.png" alt="k1 M12 Morphemes">
+<p><strong>Phonemes</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k1_m12_nb_phonemes_fixed_effort_atlas.png" alt="k1 M12 Phonemes">
+<p><strong>Syllables: CMU/pkg</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k1_m12_nb_syllables_cmu_or_pkg_fixed_effort_atlas.png" alt="k1 M12 Syllables: CMU/pkg">
+<p><strong>Syllables: pkg</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k1_m12_nb_syllables_pkg_fixed_effort_atlas.png" alt="k1 M12 Syllables: pkg">
+<p><strong>Words</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k1_m12_nb_words_fixed_effort_atlas.png" alt="k1 M12 Words">
+<h4>K2 plots</h4>
+<p><strong>Morphemes</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k2_m12_nb_morphemes_fixed_effort_atlas.png" alt="k2 M12 Morphemes">
+<p><strong>Phonemes</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k2_m12_nb_phonemes_fixed_effort_atlas.png" alt="k2 M12 Phonemes">
+<p><strong>Syllables: CMU/pkg</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k2_m12_nb_syllables_cmu_or_pkg_fixed_effort_atlas.png" alt="k2 M12 Syllables: CMU/pkg">
+<p><strong>Syllables: pkg</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k2_m12_nb_syllables_pkg_fixed_effort_atlas.png" alt="k2 M12 Syllables: pkg">
+<p><strong>Words</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k2_m12_nb_words_fixed_effort_atlas.png" alt="k2 M12 Words">
+<h4>K3 plots</h4>
+<p><strong>Morphemes</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k3_m12_nb_morphemes_fixed_effort_atlas.png" alt="k3 M12 Morphemes">
+<p><strong>Phonemes</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k3_m12_nb_phonemes_fixed_effort_atlas.png" alt="k3 M12 Phonemes">
+<p><strong>Syllables: CMU/pkg</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k3_m12_nb_syllables_cmu_or_pkg_fixed_effort_atlas.png" alt="k3 M12 Syllables: CMU/pkg">
+<p><strong>Syllables: pkg</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k3_m12_nb_syllables_pkg_fixed_effort_atlas.png" alt="k3 M12 Syllables: pkg">
+<p><strong>Words</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k3_m12_nb_words_fixed_effort_atlas.png" alt="k3 M12 Words">
+<h3>M13: Context entropy by question type</h3>
+<p><strong>Question.</strong> Does context entropy matter differently after different broad caretaker question types?</p>
+<p><strong>Regression type.</strong> Linear regression / ordinary least squares.</p>
+<p><strong>Library.</strong> <code>statsmodels.formula.api.ols</code>; primary uncertainty uses child-cluster robust standard errors where available.</p>
+<p><strong>Outcome.</strong> <code>sum_bits</code>: total information of the target utterance for this source.</p>
+<p><strong>Formula.</strong> <code>sum_bits ~ age * effort + parent_context_effort + context_entropy + C(question_type) + context_entropy:C(question_type) + C(child_id)</code></p>
+<p><strong>Statsmodels formula.</strong> <code>sum_bits ~ age_c * effort_c + parent_context_effort_c + context_entropy_c + C(question_type) + context_entropy_c:C(question_type) + C(child_id)</code></p>
+<p><strong>Core controls.</strong> <code>age_c</code>: child age in months, centered; <code>effort_c</code>: the centered effort measure named under each plot.</p>
+<p><strong>Coverage.</strong> 15/15 fitted combinations across K1, K2, K3; effort axes: Morphemes, Phonemes, Syllables: CMU/pkg, Syllables: pkg, Words. Observations per fitted combination: 441,413-442,111. Mean descriptive R2: 0.801.</p>
+<p><strong>Plain read.</strong> Context-entropy-by-question-type model. Tests whether context entropy behaves differently by question type.</p>
+<p><strong>Plots below.</strong> Each plot uses this same model family for one effort unit, then draws prediction lines at fixed observed effort values.</p>
+<h4>K1 plots</h4>
+<p><strong>Morphemes</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k1_m13_nb_morphemes_fixed_effort_atlas.png" alt="k1 M13 Morphemes">
+<p><strong>Phonemes</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k1_m13_nb_phonemes_fixed_effort_atlas.png" alt="k1 M13 Phonemes">
+<p><strong>Syllables: CMU/pkg</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k1_m13_nb_syllables_cmu_or_pkg_fixed_effort_atlas.png" alt="k1 M13 Syllables: CMU/pkg">
+<p><strong>Syllables: pkg</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k1_m13_nb_syllables_pkg_fixed_effort_atlas.png" alt="k1 M13 Syllables: pkg">
+<p><strong>Words</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k1_m13_nb_words_fixed_effort_atlas.png" alt="k1 M13 Words">
+<h4>K2 plots</h4>
+<p><strong>Morphemes</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k2_m13_nb_morphemes_fixed_effort_atlas.png" alt="k2 M13 Morphemes">
+<p><strong>Phonemes</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k2_m13_nb_phonemes_fixed_effort_atlas.png" alt="k2 M13 Phonemes">
+<p><strong>Syllables: CMU/pkg</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k2_m13_nb_syllables_cmu_or_pkg_fixed_effort_atlas.png" alt="k2 M13 Syllables: CMU/pkg">
+<p><strong>Syllables: pkg</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k2_m13_nb_syllables_pkg_fixed_effort_atlas.png" alt="k2 M13 Syllables: pkg">
+<p><strong>Words</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k2_m13_nb_words_fixed_effort_atlas.png" alt="k2 M13 Words">
+<h4>K3 plots</h4>
+<p><strong>Morphemes</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k3_m13_nb_morphemes_fixed_effort_atlas.png" alt="k3 M13 Morphemes">
+<p><strong>Phonemes</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k3_m13_nb_phonemes_fixed_effort_atlas.png" alt="k3 M13 Phonemes">
+<p><strong>Syllables: CMU/pkg</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k3_m13_nb_syllables_cmu_or_pkg_fixed_effort_atlas.png" alt="k3 M13 Syllables: CMU/pkg">
+<p><strong>Syllables: pkg</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k3_m13_nb_syllables_pkg_fixed_effort_atlas.png" alt="k3 M13 Syllables: pkg">
+<p><strong>Words</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k3_m13_nb_words_fixed_effort_atlas.png" alt="k3 M13 Words">
+<h3>M14: Parent effort by context entropy</h3>
+<p><strong>Question.</strong> Do context entropy and preceding caretaker effort jointly predict target information?</p>
+<p><strong>Regression type.</strong> Linear regression / ordinary least squares.</p>
+<p><strong>Library.</strong> <code>statsmodels.formula.api.ols</code>; primary uncertainty uses child-cluster robust standard errors where available.</p>
+<p><strong>Outcome.</strong> <code>sum_bits</code>: total information of the target utterance for this source.</p>
+<p><strong>Formula.</strong> <code>sum_bits ~ age * effort + parent_context_effort + context_entropy + C(question_type) + parent_context_effort:context_entropy + C(child_id)</code></p>
+<p><strong>Statsmodels formula.</strong> <code>sum_bits ~ age_c * effort_c + parent_context_effort_c + context_entropy_c + C(question_type) + parent_context_effort_c:context_entropy_c + C(child_id)</code></p>
+<p><strong>Core controls.</strong> <code>age_c</code>: child age in months, centered; <code>effort_c</code>: the centered effort measure named under each plot.</p>
+<p><strong>Coverage.</strong> 15/15 fitted combinations across K1, K2, K3; effort axes: Morphemes, Phonemes, Syllables: CMU/pkg, Syllables: pkg, Words. Observations per fitted combination: 441,413-442,111. Mean descriptive R2: 0.801.</p>
+<p><strong>Plain read.</strong> Parent-context-effort-by-context-entropy model. Tests whether context amount and entropy carry separable information.</p>
+<p><strong>Plots below.</strong> Each plot uses this same model family for one effort unit, then draws prediction lines at fixed observed effort values.</p>
+<h4>K1 plots</h4>
+<p><strong>Morphemes</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k1_m14_nb_morphemes_fixed_effort_atlas.png" alt="k1 M14 Morphemes">
+<p><strong>Phonemes</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k1_m14_nb_phonemes_fixed_effort_atlas.png" alt="k1 M14 Phonemes">
+<p><strong>Syllables: CMU/pkg</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k1_m14_nb_syllables_cmu_or_pkg_fixed_effort_atlas.png" alt="k1 M14 Syllables: CMU/pkg">
+<p><strong>Syllables: pkg</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k1_m14_nb_syllables_pkg_fixed_effort_atlas.png" alt="k1 M14 Syllables: pkg">
+<p><strong>Words</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k1_m14_nb_words_fixed_effort_atlas.png" alt="k1 M14 Words">
+<h4>K2 plots</h4>
+<p><strong>Morphemes</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k2_m14_nb_morphemes_fixed_effort_atlas.png" alt="k2 M14 Morphemes">
+<p><strong>Phonemes</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k2_m14_nb_phonemes_fixed_effort_atlas.png" alt="k2 M14 Phonemes">
+<p><strong>Syllables: CMU/pkg</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k2_m14_nb_syllables_cmu_or_pkg_fixed_effort_atlas.png" alt="k2 M14 Syllables: CMU/pkg">
+<p><strong>Syllables: pkg</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k2_m14_nb_syllables_pkg_fixed_effort_atlas.png" alt="k2 M14 Syllables: pkg">
+<p><strong>Words</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k2_m14_nb_words_fixed_effort_atlas.png" alt="k2 M14 Words">
+<h4>K3 plots</h4>
+<p><strong>Morphemes</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k3_m14_nb_morphemes_fixed_effort_atlas.png" alt="k3 M14 Morphemes">
+<p><strong>Phonemes</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k3_m14_nb_phonemes_fixed_effort_atlas.png" alt="k3 M14 Phonemes">
+<p><strong>Syllables: CMU/pkg</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k3_m14_nb_syllables_cmu_or_pkg_fixed_effort_atlas.png" alt="k3 M14 Syllables: CMU/pkg">
+<p><strong>Syllables: pkg</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k3_m14_nb_syllables_pkg_fixed_effort_atlas.png" alt="k3 M14 Syllables: pkg">
+<p><strong>Words</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k3_m14_nb_words_fixed_effort_atlas.png" alt="k3 M14 Words">
+<h3>M15: Expanded context interaction stress test</h3>
+<p><strong>Question.</strong> Do the main context controls alter the age-effort trajectory under a larger interaction stress test?</p>
+<p><strong>Regression type.</strong> Linear regression / ordinary least squares.</p>
+<p><strong>Library.</strong> <code>statsmodels.formula.api.ols</code>; primary uncertainty uses child-cluster robust standard errors where available.</p>
+<p><strong>Outcome.</strong> <code>sum_bits</code>: total information of the target utterance for this source.</p>
+<p><strong>Formula.</strong> <code>sum_bits ~ age * effort + parent_context_effort + context_entropy + C(question_type) + age:context_entropy + effort:context_entropy + age:parent_context_effort + effort:parent_context_effort + context_entropy:C(question_type) + C(child_id)</code></p>
+<p><strong>Statsmodels formula.</strong> <code>sum_bits ~ age_c * effort_c + parent_context_effort_c + context_entropy_c + C(question_type) + age_c:context_entropy_c + effort_c:context_entropy_c + age_c:parent_context_effort_c + effort_c:parent_context_effort_c + context_entropy_c:C(question_type) + C(child_id)</code></p>
+<p><strong>Core controls.</strong> <code>age_c</code>: child age in months, centered; <code>effort_c</code>: the centered effort measure named under each plot.</p>
+<p><strong>Coverage.</strong> 15/15 fitted combinations across K1, K2, K3; effort axes: Morphemes, Phonemes, Syllables: CMU/pkg, Syllables: pkg, Words. Observations per fitted combination: 441,413-442,111. Mean descriptive R2: 0.802.</p>
+<p><strong>Plain read.</strong> Expanded context interaction stress test. Checks the richest corrected interaction set in the current ladder.</p>
+<p><strong>Plots below.</strong> Each plot uses this same model family for one effort unit, then draws prediction lines at fixed observed effort values.</p>
+<h4>K1 plots</h4>
+<p><strong>Morphemes</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k1_m15_nb_morphemes_fixed_effort_atlas.png" alt="k1 M15 Morphemes">
+<p><strong>Phonemes</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k1_m15_nb_phonemes_fixed_effort_atlas.png" alt="k1 M15 Phonemes">
+<p><strong>Syllables: CMU/pkg</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k1_m15_nb_syllables_cmu_or_pkg_fixed_effort_atlas.png" alt="k1 M15 Syllables: CMU/pkg">
+<p><strong>Syllables: pkg</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k1_m15_nb_syllables_pkg_fixed_effort_atlas.png" alt="k1 M15 Syllables: pkg">
+<p><strong>Words</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k1_m15_nb_words_fixed_effort_atlas.png" alt="k1 M15 Words">
+<h4>K2 plots</h4>
+<p><strong>Morphemes</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k2_m15_nb_morphemes_fixed_effort_atlas.png" alt="k2 M15 Morphemes">
+<p><strong>Phonemes</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k2_m15_nb_phonemes_fixed_effort_atlas.png" alt="k2 M15 Phonemes">
+<p><strong>Syllables: CMU/pkg</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k2_m15_nb_syllables_cmu_or_pkg_fixed_effort_atlas.png" alt="k2 M15 Syllables: CMU/pkg">
+<p><strong>Syllables: pkg</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k2_m15_nb_syllables_pkg_fixed_effort_atlas.png" alt="k2 M15 Syllables: pkg">
+<p><strong>Words</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k2_m15_nb_words_fixed_effort_atlas.png" alt="k2 M15 Words">
+<h4>K3 plots</h4>
+<p><strong>Morphemes</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k3_m15_nb_morphemes_fixed_effort_atlas.png" alt="k3 M15 Morphemes">
+<p><strong>Phonemes</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k3_m15_nb_phonemes_fixed_effort_atlas.png" alt="k3 M15 Phonemes">
+<p><strong>Syllables: CMU/pkg</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k3_m15_nb_syllables_cmu_or_pkg_fixed_effort_atlas.png" alt="k3 M15 Syllables: CMU/pkg">
+<p><strong>Syllables: pkg</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k3_m15_nb_syllables_pkg_fixed_effort_atlas.png" alt="k3 M15 Syllables: pkg">
+<p><strong>Words</strong></p>
+<img src="../figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/trigram_k3_m15_nb_words_fixed_effort_atlas.png" alt="k3 M15 Words">
+<h2>Model-Version And Estimator Sensitivity</h2>
+<p>The primary fixed-effort atlas above is the corrected source-specific M1-M15 ladder. This section records the saved model-version layer: child-structure variants, estimator variants, and formula versions that are available on disk.</p>
+<h3>Corrected Child-Structure / Estimator Versions</h3>
+<p>_No corrected version-sensitivity rows are currently saved for <code>trigram</code> in <code>results/route1_corrected_baseline_atlas/full_child_structure_sensitivity/source_specific_model_summary.csv</code>._</p>
+<h2>Saved Tables And Artifacts</h2>
+<p>The long coefficient tables, fixed-effort prediction grids, slice definitions, and slope summaries are saved as CSV artifacts. They are intentionally not printed in this HTML report because the consultation layer is the model cards and plots above.</p>
+<h2>Saved Outputs</h2>
+<pre><code>results/route1_source_specific_corrected_fixed_effort_atlas/trigram/model_summary.csv
+results/route1_source_specific_corrected_fixed_effort_atlas/trigram/coefficient_long.csv
+results/route1_source_specific_corrected_fixed_effort_atlas/trigram/fixed_effort_predictions.csv.gz
+results/route1_source_specific_corrected_fixed_effort_atlas/trigram/fixed_slice_slopes.csv
+results/route1_source_specific_corrected_fixed_effort_atlas/trigram/figure_manifest.csv
+figs/route1_source_specific_corrected_fixed_effort_atlas/trigram/</code></pre>
+</main>
+</body>
+</html>

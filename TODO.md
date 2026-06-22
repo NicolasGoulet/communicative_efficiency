@@ -21,6 +21,386 @@ When a task is completed, move any useful result or decision into
 - TODO: Keep `compute_surprisal_mila` as the scoring/HPC/audit repo. Treat older Route 1 reports there as archive/scaffold, not as the evidential baseline for the restarted analyses.
 - TODO: Hand off the PBM additive same-length LSTM generated utterances to `compute_surprisal_mila` for scoring with the same logic used for random/unigram/bigram/trigram baselines. Keep `lstm_additive_k3`, `lstm_additive_k4`, and `lstm_additive_k5` separate as distinct generated-baseline conditions.
 
+## Next Priority: Route 1 Best-Model Robustness Package Before Supervisor Report
+
+This is the next Codex task to start in a fresh session. Do not treat the Atlas
+as the story. The Atlas is the inventory. The goal here is to fit, verify, and
+plot the best Route 1 model families so the scientist can choose the strongest
+evidence for answering Prof. Xu and Prof. Portelance before writing the actual
+supervisor-facing report.
+
+Scope:
+
+- Route 1 only: outcome is utterance information, usually `sum_bits`.
+- Do not write the final supervisor report yet.
+- Build a pre-supervisor candidate report / evidence gallery that shows the best
+  models, robustness checks, plots, model cards, effect interpretations, and
+  cautions.
+- Reuse existing correct fitted artifacts where possible. Refit only missing or
+  incomplete model/estimator combinations.
+- Keep all fitted summaries, prediction grids, plots, and model-card metadata so
+  this does not need to be refit again to regenerate reports.
+
+### Active Correction For The Current Agent Task
+
+This section overrides any drift toward a giant M1-M15 inventory dump. The
+current deliverable is a **focused, plot-first candidate report** for choosing
+what belongs in the later supervisor report.
+
+Keep these constraints in view while editing:
+
+- Do not make the report a compact aggregate grid or a long table-first model
+  zoo.
+- Do not include every M1-M15 model just because it exists. Include the
+  promising M1-M15 candidates that answer the scientific question, plus any
+  newly fit simple parent-effort variants needed below.
+- The analysis is about **communicative efficiency**, not raw growth in
+  utterance size. Do not frame the goal as predicting how large total
+  `sum_bits` gets with age. Raw total bits can rise simply because older
+  children produce longer utterances, which is an MLU/length fact, not the
+  efficiency claim.
+- The main Route 1 estimand is conditional utterance information: how
+  utterance-level `sum_bits` changes with age **at fixed child effort** and
+  after relevant controls such as child identity and parent-context effort.
+- The data are repeated utterance measurements from the same children, sampled
+  across different sessions and ages. Estimator choices must be justified in
+  that repeated-measures context.
+- The key visual objects must be regression/fixed-effort age lines, including
+  real children, generated baselines, caretaker contrasts, and the three
+  heldout children's actual-vs-predicted lines.
+- Tables are allowed only as compact support for interpretation and audit; they
+  must not replace the plots.
+- If an interaction is written, always write the lower-level predictors too:
+  write `age_c + effort_c + age_c:effort_c`, not only `age_c:effort_c` or
+  shorthand `age_c * effort_c`.
+- Keep conditional total-bits and rate outcomes conceptually separate.
+  `mean_bits_per_token` or `sum_bits / nb_words` is a secondary rate-outcome
+  check. It may be useful for communicative efficiency, but it is not the same
+  model as total `sum_bits` at fixed effort.
+- Do not promote raw observed-vs-fitted `sum_bits` plots as evidence. Those
+  mostly show that longer utterances contain more total bits and will confuse
+  the communicative-efficiency question.
+- Keep the pooled and child-controlled age effects visible as different
+  answers. M1 (`sum_bits ~ age + effort`, no child identity) is a real
+  pooled/compositional contrast. M2/M3 and richer child-identity models answer
+  the within-child fixed-effort communicative-efficiency question.
+
+Current focused formula family to test and plot:
+
+- [x] **Base fixed-effort child model:** `sum_bits ~ age + child effort + child identity`.
+- [x] **Simple parent-effort control:** `sum_bits ~ age + child effort + parent context effort + child identity`.
+- [x] **Child-effort interaction:** `sum_bits ~ age + child effort + age:child effort + parent context effort + child identity`.
+- [x] **Parent-effort reaction by age:** `sum_bits ~ age + child effort + parent context effort + age:parent context effort + child identity`.
+- [x] **Parent-effort reaction by child effort:** `sum_bits ~ age + child effort + parent context effort + child effort:parent context effort + child identity`.
+- [x] **Full age/context-interaction candidate:** `sum_bits ~ age + child effort + parent context effort + age:child effort + age:parent context effort + child identity`.
+- [x] **Question/form-control variants:** rerun or reuse variants with and
+      without `question_type`, but keep them clearly labeled so question type
+      does not obscure the simpler parent-effort story.
+- [x] **Promising existing M1-M15 candidates to include if relevant:** M2, M3,
+      M4a, M4c, M5, M6, M7, M11, and M15. Do not include unpromising/noisy
+      M1-M15 sections just to be exhaustive.
+- [ ] **Secondary rate-outcome check:** repeat the strongest candidate(s) with
+      `mean_bits_per_token` or `sum_bits / child effort` as the outcome, while
+      still controlling for child effort as appropriate and clearly explaining
+      that this is a different scientific question.
+
+2026-06-18 status: added `docs/route1_formula_permutation_estimator_report.md`
+and `.html` / `.embedded.html`. It fits 36 formulas x 7 estimator families on
+the child-session/effort-band aggregate repeated-measures screen. Every formula
+keeps age, child effort, and child identity handling. Context entropy,
+parent-context effort, question type, `age:child effort`, `age:context entropy`,
+and `age:parent context effort` are permuted with lower-order terms preserved.
+The requested `child effort:parent context effort` interaction remains a
+separate follow-up if needed, as does the secondary bits-per-token/rate outcome.
+
+2026-06-18 correction: the formula-permutation report now puts the row-level
+fixed-effort Atlas result before the aggregate estimator screen whenever an
+exact Atlas analogue exists. It also adds a global fixed-effort summary that
+averages the row-level fixed-word-count prediction lines across fixed sizes.
+This is the compact answer to whether `sum_bits` goes up or down with age at
+the same production-effort levels. Aggregate `mean_sum_bits` estimator lines
+are explicitly labeled as sensitivity screens only.
+
+2026-06-20 status: extended and reran the modular child-only
+length-controlled model suite in
+`src/build_route1_child_length_controlled_model_suite.py`. The current
+real-child K3 word-effort run fit 21 formulas x 9 estimator/repeated-measures
+structures (`189/189` successful fits), saved 189 fitted model pickle files,
+generated 47 figures, and wrote
+`docs/route1_child_length_controlled_model_suite.{md,html}`. The report is
+plot-first and keeps all coefficient/fit tables as CSV artifacts. New F18-F21
+models use exact word-count categories and exact-length age-slope interactions;
+these are the strongest direct check that the fixed-effort developmental
+pattern is not just the known age-related MLU increase.
+
+2026-06-20 scientific read: primary row-level child-fixed-effect slopes remain
+downward for all F01-F17 continuous-effort formulas. In the exact-length
+F18-F21 layer, primary slopes are `41` downward and `7` upward; well-supported
+short and middle lengths are predominantly downward, while the positive slopes
+occur at length `8` and sparse longer lengths `10-12`, which must be treated as
+support-limited rather than overclaimed.
+
+2026-06-22 status: added `docs/route1_phoneme_effort_line_audit.md` and
+`.html` to confirm the current real-child corrected Atlas phoneme-effort lines
+use the 12 most frequent exact real-child phoneme counts. The selected values
+are `2-13`, split as low `2-5`, middle `6-9`, and high `10-13`; the audit also
+writes a frequency proof plot and a main-model phoneme-slope plot under
+`figs/route1_phoneme_effort_line_audit/`.
+
+2026-06-22 correction: replaced the weak supervisor proposed-completion
+side-draft with a model-rich v2 in
+`docs/predicting_utterance_level_information_report_proposed_completion.md`.
+The original supervisor-facing report remains
+`docs/predicting_utterance_level_information_report.md` and was not modified.
+The side draft now promotes the model ladder, F01-F21 length-controlled suite,
+exact-length MLU proof, estimator-family checks, age-scrambling checks,
+real-vs-random/ngram/LSTM/caretaker context panels, source-specific Atlas
+figures, paired source-gap models, and heldout-child diagnostics.
+
+2026-06-22 status: added the figure-first exhaustive ANCOVA selection gallery
+in `docs/route1_exhaustive_ancova_gallery.md` / `.html` / `.embedded.html`.
+It fits and saves reusable adjusted age/source comparisons across words,
+morphemes, both syllable measures, and phonemes. Outputs under
+`results/route1_exhaustive_ancova_gallery/` include aggregate k0/k3/context
+gain cells, ANCOVA term tests, adjusted marginal means, source-real contrasts,
+top exact-effort values, exact-effort adjusted means, exact-effort source-real
+gaps, and a figure manifest. The gallery is intentionally candidate-selection
+material, not the supervisor report.
+
+2026-06-22 update: revised the ANCOVA gallery so the report explains the model
+logic and each plot. The opening now states why ANCOVA is needed instead of raw
+ANOVA, which effort variables are controlled, how exact-effort plots guard
+against an MLU-only explanation, and how the caregiver/CDS paper claim differs
+from the current fixed-effort utterance-level analysis. The regenerated gallery
+has `33` figure references and no missing image files; focused report-builder
+tests pass (`9` tests).
+
+2026-06-22 follow-up: clarified the source-minus-real plots. The report now
+states that real child utterances are the `0` reference line, and the line plots
+were regenerated with clearer titles, y-axis labels, and an in-plot `0 = real
+child utterances` label.
+
+2026-06-22 status: added
+`src/build_route1_frequency_informativity_predictors.py` and computed the safe
+first frequency-control layer:
+`results/route1_frequency_informativity_predictors/hash_frequency_predictors.csv.gz`.
+This gives exact-target recurrence and smoothed frequency bits by
+`target_text_hash` for caretaker-CDS, real-child, and combined reference
+scopes. Richer lexical/phone-sequence informativity predictors are scaffolded
+in the builder but need a safer text-column streaming pass because pandas'
+C parser segfaulted on the large scored text file in this environment.
+
+Estimator rationale to state in the report:
+
+- [x] **OLS + child fixed effects + clustered SE:** main comparable Atlas view;
+      controls stable child identity and clusters repeated utterances by child.
+- [x] **GEE Gaussian by child:** population-average repeated-measures check for
+      continuous bits.
+- [x] **GEE Gamma/log by child:** positive-skew robustness check for bits when
+      the outcome is strictly positive.
+- [x] **GLM Gaussian / Gamma-log where feasible:** distribution/link
+      sensitivity checks; secondary to the repeated-measures estimators.
+- [x] **MixedLM random child intercept:** lets children have different baseline
+      information levels.
+- [x] **MixedLM random child age slope:** lets children have different
+      developmental trajectories; record convergence/singularity warnings.
+- [x] **Month/session aggregate only as robustness:** useful for reducing
+      pseudo-replication, but must not be presented as the main row-level
+      result.
+
+### Scientific Questions To Answer
+
+- Given context and a fixed production-effort level, does child age predict
+  total utterance information?
+- Does the age effect survive child identity, effort, parent-context effort,
+  context entropy/predictability, and question/statement type controls?
+- Does the result survive estimator-family checks beyond ordinary least squares?
+- Does the result survive age-bin / age-label robustness checks?
+- Can PBM-trained models predict heldout children's real trajectories?
+- Does the child pattern differ from the caretaker/parent pattern?
+- Which plots and model families are strong enough to promote into the later
+  supervisor-facing report?
+
+### Core Formulas To Fit And Plot
+
+Use centered predictors where the existing pipeline expects them. Always keep
+lower-order terms when fitting interactions.
+
+- [x] **M2 primary child-adjusted model:**
+      `sum_bits ~ age + effort + child identity`.
+      Hypothesis: at the same effort level, the child's age still predicts
+      utterance information after accounting for stable child-level differences.
+- [x] **M3 age-by-effort model:**
+      `sum_bits ~ age * effort + child identity`.
+      Hypothesis: the age effect may change depending on production effort.
+- [x] **M4c question/form control model:**
+      `sum_bits ~ age + effort + question type + child identity`.
+      Hypothesis: the age effect is not just because older children receive or
+      answer different kinds of prompts/questions.
+- [x] **M5 combined context-control model:**
+      `sum_bits ~ age + effort + context entropy + parent context effort + question type + child identity`.
+      Hypothesis: the age effect remains after controlling major email-relevant
+      confounds: target effort, context predictability, preceding caretaker
+      effort, and question/statement type.
+- [x] **M15 / richest current interaction model:**
+      include age, effort, context entropy, parent context effort, question type,
+      and theoretically relevant interactions, with all lower-order terms kept.
+      Hypothesis: the developmental effect is not an artifact of a missing
+      context or effort interaction.
+- [x] **Nonlinear age model:**
+      add age spline or age-quadratic/categorical-age-bin variants.
+      Hypothesis: the developmental trajectory is not necessarily one straight
+      line across all months.
+- [x] **Month-level aggregated model:**
+      model child-month / effort-bin summaries.
+      Hypothesis: the result is not driven by treating many utterance rows from
+      the same child/session/month as fully independent.
+- [x] **Heldout population prediction model:**
+      train on PBM real children, then predict heldout children.
+      Hypothesis: the model predicts unseen children's trajectory shape rather
+      than only fitting children it has already seen.
+
+### Estimator Families To Fit Or Audit
+
+OLS alone is not enough for the pre-supervisor robustness package. For each
+core formula where feasible, fit and compare these estimator families. If an
+estimator is already correctly fit in an existing deep-dive artifact, audit and
+reuse it rather than refitting blindly.
+
+- [x] **OLS + child fixed effects + child-clustered robust SE.**
+      Main comparable Atlas baseline. Use for fixed-effort prediction plots and
+      direct comparison with existing Atlas v2 outputs.
+- [x] **GEE Gaussian, clustered by child.**
+      Population-average robustness model for repeated utterances within child.
+- [x] **GEE Gamma/log, clustered by child.**
+      Robustness model for positive, skewed information outcomes. Interpret
+      coefficients on the log expected-bits scale; prediction plots are the
+      clearest presentation.
+- [x] **GLM Gaussian.**
+      Distributional sensitivity check; secondary to OLS/GEE/MixedLM.
+- [x] **GLM Gamma/log.**
+      Positive-outcome sensitivity check; use prediction-scale plots.
+- [x] **MixedLM random child intercept.**
+      Allows each child to have their own baseline information level.
+- [x] **MixedLM random child age slope.**
+      Allows each child to have their own developmental trajectory. Record and
+      explain convergence or singular-fit warnings.
+- [x] **Age-spline / nonlinear age estimator variant.**
+      Checks whether the age effect should be curved or age-bin-specific rather
+      than a single linear slope.
+- [x] **Month-level aggregate estimator.**
+      Fits on child-month/effort-bin summaries to reduce row-level
+      pseudo-replication.
+- [x] **Heldout prediction estimator.**
+      Must not use `C(child_id)` for unseen children unless using a valid
+      population/Mundlak-compatible prediction design. Plot actual heldout
+      regression lines against predicted regression lines.
+
+### Existing Artifacts To Audit Before Refitting
+
+- [x] Audit `docs/utterance_information_m1_m2_deep_dive.md` and
+      `results/m1_m2_utterance_information_deep_dive/` for existing OLS,
+      clustered OLS, GLM, GEE, and MixedLM M1/M2/M3 sensitivity fits and plots.
+- [x] Audit `docs/utterance_information_route1_real_corrected_fixed_effort_atlas_v2.html`
+      and `results/route1_source_specific_corrected_fixed_effort_atlas/real/`
+      for current M1-M15 formula-ladder OLS artifacts.
+- [x] Audit all source-specific Atlas v2 reports and result folders for real,
+      random, unigram, bigram, trigram, and LSTM k3/k4/k5 source comparisons.
+- [x] Audit `docs/utterance_information_age_scrambling_robustness.html` and
+      `results/age_scrambling_robustness/` for age-label scrambling and balanced
+      bootstrap robustness.
+- [x] Audit `docs/utterance_information_route1_heldout_real_child_prediction_report.html`
+      and `results/route1_heldout_real_child_prediction/` for heldout actual vs
+      predicted trajectory artifacts.
+- [x] Audit `docs/utterance_information_route1_caretaker_corrected_fixed_effort_atlas_v2.html`
+      and `results/route1_caretaker_atlas/full_fit/` for parent/caretaker
+      comparison artifacts.
+- [x] Record which model/formula/estimator combinations are already usable and
+      which ones are missing before launching any long run.
+
+### Required Plots Before Supervisor Report
+
+- [x] Fixed-effort age lines for the best models, especially M2, M3, M4c, M5,
+      M15/rich, nonlinear age, and month-level aggregate variants.
+- [x] The same scientific question plotted across estimator families:
+      OLS/fixed effects, GEE Gaussian, GEE Gamma/log, GLM Gaussian, GLM
+      Gamma/log, MixedLM random intercept, MixedLM random age slope.
+- [x] Coefficient/effect-size forest plots across estimator families.
+- [x] Variable-importance / nested delta-R2 plots, with clear warnings that
+      delta-R2 is not causal importance.
+- [x] Actual real-data regression line vs model-predicted line where relevant.
+- [x] Heldout actual-vs-predicted trajectory plots: actual heldout line and
+      PBM-trained predicted line in the same panel.
+- [x] Heldout calibration and residual-over-age plots.
+- [x] Age-scrambling / balanced-bootstrap null robustness plots.
+- [x] Source comparison plots across real, random, unigram, bigram, trigram, and
+      LSTM sources.
+- [x] Caretaker/parent contrast plots using analogous fixed-effort logic.
+- [x] Residual diagnostics and assumption-check plots for the candidate best
+      models.
+
+### Required Model Cards In The Candidate Report
+
+Every candidate model shown in the report must have a model-style card with:
+
+- [x] Model ID / short name.
+- [x] Scientific question / hypothesis being tested.
+- [x] Formula in readable terms and exact statsmodels-style formula where
+      relevant.
+- [x] Outcome variable and scale/link function.
+- [x] Estimator family and library used.
+- [x] Dependence handling: child fixed effects, clustered SE, GEE cluster,
+      random intercepts/slopes, or aggregation unit.
+- [x] Predictors and controls, including why each is present.
+- [x] What the age coefficient means in one sentence.
+- [x] What the effort coefficient means in one sentence.
+- [x] What each interaction means in one sentence.
+- [x] Whether the model is for explanation, robustness, prediction, or
+      descriptive comparison.
+- [x] Takeaway: what the model says if taken seriously.
+- [x] Caution: assumption, convergence, interpretability, or missing-predictor
+      limitation.
+- [x] Saved artifacts: model summary CSV, coefficient CSV, prediction grid, and
+      plot paths.
+
+### Required One-Line Effect Sentences
+
+For every promoted plot, add literal interpretation sentences, not generic
+plot-reading instructions:
+
+- [x] "Age down arrow" sentence: what older age means for predicted `sum_bits`
+      at fixed effort in this specific model.
+- [x] "Effort up arrow" sentence: what longer utterance means for predicted
+      `sum_bits` in this specific model.
+- [x] "Age x effort" sentence: whether the age trend changes across effort
+      levels in this specific model.
+- [x] "Context entropy" sentence: whether context predictability/informativeness
+      adds explanatory value in this specific model.
+- [x] "Question type" sentence: whether the age effect survives broad context
+      form controls.
+- [x] "Caretaker contrast" sentence: whether adult/caretaker speech shows the
+      same child-age pattern.
+- [x] "Heldout prediction" sentence: whether the predicted trajectory matches
+      the actual unseen-child trajectory.
+
+### Acceptance Checklist
+
+- [x] The next report is explicitly labeled as a pre-supervisor candidate /
+      evidence-gallery report, not the final supervisor report.
+- [x] It includes the core formulas, estimator-family robustness, source
+      comparisons, heldout prediction, age-scrambling robustness, and caretaker
+      contrast.
+- [x] It clearly distinguishes Atlas inventory from the selected "best model"
+      story.
+- [x] It does not imply every Atlas v2 plot is GEE/MixedLM/GLM when the source
+      artifact is OLS.
+- [x] It says plainly when a model is OLS, GEE, GLM, MixedLM, or aggregated.
+- [x] It saves all reusable fit outputs and prediction grids.
+- [x] It creates Markdown, HTML, embedded HTML, and PDF outputs.
+- [x] It verifies image links and embedded images.
+- [x] It runs focused tests and relevant smoke checks.
+- [x] It updates `docs/notes.md` with commands, outputs, and verification.
+
 ### Immediate Route 1 Cleanup / Baseline Atlas TODOs
 
 - [ ] Use `docs/route1_corrected_baseline_atlas_agent_prompt.md` as the launch prompt for the next long implementation run.
@@ -38,6 +418,7 @@ When a task is completed, move any useful result or decision into
 - [ ] Compare real-child and baseline trajectories side by side: age coefficients, fixed-effort age curves, context-control stability, and balanced/scrambled age robustness.
 - [ ] Only after source-specific atlases exist, fit the pooled formal comparison model `sum_bits ~ target_source * age_c * effort_c + context_controls + C(child_id)` and write it as a separate downstream comparison report.
 - [ ] Run child-structure sensitivity for the corrected ladder as separate variants: no child identity plus clustered SE, `C(child_id)`, GEE clustered by child, MixedLM random intercept/slope, fixed-effect within-child age, and Mundlak within/between age. Do not combine `C(child_id)` with random child intercepts, and do not estimate `child_mean_age` inside a `C(child_id)` formula.
+- [ ] After the child/baseline atlas finishes, run the prepared entropy-free caretaker-target atlas using `results/route1_caretaker_atlas/preflight/CARETAKER_FULL_RUN_COMMANDS.md`.
 - [ ] Keep Route 2 effort/length-outcome modeling parked until the corrected Route 1 child/baseline atlas is complete.
 
 
@@ -61,6 +442,12 @@ These are never to be implemented at the same time, always one at a time describ
 Use this for short notes after finishing tasks.
 
 - TODO: YYYY-MM-DD - Finished X; verified with Y.
+- 2026-06-18 - Built the Route 1 best-model robustness package: fitted/audited M2, M3, M4c, M5, M15, nonlinear-age, month-level aggregate, and heldout-prediction evidence; generated Markdown/HTML/embedded HTML/PDF outputs plus 18/18 required plots; verified with focused tests, compile check, report rebuild, image-link audit, embedded-image audit, and estimator-fit coverage audit.
+- 2026-06-18 - Revised the Route 1 robustness package into a formula-by-formula deep dive: added no-question-type, age-by-effort, and parent-context-reaction variants; wrote interaction formulas with lower-order predictors explicitly; generated one section per formula and one subsection per estimator; verified 10 formula sections, 70 estimator subsections, 70/70 estimator fits, 28/28 plots, 22/22 embedded images, no missing image refs, and no shorthand `age_c * effort_c` formulas.
+- 2026-06-18 - Expanded the formula-by-formula robustness report with the full expected plot battery: existing row-level Atlas fixed-effort plots where available, estimator-family fixed-effort plots, actual-vs-predicted regression plots, residual/calibration plots, term-effect forests, and one actual-vs-fitted/residual diagnostic per formula-estimator subsection. Verified 70/70 estimator fits, 10 formula sections, 70 estimator subsections, 70 estimator diagnostic plots, 140/140 plot-manifest entries, 127 Markdown image refs with 0 missing, and 127 embedded HTML images.
+- 2026-06-18 - Simplified `docs/route1_best_model_robustness_package.md` back to the requested fixed-effort regression-line report: row-level `sum_bits` Atlas plots for M2, M3, M4c, M5, M15, and M7; heldout actual-vs-predicted regression lines; age-scrambling/source/caretaker contrast plots. Removed aggregate diagnostic plots from the main narrative and clarified that `mean_sum_bits` aggregate cells are not the primary outcome and not bits per token. Verified 13/13 image refs and 13/13 embedded HTML images; PDF render is currently unavailable because local Chrome/Brave crashes before writing the PDF.
+- 2026-06-18 - Corrected the Route 1 candidate package framing to communicative efficiency rather than raw `sum_bits` growth/MLU. Regenerated `docs/route1_best_model_robustness_package.md`, `.html`, and `.embedded.html` as a focused fixed-effort regression-line gallery with promising candidates M2, M3, M4a, M4c, M5, M6, M7, M11, M15 plus exact parent-effort all-estimator screening variants. Removed raw observed-vs-fitted aggregate total-bit diagnostics from the report body. Verified compile, focused unittest, 94 Markdown image refs with 0 missing, 85/85 manifest plots available, 94 embedded images, 0 `aggregate_actual_vs_model_prediction` refs, 0 raw actual-vs-fitted refs, and 0 `mean_sum_bits` mentions.
+- 2026-06-20 - Extended the child-only length-controlled model suite with exact word-count F18-F21 formulas and MLU-focused plots. Reran the real-child K3 word-effort grid: 189/189 fits, 189 saved models, 47 figures, 47/47 Markdown image refs present, and 0 occurrences of the removed course-label phrase in the regenerated Markdown/HTML report. Exact-length primary slopes were 41 downward and 7 upward, with positive slopes concentrated at length 8 and sparse lengths 10-12. Verified compile, focused unittest, report regeneration, image audit, and full suite: 313 tests passing.
 - 2026-05-19 - Rewrote additive age-binned unigram/bigram/trigram dictionary building in `src/build_age_word_dicts.py`; counts now use `chi.csv` plus `caretakers.csv`, with utterance-initial child bigrams/trigrams conditioned on the most recent prior caretaker utterance.
 - 2026-05-19 - Rewrote baseline generation in `src/add_random_and_unigram_utterances.py`; generation now supports random, unigram, bigram, and trigram outputs, and bigram/trigram generation uses the same caretaker-boundary context logic as counting.
 - 2026-05-19 - Added trigram baseline pickup to `src/new_create_parallel_data.py`; documented the n-gram rewrite in `docs/ngram-models.md`, `docs/general-overview.md`, `docs/design.md`, and `docs/notes.md`.
@@ -179,3 +566,13 @@ Use this for short notes after finishing tasks.
 - 2026-06-16 - Generated current-scored real-child coverage plots for the PBM scored universe: 21 Brown/Manchester/Providence children, 446,508 scored real-child rows, ages 11.133-62.4 months, and 52 covered integer months. The smallest current-scored month-cover set is Providence/Naima, Brown/Sarah, and Brown/Adam. Outputs are under `figs/route1_current_scored_coverage/` and `results/route1_current_scored_coverage/`.
 - 2026-06-16 - Added tighter same-axis coverage comparison plots for candidate selection: proposed heldout children/unions, the current scored 3-child cover set, Brown/Manchester/Providence scored dataset-union rows, and the all-PBM scored union. Main output: `figs/route1_current_scored_coverage/scored_pbm_vs_proposed_sets_row_coverage.png`.
 - 2026-06-16 - Added and tested `src/create_heldout_real_child_scoring_bundle.py` for the three-child heldout generalization scoring handoff. Built `results/scoring_bundles/heldout_real_child_generalization_2026-06-16.tar.gz` with Forrester/Ella, Sachs/Naomi, and MPI-EVA-Manchester/Helen real-child scoring CSVs only: 177,600 rows, 0 blank targets, 12 expected Mistral tasks across k0-k3. Rsynced the tarball and PC prompt to `compute_surprisal_mila/new_data/`; remote dry run on the PC built the 12-task manifest successfully.
+- 2026-06-16 - Added the entropy-free caretaker-target Route 1 atlas prep/fitting scaffold in `src/build_route1_caretaker_atlas.py` with tests in `tests/test_build_route1_caretaker_atlas.py`. Ran a dyad-balanced real-data smoke fit for k1-k3 (`18/18` model rows fit), full caretaker preflight audit for k0-k3, and the full unit suite (`295` tests passing). Full caretaker fitting is prepared but not launched.
+- 2026-06-17 - Completed the Route 1 source-specific corrected fixed-effort Atlas v2 suite and the caretaker/parent atlas. Source-specific child/baseline/LSTM groups now have independent Markdown/HTML/PDF reports for real, random, unigram, bigram, trigram, and LSTM k3/k4/k5, each backed by saved M1-M15 model summaries, coefficient-long tables, fixed-effort prediction grids, slope summaries, and PNG/PDF plot files. Real-child report also includes available estimator-family sensitivity and age-scrambling robustness sections. The caretaker atlas was fully fit for k0-k3 with 140 model rows, 120 fitted rows, and 120 plot panels. Verified 0 missing Markdown image links and full suite: 295 tests passing.
+- 2026-06-17 - Repaired the Atlas v2 consultation layer after the first HTML pass showed broken plots and table-heavy bodies. Regenerated source-specific and caretaker Markdown/HTML reports with report-relative figure links, model-card-first sections, formula/library/regression explanations, and table-heavy material kept as saved CSV artifacts. Refreshed all Atlas v2 PDFs from the fixed HTML. Verified 2,230 HTML image refs with 0 missing files, headless browser screenshots for real and caretaker reports with visible plots, `py_compile`, and `tests.test_build_route1_caretaker_atlas`.
+- 2026-06-17 - Fixed Route 1 Atlas v2 report consultation format and image loading. Reports now use model-card sections with formulas/OLS/statsmodels/uncertainty/outcome before plots, image links resolve correctly from `docs/`, and `.embedded.html` self-contained copies were generated for all source-specific and caretaker reports. Embedded audit: 2,230/2,230 images embedded, 0 external image refs.
+- 2026-06-17 - Built the heldout real-child trajectory prediction report for Forrester/Ella, Sachs/Naomi, and MPI-EVA-Manchester/Helen. The new builder refits PBM-trained heldout-compatible OLS population and Mundlak models, produces the improved PBM-corpus-versus-heldout coverage plot, actual-vs-predicted trajectories, fixed-effort checks, Markdown/HTML/embedded HTML/PDF reports, and saved prediction CSV artifacts. Verification: 60 fits, 4 expected k0 context skips, 10 image refs with 0 missing, embedded HTML with 10/10 data images, visible headless-browser screenshot, and `py_compile` passing.
+- 2026-06-17 - Built `docs/communicative_efficiency_supervisor_candidate_report_v0.{md,html,embedded.html,pdf}` as a selective supervisor-candidate synthesis. It links the current M1-M15 model cards, states line meanings explicitly, adds source-specific fixed-effort slope comparison, model-ladder R2/Delta-R2 importance, one-line effect cards, heldout actual-vs-predicted regression-line panels, calibration/residual checks, and PBM real-k3 predictor correlations. Verification: builder compiles, 6 image refs with 0 missing, embedded HTML has 6/6 data images, visible headless-browser screenshot, and PDF refreshed.
+- 2026-06-18 - Strengthened `docs/communicative_efficiency_supervisor_candidate_report_v0.{md,html,embedded.html,pdf}` with explicit figure guides for every promoted figure: what the figure shows, how to read it, what it means for the Route 1 claim, and what not to overclaim. Added focused tests for the figure-guide layer and regenerated all report formats. Verification: focused unittest passed; `py_compile` passed; 6 Markdown image refs with 0 missing; embedded HTML has 6/6 data images and 0 external PNG refs.
+- 2026-06-22 - Added the Route 1 real-vs-controls context report at `docs/route1_real_vs_controls_context_report.html`/`.embedded.html` and linked it from `docs/route1_current_reports_browser_index.html`. The report contrasts real children with random, unigram, bigram, trigram, LSTM k3/k4/k5, and caretaker speech using k0/k3 trajectories, with-context trajectories, context-gain trajectories, source-minus-real gaps, paired/control difference models, and illustrative examples. Added focused tests for paired-gap math, example selection, and report-relative figure links.
+- 2026-06-22 update - Expanded the real-vs-controls report with model-based fixed-effort regression-line evidence from the saved corrected Atlas artifacts: M2/CM2 k3 lines at 2, 6, and 10 words, model-predicted source-minus-real line gaps, and slope-difference plots/tables across M2, M3, M4c, M5, M6, M7, M11, and M15 where available. The report now explicitly states the fixed-effort developmental trend, including the real-child downward slopes and which controls are flatter/upward.
+- 2026-06-22 update - Added a separate proposed completion draft beside the current supervisor-facing report: `docs/predicting_utterance_level_information_report_proposed_completion.{md,html,embedded.html}`. The current `docs/predicting_utterance_level_information_report.*` files were left unchanged. The side draft inserts candidate real-vs-baseline/caretaker synthesis, fixed-effort slope tables, and promoted figures for manual reworking.
