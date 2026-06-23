@@ -89,7 +89,7 @@ developmental age bins.
 Most utterances fall between 6 and 35 months, especially because Manchester is
 dense in the early-to-middle toddler range. The later bins remain useful, but
 they contain fewer observations, particularly for caretakers in the oldest bin.
-This should be kept in mind when interpreting age-binned descriptive summaries.
+This should be kept in mind when interpreting age-binned descriptive summaries. 
 
 The contribution of each corpus also changes across developmental time:
 
@@ -138,7 +138,7 @@ must be controlled. Later models may also aggregate by child, age bin, context
 window, and utterance-length band to make the repeated-observation structure
 more explicit.
 
-## Complexity / Effort
+## Complexity / Production Effort
 
 The first part of the analysis concerns the amount of linguistic material used
 to produce an utterance. In this document, this is treated as production
@@ -148,7 +148,7 @@ produce than a shorter utterance.
 
 The primary effort measure is the number of lexical words in the cleaned target
 utterance. This measure is easy to interpret and aligns directly with the
-matched-length baseline design, since the random, n-gram, and same-length LSTM
+matched-length baseline design, since the random, n-gram, and LSTM
 baselines are generated with the same number of words as the corresponding
 child utterance.
 
@@ -170,9 +170,11 @@ string submitted for surprisal scoring:
 These measures are also important because the generated baselines discussed below are
 matched to children in word count, but not necessarily in morphemes, syllables,
 or phonemes. A baseline may therefore use the same number of words while still
-requiring a different amount of phonological or morphological effort.
+requiring a different amount of phonological or morphological effort. It is worthwhile to stress that this is production effort : complexity can also be addressed in the context of cognitive complexity.
 
 ## Information
+
+### Surprisal
 
 The second part of the analysis concerns informational content. Information is
 measured with Mistral surprisal in bits. Higher surprisal means that the model
@@ -195,12 +197,13 @@ utterances. This lets us ask whether developmental changes in surprisal reflect
 the utterance alone, the conversational context, or the relationship between
 the two.
 
-Context entropy is also measured in bits, but it captures a different object
-from target surprisal. Surprisal measures the information in the utterance that
-was actually produced. Context entropy measures the model's uncertainty about
-what could come next after the preceding context. This can later be used to ask
-whether children produce longer or more informative utterances in contexts that
-are themselves more uncertain. It can also be used as a predictor of the informational contents of an utterance. 
+### Response Entropy (and Next-Token Context Entropy)
+
+Another feature related to information is response entropy : for a given context, *how varied are the different possible answers* when sampling from a language model? Here, the language model used is the same one used for *scoring* surprisal : Mistral 7B params. 
+Instead of sampling the entire set of possible answers (which is not computationally feasible), 100 answers are generated for each unique context-window, and not for each unique utterances.
+This is because many utterances produced by children are said in a row.
+Resampling a 100 utterances each time a same context window reappears TODO EXPLAIN THAT THINGY ABOUT MONTE CARLO STUFF. 
+At the time of writing these lines, GPUs are hard at work generating these utterances!
 
 ## Comparison Baselines
 
@@ -240,8 +243,36 @@ is held constant relative to the real child utterance. A later free-length
 variant can ask a different question: whether the model chooses a similar amount
 of communicative effort when responding to the same caretaker context.
 
+Additionally, as I write these lines I realize we could also use some of the sampled utterances necessary for context entropy as a new source of baseline comparison.
 
-## Model 2 Details
+
+## Analyses and Results
+
+We are now ready to describe results of various analyses. As stated at the start of this document, the following models are trying to predict the total sum of bits at the level of utterances. 
+
+### Model 0 : Not controlling for effort 
+
+The most naive approach is to consider only the average of bits per token per utterance through time. This reveals a developmental decrease in bits per tokens in utterances that is explained by the increase in mean-utterance-length.
+Increase in MLU has two effects related to surprisal worth notting here : (1) the total amount of surprisal per utterance increases and (2) the average bit per token decreases, as larger context windows make subsequent tokens less unpredictable. 
+
+TODO ADD 1 PLOT TO SHOW THE INCREAE IN MLU, ONE PLOT TO SHOW INCREASE IN sum_bits per utterance and another to show the decrease in bits per token 
+
+### Model 1 : Only controlling for effort 
+
+This slightly less naive models assumes independance between individual utterances, which is a wrong assumption : two utterance from the same child are likely to be more correlated than utterances from two different children. **This being said**, what do models predict when we only control for effort?
+
+Controlling for effort here means TODO EXPLAIN. 
+
+The following plots predict an increase in total bits per utterance for the same level of effort. GTODO EXPLAIN
+
+TODO ADD PLOTS
+
+### Model 2 : Controlling for child-identity
+
+Of course each utterances are not independant observations. They are conversational turns from specific subjects over time. It therefore makes sense to control for the identity of children.
+
+
+### Model 2 Details
 
 Model 2 is the main result to interpret at this stage because it controls both
 production effort and child identity. The formula is:
@@ -299,7 +330,7 @@ utterance sizes.
 
 ![Model 2 fixed-effort predictions for phoneme count](../figs/m2_simple_plots/m2_phonemes_fixed_effort_and_global_trend.png)
 
-### Robustness Checks
+## Robustness Checks
 
 The main Model 2 table above is fit at the utterance level with the preceding
 three caretaker utterances as context. A complementary robustness analysis uses

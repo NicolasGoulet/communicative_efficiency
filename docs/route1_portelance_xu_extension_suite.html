@@ -1,0 +1,749 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Portelance/Xu Extension Suite</title>
+<style>
+:root {
+  color-scheme: light;
+  --ink: #1e2528;
+  --muted: #5e686d;
+  --line: #d9e0df;
+  --paper: #ffffff;
+  --soft: #f5f7f6;
+  --accent: #2f6f73;
+  --accent2: #c76f2c;
+}
+body {
+  margin: 0;
+  background: #eef2f1;
+  color: var(--ink);
+  font: 16px/1.58 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+main {
+  max-width: 980px;
+  margin: 34px auto 56px;
+  padding: 48px 58px;
+  background: var(--paper);
+  box-shadow: 0 18px 50px rgba(31, 45, 48, 0.12);
+}
+h1, h2, h3, h4 {
+  line-height: 1.18;
+  margin: 1.6em 0 0.55em;
+}
+h1 {
+  margin-top: 0;
+  font-size: 2.25rem;
+  border-bottom: 3px solid var(--accent);
+  padding-bottom: 0.45em;
+}
+h2 {
+  font-size: 1.55rem;
+  color: var(--accent);
+}
+h3 {
+  font-size: 1.18rem;
+}
+p {
+  margin: 0.75em 0;
+}
+a {
+  color: var(--accent);
+}
+blockquote {
+  border-left: 4px solid var(--accent2);
+  margin: 1.1em 0;
+  padding: 0.05em 1.1em;
+  color: var(--muted);
+  background: #fff8f2;
+}
+code {
+  background: var(--soft);
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  padding: 0.08em 0.3em;
+  font-family: "SFMono-Regular", Consolas, monospace;
+  font-size: 0.92em;
+}
+pre {
+  background: #f5f7f6;
+  color: var(--ink);
+  border: 1px solid var(--line);
+  padding: 1em;
+  overflow-x: auto;
+  border-radius: 7px;
+}
+pre code {
+  background: transparent;
+  border: 0;
+  padding: 0;
+  color: inherit;
+}
+table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 1.15em 0 1.45em;
+  font-size: 0.95em;
+}
+th, td {
+  border: 1px solid var(--line);
+  padding: 0.54em 0.68em;
+  vertical-align: top;
+}
+th {
+  background: #e7efed;
+  text-align: left;
+}
+tr:nth-child(even) td {
+  background: #fafbfb;
+}
+img {
+  max-width: 100%;
+  display: block;
+  margin: 1.1em auto 0.45em;
+}
+ul, ol {
+  padding-left: 1.4em;
+}
+.caption {
+  color: var(--muted);
+  font-size: 0.92em;
+  margin-top: -0.15em;
+}
+@media print {
+  body {
+    background: white;
+  }
+  main {
+    box-shadow: none;
+    margin: 0;
+    max-width: none;
+    padding: 28px;
+  }
+}
+</style>
+</head>
+<body>
+<main>
+<h1>Portelance/Xu Communicative-Efficiency Extension Suite</h1>
+<p>This is a sidecar analysis package for choosing paper-ready analyses. It does not modify the current supervisor-facing report.</p>
+<p>The suite translates the Portelance/Xu discussion and the Pawar/Cychosz frequency-informativity template into concrete checks: effort as an outcome, frequency controls, adult-likeness/caretaker distance, equalized sampling, scrambled-age nulls, and effort-information tradeoff plots.</p>
+<h2>Why These Analyses Matter</h2>
+<ul>
+<li><strong>For Prof. Portelance:</strong> these analyses connect the CHILDES/Mistral work to communicative efficiency as a tradeoff between informativeness, effort, and listener/learner context.</li>
+<li><strong>For Prof. Xu:</strong> they operationalize the two-route framing: Route 1 asks about information at fixed effort; Route 2 asks whether context predicts effort itself.</li>
+<li><strong>For peer reviewers:</strong> the suite adds controls for frequency, context effort, question type, unequal age-bin sampling, age-label artifacts, and adult/caretaker comparison baselines.</li>
+</ul>
+<h2>Feature Status</h2>
+<table>
+<thead><tr>
+<th>feature</th>
+<th>status</th>
+<th>artifact</th>
+<th>peer_review_reason</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>Context uncertainty</td>
+<td>implemented</td>
+<td>context_entropy_bits in analysis rows</td>
+<td>Tests whether effort/information effects are actually context-sensitive.</td>
+</tr>
+<tr>
+<td>Context effort</td>
+<td>implemented</td>
+<td>context_effort_words</td>
+<td>Controls for the amount of preceding caregiver material.</td>
+</tr>
+<tr>
+<td>Question type</td>
+<td>implemented, coarse</td>
+<td>question_type</td>
+<td>Questions can mechanically elicit different child response lengths.</td>
+</tr>
+<tr>
+<td>Exact target recurrence / frequency bits</td>
+<td>implemented</td>
+<td>exact_target_frequency_bits from hash_frequency_predictors.csv.gz</td>
+<td>Separates age effects from children/caretakers using more repeated conventional utterances.</td>
+</tr>
+<tr>
+<td>Word-unigram and phone-bigram informativity</td>
+<td>implemented in code, not full-run completed here</td>
+<td>src/build_route1_frequency_informativity_predictors.py --mode text</td>
+<td>Closest analogue to Pawar/Cychosz frequency-vs-informativity controls; full run needs a safer long text pass.</td>
+</tr>
+<tr>
+<td>Full response-space entropy</td>
+<td>pilot-only, not full scored</td>
+<td>response_entropy pilot reports</td>
+<td>Would directly quantify uncertainty over possible child responses, but full Mila-scale generation is still a separate run.</td>
+</tr>
+</tbody></table>
+<h2>Main Status</h2>
+<ul>
+<li>Implemented now: Route 2 effort models, exact-frequency Route 1 controls, adult-likeness plots, effort-information tradeoff plots, equalized bootstraps, scrambled-age nulls.</li>
+<li>Implemented as proxy now: exact target recurrence/frequency bits. This is the stable first frequency-control layer.</li>
+<li>Route 2 effort models are real-child models in this build. The finite k3 context-entropy row extract contains real child rows; caretaker/adult-likeness comparisons are still implemented through the fixed-effort ANCOVA artifacts.</li>
+<li>Equalized bootstrap plots use only age bins with at least 1,000 prepared rows, then sample up to 4,000 rows per included age bin. This avoids letting the sparse <code>060-065</code> context-entropy coverage force all bins down to 10 rows.</li>
+<li>Not fully scored now: full response-space entropy and full text/phone informativity predictors. The code path exists for text/phone predictors, but a full safe text pass remains a separate long run.</li>
+</ul>
+<h3>Analysis Row Coverage</h3>
+<table>
+<thead><tr>
+<th>source_label</th>
+<th>006-023</th>
+<th>024-029</th>
+<th>030-035</th>
+<th>036-041</th>
+<th>042-047</th>
+<th>048-053</th>
+<th>054-059</th>
+<th>060-065</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>Real child</td>
+<td>62,737</td>
+<td>161,909</td>
+<td>141,479</td>
+<td>36,874</td>
+<td>16,065</td>
+<td>12,632</td>
+<td>9,707</td>
+<td>10</td>
+</tr>
+</tbody></table>
+<h2>Figure Gallery</h2>
+<h3>Route 2 Effort Outcome</h3>
+<h4>Route 2 predicted words by context uncertainty</h4>
+<p><strong>Why this matters:</strong> Tests the Portelance/Xu question of whether children modulate production effort according to how uncertain the preceding context is.</p>
+<img src="../figs/route1_portelance_xu_extension_suite/route2_predicted_nb_words_by_context_uncertainty.png" alt="Route 2 predicted words by context uncertainty">
+<h4>Route 2 predicted morphemes by context uncertainty</h4>
+<p><strong>Why this matters:</strong> Tests the Portelance/Xu question of whether children modulate production effort according to how uncertain the preceding context is.</p>
+<img src="../figs/route1_portelance_xu_extension_suite/route2_predicted_nb_morphemes_by_context_uncertainty.png" alt="Route 2 predicted morphemes by context uncertainty">
+<h4>Route 2 predicted syllables: cmu/pkg by context uncertainty</h4>
+<p><strong>Why this matters:</strong> Tests the Portelance/Xu question of whether children modulate production effort according to how uncertain the preceding context is.</p>
+<img src="../figs/route1_portelance_xu_extension_suite/route2_predicted_nb_syllables_cmu_or_pkg_by_context_uncertainty.png" alt="Route 2 predicted syllables: cmu/pkg by context uncertainty">
+<h4>Route 2 predicted syllables: pkg by context uncertainty</h4>
+<p><strong>Why this matters:</strong> Tests the Portelance/Xu question of whether children modulate production effort according to how uncertain the preceding context is.</p>
+<img src="../figs/route1_portelance_xu_extension_suite/route2_predicted_nb_syllables_pkg_by_context_uncertainty.png" alt="Route 2 predicted syllables: pkg by context uncertainty">
+<h4>Route 2 predicted phonemes by context uncertainty</h4>
+<p><strong>Why this matters:</strong> Tests the Portelance/Xu question of whether children modulate production effort according to how uncertain the preceding context is.</p>
+<img src="../figs/route1_portelance_xu_extension_suite/route2_predicted_nb_phonemes_by_context_uncertainty.png" alt="Route 2 predicted phonemes by context uncertainty">
+<h4>Route 2 context-uncertainty coefficients</h4>
+<p><strong>Why this matters:</strong> A positive context-uncertainty coefficient means higher contextual uncertainty predicts longer/more effortful productions, directly testing effort modulation.</p>
+<img src="../figs/route1_portelance_xu_extension_suite/route2_context_uncertainty_coefficients.png" alt="Route 2 context-uncertainty coefficients">
+<h3>Frequency-Controlled Route 1</h3>
+<h4>Route 1 age coefficients with context/frequency controls</h4>
+<p><strong>Why this matters:</strong> Shows whether the fixed-effort developmental effect survives controls motivated by frequency/informativity peer-review concerns.</p>
+<img src="../figs/route1_portelance_xu_extension_suite/route1_age_coefficients_with_context_frequency_controls.png" alt="Route 1 age coefficients with context/frequency controls">
+<h4>Joint model incremental fit</h4>
+<p><strong>Why this matters:</strong> Addresses the joint-inference idea: context and frequency should be evaluated together rather than as isolated single predictors.</p>
+<img src="../figs/route1_portelance_xu_extension_suite/route1_joint_model_delta_r2.png" alt="Joint model incremental fit">
+<h3>Adult-Likeness / Caretaker Distance</h3>
+<h4>Caretaker-minus-real with-context information</h4>
+<p><strong>Why this matters:</strong> Makes the adult-likeness claim explicit by tracking the signed distance between child behavior and caretaker behavior.</p>
+<img src="../figs/route1_portelance_xu_extension_suite/adult_likeness_caretaker_minus_real_sum_bits_k3.png" alt="Caretaker-minus-real with-context information">
+<h4>Caretaker-minus-real context gain</h4>
+<p><strong>Why this matters:</strong> Makes the adult-likeness claim explicit by tracking the signed distance between child behavior and caretaker behavior.</p>
+<img src="../figs/route1_portelance_xu_extension_suite/adult_likeness_caretaker_minus_real_context_gain.png" alt="Caretaker-minus-real context gain">
+<h3>Efficiency Tradeoff</h3>
+<h4>Effort-information tradeoff space (Words)</h4>
+<p><strong>Why this matters:</strong> Connects the project to communicative-efficiency theory by showing the observed effort/information region occupied by real children, controls, LSTMs, and caretakers.</p>
+<img src="../figs/route1_portelance_xu_extension_suite/effort_information_tradeoff_nb_words.png" alt="Effort-information tradeoff space (Words)">
+<h4>Effort-information tradeoff space (Phonemes)</h4>
+<p><strong>Why this matters:</strong> Connects the project to communicative-efficiency theory by showing the observed effort/information region occupied by real children, controls, LSTMs, and caretakers.</p>
+<img src="../figs/route1_portelance_xu_extension_suite/effort_information_tradeoff_nb_phonemes.png" alt="Effort-information tradeoff space (Phonemes)">
+<h3>Equalized Sampling</h3>
+<h4>Equalized bootstrap: Bits per word</h4>
+<p><strong>Why this matters:</strong> Follows the Pawar/Cychosz-style sampling concern: age trajectories should not be artifacts of unequal data volume across bins.</p>
+<img src="../figs/route1_portelance_xu_extension_suite/equalized_bootstrap_bits_per_word.png" alt="Equalized bootstrap: Bits per word">
+<h4>Equalized bootstrap: Bits per phoneme</h4>
+<p><strong>Why this matters:</strong> Follows the Pawar/Cychosz-style sampling concern: age trajectories should not be artifacts of unequal data volume across bins.</p>
+<img src="../figs/route1_portelance_xu_extension_suite/equalized_bootstrap_bits_per_phoneme.png" alt="Equalized bootstrap: Bits per phoneme">
+<h4>Equalized bootstrap: Exact-target frequency bits</h4>
+<p><strong>Why this matters:</strong> Follows the Pawar/Cychosz-style sampling concern: age trajectories should not be artifacts of unequal data volume across bins.</p>
+<img src="../figs/route1_portelance_xu_extension_suite/equalized_bootstrap_exact_target_frequency_bits.png" alt="Equalized bootstrap: Exact-target frequency bits">
+<h4>Equalized bootstrap: Context entropy bits</h4>
+<p><strong>Why this matters:</strong> Follows the Pawar/Cychosz-style sampling concern: age trajectories should not be artifacts of unequal data volume across bins.</p>
+<img src="../figs/route1_portelance_xu_extension_suite/equalized_bootstrap_context_entropy_bits.png" alt="Equalized bootstrap: Context entropy bits">
+<h3>Scrambled-Age Robustness</h3>
+<h4>Scrambled-age null check: with-context information</h4>
+<p><strong>Why this matters:</strong> Peer-review guardrail: developmental slopes should stand apart from age-label scrambling, not merely reflect binning or sampling structure.</p>
+<img src="../figs/route1_portelance_xu_extension_suite/scrambled_age_null_sum_bits_k3.png" alt="Scrambled-age null check: with-context information">
+<h4>Scrambled-age null check: context gain</h4>
+<p><strong>Why this matters:</strong> Peer-review guardrail: developmental slopes should stand apart from age-label scrambling, not merely reflect binning or sampling structure.</p>
+<img src="../figs/route1_portelance_xu_extension_suite/scrambled_age_null_context_gain.png" alt="Scrambled-age null check: context gain">
+<h2>Compact Tables</h2>
+<h3>Route 2 Context-Uncertainty Coefficients</h3>
+<p>Positive coefficients mean that more uncertain contexts predict more production effort. These are log-effort outcomes, so the sign is the key first reading.</p>
+<table>
+<thead><tr>
+<th>source_label</th>
+<th>effort_label</th>
+<th>coef</th>
+<th>p</th>
+<th>nobs</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>Real child</td>
+<td>Words</td>
+<td>0.002</td>
+<td>0.428</td>
+<td>81,717</td>
+</tr>
+<tr>
+<td>Real child</td>
+<td>Morphemes</td>
+<td>0.004</td>
+<td>0.134</td>
+<td>81,717</td>
+</tr>
+<tr>
+<td>Real child</td>
+<td>Syllables: CMU/pkg</td>
+<td>0.006</td>
+<td>0.005</td>
+<td>81,717</td>
+</tr>
+<tr>
+<td>Real child</td>
+<td>Syllables: pkg</td>
+<td>0.007</td>
+<td>0.002</td>
+<td>81,717</td>
+</tr>
+<tr>
+<td>Real child</td>
+<td>Phonemes</td>
+<td>0.009</td>
+<td>&lt;.001</td>
+<td>81,717</td>
+</tr>
+</tbody></table>
+<h3>Route 1 Joint Model Summary</h3>
+<p>The age coefficient is the fixed-effort developmental signal after adding context/frequency controls. <code>delta_r2_vs_base</code> shows what each added predictor family contributes over the base effort+child model.</p>
+<table>
+<thead><tr>
+<th>model_id</th>
+<th>effort_label</th>
+<th>age_coef</th>
+<th>age_p</th>
+<th>r2</th>
+<th>delta_r2_vs_base</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>base_effort_child</td>
+<td>Words</td>
+<td>-0.732</td>
+<td>0.005</td>
+<td>0.660</td>
+<td>0.0000</td>
+</tr>
+<tr>
+<td>context_controls</td>
+<td>Words</td>
+<td>-0.662</td>
+<td>0.014</td>
+<td>0.661</td>
+<td>8.32e-04</td>
+</tr>
+<tr>
+<td>frequency_control</td>
+<td>Words</td>
+<td>-0.572</td>
+<td>&lt;.001</td>
+<td>0.691</td>
+<td>0.0308</td>
+</tr>
+<tr>
+<td>joint_context_frequency</td>
+<td>Words</td>
+<td>-0.511</td>
+<td>0.002</td>
+<td>0.691</td>
+<td>0.0316</td>
+</tr>
+<tr>
+<td>joint_interactions</td>
+<td>Words</td>
+<td>-0.506</td>
+<td>0.004</td>
+<td>0.692</td>
+<td>0.0320</td>
+</tr>
+<tr>
+<td>base_effort_child</td>
+<td>Morphemes</td>
+<td>-1.038</td>
+<td>&lt;.001</td>
+<td>0.652</td>
+<td>0.0000</td>
+</tr>
+<tr>
+<td>context_controls</td>
+<td>Morphemes</td>
+<td>-0.970</td>
+<td>&lt;.001</td>
+<td>0.653</td>
+<td>9.21e-04</td>
+</tr>
+<tr>
+<td>frequency_control</td>
+<td>Morphemes</td>
+<td>-0.811</td>
+<td>&lt;.001</td>
+<td>0.682</td>
+<td>0.0300</td>
+</tr>
+<tr>
+<td>joint_context_frequency</td>
+<td>Morphemes</td>
+<td>-0.752</td>
+<td>&lt;.001</td>
+<td>0.683</td>
+<td>0.0309</td>
+</tr>
+<tr>
+<td>joint_interactions</td>
+<td>Morphemes</td>
+<td>-0.744</td>
+<td>0.002</td>
+<td>0.683</td>
+<td>0.0313</td>
+</tr>
+<tr>
+<td>base_effort_child</td>
+<td>Syllables: CMU/pkg</td>
+<td>-0.360</td>
+<td>0.041</td>
+<td>0.677</td>
+<td>0.0000</td>
+</tr>
+<tr>
+<td>context_controls</td>
+<td>Syllables: CMU/pkg</td>
+<td>-0.302</td>
+<td>0.086</td>
+<td>0.678</td>
+<td>8.37e-04</td>
+</tr>
+<tr>
+<td>frequency_control</td>
+<td>Syllables: CMU/pkg</td>
+<td>-0.258</td>
+<td>0.033</td>
+<td>0.701</td>
+<td>0.0235</td>
+</tr>
+<tr>
+<td>joint_context_frequency</td>
+<td>Syllables: CMU/pkg</td>
+<td>-0.206</td>
+<td>0.067</td>
+<td>0.702</td>
+<td>0.0244</td>
+</tr>
+<tr>
+<td>joint_interactions</td>
+<td>Syllables: CMU/pkg</td>
+<td>-0.203</td>
+<td>0.166</td>
+<td>0.702</td>
+<td>0.0250</td>
+</tr>
+<tr>
+<td>base_effort_child</td>
+<td>Syllables: pkg</td>
+<td>-0.278</td>
+<td>0.099</td>
+<td>0.663</td>
+<td>0.0000</td>
+</tr>
+<tr>
+<td>context_controls</td>
+<td>Syllables: pkg</td>
+<td>-0.221</td>
+<td>0.181</td>
+<td>0.664</td>
+<td>8.49e-04</td>
+</tr>
+<tr>
+<td>frequency_control</td>
+<td>Syllables: pkg</td>
+<td>-0.173</td>
+<td>0.181</td>
+<td>0.689</td>
+<td>0.0255</td>
+</tr>
+<tr>
+<td>joint_context_frequency</td>
+<td>Syllables: pkg</td>
+<td>-0.123</td>
+<td>0.287</td>
+<td>0.689</td>
+<td>0.0265</td>
+</tr>
+<tr>
+<td>joint_interactions</td>
+<td>Syllables: pkg</td>
+<td>-0.119</td>
+<td>0.488</td>
+<td>0.690</td>
+<td>0.0273</td>
+</tr>
+<tr>
+<td>base_effort_child</td>
+<td>Phonemes</td>
+<td>-0.493</td>
+<td>0.028</td>
+<td>0.672</td>
+<td>0.0000</td>
+</tr>
+<tr>
+<td>context_controls</td>
+<td>Phonemes</td>
+<td>-0.434</td>
+<td>0.048</td>
+<td>0.673</td>
+<td>9.17e-04</td>
+</tr>
+<tr>
+<td>frequency_control</td>
+<td>Phonemes</td>
+<td>-0.353</td>
+<td>0.040</td>
+<td>0.692</td>
+<td>0.0200</td>
+</tr>
+<tr>
+<td>joint_context_frequency</td>
+<td>Phonemes</td>
+<td>-0.301</td>
+<td>0.059</td>
+<td>0.693</td>
+<td>0.0210</td>
+</tr>
+<tr>
+<td>joint_interactions</td>
+<td>Phonemes</td>
+<td>-0.296</td>
+<td>0.146</td>
+<td>0.694</td>
+<td>0.0218</td>
+</tr>
+</tbody></table>
+<h3>Scrambled-Age Null Summary</h3>
+<p>Observed slopes should sit outside or near the edge of scrambled-age null intervals if the developmental effect is not just an age-bin/sampling artifact.</p>
+<table>
+<thead><tr>
+<th>source_label</th>
+<th>effort_label</th>
+<th>outcome</th>
+<th>observed_slope_per_6mo</th>
+<th>null_lo</th>
+<th>null_hi</th>
+<th>empirical_p</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>Caretaker</td>
+<td>Words</td>
+<td>sum_bits_k3</td>
+<td>0.087</td>
+<td>-0.027</td>
+<td>0.028</td>
+<td>0.020</td>
+</tr>
+<tr>
+<td>Caretaker</td>
+<td>Words</td>
+<td>context_gain</td>
+<td>-0.414</td>
+<td>-0.020</td>
+<td>0.016</td>
+<td>0.020</td>
+</tr>
+<tr>
+<td>Real child</td>
+<td>Words</td>
+<td>sum_bits_k3</td>
+<td>-0.560</td>
+<td>-0.050</td>
+<td>0.042</td>
+<td>0.020</td>
+</tr>
+<tr>
+<td>Real child</td>
+<td>Words</td>
+<td>context_gain</td>
+<td>-0.172</td>
+<td>-0.024</td>
+<td>0.024</td>
+<td>0.020</td>
+</tr>
+<tr>
+<td>Caretaker</td>
+<td>Morphemes</td>
+<td>sum_bits_k3</td>
+<td>0.137</td>
+<td>-0.019</td>
+<td>0.035</td>
+<td>0.020</td>
+</tr>
+<tr>
+<td>Caretaker</td>
+<td>Morphemes</td>
+<td>context_gain</td>
+<td>-0.407</td>
+<td>-0.023</td>
+<td>0.034</td>
+<td>0.020</td>
+</tr>
+<tr>
+<td>Real child</td>
+<td>Morphemes</td>
+<td>sum_bits_k3</td>
+<td>-0.611</td>
+<td>-0.046</td>
+<td>0.051</td>
+<td>0.020</td>
+</tr>
+<tr>
+<td>Real child</td>
+<td>Morphemes</td>
+<td>context_gain</td>
+<td>-0.204</td>
+<td>-0.032</td>
+<td>0.026</td>
+<td>0.020</td>
+</tr>
+<tr>
+<td>Caretaker</td>
+<td>Syllables: CMU/pkg</td>
+<td>sum_bits_k3</td>
+<td>0.067</td>
+<td>-0.021</td>
+<td>0.020</td>
+<td>0.020</td>
+</tr>
+<tr>
+<td>Caretaker</td>
+<td>Syllables: CMU/pkg</td>
+<td>context_gain</td>
+<td>-0.415</td>
+<td>-0.026</td>
+<td>0.016</td>
+<td>0.020</td>
+</tr>
+<tr>
+<td>Real child</td>
+<td>Syllables: CMU/pkg</td>
+<td>sum_bits_k3</td>
+<td>-0.292</td>
+<td>-0.052</td>
+<td>0.029</td>
+<td>0.020</td>
+</tr>
+<tr>
+<td>Real child</td>
+<td>Syllables: CMU/pkg</td>
+<td>context_gain</td>
+<td>-0.134</td>
+<td>-0.028</td>
+<td>0.017</td>
+<td>0.020</td>
+</tr>
+<tr>
+<td>Caretaker</td>
+<td>Syllables: pkg</td>
+<td>sum_bits_k3</td>
+<td>0.074</td>
+<td>-0.024</td>
+<td>0.016</td>
+<td>0.020</td>
+</tr>
+<tr>
+<td>Caretaker</td>
+<td>Syllables: pkg</td>
+<td>context_gain</td>
+<td>-0.414</td>
+<td>-0.028</td>
+<td>0.026</td>
+<td>0.020</td>
+</tr>
+<tr>
+<td>Real child</td>
+<td>Syllables: pkg</td>
+<td>sum_bits_k3</td>
+<td>-0.218</td>
+<td>-0.049</td>
+<td>0.039</td>
+<td>0.020</td>
+</tr>
+<tr>
+<td>Real child</td>
+<td>Syllables: pkg</td>
+<td>context_gain</td>
+<td>-0.133</td>
+<td>-0.021</td>
+<td>0.024</td>
+<td>0.020</td>
+</tr>
+<tr>
+<td>Caretaker</td>
+<td>Phonemes</td>
+<td>sum_bits_k3</td>
+<td>0.067</td>
+<td>-0.015</td>
+<td>0.022</td>
+<td>0.020</td>
+</tr>
+<tr>
+<td>Caretaker</td>
+<td>Phonemes</td>
+<td>context_gain</td>
+<td>-0.422</td>
+<td>-0.019</td>
+<td>0.022</td>
+<td>0.020</td>
+</tr>
+<tr>
+<td>Real child</td>
+<td>Phonemes</td>
+<td>sum_bits_k3</td>
+<td>-0.295</td>
+<td>-0.033</td>
+<td>0.032</td>
+<td>0.020</td>
+</tr>
+<tr>
+<td>Real child</td>
+<td>Phonemes</td>
+<td>context_gain</td>
+<td>-0.163</td>
+<td>-0.026</td>
+<td>0.021</td>
+<td>0.020</td>
+</tr>
+</tbody></table>
+<h2>Saved Artifacts</h2>
+<pre><code>results/route1_portelance_xu_extension_suite/portelance_xu_k3_real_caretaker_analysis_rows.csv.gz
+results/route1_portelance_xu_extension_suite/route2_effort_outcome_coefficients.csv
+results/route1_portelance_xu_extension_suite/route2_effort_outcome_predictions.csv
+results/route1_portelance_xu_extension_suite/route1_joint_model_coefficients.csv
+results/route1_portelance_xu_extension_suite/route1_joint_model_summary.csv
+results/route1_portelance_xu_extension_suite/equalized_age_bootstrap_samples.csv.gz
+results/route1_portelance_xu_extension_suite/equalized_age_bootstrap_summary.csv
+results/route1_portelance_xu_extension_suite/scrambled_age_null_slopes.csv
+results/route1_portelance_xu_extension_suite/adult_likeness_caretaker_minus_real_adjusted_gaps.csv
+results/route1_portelance_xu_extension_suite/adult_likeness_route2_context_entropy_coefficient_distance.csv
+results/route1_portelance_xu_extension_suite/feature_status_for_peer_review.csv
+results/route1_portelance_xu_extension_suite/figure_manifest.csv</code></pre>
+</main>
+</body>
+</html>

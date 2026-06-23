@@ -190,6 +190,28 @@ scopes. Richer lexical/phone-sequence informativity predictors are scaffolded
 in the builder but need a safer text-column streaming pass because pandas'
 C parser segfaulted on the large scored text file in this environment.
 
+2026-06-22 status: added the Portelance/Xu communicative-efficiency extension
+suite in `docs/route1_portelance_xu_extension_suite.md` / `.html` /
+`.embedded.html`. It implements Route 2 effort-as-outcome models, exact-
+frequency-controlled Route 1 models, adult-likeness/caretaker-distance plots,
+effort-information tradeoff plots, equalized age-bin bootstrap plots, and
+scrambled-age null checks. Reusable outputs are saved under
+`results/route1_portelance_xu_extension_suite/`, with figures under
+`figs/route1_portelance_xu_extension_suite/`. Current limitation: the finite
+k3 context-entropy extract contains real-child rows, so Route 2 effort models
+are real-child models in this build; caretaker comparisons are covered through
+the fixed-effort ANCOVA artifacts. Focused tests pass and the report image
+audit found `18` image references with `0` missing files.
+
+2026-06-22 status: added a curated staging report for possible additions to the
+supervisor-facing report:
+`docs/predicting_utterance_level_information_candidate_additions.md` /
+`.html` / `.embedded.html`. This report does not modify the active supervisor
+report. It explains the new predictors, states what the refreshed models say,
+labels each figure as main-text/appendix/exploratory/optional, and writes
+candidate manifests under
+`results/route1_portelance_xu_extension_suite/candidate_additions/`.
+
 Estimator rationale to state in the report:
 
 - [x] **OLS + child fixed effects + clustered SE:** main comparable Atlas view;

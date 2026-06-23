@@ -5240,3 +5240,158 @@ MPLCONFIGDIR=/tmp/matplotlib-cache .venv/bin/python \
 - Additional 2026-06-22 verification after the explanatory-gallery revision:
   focused tests passed again (`9` tests), and the Markdown image audit again
   found `33` image references with `0` missing files.
+
+## 2026-06-22 - Portelance/Xu communicative-efficiency extension suite
+
+- Added `src/build_route1_portelance_xu_extension_suite.py` and
+  `tests/test_build_route1_portelance_xu_extension_suite.py`.
+- Generated a sidecar figure-first report for paper-selection analyses:
+
+```text
+docs/route1_portelance_xu_extension_suite.md
+docs/route1_portelance_xu_extension_suite.html
+docs/route1_portelance_xu_extension_suite.embedded.html
+figs/route1_portelance_xu_extension_suite/
+```
+
+- Added the report to `docs/route1_current_reports_browser_index.html`.
+- Implemented now:
+  - Route 2 effort-as-outcome models for words, morphemes, both syllable
+    measures, and phonemes;
+  - exact-target recurrence/frequency-bit controls for Route 1;
+  - joint context/frequency model comparisons;
+  - adult-likeness/caretaker-minus-real fixed-effort plots from the ANCOVA
+    artifacts;
+  - effort-information tradeoff plots for words and phonemes;
+  - equalized age-bin bootstraps;
+  - scrambled-age null checks.
+- Reusable outputs:
+
+```text
+results/route1_portelance_xu_extension_suite/portelance_xu_k3_real_caretaker_analysis_rows.csv.gz
+results/route1_portelance_xu_extension_suite/route2_effort_outcome_coefficients.csv
+results/route1_portelance_xu_extension_suite/route2_effort_outcome_predictions.csv
+results/route1_portelance_xu_extension_suite/route1_joint_model_coefficients.csv
+results/route1_portelance_xu_extension_suite/route1_joint_model_summary.csv
+results/route1_portelance_xu_extension_suite/equalized_age_bootstrap_samples.csv.gz
+results/route1_portelance_xu_extension_suite/equalized_age_bootstrap_summary.csv
+results/route1_portelance_xu_extension_suite/scrambled_age_null_slopes.csv
+results/route1_portelance_xu_extension_suite/adult_likeness_caretaker_minus_real_adjusted_gaps.csv
+results/route1_portelance_xu_extension_suite/adult_likeness_route2_context_entropy_coefficient_distance.csv
+results/route1_portelance_xu_extension_suite/feature_status_for_peer_review.csv
+results/route1_portelance_xu_extension_suite/figure_manifest.csv
+```
+
+- Build notes:
+  - pandas' C parser segfaulted on the large long CSV again, so the prepare
+    stage now uses standard-library `csv.DictReader` streaming with gzip,
+    context-feature caching, and a dictionary join to
+    `hash_frequency_predictors.csv.gz`.
+  - Prepared row coverage is `441,413` real-child k3 rows with finite context
+    entropy and all five effort measures. Caretaker rows are not present in
+    this finite context-entropy extract, so Route 2 effort models are
+    real-child models in this build; caretaker/adult-likeness comparisons are
+    still implemented through the existing fixed-effort ANCOVA artifacts.
+  - The `060-065` prepared context-entropy row count is only `10`, so equalized
+    bootstrap plots require at least `1,000` rows per age bin and sample up to
+    `4,000` rows per included bin. This avoids collapsing every bin to `10`
+    rows.
+- Scientific status:
+  - Route 2 context-uncertainty coefficients are positive for all five effort
+    scales and strongest for phoneme/syllable effort; word/morpheme effects are
+    weaker in this first real-child context-entropy extract.
+  - Route 1 age coefficients remain negative after exact-frequency and context
+    controls across effort measures in the balanced real-child model rows.
+  - Exact-target frequency bits add about `0.03` R2 over the base fixed-effort
+    child model, so frequency/conventionality is meaningful but does not erase
+    the age effect in this run.
+- Verification:
+
+```bash
+MPLCONFIGDIR=/tmp/matplotlib-cache .venv/bin/python -m py_compile \
+  src/build_route1_portelance_xu_extension_suite.py
+MPLCONFIGDIR=/tmp/matplotlib-cache .venv/bin/python -m unittest \
+  tests.test_build_route1_portelance_xu_extension_suite \
+  tests.test_build_route1_frequency_informativity_predictors
+MPLCONFIGDIR=/tmp/matplotlib-cache .venv/bin/python \
+  src/build_route1_portelance_xu_extension_suite.py --stage prepare --chunksize 100000
+MPLCONFIGDIR=/tmp/matplotlib-cache .venv/bin/python \
+  src/build_route1_portelance_xu_extension_suite.py --stage models --permutations 50
+MPLCONFIGDIR=/tmp/matplotlib-cache .venv/bin/python \
+  src/build_route1_portelance_xu_extension_suite.py --stage plot
+MPLCONFIGDIR=/tmp/matplotlib-cache .venv/bin/python \
+  src/build_route1_portelance_xu_extension_suite.py --stage report
+```
+
+- Results: focused tests passed (`8` tests); report regeneration completed;
+  Markdown image audit found `18` image references with `0` missing files.
+
+## 2026-06-22 - Candidate additions for supervisor report
+
+- Added `src/build_supervisor_candidate_additions_report.py` and
+  `tests/test_build_supervisor_candidate_additions_report.py`.
+- Generated a curated staging report for deciding what to move into the
+  supervisor-facing report later:
+
+```text
+docs/predicting_utterance_level_information_candidate_additions.md
+docs/predicting_utterance_level_information_candidate_additions.html
+docs/predicting_utterance_level_information_candidate_additions.embedded.html
+```
+
+- The active supervisor-facing report was not modified:
+
+```text
+docs/predicting_utterance_level_information_report.md
+```
+
+- The staging report pulls from:
+  - `results/route1_exhaustive_ancova_gallery/`
+  - `results/route1_portelance_xu_extension_suite/`
+- It explains these predictors in report-ready language:
+  - production effort;
+  - exact effort value;
+  - `context_entropy_bits`;
+  - `context_effort_words`;
+  - `question_type`;
+  - `exact_target_frequency_bits`;
+  - source-minus-real gap;
+  - context gain.
+- It labels candidate figures as main text, appendix, exploratory, optional, or
+  not-ready, and writes companion manifests:
+
+```text
+results/route1_portelance_xu_extension_suite/candidate_additions/candidate_additions_manifest.csv
+results/route1_portelance_xu_extension_suite/candidate_additions/candidate_predictor_dictionary.csv
+```
+
+- Refreshed model status included in the report:
+  - fixed-effort adjusted k3 information decreases by `-5.46` to `-3.19` bits
+    from first to last age bin across effort scales;
+  - `51/60` exact-effort slopes are downward;
+  - exact-target frequency bits add `0.0200` to `0.0308` R2 over the base
+    effort+child model while age coefficients remain negative;
+  - context-uncertainty coefficients are positive for all five Route 2 effort
+    scales and p<.05 for `3/5` effort scales in the current real-child extract;
+  - real-child observed k3 slopes are outside the 95% scrambled null range for
+    `5/5` effort scales.
+- Verification:
+
+```bash
+MPLCONFIGDIR=/tmp/matplotlib-cache .venv/bin/python -m py_compile \
+  src/build_supervisor_candidate_additions_report.py \
+  src/build_route1_portelance_xu_extension_suite.py
+MPLCONFIGDIR=/tmp/matplotlib-cache .venv/bin/python -m unittest \
+  tests.test_build_supervisor_candidate_additions_report \
+  tests.test_build_route1_portelance_xu_extension_suite \
+  tests.test_build_route1_frequency_informativity_predictors
+MPLCONFIGDIR=/tmp/matplotlib-cache .venv/bin/python \
+  src/build_route1_portelance_xu_extension_suite.py --stage models --permutations 50
+MPLCONFIGDIR=/tmp/matplotlib-cache .venv/bin/python \
+  src/build_route1_portelance_xu_extension_suite.py --stage plot
+MPLCONFIGDIR=/tmp/matplotlib-cache .venv/bin/python \
+  src/build_supervisor_candidate_additions_report.py
+```
+
+- Results: focused tests passed (`11` tests); report regeneration completed;
+  Markdown image audit found `10` image references with `0` missing files.
