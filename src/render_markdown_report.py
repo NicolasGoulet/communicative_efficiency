@@ -98,6 +98,37 @@ table {
   margin: 1.15em 0 1.45em;
   font-size: 0.95em;
 }
+.plot-layout {
+  table-layout: fixed;
+  margin: 1.1em auto 1.45em;
+}
+.plot-layout,
+.plot-layout tr,
+.plot-layout td {
+  border: 0;
+  background: transparent;
+}
+.plot-layout td {
+  padding: 0.35em 0.55em 0.95em;
+  text-align: center;
+  vertical-align: top;
+}
+.plot-layout img {
+  width: 100%;
+  max-width: 100%;
+  margin: 0 auto 0.35em;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: white;
+}
+.plot-layout .centered-cell img {
+  width: 54%;
+}
+.plot-caption {
+  color: var(--muted);
+  font-size: 0.85em;
+  line-height: 1.35;
+}
 th, td {
   border: 1px solid var(--line);
   padding: 0.54em 0.68em;
@@ -110,10 +141,59 @@ th {
 tr:nth-child(even) td {
   background: #fafbfb;
 }
+.plot-layout tr:nth-child(even) td {
+  background: transparent;
+}
 img {
   max-width: 100%;
   display: block;
   margin: 1.1em auto 0.45em;
+}
+.figure-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.05rem 1.25rem;
+  align-items: start;
+  margin: 1.1em 0 1.45em;
+}
+.figure-grid.two-one {
+  max-width: 900px;
+  margin-left: auto;
+  margin-right: auto;
+}
+.figure-grid.five-panel {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+.figure-grid figure {
+  margin: 0;
+}
+.figure-grid img {
+  width: 100%;
+  max-width: 100%;
+  margin: 0;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: white;
+}
+.figure-grid figcaption {
+  color: var(--muted);
+  font-size: 0.85em;
+  line-height: 1.35;
+  text-align: center;
+  margin-top: 0.35em;
+}
+.figure-grid .centered {
+  grid-column: 1 / -1;
+  justify-self: center;
+  max-width: 58%;
+}
+.figure-grid.two-one .centered {
+  max-width: 54%;
+}
+.figure-grid.five-panel .centered {
+  max-width: 52%;
 }
 ul, ol {
   padding-left: 1.4em;
@@ -134,7 +214,19 @@ ul, ol {
     padding: 28px;
   }
 }
+@media screen and (max-width: 540px) {
+  .figure-grid {
+    grid-template-columns: 1fr;
+  }
+  .figure-grid .centered,
+  .figure-grid.five-panel .centered {
+    grid-column: auto;
+    max-width: 100%;
+  }
+}
 """
+
+RAW_HTML_LINE = re.compile(r"^</?(div|figure|figcaption|img|span|br|table|tbody|tr|td)(\s|>|/)")
 
 
 def render_inline(text: str) -> str:
@@ -197,6 +289,12 @@ def render_table(lines: list[str]) -> str:
         out.append("</tr>")
     out.append("</tbody></table>")
     return "\n".join(out)
+
+
+def is_raw_html_line(line: str) -> bool:
+    """Allow simple report-layout HTML while keeping other markup escaped."""
+
+    return bool(RAW_HTML_LINE.match(line.strip()))
 
 
 def markdown_to_html(markdown: str) -> str:
@@ -275,6 +373,13 @@ def markdown_to_html(markdown: str) -> str:
             flush_paragraph()
             close_list()
             html_lines.append(render_inline(stripped))
+            i += 1
+            continue
+
+        if is_raw_html_line(stripped):
+            flush_paragraph()
+            close_list()
+            html_lines.append(line)
             i += 1
             continue
 

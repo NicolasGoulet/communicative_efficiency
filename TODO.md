@@ -212,6 +212,16 @@ labels each figure as main-text/appendix/exploratory/optional, and writes
 candidate manifests under
 `results/route1_portelance_xu_extension_suite/candidate_additions/`.
 
+2026-06-23 status: added a separate plot-first inspiration draft for the active
+supervisor report:
+`docs/predicting_utterance_level_information_route1_inspiration.md` and
+`.html`. It does not modify
+`docs/predicting_utterance_level_information_report.md`. The draft proposes a
+cleaner fixed-effort utterance-information narrative, adds 10 existing Route 1
+figure candidates, replaces the weak possible-next-steps framing, and records
+how the already-existing word-level Mistral surprisal product can support a
+lexical-identity / word-position follow-up.
+
 Estimator rationale to state in the report:
 
 - [x] **OLS + child fixed effects + clustered SE:** main comparable Atlas view;
@@ -598,3 +608,50 @@ Use this for short notes after finishing tasks.
 - 2026-06-22 - Added the Route 1 real-vs-controls context report at `docs/route1_real_vs_controls_context_report.html`/`.embedded.html` and linked it from `docs/route1_current_reports_browser_index.html`. The report contrasts real children with random, unigram, bigram, trigram, LSTM k3/k4/k5, and caretaker speech using k0/k3 trajectories, with-context trajectories, context-gain trajectories, source-minus-real gaps, paired/control difference models, and illustrative examples. Added focused tests for paired-gap math, example selection, and report-relative figure links.
 - 2026-06-22 update - Expanded the real-vs-controls report with model-based fixed-effort regression-line evidence from the saved corrected Atlas artifacts: M2/CM2 k3 lines at 2, 6, and 10 words, model-predicted source-minus-real line gaps, and slope-difference plots/tables across M2, M3, M4c, M5, M6, M7, M11, and M15 where available. The report now explicitly states the fixed-effort developmental trend, including the real-child downward slopes and which controls are flatter/upward.
 - 2026-06-22 update - Added a separate proposed completion draft beside the current supervisor-facing report: `docs/predicting_utterance_level_information_report_proposed_completion.{md,html,embedded.html}`. The current `docs/predicting_utterance_level_information_report.*` files were left unchanged. The side draft inserts candidate real-vs-baseline/caretaker synthesis, fixed-effort slope tables, and promoted figures for manual reworking.
+- 2026-06-23 status: added a separate word-level alternative model discussion
+  report in `docs/predicting_word_level_information_alternative_report.md` and
+  rendered `.html`. This side report does not modify the active supervisor
+  report. It keeps the first-report boundary clear: Route 1 should focus on
+  utterance-level `sum_bits` at fixed production effort, while the word-level
+  follow-up should discuss form cost, contextual word informativity,
+  same-word developmental models, word-level context gain, and a guarded
+  utterance-level lexical-profile extension.
+- 2026-06-23 status: fit the supervisor-facing union context Model 4 for real
+  child k3 utterance-level `sum_bits`: `age + effort + age:effort + parent
+  context effort + context entropy + child identity`, with no question-type
+  predictor. Added `src/build_supervisor_union_context_model.py`, generated
+  summaries under `results/supervisor_union_context_model/`, regenerated clean
+  fixed-effort plots under `figs/supervisor_union_context_model/`, and updated
+  `docs/predicting_utterance_level_information_report.{md,html,embedded.html}`.
+  The word-count model keeps the age effect negative (`-0.122` bits/month,
+  `p < .001`, `R2 = 0.627`) while both context predictors have independent
+  negative associations. Focused test and syntax checks passed.
+- 2026-06-23 status: added a separate two-candidate decision report for the
+  possible final supervisor model: context-as-mechanism versus real-children-
+  versus-baselines. Outputs are
+  `docs/two_final_model_candidates_report.{md,html,embedded.html}`. This side
+  report does not modify the active supervisor-facing report.
+- 2026-06-23 update: expanded the two-candidate side report with a plain
+  explanation of size control, exact-length/MLU-proof models, repeated-measures
+  estimator choices, already-fit GEE/GLM/MixedLM sensitivity plots, and the
+  no-question `F27` context-mechanism estimator screen.
+- 2026-06-23 update: added fixed-word estimator-panel counterparts to the
+  two-candidate side report, using the same supervisor-facing plot logic at 2,
+  6, and 10 words. New files:
+  `src/build_two_final_model_candidate_estimator_plots.py`,
+  `tests/test_build_two_final_model_candidate_estimator_plots.py`,
+  `figs/two_final_model_candidates_report/`, and
+  `results/two_final_model_candidates_report/`. Regenerated
+  `docs/two_final_model_candidates_report.{html,embedded.html}` and verified
+  the focused test plus 0 missing Markdown image links.
+- 2026-06-23 update: corrected the estimator-sensitivity question by fitting
+  exactly the four current supervisor formulas M1-M4, rather than mixing in
+  F19/F21 exact-length formulas or the F10 question-type context analogue.
+  Added `src/build_supervisor_formula_estimator_sensitivity.py`,
+  `tests/test_build_supervisor_formula_estimator_sensitivity.py`,
+  `docs/supervisor_formula_estimator_sensitivity_report.{md,html,embedded.html}`,
+  `results/supervisor_formula_estimator_sensitivity/`, and
+  `figs/supervisor_formula_estimator_sensitivity/`. Final version excludes
+  session-ID predictors/grouping/random intercepts and uses row-level or
+  child-age-word-cell estimators only. All 20 fits completed; focused test
+  passed; image audit found 0 missing links.

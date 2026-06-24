@@ -479,7 +479,12 @@ def fit_source_atlas(
     return summary, predictions, coefficients, bin_defs
 
 
-def plot_fixed_predictions(predictions: pd.DataFrame, *, fig_dir: Path) -> pd.DataFrame:
+def plot_fixed_predictions(
+    predictions: pd.DataFrame,
+    *,
+    fig_dir: Path,
+    title_template: str | None = None,
+) -> pd.DataFrame:
     """Plot fixed-effort atlas figures."""
 
     fig_dir.mkdir(parents=True, exist_ok=True)
@@ -516,7 +521,19 @@ def plot_fixed_predictions(predictions: pd.DataFrame, *, fig_dir: Path) -> pd.Da
             ax.grid(alpha=0.18)
             ax.legend(title="Fixed value", fontsize=8, title_fontsize=9)
         axes[0].set_ylabel("Predicted total bits")
-        fig.suptitle(f"{source} | {context_k.upper()} {model_id}: {model_label} | {effort_label}", y=1.05)
+        if title_template:
+            title = title_template.format(
+                source=source,
+                context_k=context_k,
+                context_k_upper=str(context_k).upper(),
+                model_id=model_id,
+                model_label=model_label,
+                effort_col=effort_col,
+                effort_label=effort_label,
+            )
+        else:
+            title = f"{source} | {context_k.upper()} {model_id}: {model_label} | {effort_label}"
+        fig.suptitle(title, y=1.05)
         fig.tight_layout()
         filename = f"{slugify(source)}_{context_k}_{model_id.lower()}_{slugify(effort_col)}_fixed_effort_atlas.png"
         out = fig_dir / filename

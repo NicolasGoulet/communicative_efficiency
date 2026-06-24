@@ -144,6 +144,12 @@ class TestRoute1ReportAssets(unittest.TestCase):
             "| --- | --- |\n"
             "| x | y |\n\n"
             "![Alt](../figs/example.png)\n"
+            "<div class=\"figure-grid\">\n"
+            "<figure><img src=\"../figs/a.png\" alt=\"A\"></figure>\n"
+            "</div>\n"
+            "<table class=\"plot-layout\">\n"
+            "<tr><td colspan=\"2\"><img src=\"../figs/b.png\" alt=\"B\"></td></tr>\n"
+            "</table>\n"
         )
 
         self.assertIn("<h1>Title</h1>", rendered)
@@ -151,6 +157,10 @@ class TestRoute1ReportAssets(unittest.TestCase):
         self.assertIn("<code>code</code>", rendered)
         self.assertIn("<table>", rendered)
         self.assertIn('src="../figs/example.png"', rendered)
+        self.assertIn('<div class="figure-grid">', rendered)
+        self.assertIn('<figure><img src="../figs/a.png" alt="A"></figure>', rendered)
+        self.assertIn('<table class="plot-layout">', rendered)
+        self.assertIn('<tr><td colspan="2"><img src="../figs/b.png" alt="B"></td></tr>', rendered)
 
     @staticmethod
     def write_csv(path: Path, rows):

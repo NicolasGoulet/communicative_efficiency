@@ -204,6 +204,26 @@ MPLCONFIGDIR=/tmp/matplotlib .venv/bin/python src/build_route1_formula_permutati
   `MPLCONFIGDIR=/tmp/matplotlib .venv/bin/python -m unittest tests.test_build_route1_best_model_robustness_package`
   with 9 tests passing.
 
+## 2026-06-23 Supervisor Report Route 1 Inspiration Draft
+
+- Added `docs/predicting_utterance_level_information_route1_inspiration.md`
+  and rendered
+  `docs/predicting_utterance_level_information_route1_inspiration.html`.
+- This is a side draft for inspiration only; the active supervisor-facing
+  report `docs/predicting_utterance_level_information_report.md` was not
+  modified.
+- The draft reframes the report around fixed-effort utterance information and
+  proposes 10 existing figure additions: fixed-effort bits-per-word
+  trajectories, context-specific age slopes, context gain, context-size
+  controls, outcome sensitivity, dataset robustness, individual trajectories,
+  frequency/ngram baselines, and LSTM baselines.
+- It also records that the existing word-level Mistral product in
+  `compute_surprisal_mila` has 16,506,760 word rows and can support
+  lexical-identity-controlled and word-position analyses using `word_sum_bits`.
+- Verification: rendered the HTML with
+  `uv run python src/render_markdown_report.py docs/predicting_utterance_level_information_route1_inspiration.md docs/predicting_utterance_level_information_route1_inspiration.html --embed-images`
+  and checked 13 image links with 0 missing.
+
 ## Important Paths
 
 - `src/prepare_datasets.py`
@@ -5395,3 +5415,161 @@ MPLCONFIGDIR=/tmp/matplotlib-cache .venv/bin/python \
 
 - Results: focused tests passed (`11` tests); report regeneration completed;
   Markdown image audit found `10` image references with `0` missing files.
+
+## 2026-06-23 - Word-level alternative model discussion report
+
+- Added a separate side report for the five word-level models to discuss:
+
+```text
+docs/predicting_word_level_information_alternative_report.md
+docs/predicting_word_level_information_alternative_report.html
+```
+
+- The active supervisor-facing utterance report was not modified. The new
+  report explicitly keeps the first supervisor report focused on Route 1:
+  predicting utterance-level `sum_bits` at fixed production effort.
+- The alternative report covers:
+  - word-type form cost versus average contextual informativity;
+  - same-word developmental informativity with word identity controls;
+  - word-level context gain from k0 versus contextual scoring;
+  - occurrence-level form cost versus residual contextual informativity;
+  - an utterance-level lexical-profile extension that avoids using raw
+    same-utterance word surprisal as a tautological predictor of `sum_bits`.
+- Render command:
+
+```bash
+uv run python src/render_markdown_report.py \
+  docs/predicting_word_level_information_alternative_report.md \
+  docs/predicting_word_level_information_alternative_report.html \
+  --title "Alternative Word-Level Information Models"
+```
+
+## 2026-06-23 - Supervisor union context Model 4
+
+- Added `src/build_supervisor_union_context_model.py` and
+  `tests/test_build_supervisor_union_context_model.py`.
+- Fit the real-child k3 no-question union context model:
+
+```text
+sum_bits ~ age_c + effort_c + age_c:effort_c
+         + parent_context_effort_c + context_entropy_c
+         + C(child_id)
+```
+
+- Generated fitted artifacts:
+
+```text
+results/supervisor_union_context_model/union_context_model_summary.csv
+results/supervisor_union_context_model/union_context_fixed_effort_predictions.csv.gz
+results/supervisor_union_context_model/union_context_coefficient_long.csv
+results/supervisor_union_context_model/union_context_fixed_slice_slopes.csv
+results/supervisor_union_context_model/union_context_fixed_effort_bins.csv
+results/supervisor_union_context_model/union_context_figure_manifest.csv
+figs/supervisor_union_context_model/
+```
+
+- Word-count result promoted to the supervisor report: `n = 441,413`,
+  `R2 = 0.627`, age `-0.122` bits/month (`p < .001`), effort `6.376`
+  bits/word, age-by-effort `-0.003` (`p = .707`), parent-context effort
+  `-0.043`, and context entropy `-0.470`.
+- Updated and rendered:
+
+```text
+docs/predicting_utterance_level_information_report.md
+docs/predicting_utterance_level_information_report.html
+docs/predicting_utterance_level_information_report.embedded.html
+```
+
+- Verification:
+
+```bash
+uv run python -m py_compile \
+  src/build_supervisor_union_context_model.py \
+  src/build_route1_source_specific_m1_m6_fixed_effort_atlas.py
+uv run python -m unittest tests.test_build_supervisor_union_context_model
+uv run python src/render_markdown_report.py \
+  docs/predicting_utterance_level_information_report.md \
+  docs/predicting_utterance_level_information_report.html \
+  --title "Predicting Informational Content at the Utterance Level"
+uv run python src/render_markdown_report.py \
+  docs/predicting_utterance_level_information_report.md \
+  docs/predicting_utterance_level_information_report.embedded.html \
+  --title "Predicting Informational Content at the Utterance Level" \
+  --embed-images
+```
+
+## 2026-06-23 - Two final-model candidate side report
+
+- Added a short decision report comparing only the two possible final model
+  directions:
+
+```text
+docs/two_final_model_candidates_report.md
+docs/two_final_model_candidates_report.html
+docs/two_final_model_candidates_report.embedded.html
+```
+
+- Candidate A is a clean no-question context-mechanism model:
+  `sum_bits ~ age + effort + age:effort + parent context effort + context entropy
+  + age:context entropy + child identity`.
+- Candidate B is the real-child-versus-baselines specificity model using the
+  existing fixed-effort real-vs-control evidence.
+- Updated the report with a size-control explanation, exact-length/MLU-proof
+  evidence, repeated-measures estimator rationale, already-fit GEE/GLM/MixedLM
+  sensitivity plots, and the no-question `F27` context-mechanism estimator
+  screen.
+- Added supervisor-style fixed-word estimator panels to the side report. New
+  builder: `src/build_two_final_model_candidate_estimator_plots.py`; figures
+  are under `figs/two_final_model_candidates_report/`; plot manifest and slope
+  CSVs are under `results/two_final_model_candidates_report/`. The panels cover
+  F01/M2, F02/M3, F10/context-control analogue, F19/exact-length, and
+  F21/exact-length-with-context at fixed 2, 6, and 10 words across row
+  OLS+child FE, aggregate OLS, GEE Gaussian, GEE Gamma/log, MixedLM random
+  child intercept, and MixedLM child+session intercepts.
+- Verified report rendering and checked Markdown image links: `0` missing.
+- Focused verification:
+  `.venv/bin/python -m unittest tests.test_build_two_final_model_candidate_estimator_plots`.
+
+## 2026-06-23 - Exact supervisor-formula estimator sensitivity
+
+- Added a clean estimator sensitivity report using only the four formulas
+  currently in `docs/predicting_utterance_level_information_report.md`:
+
+```text
+M1: sum_bits ~ age + effort
+M2: sum_bits ~ age + effort + child identity
+M3: sum_bits ~ age + effort + age:effort + child identity
+M4: sum_bits ~ age + effort + age:effort
+    + parent context effort + context entropy + child identity
+```
+
+- New builder and focused tests:
+
+```text
+src/build_supervisor_formula_estimator_sensitivity.py
+tests/test_build_supervisor_formula_estimator_sensitivity.py
+```
+
+- Refined the report after deciding that session-level random intercepts
+  compete too directly with age because age is fixed within session. The final
+  version fits 20/20 real-child k3 word-effort models and uses no `session_id`
+  predictor, grouping factor, or random intercept. M1 variants include plain
+  row OLS, clustered row OLS, child-age-word-cell OLS, child-age-word-cell GEE
+  Gaussian, and child-age-word-cell GEE Gamma/log. M2-M4 variants use row
+  OLS+child fixed effects, child-age-word-cell OLS+child fixed effects,
+  child-age-word-cell GEE+child fixed effects, child-age-word-cell Gamma/log
+  GEE+child fixed effects, and child-age-word-cell MixedLM with random child
+  intercept. MixedLM variants adapt child identity from fixed child intercepts
+  to random child intercepts.
+- Outputs:
+
+```text
+docs/supervisor_formula_estimator_sensitivity_report.md
+docs/supervisor_formula_estimator_sensitivity_report.html
+docs/supervisor_formula_estimator_sensitivity_report.embedded.html
+results/supervisor_formula_estimator_sensitivity/
+figs/supervisor_formula_estimator_sensitivity/
+```
+
+- Verification: focused unittest passed; Markdown image audit found 5 image
+  references and 0 missing files.

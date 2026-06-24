@@ -1,0 +1,465 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Alternative Word-Level Information Models</title>
+<style>
+:root {
+  color-scheme: light;
+  --ink: #1e2528;
+  --muted: #5e686d;
+  --line: #d9e0df;
+  --paper: #ffffff;
+  --soft: #f5f7f6;
+  --accent: #2f6f73;
+  --accent2: #c76f2c;
+}
+body {
+  margin: 0;
+  background: #eef2f1;
+  color: var(--ink);
+  font: 16px/1.58 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+main {
+  max-width: 980px;
+  margin: 34px auto 56px;
+  padding: 48px 58px;
+  background: var(--paper);
+  box-shadow: 0 18px 50px rgba(31, 45, 48, 0.12);
+}
+h1, h2, h3, h4 {
+  line-height: 1.18;
+  margin: 1.6em 0 0.55em;
+}
+h1 {
+  margin-top: 0;
+  font-size: 2.25rem;
+  border-bottom: 3px solid var(--accent);
+  padding-bottom: 0.45em;
+}
+h2 {
+  font-size: 1.55rem;
+  color: var(--accent);
+}
+h3 {
+  font-size: 1.18rem;
+}
+p {
+  margin: 0.75em 0;
+}
+a {
+  color: var(--accent);
+}
+blockquote {
+  border-left: 4px solid var(--accent2);
+  margin: 1.1em 0;
+  padding: 0.05em 1.1em;
+  color: var(--muted);
+  background: #fff8f2;
+}
+code {
+  background: var(--soft);
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  padding: 0.08em 0.3em;
+  font-family: "SFMono-Regular", Consolas, monospace;
+  font-size: 0.92em;
+}
+pre {
+  background: #f5f7f6;
+  color: var(--ink);
+  border: 1px solid var(--line);
+  padding: 1em;
+  overflow-x: auto;
+  border-radius: 7px;
+}
+pre code {
+  background: transparent;
+  border: 0;
+  padding: 0;
+  color: inherit;
+}
+table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 1.15em 0 1.45em;
+  font-size: 0.95em;
+}
+.plot-layout {
+  table-layout: fixed;
+  margin: 1.1em auto 1.45em;
+}
+.plot-layout,
+.plot-layout tr,
+.plot-layout td {
+  border: 0;
+  background: transparent;
+}
+.plot-layout td {
+  padding: 0.35em 0.55em 0.95em;
+  text-align: center;
+  vertical-align: top;
+}
+.plot-layout img {
+  width: 100%;
+  max-width: 100%;
+  margin: 0 auto 0.35em;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: white;
+}
+.plot-layout .centered-cell img {
+  width: 54%;
+}
+.plot-caption {
+  color: var(--muted);
+  font-size: 0.85em;
+  line-height: 1.35;
+}
+th, td {
+  border: 1px solid var(--line);
+  padding: 0.54em 0.68em;
+  vertical-align: top;
+}
+th {
+  background: #e7efed;
+  text-align: left;
+}
+tr:nth-child(even) td {
+  background: #fafbfb;
+}
+.plot-layout tr:nth-child(even) td {
+  background: transparent;
+}
+img {
+  max-width: 100%;
+  display: block;
+  margin: 1.1em auto 0.45em;
+}
+.figure-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.05rem 1.25rem;
+  align-items: start;
+  margin: 1.1em 0 1.45em;
+}
+.figure-grid.two-one {
+  max-width: 900px;
+  margin-left: auto;
+  margin-right: auto;
+}
+.figure-grid.five-panel {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+.figure-grid figure {
+  margin: 0;
+}
+.figure-grid img {
+  width: 100%;
+  max-width: 100%;
+  margin: 0;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: white;
+}
+.figure-grid figcaption {
+  color: var(--muted);
+  font-size: 0.85em;
+  line-height: 1.35;
+  text-align: center;
+  margin-top: 0.35em;
+}
+.figure-grid .centered {
+  grid-column: 1 / -1;
+  justify-self: center;
+  max-width: 58%;
+}
+.figure-grid.two-one .centered {
+  max-width: 54%;
+}
+.figure-grid.five-panel .centered {
+  max-width: 52%;
+}
+ul, ol {
+  padding-left: 1.4em;
+}
+.caption {
+  color: var(--muted);
+  font-size: 0.92em;
+  margin-top: -0.15em;
+}
+@media print {
+  body {
+    background: white;
+  }
+  main {
+    box-shadow: none;
+    margin: 0;
+    max-width: none;
+    padding: 28px;
+  }
+}
+@media screen and (max-width: 540px) {
+  .figure-grid {
+    grid-template-columns: 1fr;
+  }
+  .figure-grid .centered,
+  .figure-grid.five-panel .centered {
+    grid-column: auto;
+    max-width: 100%;
+  }
+}
+</style>
+</head>
+<body>
+<main>
+<h1>Alternative Report: Word-Level Information, Form Cost, and Context</h1>
+<p>Working draft, June 2026</p>
+<h2>Purpose</h2>
+<p>This is a separate discussion report. It should not replace the first supervisor-facing report.</p>
+<p>The first supervisor report should stay focused on Route 1:</p>
+<pre><code>At the utterance level, does total information, measured with sum_bits, change
+with age after controlling production effort and repeated observations from the
+same children?</code></pre>
+<p>This alternative report asks a different follow-up question:</p>
+<pre><code>Inside an utterance, how is information distributed across individual words,
+and how does that relate to word-form cost, contextual support, and development?</code></pre>
+<p>The distinction matters. Route 1 treats the utterance as the unit of analysis. The word-level route treats word uses and word types as the units of analysis. The two can speak to each other, but they should not be mixed in the first supervisor report.</p>
+<h2>Available Word-Level Quantity</h2>
+<p>The word-level scoring pass assigns Mistral surprisal mass back to lexical word spans. For each word occurrence, the available quantities include:</p>
+<ul>
+<li>the word form and its position in the utterance;</li>
+<li>total surprisal assigned to that word, <code>word_sum_bits</code>;</li>
+<li>form-cost proxies such as characters and syllables;</li>
+<li>normalized outcomes such as bits per character and bits per syllable;</li>
+<li>context window, speaker group, child, age, and utterance identifiers;</li>
+<li>token-level details showing which Mistral subword tokens contributed to the</li>
+<p>word-level value.</p>
+</ul>
+<p>The most useful interpretation is:</p>
+<pre><code>word_sum_bits = how unpredictable this particular word use was in this
+conversational and utterance-internal context.</code></pre>
+<p>This is not identical to semantic informativeness. It is model-based contextual unpredictability at the word-use level.</p>
+<h2>Five Models To Discuss</h2>
+<h3>Model 1: Word-Type Form Cost Versus Average Informativity</h3>
+<p><strong>Question.</strong> Are longer or more effortful word forms more informative on average?</p>
+<p>This is the closest analogue to a Levshina-style law-of-abbreviation analysis. For each word type, average word-level surprisal across all its observed uses, then ask whether more informative words are longer or more complex forms.</p>
+<p>Core type-level formulas:</p>
+<pre><code>word_char_len ~ neg_log2_frequency
+word_char_len ~ average_word_informativity_bits
+word_char_len ~ neg_log2_frequency + average_word_informativity_bits
+
+word_syllable_count ~ neg_log2_frequency
+word_syllable_count ~ average_word_informativity_bits
+word_syllable_count ~ neg_log2_frequency + average_word_informativity_bits</code></pre>
+<p>Best use:</p>
+<ul>
+<li>This is the cleanest &quot;word form cost vs contextual informativity&quot; model.</li>
+<li>It tells us whether costly forms are associated with higher average</li>
+<p>contextual information.</p>
+<li>It should be fit separately for child speech and caretaker speech, and</li>
+<p>separately by context window.</p>
+</ul>
+<p>Main caveat:</p>
+<ul>
+<li>Word frequency and word informativity are closely related. The key model is</li>
+<p>the combined one, because it asks whether contextual informativity adds anything beyond frequency.</p>
+</ul>
+<p>What would be interesting:</p>
+<ul>
+<li>Longer words have higher average contextual informativity even after</li>
+<p>frequency is controlled.</p>
+<li>The relation is stronger in child speech, or changes by developmental age bin.</li>
+</ul>
+<h3>Model 2: Same-Word Developmental Informativity</h3>
+<p><strong>Question.</strong> For the same frequent words, do the contexts in which children use them become more or less informative over development?</p>
+<p>This model controls word identity. That is the critical move. Without word identity controls, a developmental effect could simply mean that older children use different words. With word identity controls, the model asks whether the same words are used in different contextual conditions across age.</p>
+<p>Core occurrence/cell-level formula:</p>
+<pre><code>word_sum_bits ~ age + child identity + context window + word identity</code></pre>
+<p>By-context version:</p>
+<pre><code>word_sum_bits ~ age + child identity + word identity</code></pre>
+<p>fit separately for <code>k0</code>, <code>k1</code>, <code>k2</code>, and <code>k3</code>.</p>
+<p>Best use:</p>
+<ul>
+<li>This is the strongest developmental word-level model.</li>
+<li>It asks whether children&#x27;s usage contexts change for the same lexical items.</li>
+<li>It is a good complement to Route 1 because it can explain whether an</li>
+<p>utterance-level age effect is driven by new vocabulary or by changing use of familiar words.</p>
+</ul>
+<p>Main caveat:</p>
+<ul>
+<li>It should be restricted to frequent words with enough observations. Rare</li>
+<p>words cannot support stable word fixed effects.</p>
+</ul>
+<p>What would be interesting:</p>
+<ul>
+<li>Same-word <code>word_sum_bits</code> decreases with age under <code>k3</code>: familiar words are</li>
+<p>being used in increasingly predictable discourse contexts.</p>
+<li>Same-word <code>word_sum_bits</code> increases with age under <code>k0</code>: older children use</li>
+<p>the same words in more internally complex utterance positions without relying on discourse context.</p>
+<li>The <code>k0</code> and <code>k3</code> age effects diverge, suggesting development in contextual</li>
+<p>embedding rather than only lexical choice.</p>
+</ul>
+<h3>Model 3: Word-Level Context Gain</h3>
+<p><strong>Question.</strong> Which individual words become easier to predict when discourse context is added, and does that context support change with age?</p>
+<p>For the same word occurrence, define:</p>
+<pre><code>word_context_gain_k3 = word_sum_bits_k0 - word_sum_bits_k3</code></pre>
+<p>The same can be computed for <code>k1</code> and <code>k2</code>.</p>
+<p>Core formula:</p>
+<pre><code>word_context_gain ~ age
+                  + word form cost
+                  + word position
+                  + child identity
+                  + word identity</code></pre>
+<p>Optional context-window version:</p>
+<pre><code>word_context_gain ~ age * context window
+                  + word form cost
+                  + word position
+                  + child identity
+                  + word identity</code></pre>
+<p>Best use:</p>
+<ul>
+<li>This directly asks whether the conversational context helps predict specific</li>
+<p>words.</p>
+<li>It separates residual word information from context support.</li>
+<li>It is especially useful for the question: are children increasingly using</li>
+<p>words that are supported by the preceding conversational context?</p>
+</ul>
+<p>Main caveat:</p>
+<ul>
+<li>The k0 and k3 word rows need to be paired carefully by utterance and</li>
+<p>word index. This is a derived table, not a raw scoring output.</p>
+</ul>
+<p>What would be interesting:</p>
+<ul>
+<li>Context gain increases with age for the same words.</li>
+<li>Longer or more specific word forms have larger context gain, suggesting that</li>
+<p>costly forms are used when context makes them recoverable.</p>
+<li>Context gain is stronger for later words in the utterance than for the first</li>
+<p>word, because previous target words also become part of the predictive context.</p>
+</ul>
+<h3>Model 4: Word-Form Cost Versus Residual Contextual Informativity</h3>
+<p><strong>Question.</strong> Do costly word forms carry more residual information after context is known, and does this relation change with age?</p>
+<p>This is subtly different from Model 1. Model 1 is type-level: average informativity of a word type. Model 4 is occurrence-level: whether a costly word form is used in a high- or low-information position on a particular occasion.</p>
+<p>Core formula:</p>
+<pre><code>word_sum_bits ~ age
+              + word form cost
+              + age:word form cost
+              + word frequency
+              + word position
+              + context window
+              + child identity</code></pre>
+<p>Stronger frequent-word version:</p>
+<pre><code>word_sum_bits ~ age
+              + age:word form cost
+              + word position
+              + context window
+              + child identity
+              + word identity</code></pre>
+<p>Best use:</p>
+<ul>
+<li>This gets closest to the phrase &quot;word form cost vs contextual informativity.&quot;</li>
+<li>It asks whether effortful forms are reserved for more informative word uses.</li>
+<li>The age interaction asks whether this calibration changes developmentally.</li>
+</ul>
+<p>Main caveat:</p>
+<ul>
+<li>If word identity is included, stable word-form cost is mostly absorbed by</li>
+<p>word fixed effects. Then the age interaction should be interpreted as a developmental moderation check, not as a simple between-word length effect.</p>
+</ul>
+<p>What would be interesting:</p>
+<ul>
+<li>A positive form-cost effect: longer or syllabically heavier words carry more</li>
+<p>word-level information.</p>
+<li>A negative age by form-cost interaction: older children may use costly words</li>
+<p>in more predictable contexts, possibly because those words become routinized or better supported by discourse.</p>
+<li>A positive age by form-cost interaction: older children may reserve costly</li>
+<p>words for increasingly informative lexical choices.</p>
+</ul>
+<h3>Model 5: Utterance-Level Sum Bits From Word-Level Lexical Profile</h3>
+<p><strong>Question.</strong> Can we explain the utterance-level Route 1 result by looking at the words inside the utterance?</p>
+<p>This is the bridge back to the first supervisor report. The outcome remains utterance-level <code>sum_bits</code>, but the predictors summarize the lexical and word-form profile of the utterance.</p>
+<p>Important guardrail:</p>
+<p>Do not predict <code>sum_bits</code> using the same utterance&#x27;s raw word surprisal values as predictors. That would be almost tautological, because utterance <code>sum_bits</code> is the sum of token or word surprisal mass.</p>
+<p>Instead, use word-level predictors that are not just the same outcome re-expressed. For example:</p>
+<ul>
+<li>mean word length in characters;</li>
+<li>mean syllable count;</li>
+<li>maximum word-form cost in the utterance;</li>
+<li>proportion of rare words;</li>
+<li>expected lexical informativity of the word types, estimated from other rows;</li>
+<li>number or proportion of high-cost words;</li>
+<li>word-position profile, such as whether the costly words occur early or late.</li>
+</ul>
+<p>Core formula:</p>
+<pre><code>sum_bits ~ age
+         + child word count
+         + child identity
+         + mean word form cost
+         + max word form cost
+         + rare-word share
+         + expected lexical informativity
+         + context window</code></pre>
+<p>Model-comparison version:</p>
+<pre><code>Base Route 1:
+sum_bits ~ age + child word count + child identity
+
+Lexical-profile extension:
+sum_bits ~ age + child word count + child identity
+         + lexical-profile predictors</code></pre>
+<p>Best use:</p>
+<ul>
+<li>This keeps the first report&#x27;s outcome, <code>sum_bits</code>, but tests whether the age</li>
+<p>effect is explained by changes in lexical composition.</p>
+<li>It can tell us whether older children&#x27;s lower or higher conditional</li>
+<p>information is due to using different kinds of words.</p>
+<li>It is the best bridge between Route 1 and the word-level route.</li>
+</ul>
+<p>Main caveat:</p>
+<ul>
+<li>Expected lexical informativity must be estimated out of sample or at least</li>
+<p>outside the target utterance. Otherwise the model leaks the outcome into the predictors.</p>
+</ul>
+<p>What would be interesting:</p>
+<ul>
+<li>The Route 1 age effect shrinks after adding lexical-profile predictors. That</li>
+<p>would suggest that developmental change in utterance information is partly lexical-compositional.</p>
+<li>The age effect remains. That would suggest Route 1 is not just about which</li>
+<p>word types children use, but about how whole utterances are structured in context.</p>
+</ul>
+<h2>Suggested Discussion Order</h2>
+<p>For a supervisor meeting, the cleanest order is:</p>
+<ol>
+<li>Keep the first report focused on Route 1 and utterance-level <code>sum_bits</code>.</li>
+<li>Present this word-level report as a follow-up, not as a competing main</li>
+<p>analysis.</p>
+<li>Start with Model 1 because it is the cleanest form-cost/informativity</li>
+<p>question.</p>
+<li>Move to Model 2 because it is the strongest developmental word-use model.</li>
+<li>Use Model 3 to connect word-level information to discourse context.</li>
+<li>Use Model 5 only after the Route 1 result is established, because it asks</li>
+<p>whether word-level lexical composition explains the utterance-level effect.</p>
+</ol>
+<h2>What Not To Claim Yet</h2>
+<p>Do not claim that word-level information is &quot;better&quot; than utterance-level information. It answers a different question.</p>
+<p>Do not claim that lower surprisal is automatically better or worse. Lower surprisal means more predictable under the model. In child language, that could reflect better contextual integration, routinization, caregiver scaffolding, or less novel content.</p>
+<p>Do not use a same-utterance word surprisal decomposition as a predictor of <code>sum_bits</code> and treat it as explanatory. That is mostly arithmetic.</p>
+<p>Do not put this in the first supervisor report unless the supervisor explicitly asks for the next phase. The first report should make the Route 1 utterance level argument cleanly.</p>
+<h2>Recommended Next Step</h2>
+<p>The best immediate follow-up is to run and summarize the word-level model suite in this order:</p>
+<ol>
+<li>Model 1: type-level form cost versus average informativity.</li>
+<li>Model 2: same-word developmental informativity with word identity controls.</li>
+<li>Model 3: word-level context gain, after pairing k0 and contextual word rows.</li>
+<li>Model 5: utterance-level lexical-profile extension of Route 1.</li>
+</ol>
+<p>That sequence would let us say:</p>
+<pre><code>The first report asks whether utterance-level information changes at fixed
+effort. The follow-up asks where that information lives inside the utterance:
+in word form cost, lexical choice, word identity, or contextual support.</code></pre>
+</main>
+</body>
+</html>

@@ -1,0 +1,648 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Two Possible Final Models To Discuss</title>
+<style>
+:root {
+  color-scheme: light;
+  --ink: #1e2528;
+  --muted: #5e686d;
+  --line: #d9e0df;
+  --paper: #ffffff;
+  --soft: #f5f7f6;
+  --accent: #2f6f73;
+  --accent2: #c76f2c;
+}
+body {
+  margin: 0;
+  background: #eef2f1;
+  color: var(--ink);
+  font: 16px/1.58 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+main {
+  max-width: 980px;
+  margin: 34px auto 56px;
+  padding: 48px 58px;
+  background: var(--paper);
+  box-shadow: 0 18px 50px rgba(31, 45, 48, 0.12);
+}
+h1, h2, h3, h4 {
+  line-height: 1.18;
+  margin: 1.6em 0 0.55em;
+}
+h1 {
+  margin-top: 0;
+  font-size: 2.25rem;
+  border-bottom: 3px solid var(--accent);
+  padding-bottom: 0.45em;
+}
+h2 {
+  font-size: 1.55rem;
+  color: var(--accent);
+}
+h3 {
+  font-size: 1.18rem;
+}
+p {
+  margin: 0.75em 0;
+}
+a {
+  color: var(--accent);
+}
+blockquote {
+  border-left: 4px solid var(--accent2);
+  margin: 1.1em 0;
+  padding: 0.05em 1.1em;
+  color: var(--muted);
+  background: #fff8f2;
+}
+code {
+  background: var(--soft);
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  padding: 0.08em 0.3em;
+  font-family: "SFMono-Regular", Consolas, monospace;
+  font-size: 0.92em;
+}
+pre {
+  background: #f5f7f6;
+  color: var(--ink);
+  border: 1px solid var(--line);
+  padding: 1em;
+  overflow-x: auto;
+  border-radius: 7px;
+}
+pre code {
+  background: transparent;
+  border: 0;
+  padding: 0;
+  color: inherit;
+}
+table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 1.15em 0 1.45em;
+  font-size: 0.95em;
+}
+.plot-layout {
+  table-layout: fixed;
+  margin: 1.1em auto 1.45em;
+}
+.plot-layout,
+.plot-layout tr,
+.plot-layout td {
+  border: 0;
+  background: transparent;
+}
+.plot-layout td {
+  padding: 0.35em 0.55em 0.95em;
+  text-align: center;
+  vertical-align: top;
+}
+.plot-layout img {
+  width: 100%;
+  max-width: 100%;
+  margin: 0 auto 0.35em;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: white;
+}
+.plot-layout .centered-cell img {
+  width: 54%;
+}
+.plot-caption {
+  color: var(--muted);
+  font-size: 0.85em;
+  line-height: 1.35;
+}
+th, td {
+  border: 1px solid var(--line);
+  padding: 0.54em 0.68em;
+  vertical-align: top;
+}
+th {
+  background: #e7efed;
+  text-align: left;
+}
+tr:nth-child(even) td {
+  background: #fafbfb;
+}
+.plot-layout tr:nth-child(even) td {
+  background: transparent;
+}
+img {
+  max-width: 100%;
+  display: block;
+  margin: 1.1em auto 0.45em;
+}
+.figure-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.05rem 1.25rem;
+  align-items: start;
+  margin: 1.1em 0 1.45em;
+}
+.figure-grid.two-one {
+  max-width: 900px;
+  margin-left: auto;
+  margin-right: auto;
+}
+.figure-grid.five-panel {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+.figure-grid figure {
+  margin: 0;
+}
+.figure-grid img {
+  width: 100%;
+  max-width: 100%;
+  margin: 0;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: white;
+}
+.figure-grid figcaption {
+  color: var(--muted);
+  font-size: 0.85em;
+  line-height: 1.35;
+  text-align: center;
+  margin-top: 0.35em;
+}
+.figure-grid .centered {
+  grid-column: 1 / -1;
+  justify-self: center;
+  max-width: 58%;
+}
+.figure-grid.two-one .centered {
+  max-width: 54%;
+}
+.figure-grid.five-panel .centered {
+  max-width: 52%;
+}
+ul, ol {
+  padding-left: 1.4em;
+}
+.caption {
+  color: var(--muted);
+  font-size: 0.92em;
+  margin-top: -0.15em;
+}
+@media print {
+  body {
+    background: white;
+  }
+  main {
+    box-shadow: none;
+    margin: 0;
+    max-width: none;
+    padding: 28px;
+  }
+}
+@media screen and (max-width: 540px) {
+  .figure-grid {
+    grid-template-columns: 1fr;
+  }
+  .figure-grid .centered,
+  .figure-grid.five-panel .centered {
+    grid-column: auto;
+    max-width: 100%;
+  }
+}
+</style>
+</head>
+<body>
+<main>
+<h1>Two Possible Final Models To Discuss</h1>
+<p>This is a side report for choosing the final model direction. It is not the current supervisor-facing report.</p>
+<p>The first four models form the cumulative core:</p>
+<pre><code>M1: sum_bits ~ age + effort
+M2: sum_bits ~ age + effort + child identity
+M3: sum_bits ~ age + effort + age:effort + child identity
+M4: sum_bits ~ age + effort + age:effort
+               + parent context effort + context entropy
+               + child identity</code></pre>
+<p>The question for the final model is what we want the last step to add. I see two clean options.</p>
+<h2>How Size Is Controlled</h2>
+<p>The size issue is the central design problem. Raw total <code>sum_bits</code> is strongly tied to utterance length: older children tend to produce longer utterances, and longer utterances mechanically accumulate more total bits. So a raw age trend would mostly rediscover MLU.</p>
+<p>We control size in three related ways.</p>
+<h3>1. Effort As A Covariate</h3>
+<p>The basic model includes a child-utterance effort term:</p>
+<pre><code>sum_bits ~ age + effort + ...</code></pre>
+<p>For the word-count version, this means the age coefficient is interpreted after adjusting for the number of words in the child utterance. The same logic can be repeated with morphemes, syllables, or phonemes.</p>
+<p>This is not the same as saying all utterances have the same length. It means the regression estimates the age relation after accounting for the expected increase in <code>sum_bits</code> associated with effort.</p>
+<h3>2. Fixed-Effort Prediction Lines</h3>
+<p>The plots make the size control more concrete. A line labelled <code>5</code> words is not a raw average of all utterances at that age. It is the model prediction for utterances held at exactly 5 words while age changes.</p>
+<p>So the visual question is:</p>
+<blockquote><p>At the same utterance size, does predicted <code>sum_bits</code> go up or down with age?</p></blockquote>
+<p>This is why the fixed-effort plots are more important than raw age averages.</p>
+<h3>3. Exact-Length Models</h3>
+<p>The strongest MLU check uses exact length as a category:</p>
+<pre><code>sum_bits ~ age + C(exact word count) + age:C(exact word count) + ...</code></pre>
+<p>This lets each exact word count have its own baseline and, in the interaction version, its own age slope. MLU cannot explain a slope estimated inside the two-word stratum, the three-word stratum, and so on, because every utterance in that comparison has the same word count.</p>
+<p>In the already-fit exact-length model without context controls, the primary row-level estimator has downward age slopes for <code>9/12</code> exact word lengths. The upward slopes are concentrated in sparser longer lengths (<code>10-12</code> words).</p>
+<img src="../figs/route1_child_length_controlled_model_suite/mlu_proof_exact_length_age_slopes.png" alt="Exact-length age slopes">
+<img src="../figs/route1_child_length_controlled_model_suite/f19_k3_nb_words_estimator_mean_lines.png" alt="Exact-length estimator comparison">
+<h2>Why Not Just Plain OLS?</h2>
+<p>Plain OLS with independent errors would be too naive because the data are repeated utterances from the same children, nested in sessions across time. Rows from the same child are correlated, and sessions with many utterances can otherwise dominate the analysis.</p>
+<p>The current main estimator is not naive OLS. It is:</p>
+<pre><code>OLS + child fixed intercepts + child-clustered standard errors</code></pre>
+<p>That does three things:</p>
+<table>
+<thead><tr>
+<th>Component</th>
+<th>What it does</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>OLS mean model</td>
+<td>Keeps coefficients and fixed-effort predictions easy to interpret on the additive bits scale.</td>
+</tr>
+<tr>
+<td>Child fixed intercepts</td>
+<td>Controls stable differences between children, corpora, and child baselines.</td>
+</tr>
+<tr>
+<td>Child-clustered SE</td>
+<td>Adjusts uncertainty because utterances from the same child are not independent.</td>
+</tr>
+</tbody></table>
+<p>But it is still reasonable to ask whether a repeated-measures estimator should be preferred. We already fit those checks in the child-length-controlled model suite.</p>
+<table>
+<thead><tr>
+<th>Estimator family</th>
+<th>What it adds</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>Session/effort-cell OLS</td>
+<td>Aggregates utterances into child-session-exact-effort cells so high-row-count sessions have less leverage.</td>
+</tr>
+<tr>
+<td>GEE grouped by child</td>
+<td>Estimates a population-average relation while modeling within-child dependence.</td>
+</tr>
+<tr>
+<td>Gamma/log GLM or GEE</td>
+<td>Checks whether results depend on Gaussian errors for positive, right-skewed total bits.</td>
+</tr>
+<tr>
+<td>MixedLM random child intercept</td>
+<td>Treats child baselines as random effects rather than fixed intercepts.</td>
+</tr>
+<tr>
+<td>MixedLM random age slope</td>
+<td>Lets children differ in developmental slope; useful but sometimes unstable.</td>
+</tr>
+<tr>
+<td>MixedLM child + session intercepts</td>
+<td>Represents utterances nested inside sessions inside children.</td>
+</tr>
+</tbody></table>
+<p>My current read is:</p>
+<blockquote><p>Use OLS with child fixed effects and child-clustered SE for the main</p></blockquote>
+<blockquote><p>supervisor-facing line because it is transparent. Use GEE and mixed models as</p></blockquote>
+<blockquote><p>repeated-measures robustness checks. Do not defend plain independent-row OLS.</p></blockquote>
+<p>The existing estimator grid supports this strategy, but with an important qualification. In the exact-length models, short and middle word-count slices remain downward across the displayed OLS-cluster, GEE, Gamma/log, random intercept, and session-intercept variants. The longer exact-length slices are more mixed. That is not a reason to hide the exact-length model; it is exactly why it is useful. It shows where the fixed-effort effect is stable and where the developmental pattern may differ for longer utterances. The random-age-slope mixed model is less stable and should be treated as diagnostic rather than headline evidence.</p>
+<img src="../figs/route1_child_length_controlled_model_suite/slope_heatmap_formula_by_estimator.png" alt="Estimator slope heatmap">
+<img src="../figs/route1_child_length_controlled_model_suite/variance_explained_by_formula_estimator.png" alt="Variance explained by formula and estimator">
+<h2>Same Fixed-Effort Plots With Other Estimators</h2>
+<p>The plots below use the same visual logic as the supervisor-facing report: predicted <code>sum_bits</code> is plotted through age while the child utterance is held at a fixed word count. To avoid a noisy wall of lines, each panel shows three representative lengths: 2, 6, and 10 words.</p>
+<p>The panels are different estimator/repeated-measures structures. The important comparison is the slope shape inside each panel. The absolute vertical intercepts are not always directly comparable across estimator families because some models predict population-average lines and others include different fixed/random intercept structures.</p>
+<table>
+<thead><tr>
+<th>Plot</th>
+<th>What it corresponds to</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>F01</td>
+<td>Model 2 analogue: age + effort + child identity.</td>
+</tr>
+<tr>
+<td>F02</td>
+<td>Model 3 analogue: adds <code>age:effort</code>.</td>
+</tr>
+<tr>
+<td>F10</td>
+<td>Closest already-fit estimator-grid analogue to the context-control model; it includes parent context effort, context entropy, <code>age:effort</code>, child identity, and question type.</td>
+</tr>
+<tr>
+<td>F19</td>
+<td>Exact-length no-question MLU check.</td>
+</tr>
+<tr>
+<td>F21</td>
+<td>Exact-length context-control MLU check; this already-fit grid includes question type.</td>
+</tr>
+</tbody></table>
+<p>The exact no-question M4 union model that we put in the supervisor-facing report exists as the primary row-level model. The full estimator-grid version available here is not exactly the same because it includes question type, so I would present it as a robustness analogue rather than as the preferred M4 formula.</p>
+<img src="../figs/two_final_model_candidates_report/f01_m2_analogue_fixed_word_estimator_panels.png" alt="M2 analogue fixed-word estimator panels">
+<img src="../figs/two_final_model_candidates_report/f02_m3_analogue_fixed_word_estimator_panels.png" alt="M3 analogue fixed-word estimator panels">
+<img src="../figs/two_final_model_candidates_report/f10_context_controls_fixed_word_estimator_panels.png" alt="Context-control fixed-word estimator panels">
+<img src="../figs/two_final_model_candidates_report/f19_exact_length_fixed_word_estimator_panels.png" alt="Exact-length fixed-word estimator panels">
+<img src="../figs/two_final_model_candidates_report/f21_exact_length_context_fixed_word_estimator_panels.png" alt="Exact-length context-control fixed-word estimator panels">
+<p>The visual read is that M2, M3, and the context-control analogue keep the same basic fixed-effort story across the repeated-measures checks: the age lines are usually downward, even if the aggregate/GEE/mixed versions flatten the effect relative to the row-level child-fixed-effect model. The exact-length plots are the strongest guard against the &quot;this is just MLU&quot; critique, but they also show a real boundary condition: the 2-word and 6-word slices are downward across the displayed estimators, while the 10-word slice is upward in most additive-scale exact-length variants. I would describe that directly. The claim should not be &quot;every exact length decreases.&quot; The cleaner claim is &quot;the effect is robust for short and middle same-length utterances, while longer exact-length utterances may follow a different developmental trajectory.&quot;</p>
+<p>The plotted slope values are saved here:</p>
+<pre><code>results/two_final_model_candidates_report/fixed_word_estimator_panel_slopes.csv</code></pre>
+<h2>Candidate A: Context As Mechanism</h2>
+<h3>What This Adds After Model 4</h3>
+<p>Model 4 treats context variables as controls. It asks whether the age effect remains after accounting for context length and context uncertainty.</p>
+<p>The mechanism version asks a stronger question:</p>
+<blockquote><p>Does the developmental age effect itself change depending on context</p></blockquote>
+<blockquote><p>uncertainty?</p></blockquote>
+<p>That is a different claim. It moves from &quot;the age effect survives context controls&quot; to &quot;context may shape the developmental effect.&quot;</p>
+<h3>Clean Formula</h3>
+<pre><code>sum_bits ~ age + effort + age:effort
+         + parent context effort + context entropy
+         + age:context entropy
+         + child identity</code></pre>
+<p>I would keep this version free of question type. The important new term is <code>age:context entropy</code>.</p>
+<h3>What Each New Predictor Is Doing</h3>
+<table>
+<thead><tr>
+<th>Predictor</th>
+<th>Role</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>Parent context effort</td>
+<td>Controls how much linguistic material is available in the fixed k3 context.</td>
+</tr>
+<tr>
+<td>Context entropy</td>
+<td>Controls how uncertain the preceding context is.</td>
+</tr>
+<tr>
+<td>Age x context entropy</td>
+<td>Tests whether the age slope differs in more versus less uncertain contexts.</td>
+</tr>
+</tbody></table>
+<h3>What I Would Show</h3>
+<p>I would not lead with a big coefficient table. I would show:</p>
+<ol>
+<li>A small formula box showing that this is Model 4 plus <code>age:context entropy</code>.</li>
+<li>One compact coefficient card for <code>age</code>, <code>context entropy</code>, and</li>
+<p><code>age:context entropy</code>.</p>
+<li>One plot with predicted <code>sum_bits</code> by age at fixed word counts, split into</li>
+<p>low, medium, and high context-entropy settings.</p>
+</ol>
+<p>The plot would answer the model visually:</p>
+<blockquote><p>Are the age lines equally downward in all contexts, or is the developmental</p></blockquote>
+<blockquote><p>decrease stronger in some context-entropy settings?</p></blockquote>
+<h3>Already-Fit Estimator Versions</h3>
+<p>The closest already-fit no-question mechanism screen is formula <code>F27</code> in the formula-permutation estimator report:</p>
+<pre><code>mean_sum_bits ~ age + effort + age:effort
+              + parent context effort + context entropy
+              + age:context entropy
+              + child identity</code></pre>
+<p>This is an aggregate child-session/effort-band estimator screen rather than the primary row-level supervisor model, but it is useful because it has OLS-cluster, GEE, Gamma/log, and MixedLM versions already fit.</p>
+<table>
+<thead><tr>
+<th>Estimator</th>
+<th>Scale</th>
+<th>Age x context entropy</th>
+<th>p</th>
+<th>Read</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>OLS + child FE + clustered SE</td>
+<td>additive bits</td>
+<td>-0.079</td>
+<td>.359</td>
+<td>No strong evidence for mechanism.</td>
+</tr>
+<tr>
+<td>GEE Gaussian</td>
+<td>additive bits</td>
+<td>-0.079</td>
+<td>.345</td>
+<td>Same substantive read as OLS-cluster.</td>
+</tr>
+<tr>
+<td>GEE Gamma/log</td>
+<td>log mean bits</td>
+<td>-0.0025</td>
+<td>.042</td>
+<td>Suggests a small negative interaction on the log scale.</td>
+</tr>
+<tr>
+<td>GLM Gamma/log</td>
+<td>log mean bits</td>
+<td>-0.0025</td>
+<td>.010</td>
+<td>Same direction on the log scale.</td>
+</tr>
+<tr>
+<td>MixedLM random child intercept</td>
+<td>additive bits</td>
+<td>-0.079</td>
+<td>.121</td>
+<td>Same direction, not conventionally clear.</td>
+</tr>
+<tr>
+<td>MixedLM random age slope</td>
+<td>additive bits</td>
+<td>-0.084</td>
+<td>.102</td>
+<td>Same direction, but random-slope models are diagnostic.</td>
+</tr>
+</tbody></table>
+<img src="../figs/route1_formula_permutation_estimator_report/f27_aggregate_estimator_screen_age_lines.png" alt="F27 estimator age lines">
+<img src="../figs/route1_formula_permutation_estimator_report/f27_aggregate_estimator_fixed_effort_age_lines.png" alt="F27 fixed-effort estimator lines">
+<img src="../figs/route1_formula_permutation_estimator_report/f27_term_effect_forest.png" alt="F27 term effect forest">
+<p>This makes Candidate A scientifically interesting but not the cleanest final slide. The interaction direction is mostly negative, but it is not uniformly strong across estimators, and the screen is aggregate rather than the exact row-level no-question model.</p>
+<h3>How I Would Describe It</h3>
+<p>I would say:</p>
+<blockquote><p>The previous model showed that the developmental decrease in utterance-level</p></blockquote>
+<blockquote><p>information is not explained away by context length or context entropy. This</p></blockquote>
+<blockquote><p>model asks whether context uncertainty changes the developmental slope itself.</p></blockquote>
+<blockquote><p>In other words, context is no longer only a control variable; it becomes a</p></blockquote>
+<blockquote><p>candidate mechanism.</p></blockquote>
+<h3>What It Would Mean</h3>
+<p>If <code>age:context entropy</code> is near zero:</p>
+<blockquote><p>The age effect appears fairly stable across context-entropy levels. That would</p></blockquote>
+<blockquote><p>support the simpler Model 4 interpretation.</p></blockquote>
+<p>If <code>age:context entropy</code> is clearly nonzero:</p>
+<blockquote><p>The developmental change depends on the kind of context. Then the final story</p></blockquote>
+<blockquote><p>should become more mechanistic: children may become especially efficient in</p></blockquote>
+<blockquote><p>some context types but not others.</p></blockquote>
+<h3>Main Caveat</h3>
+<p>This should not be overclaimed as the final response-space entropy story. Current context entropy is a useful context-predictability control, but it is not the same as estimating the full distribution of possible child responses.</p>
+<h2>Candidate B: Real Children Versus Baselines</h2>
+<h3>What This Adds After Model 4</h3>
+<p>Models 1-4 ask whether real child utterances show a developmental fixed-effort age effect.</p>
+<p>The source-comparison model asks a different final question:</p>
+<blockquote><p>Is the real-child developmental trajectory different from matched generated</p></blockquote>
+<blockquote><p>baselines and caretaker speech?</p></blockquote>
+<p>This is not a mechanism model. It is a specificity model. It asks whether the real child pattern is special, or whether the same pattern appears in random, n-gram, LSTM, or caretaker controls.</p>
+<h3>Clean Formula Options</h3>
+<p>For paired generated baselines, the cleanest version is often a gap model:</p>
+<pre><code>source_minus_real_sum_bits ~ age + effort + child identity</code></pre>
+<p>where:</p>
+<pre><code>source_minus_real_sum_bits = generated_or_control_sum_bits - real_child_sum_bits</code></pre>
+<p>A direct pooled version is:</p>
+<pre><code>sum_bits ~ source + age + effort
+         + source:age + source:effort + age:effort
+         + source:age:effort
+         + child identity</code></pre>
+<p>The important terms are <code>source:age</code> and <code>source:age:effort</code>: they ask whether the developmental slope differs by source at the same production effort.</p>
+<h3>What Each New Predictor Is Doing</h3>
+<table>
+<thead><tr>
+<th>Predictor</th>
+<th>Role</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>Source</td>
+<td>Distinguishes real child utterances, generated controls, LSTM controls, and caretaker speech.</td>
+</tr>
+<tr>
+<td>Source x age</td>
+<td>Tests whether the developmental trajectory differs by source.</td>
+</tr>
+<tr>
+<td>Source x age x effort</td>
+<td>Tests whether source differences in developmental trajectory depend on utterance length.</td>
+</tr>
+<tr>
+<td>Source-minus-real gap</td>
+<td>A paired way to ask how far each control is from the real utterance in the same context.</td>
+</tr>
+</tbody></table>
+<h3>Current Evidence Already Available</h3>
+<p>The existing real-vs-controls report already contains a usable fixed-effort comparison layer. Under the simple identity-plus-effort comparison, the real child fixed-effort slope is downward for all 12 fixed word-count lines:</p>
+<table>
+<thead><tr>
+<th>Source</th>
+<th>Real slope, bits/6 months</th>
+<th>Source slope, bits/6 months</th>
+<th>Source minus real slope</th>
+<th>Direction read</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>Random</td>
+<td>-0.735</td>
+<td>1.068</td>
+<td>1.803</td>
+<td>Random goes upward while real children go downward.</td>
+</tr>
+<tr>
+<td>Unigram</td>
+<td>-0.735</td>
+<td>-0.125</td>
+<td>0.610</td>
+<td>Unigram decreases, but much less than real children.</td>
+</tr>
+<tr>
+<td>Bigram</td>
+<td>-0.735</td>
+<td>-0.134</td>
+<td>0.601</td>
+<td>Bigram decreases, but much less than real children.</td>
+</tr>
+<tr>
+<td>Trigram</td>
+<td>-0.735</td>
+<td>-0.092</td>
+<td>0.643</td>
+<td>Trigram decreases, but much less than real children.</td>
+</tr>
+<tr>
+<td>LSTM k3</td>
+<td>-0.735</td>
+<td>-0.279</td>
+<td>0.456</td>
+<td>LSTM decreases, but less than real children.</td>
+</tr>
+<tr>
+<td>LSTM k4</td>
+<td>-0.735</td>
+<td>-0.351</td>
+<td>0.384</td>
+<td>LSTM decreases, but less than real children.</td>
+</tr>
+<tr>
+<td>LSTM k5</td>
+<td>-0.735</td>
+<td>-0.363</td>
+<td>0.372</td>
+<td>LSTM decreases, but less than real children.</td>
+</tr>
+<tr>
+<td>Caretaker</td>
+<td>-0.735</td>
+<td>0.172</td>
+<td>0.907</td>
+<td>Caretaker speech goes upward while real children go downward.</td>
+</tr>
+</tbody></table>
+<img src="../figs/route1_real_vs_controls_context_report/random_m2_k3_fixed_word_regression_lines.png" alt="Real versus random fixed-effort lines">
+<img src="../figs/route1_real_vs_controls_context_report/lstm_m2_k3_fixed_word_regression_lines.png" alt="Real versus LSTM fixed-effort lines">
+<img src="../figs/route1_real_vs_controls_context_report/caretaker_m2_k3_fixed_word_regression_lines.png" alt="Real versus caretaker fixed-effort lines">
+<p>There is also an exact-effort/source-comparison layer from the exhaustive ANCOVA gallery. This is not a GEE/Mixed estimator grid, but it is another already-fit way of protecting the source comparison from the MLU objection: the source-minus-real gaps are estimated inside exact effort values and across effort scales.</p>
+<img src="../figs/route1_exhaustive_ancova_gallery/child_source_omnibus_term_test_fdr_heatmap.png" alt="Source-by-age term tests">
+<img src="../figs/route1_exhaustive_ancova_gallery/nb_words_exact_source_real_gap_slopes_sum_bits_k3.png" alt="Exact-effort source-minus-real slopes">
+<h3>What I Would Show</h3>
+<p>I would show:</p>
+<ol>
+<li>One fixed-effort line plot comparing real children to a weak control</li>
+<p>such as random.</p>
+<li>One fixed-effort line plot comparing real children to a stronger control</li>
+<p>such as LSTM.</p>
+<li>One compact slope-difference table across all controls.</li>
+</ol>
+<p>The plot logic is simple:</p>
+<blockquote><p>At the same word count, does the real-child line move through age differently</p></blockquote>
+<blockquote><p>from the lines produced by matched controls?</p></blockquote>
+<h3>How I Would Describe It</h3>
+<p>I would say:</p>
+<blockquote><p>The first four models establish the fixed-effort developmental pattern within</p></blockquote>
+<blockquote><p>real child speech. This final model asks whether that pattern is specific to</p></blockquote>
+<blockquote><p>real child utterances. Generated controls and caretaker speech are scored in</p></blockquote>
+<blockquote><p>the same framework, so if the same developmental trajectory appears</p></blockquote>
+<blockquote><p>everywhere, the result may be a scoring or length artifact. If the real-child</p></blockquote>
+<blockquote><p>trajectory differs, then the pattern is more plausibly tied to children&#x27;s</p></blockquote>
+<blockquote><p>actual language use.</p></blockquote>
+<h3>What It Would Mean</h3>
+<p>If controls look like real children:</p>
+<blockquote><p>The developmental slope may reflect scoring mechanics, changing vocabulary</p></blockquote>
+<blockquote><p>distributions, or shared corpus structure rather than something specific to</p></blockquote>
+<blockquote><p>child utterance choice.</p></blockquote>
+<p>If real children differ from controls:</p>
+<blockquote><p>The result is stronger: it is not just that fixed-effort <code>sum_bits</code> decreases</p></blockquote>
+<blockquote><p>with age, but that the real-child trajectory is sharper or differently shaped</p></blockquote>
+<blockquote><p>than plausible generated or caretaker alternatives.</p></blockquote>
+<h3>Main Caveat</h3>
+<p>This does not explain why the real-child pattern happens. It tests whether the pattern is source-specific. If we choose this as the final model, the report ends with specificity, not mechanism.</p>
+<p>The current source-comparison evidence is strongest as fixed-effort OLS/ANCOVA and paired-gap evidence. A full GEE/Mixed source-comparison estimator grid would be a good next robustness layer if Candidate B becomes the final model, but the already-fit figures are enough to decide whether this direction belongs in the supervisor report.</p>
+<h2>Recommendation</h2>
+<p>I would choose the final model based on the meeting goal:</p>
+<table>
+<thead><tr>
+<th>If the final question is...</th>
+<th>Choose...</th>
+<th>Why</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>&quot;Why might the age effect happen?&quot;</td>
+<td>Candidate A: context as mechanism</td>
+<td>It tests whether context uncertainty changes the age slope.</td>
+</tr>
+<tr>
+<td>&quot;Is the child pattern real or just an artifact?&quot;</td>
+<td>Candidate B: real versus baselines</td>
+<td>It tests whether real children differ from generated and caretaker controls.</td>
+</tr>
+</tbody></table>
+<p>My preference for a first supervisor-facing report would be Candidate B. It is easier to explain, already has strong saved figures, and directly protects the core claim from the criticism that the pattern is just a length/scoring artifact. Candidate A is scientifically interesting, but it depends more heavily on how comfortable we are with the current context-entropy predictor.</p>
+</main>
+</body>
+</html>
