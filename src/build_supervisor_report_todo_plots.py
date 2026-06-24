@@ -38,6 +38,13 @@ EFFORTS = [
     ("nb_syllables_pkg", "Syllables: pkg"),
     ("nb_phonemes", "Phonemes"),
 ]
+EFFORT_UNITS = {
+    "nb_words": ("word", "words"),
+    "nb_morphemes": ("morpheme", "morphemes"),
+    "nb_syllables_cmu_or_pkg": ("CMU/pkg syllable", "CMU/pkg syllables"),
+    "nb_syllables_pkg": ("pkg syllable", "pkg syllables"),
+    "nb_phonemes": ("phoneme", "phonemes"),
+}
 
 
 def as_float(value: object) -> float:
@@ -54,6 +61,18 @@ def age_mid(age_bin: object) -> float:
         return (float(low) + float(high)) / 2.0
     except ValueError:
         return math.nan
+
+
+def fixed_effort_label(effort_col: str, value: object) -> str:
+    """Return a supervisor-facing fixed-effort label."""
+
+    number = as_float(value)
+    if not math.isfinite(number):
+        return "fixed value"
+    value_text = f"{number:g}"
+    singular, plural = EFFORT_UNITS.get(effort_col, ("unit", "units"))
+    unit = singular if abs(number - 1.0) < 1e-9 else plural
+    return f"{value_text} {unit}"
 
 
 def iter_real_k3_rows(input_csv: Path) -> Iterable[dict[str, object]]:
@@ -81,6 +100,7 @@ def iter_real_k3_rows(input_csv: Path) -> Iterable[dict[str, object]]:
             if scanned % 1_000_000 == 0:
                 print(f"[todo-plots] scanned={scanned:,}; kept={kept:,}", flush=True)
             out = {
+                "child_id": str(row.get("child_id", "")),
                 "age_months": age_months,
                 "age_bin": age_bin,
                 "age_mid": age_mid(age_bin),
@@ -122,6 +142,45 @@ def savefig(path: Path) -> None:
     plt.close()
 
 
+def prediction_summary(result: object, new_frame: pd.DataFrame) -> pd.DataFrame:
+    """Return fitted means and 95% fitted-mean confidence intervals."""
+
+    summary = result.get_prediction(new_frame).summary_frame(alpha=0.05)
+    mean_col = "mean" if "mean" in summary.columns else "predicted_mean"
+    low_col = "mean_ci_lower" if "mean_ci_lower" in summary.columns else "ci_lower"
+    high_col = "mean_ci_upper" if "mean_ci_upper" in summary.columns else "ci_upper"
+    return pd.DataFrame(
+        {
+            "predicted_sum_bits": summary[mean_col].to_numpy(dtype=float),
+            "pred_ci_low": summary[low_col].to_numpy(dtype=float),
+            "pred_ci_high": summary[high_col].to_numpy(dtype=float),
+        }
+    )
+
+
+def child_average_prediction_summary(
+    result: object,
+    base: pd.DataFrame,
+    child_ids: list[str],
+) -> pd.DataFrame:
+    """Predict for each child fixed intercept, then average the fitted means."""
+
+    parts: list[pd.DataFrame] = []
+    for child_id in child_ids:
+        child_frame = base.copy()
+        child_frame["child_id"] = child_id
+        pred = prediction_summary(result, child_frame)
+        parts.append(pd.concat([child_frame.reset_index(drop=True), pred.reset_index(drop=True)], axis=1))
+    combined = pd.concat(parts, ignore_index=True)
+    return (
+        combined.groupby(["age_months", "line_type", "effort_level", "effort_value"], as_index=False)[
+            ["predicted_sum_bits", "pred_ci_low", "pred_ci_high"]
+        ]
+        .mean()
+        .copy()
+    )
+
+
 def plot_descriptive(summary: pd.DataFrame, fig_dir: Path) -> None:
     specs = [
         ("nb_words_mean", "nb_words_lo", "nb_words_hi", "Mean length in words", "Model 0 descriptive: mean utterance length increases", "model0_mlu_words_by_age.png"),
@@ -135,7 +194,9 @@ def plot_descriptive(summary: pd.DataFrame, fig_dir: Path) -> None:
         lo = summary[lo_col].to_numpy(dtype=float)
         hi = summary[hi_col].to_numpy(dtype=float)
         plt.plot(x, y, marker="o", linewidth=2.2, color="#2f6f73")
-        plt.fill_between(x, lo, hi, color="#2f6f73", alpha=0.16)
+        plt.fill_between(x, lo, hi, color="#2f6f73", alpha=0.24)
+        plt.plot(x, lo, color="#2f6f73", linewidth=0.8, alpha=0.55)
+        plt.plot(x, hi, color="#2f6f73", linewidth=0.8, alpha=0.55)
         plt.xticks(x, summary["age_bin"], rotation=35)
         plt.ylabel(ylabel)
         plt.xlabel("Age bin")
@@ -149,7 +210,10 @@ def fit_effort_only_models(frame: pd.DataFrame, output_dir: Path) -> tuple[pd.Da
     prediction_rows = []
     age_grid = np.linspace(frame["age_months"].min(), frame["age_months"].max(), 80)
     for effort_col, effort_label in EFFORTS:
-        result = smf.ols(f"sum_bits ~ age_months + {effort_col}", data=frame).fit()
+        result = smf.ols(f"sum_bits ~ age_months + {effort_col}", data=frame).fit(
+            cov_type="cluster",
+            cov_kwds={"groups": frame["child_id"].astype(str)},
+        )
         coefficient_rows.append(
             {
                 "effort_col": effort_col,
@@ -164,8 +228,8 @@ def fit_effort_only_models(frame: pd.DataFrame, output_dir: Path) -> tuple[pd.Da
         quantiles = frame[effort_col].quantile([0.25, 0.50, 0.75]).to_dict()
         for label, effort_value in [("low", quantiles[0.25]), ("median", quantiles[0.50]), ("high", quantiles[0.75])]:
             grid = pd.DataFrame({"age_months": age_grid, effort_col: effort_value})
-            preds = result.predict(grid)
-            for age, pred in zip(age_grid, preds):
+            pred_frame = prediction_summary(result, grid)
+            for age, pred_row in zip(age_grid, pred_frame.to_dict("records")):
                 prediction_rows.append(
                     {
                         "effort_col": effort_col,
@@ -173,7 +237,9 @@ def fit_effort_only_models(frame: pd.DataFrame, output_dir: Path) -> tuple[pd.Da
                         "effort_level": label,
                         "effort_value": float(effort_value),
                         "age_months": float(age),
-                        "predicted_sum_bits": float(pred),
+                        "predicted_sum_bits": float(pred_row["predicted_sum_bits"]),
+                        "pred_ci_low": float(pred_row["pred_ci_low"]),
+                        "pred_ci_high": float(pred_row["pred_ci_high"]),
                     }
                 )
     coefficients = pd.DataFrame(coefficient_rows)
@@ -189,22 +255,45 @@ def plot_effort_only_predictions(predictions: pd.DataFrame, fig_dir: Path) -> No
     colors = {"low": "#6d8f20", "median": "#2f6f73", "high": "#c76f2c"}
     for ax, (effort_col, effort_label) in zip(axes_flat, EFFORTS):
         panel = predictions[predictions["effort_col"].eq(effort_col)]
-        for level, group in panel.groupby("effort_level", observed=True):
+        for effort_value, group in panel.sort_values(["effort_value", "age_months"]).groupby("effort_value", sort=True):
             group = group.sort_values("age_months")
-            effort_value = group["effort_value"].iloc[0]
+            level = str(group["effort_level"].iloc[0])
+            if group[["pred_ci_low", "pred_ci_high"]].notna().all(axis=None):
+                ax.fill_between(
+                    group["age_months"].to_numpy(dtype=float),
+                    group["pred_ci_low"].to_numpy(dtype=float),
+                    group["pred_ci_high"].to_numpy(dtype=float),
+                    color=colors.get(level, "gray"),
+                    alpha=0.22,
+                    linewidth=0,
+                )
             ax.plot(
                 group["age_months"],
                 group["predicted_sum_bits"],
                 color=colors.get(level, "gray"),
-                linewidth=2.0,
-                label=f"{level}: {effort_value:g}",
+                linewidth=1.7,
+                label=fixed_effort_label(effort_col, effort_value),
             )
+            if group[["pred_ci_low", "pred_ci_high"]].notna().all(axis=None):
+                ax.plot(
+                    group["age_months"],
+                    group["pred_ci_low"],
+                    color=colors.get(level, "gray"),
+                    linewidth=1.1,
+                    alpha=0.75,
+                )
+                ax.plot(
+                    group["age_months"],
+                    group["pred_ci_high"],
+                    color=colors.get(level, "gray"),
+                    linewidth=1.1,
+                    alpha=0.75,
+                )
         ax.set_title(effort_label)
         ax.set_ylabel("Predicted total bits")
         ax.grid(alpha=0.25)
+        ax.legend(title="Fixed value", fontsize=8, title_fontsize=8)
     axes_flat[-1].axis("off")
-    handles, labels = axes_flat[0].get_legend_handles_labels()
-    fig.legend(handles, labels, loc="lower right", bbox_to_anchor=(0.91, 0.13), title="Fixed effort")
     fig.suptitle("Model 1: effort-only predictions without child identity", fontsize=15, y=1.02)
     for ax in axes_flat[:5]:
         ax.set_xlabel("Age in months")
@@ -220,21 +309,164 @@ def plot_effort_only_predictions(predictions: pd.DataFrame, fig_dir: Path) -> No
     for effort_col, effort_label in EFFORTS:
         panel = predictions[predictions["effort_col"].eq(effort_col)]
         plt.figure(figsize=(5.8, 3.7))
-        for level, group in panel.groupby("effort_level", observed=True):
+        for effort_value, group in panel.sort_values(["effort_value", "age_months"]).groupby("effort_value", sort=True):
             group = group.sort_values("age_months")
-            effort_value = group["effort_value"].iloc[0]
+            level = str(group["effort_level"].iloc[0])
+            if group[["pred_ci_low", "pred_ci_high"]].notna().all(axis=None):
+                plt.fill_between(
+                    group["age_months"].to_numpy(dtype=float),
+                    group["pred_ci_low"].to_numpy(dtype=float),
+                    group["pred_ci_high"].to_numpy(dtype=float),
+                    color=colors.get(level, "gray"),
+                    alpha=0.22,
+                    linewidth=0,
+                )
             plt.plot(
                 group["age_months"],
                 group["predicted_sum_bits"],
                 color=colors.get(level, "gray"),
-                linewidth=2.0,
-                label=f"{level}: {effort_value:g}",
+                linewidth=1.7,
+                label=fixed_effort_label(effort_col, effort_value),
             )
+            if group[["pred_ci_low", "pred_ci_high"]].notna().all(axis=None):
+                plt.plot(
+                    group["age_months"],
+                    group["pred_ci_low"],
+                    color=colors.get(level, "gray"),
+                    linewidth=1.1,
+                    alpha=0.75,
+                )
+                plt.plot(
+                    group["age_months"],
+                    group["pred_ci_high"],
+                    color=colors.get(level, "gray"),
+                    linewidth=1.1,
+                    alpha=0.75,
+                )
         plt.title(f"Model 1: {effort_label}")
         plt.xlabel("Age in months")
         plt.ylabel("Predicted total bits")
         plt.grid(alpha=0.25)
-        plt.legend(title="Fixed effort", fontsize=8, title_fontsize=8)
+        plt.legend(title="Fixed value", fontsize=8, title_fontsize=8)
+        savefig(fig_dir / filenames[effort_col])
+
+
+def fit_child_identity_models(frame: pd.DataFrame, output_dir: Path) -> tuple[pd.DataFrame, pd.DataFrame]:
+    """Fit Model 2 and generate shaded simple supervisor plots."""
+
+    coefficient_rows = []
+    prediction_rows = []
+    age_grid = np.linspace(frame["age_months"].min(), frame["age_months"].max(), 80)
+    child_ids = sorted(frame["child_id"].astype(str).unique())
+    for effort_col, effort_label in EFFORTS:
+        data = frame.copy()
+        data["effort_value"] = data[effort_col]
+        result = smf.ols("sum_bits ~ age_months + effort_value + C(child_id)", data=data).fit(
+            cov_type="cluster",
+            cov_kwds={"groups": data["child_id"].astype(str)},
+        )
+        coefficient_rows.append(
+            {
+                "effort_col": effort_col,
+                "effort_label": effort_label,
+                "age_coef_bits_per_month": float(result.params["age_months"]),
+                "age_p": float(result.pvalues["age_months"]),
+                "effort_coef_bits_per_unit": float(result.params["effort_value"]),
+                "r2": float(result.rsquared),
+                "nobs": int(result.nobs),
+            }
+        )
+        fixed_values = [
+            ("low", float(data["effort_value"].quantile(0.25))),
+            ("median", float(data["effort_value"].quantile(0.50))),
+            ("high", float(data["effort_value"].quantile(0.75))),
+        ]
+        fixed_values.append(("global adjusted trend", float(data["effort_value"].mean())))
+        for label, effort_value in fixed_values:
+            base = pd.DataFrame(
+                {
+                    "age_months": age_grid,
+                    "effort_value": effort_value,
+                    "line_type": "global" if label == "global adjusted trend" else "fixed",
+                    "effort_level": label,
+                }
+            )
+            pred_frame = child_average_prediction_summary(result, base, child_ids)
+            for pred_row in pred_frame.to_dict("records"):
+                prediction_rows.append(
+                    {
+                        "effort_col": effort_col,
+                        "effort_label": effort_label,
+                        "line_type": pred_row["line_type"],
+                        "effort_level": pred_row["effort_level"],
+                        "effort_value": float(pred_row["effort_value"]),
+                        "age_months": float(pred_row["age_months"]),
+                        "predicted_sum_bits": float(pred_row["predicted_sum_bits"]),
+                        "pred_ci_low": float(pred_row["pred_ci_low"]),
+                        "pred_ci_high": float(pred_row["pred_ci_high"]),
+                    }
+                )
+    coefficients = pd.DataFrame(coefficient_rows)
+    predictions = pd.DataFrame(prediction_rows)
+    coefficients.to_csv(output_dir / "model2_child_identity_coefficients.csv", index=False)
+    predictions.to_csv(output_dir / "model2_child_identity_predictions.csv", index=False)
+    return coefficients, predictions
+
+
+def plot_child_identity_predictions(predictions: pd.DataFrame, fig_dir: Path) -> None:
+    """Write the five M2 simple plots used by the supervisor-facing report."""
+
+    fig_dir.mkdir(parents=True, exist_ok=True)
+    colors = {"low": "#1f77b4", "median": "#ff7f0e", "high": "#2ca02c", "global adjusted trend": "#222222"}
+    filenames = {
+        "nb_words": "m2_words_fixed_effort_and_global_trend.png",
+        "nb_morphemes": "m2_morphemes_fixed_effort_and_global_trend.png",
+        "nb_syllables_cmu_or_pkg": "m2_syllables_cmu_pkg_fixed_effort_and_global_trend.png",
+        "nb_syllables_pkg": "m2_syllables_pkg_fixed_effort_and_global_trend.png",
+        "nb_phonemes": "m2_phonemes_fixed_effort_and_global_trend.png",
+    }
+    for effort_col, effort_label in EFFORTS:
+        panel = predictions[predictions["effort_col"].eq(effort_col)]
+        plt.figure(figsize=(8.2, 4.9))
+        for level, group in panel.groupby("effort_level", observed=True):
+            group = group.sort_values("age_months")
+            color = colors.get(level, "gray")
+            linewidth = 2.8 if level == "global adjusted trend" else 2.1
+            label = (
+                "Global adjusted trend"
+                if level == "global adjusted trend"
+                else f"Fixed {group['effort_value'].iloc[0]:g}"
+            )
+            if group[["pred_ci_low", "pred_ci_high"]].notna().all(axis=None):
+                plt.fill_between(
+                    group["age_months"].to_numpy(dtype=float),
+                    group["pred_ci_low"].to_numpy(dtype=float),
+                    group["pred_ci_high"].to_numpy(dtype=float),
+                    color=color,
+                    alpha=0.18 if level == "global adjusted trend" else 0.22,
+                    linewidth=0,
+                )
+            plt.plot(group["age_months"], group["predicted_sum_bits"], color=color, linewidth=linewidth, label=label)
+            if group[["pred_ci_low", "pred_ci_high"]].notna().all(axis=None):
+                plt.plot(
+                    group["age_months"],
+                    group["pred_ci_low"],
+                    color=color,
+                    linewidth=1.0,
+                    alpha=0.70,
+                )
+                plt.plot(
+                    group["age_months"],
+                    group["pred_ci_high"],
+                    color=color,
+                    linewidth=1.0,
+                    alpha=0.70,
+                )
+        plt.title(f"M2: fixed-effort predictions + 95% fitted-mean CI ({effort_label})")
+        plt.xlabel("Age in months")
+        plt.ylabel("Predicted total bits")
+        plt.grid(alpha=0.22)
+        plt.legend(title="Line type", fontsize=8, title_fontsize=8)
         savefig(fig_dir / filenames[effort_col])
 
 
@@ -301,6 +533,8 @@ def build(input_csv: Path, output_dir: Path, fig_dir: Path, m2_fig_dir: Path = D
     plot_descriptive(summary, fig_dir)
     _, predictions = fit_effort_only_models(frame, output_dir)
     plot_effort_only_predictions(predictions, fig_dir)
+    _, m2_predictions = fit_child_identity_models(frame, output_dir)
+    plot_child_identity_predictions(m2_predictions, m2_fig_dir)
     build_compact_report_grids(fig_dir, m2_fig_dir)
 
 

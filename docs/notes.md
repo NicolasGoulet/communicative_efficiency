@@ -5573,3 +5573,69 @@ figs/supervisor_formula_estimator_sensitivity/
 
 - Verification: focused unittest passed; Markdown image audit found 5 image
   references and 0 missing files.
+
+## 2026-06-23 - Real-child effort and scorable-token tail diagnostics
+
+- Built direct row-count distribution diagnostics for the real-child `k3`
+  analysis rows (`446,985` utterances). These are empirical counts of the
+  values stored in the rows, not model predictions or fitted estimates.
+- Effort plots written under `figs/effort_distribution_tail_audit/` for words,
+  morphemes, both syllable measures, phonemes, and scorable target tokens.
+- Summary CSVs written under `results/effort_distribution_tail_audit/`.
+- Key scorable-token distribution: median `n_eval_tokens=4`, p75 `5`, p90
+  `7`, p95 `9`, p99 `13`, p99.9 `21`, max `127`; `17,503` utterances
+  (`3.92%`) are above 9 evaluated target tokens.
+
+## 2026-06-23 - June 25th meeting index
+
+- Added the compact meeting index:
+
+```text
+docs/june_25th_meeting_index.html
+```
+
+- Linked pages:
+
+```text
+docs/june_25th_effort_token_distributions.html
+docs/june_25th_real_baseline_caretaker_regression_lines.html
+```
+
+- Builder:
+
+```text
+src/build_june_25_meeting_index.py
+```
+
+- Regenerated the supervisor-report M1/M2 line assets with 95% fitted-mean
+  confidence ribbons by updating and rerunning:
+
+```text
+src/build_supervisor_report_todo_plots.py
+```
+
+- Re-rendered the supervisor report HTML and embedded HTML without changing
+  the Markdown prose.
+- Verification: both edited Python scripts compile; local link/image audit over
+  the meeting pages and supervisor report HTML found `0` missing links.
+
+## 2026-06-23 - Supervisor-report ribbons and June 25th comparison overview
+
+- Added two ANCOVA-style overview figures to the top of
+  `docs/june_25th_real_baseline_caretaker_regression_lines.md`/`.html` before
+  the detailed M2/M3 source-specific dump:
+  `child_sources_adjusted_sum_bits_k3_by_effort.png` and
+  `nb_words_sum_bits_k3_source_minus_real_gap_lines.png`.
+- Strengthened fitted-mean confidence ribbon visibility for the
+  supervisor-facing line plots by drawing true CI bounds as thin lines on top
+  of the fitted trajectories. Updated the simple M0/M1/M2 plot builder, the
+  source-specific fixed-effort atlas helper, the caretaker helper, and the
+  real-vs-controls comparison-line helper.
+- Redrew the supervisor-visible M1, M2, M3, and M4 union-context figures from
+  saved prediction grids; no statistical refits were run for this ribbon
+  pass. The M1 fitted-mean intervals are genuinely very narrow
+  (`~0.06-0.26` bits in the saved grid), so they still read almost as a line.
+- Regenerated `docs/predicting_utterance_level_information_report.html`,
+  `.embedded.html`, `docs/june_25th_meeting_index.html`, and the June 25th
+  linked pages. Verification: Python syntax checks passed and the local
+  standard-library link/image audit found `0` missing links.

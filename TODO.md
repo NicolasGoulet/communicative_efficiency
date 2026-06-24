@@ -18,6 +18,8 @@ When a task is completed, move any useful result or decision into
 
 - TODO: Restart Route 1 analyses from zero in this repo on 2026-06-02, using `docs/route1_from_zero_handoff_2026-06-01.md` as the project compass. Start with audited real-child Mistral scores, recomputed cleaned word counts, descriptive plots, and the simplest defensible age/length/child model before adding contexts, baselines, or LSTM comparisons.
 - TODO: Build the supervisor-facing utterance-information report in `docs/predicting_utterance_level_information_report.md`, focused only on utterance-level informational content and its controls.
+- TODO: Decide whether the direct row-count effort and `n_eval_tokens` tail diagnostics should be included as an appendix/check in the supervisor-facing materials or kept only as working diagnostics.
+- TODO: Decide whether supervisor-report captions should explicitly say shaded bands are 95% fitted-mean CIs and that some M1 bands are nearly invisible because the estimated interval is extremely narrow.
 - TODO: Keep `compute_surprisal_mila` as the scoring/HPC/audit repo. Treat older Route 1 reports there as archive/scaffold, not as the evidential baseline for the restarted analyses.
 - TODO: Hand off the PBM additive same-length LSTM generated utterances to `compute_surprisal_mila` for scoring with the same logic used for random/unigram/bigram/trigram baselines. Keep `lstm_additive_k3`, `lstm_additive_k4`, and `lstm_additive_k5` separate as distinct generated-baseline conditions.
 

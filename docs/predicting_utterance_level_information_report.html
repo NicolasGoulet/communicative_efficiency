@@ -394,6 +394,7 @@ ul, ol {
 <p>Additionally, as I write these lines I realize we could also use some of the sampled utterances necessary for context entropy as a new source of baseline comparison.</p>
 <h2>Analyses and Results</h2>
 <p>We are now ready to describe results of various analyses. As stated at the start of this document, the following models are trying to predict the total sum of bits at the level of utterances.</p>
+<p>In the fitted-line plots, each line is the model-predicted mean <code>sum_bits</code> as age changes while the effort value shown in the legend is held fixed. The shaded ribbons are 95% confidence bands for that fitted mean. They are not the raw spread of the data, not minimum-to-maximum bands, and not prediction intervals for individual utterances.</p>
 <h3>Model 0 : Not controlling for effort</h3>
 <p>The most naive approach is to consider only the average of bits per token per utterance through time. This reveals a developmental decrease in bits per tokens in utterances that is explained by the increase in mean-utterance-length. Increase in MLU has two effects related to surprisal worth notting here : (1) the total amount of surprisal per utterance increases and (2) the average bit per token decreases, as larger context windows make subsequent tokens less unpredictable.</p>
 <p>The three descriptive plots below show this raw pattern before any effort or child-identity controls are introduced. Mean utterance length in words increases with age; mean total utterance surprisal also increases; mean bits per evaluated token tends to decline overall, although the raw trajectory is not perfectly monotonic in every late age bin.</p>
@@ -407,7 +408,6 @@ ul, ol {
 </tr>
 </table>
 <h3>Model 1 : Only controlling for effort</h3>
-<p>This slightly less naive models assumes independance between individual utterances, which is a wrong assumption : two utterance from the same child are likely to be more correlated than utterances from two different children. <strong>This being said</strong>, what do models predict when we only control for effort?</p>
 <p>Controlling for effort here means comparing utterances at the same amount of produced linguistic material. In practice, this is done by adding one effort measure at a time to the regression, for example <code>sum_bits ~ age + nb_words</code> or <code>sum_bits ~ age + nb_phonemes</code>. The model asks whether age still predicts total utterance information after accounting for the fact that longer utterances naturally accumulate more bits.</p>
 <p>The effort-only model is still intentionally incomplete because it treats every utterance as independent and does not account for repeated observations from the same child. In this version, the age slope is positive for morphemes, syllables, and phonemes, while the word-controlled slope is essentially flat. This suggests that effort control alone is not enough: between-child differences and corpus composition can still distort the developmental interpretation.</p>
 <table class="plot-layout">
@@ -484,7 +484,7 @@ ul, ol {
 <p>All five age effects are negative and statistically reliable at conventional levels. The word and morpheme versions are the most direct to interpret. The phoneme and syllable versions show that the result is not limited to orthographic word count.</p>
 <p>The effort effects are large and positive, as expected: longer or more complex utterances carry more total information. The important point is that age still has a negative association with total information after this effort effect is controlled.</p>
 <h3>Fixed-Effort Predictions</h3>
-<p>The figures below show the fitted Model 2 age trajectory while holding effort fixed. Within each figure, the colored lines are exact fixed effort levels and the black line is the global adjusted trend. Because Model 2 does not include an age-by-effort interaction, the fixed-effort lines are parallel; the point of the plots is to show that the downward age trend is present at comparable utterance sizes.</p>
+<p>The figures below show the fitted Model 2 age trajectory while holding effort fixed. Within each figure, the colored lines are exact fixed effort levels and the black line is the same fitted model evaluated at the average effort value. Because Model 2 does not include an age-by-effort interaction, the fixed-effort lines are parallel; the point of the plots is to show that the downward age trend is present at comparable utterance sizes.</p>
 <table class="plot-layout">
 <tr>
 <td><img src="../figs/m2_simple_plots/m2_words_fixed_effort_and_global_trend.png" alt="Model 2 fixed-effort predictions for word count"><div class="plot-caption">Words</div></td>

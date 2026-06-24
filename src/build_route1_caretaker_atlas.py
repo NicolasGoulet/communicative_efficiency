@@ -1136,8 +1136,22 @@ def plot_caretaker_fixed_predictions(predictions: pd.DataFrame, *, fig_dir: Path
                         line["pred_ci_low"].to_numpy(dtype=float),
                         line["pred_ci_high"].to_numpy(dtype=float),
                         color=color,
-                        alpha=0.08,
+                        alpha=0.18,
                         linewidth=0,
+                    )
+                    ax.plot(
+                        line["age_months"],
+                        line["pred_ci_low"],
+                        color=color,
+                        linewidth=0.8,
+                        alpha=0.45,
+                    )
+                    ax.plot(
+                        line["age_months"],
+                        line["pred_ci_high"],
+                        color=color,
+                        linewidth=0.8,
+                        alpha=0.45,
                     )
             ax.set_title(atlas_bin)
             ax.set_xlabel("Child age in months")

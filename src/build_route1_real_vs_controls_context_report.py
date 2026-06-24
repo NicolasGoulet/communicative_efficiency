@@ -651,12 +651,18 @@ def read_regression_predictions(
         "model_id",
         "effort_col",
         "predicted_sum_bits",
+        "pred_ci_low",
+        "pred_ci_high",
         "target_source",
         "context_k",
         "model_label",
         "effort_label",
     ]
-    data = pd.read_csv(path, usecols=usecols)
+    wanted_cols = set(usecols)
+    data = pd.read_csv(path, usecols=lambda col: col in wanted_cols)
+    for ci_col in ["pred_ci_low", "pred_ci_high"]:
+        if ci_col not in data.columns:
+            data[ci_col] = math.nan
     wanted_models = [PRIMARY_CARETAKER_LINE_MODEL] if source == "caretaker" else [PRIMARY_LINE_MODEL]
     if not primary_only:
         wanted_models = list(CARETAKER_MODEL_MAP.values()) if source == "caretaker" else list(REGRESSION_MODEL_IDS)
@@ -773,12 +779,36 @@ def plot_fixed_effort_regression_lines(predictions: pd.DataFrame, sources: Seque
             line = panel[panel["source"].eq(source)].sort_values("age_months")
             if line.empty:
                 continue
+            color = SOURCE_COLORS.get(source)
+            if line[["pred_ci_low", "pred_ci_high"]].notna().all(axis=None):
+                ax.fill_between(
+                    line["age_months"].to_numpy(dtype=float),
+                    line["pred_ci_low"].to_numpy(dtype=float),
+                    line["pred_ci_high"].to_numpy(dtype=float),
+                    color=color,
+                    alpha=0.22,
+                    linewidth=0,
+                )
+                ax.plot(
+                    line["age_months"],
+                    line["pred_ci_low"],
+                    color=color,
+                    linewidth=1.0,
+                    alpha=0.55,
+                )
+                ax.plot(
+                    line["age_months"],
+                    line["pred_ci_high"],
+                    color=color,
+                    linewidth=1.0,
+                    alpha=0.55,
+                )
             ax.plot(
                 line["age_months"],
                 line["predicted_sum_bits"],
                 linewidth=2.5,
                 label=SOURCE_LABELS.get(source, source),
-                color=SOURCE_COLORS.get(source),
+                color=color,
             )
         ax.set_title(f"{int(effort_value)} words")
         ax.set_xlabel("Age in months")
