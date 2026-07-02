@@ -353,9 +353,7 @@ utterance sizes.
 A complementary robustness analysis uses
 the same context window but aggregates the data into child-session-context
 units, then tests whether the age effect survives balanced resampling and
-age-label scrambling. Because this robustness analysis uses an aggregated
-frame, its coefficients are not numerically identical to the utterance-level
-coefficients, but the direction of the result is the same.
+age-label scrambling.
 
 Balanced age-bin bootstraps keep the estimated age effect negative for all five
 effort controls:
@@ -384,22 +382,6 @@ After controlling production effort and child identity, older child utterances
 have lower predicted total surprisal than younger child utterances.
 ```
 
-This is an informativeness result, not yet a full communicative-efficiency
-result. It says that the informational content of the produced utterance
-changes with age after effort is controlled. It does not yet show whether
-children choose longer or shorter utterances because a context is more or less
-predictable.
-
-That second question needs a model where effort is the outcome, for example:
-
-```text
-production effort ~ age + context uncertainty + child identity
-```
-
-The next context-uncertainty measure should ideally be response-level: instead
-of measuring uncertainty about only the next token, it should estimate how many
-plausible complete child responses the preceding caretaker context allows.
-
 ### Model 3 : Does the age effect depend on utterance effort?
 
 Model 2 asks whether age
@@ -421,10 +403,7 @@ medium, and longer utterances.
 
 For the word-count version with three preceding caretaker utterances as
 context, the main age effect remains negative: `-0.122` bits per month
-(`p < .001`). The age-by-effort interaction is small in this version. The
-fixed-effort plot is therefore the most useful way to read the model: it shows
-whether the predicted age trajectory remains downward across different exact
-word counts.
+(`p < .001`). 
 
 | Effort control | Age effect, bits/month | Age p | Age-by-effort effect | Model fit |
 | -------------- | ---------------------- | ----- | -------------------- | --------- |
@@ -436,11 +415,8 @@ word counts.
 
 ![Model 3 age-by-effort fixed-effort predictions](../figs/route1_source_specific_corrected_fixed_effort_atlas/real/real_k3_m3_nb_words_fixed_effort_atlas.png)
 
-Allowing the effort slope to vary by
-age does not remove the Model 2 pattern. The same-effort developmental trend is
-still downward for the word-count version, and the model gives a more flexible
-answer than Model 2 because it no longer forces every fixed-effort line to be
-perfectly parallel.
+![Model 3 age-by-effort fixed-effort predictions, phoneme control](../figs/route1_source_specific_corrected_fixed_effort_atlas/real/real_k3_m3_nb_phonemes_fixed_effort_atlas.png)
+
 
 The same age-scrambling robustness framework can also be used for Model 3. In
 the current robustness plots, the observed Model 3 age pattern remains outside
@@ -450,23 +426,13 @@ the scrambled-age null ranges.
 
 ### Model 4 : Adding Both Context Controls
 
-The next step is a single context-control model that combines the
-parent-context effort and context-entropy predictors. No question-type
-predictor is included.
+The next step is adding context entropy and the production effort of the caretaker into the model. Surprisingly, how unpredictable the next-token is given a a context the more predictable the following utterance tends to be. 
 
 ```text
 sum_bits ~ age + effort + age:effort
          + parent context effort + context entropy
          + child identity
 ```
-
-This model asks whether the Model 3 pattern survives after controlling both how
-much preceding caretaker speech is available and how uncertain the preceding
-context is. For the word-count version, the age effect remains negative:
-`-0.122` bits per month (`p < .001`; `n = 441,413`, `R2 = 0.627`).
-
-To keep the interpretation readable, the useful individual-predictor readout is
-the small table below.
 
 | Predictor | Estimate | p | Interpretation |
 | --------- | -------- | --- | -------------- |
@@ -478,8 +444,6 @@ the small table below.
 
 ![Model 4 union context fixed-effort predictions](../figs/supervisor_union_context_model/real_k3_m4ab_no_question_nb_words_fixed_effort_atlas.png)
 
-The main message is that the fixed-effort age pattern is not explained away by
-adding both context controls. Compared with Model 3, the word-count age effect
-is essentially unchanged, while the two context predictors each contribute an
-interpretable control term.
+![Model 4 union context fixed-effort predictions, phoneme control](../figs/supervisor_union_context_model/real_k3_m4ab_no_question_nb_phonemes_fixed_effort_atlas.png)
+
 

@@ -3,6 +3,126 @@
 Living project memory: discoveries, decisions, bugs, commands that worked, and
 current state. Prefer dated notes.
 
+## 2026-06-25 - Private context example candidate bank
+
+- Added `src/build_context_example_candidate_bank.py` for a private, long-form
+  manual review bank of candidate context-modulation examples.
+- Built `docs/context_example_candidate_bank_for_review.html`; this page is
+  intentionally not linked from the June 25 meeting index.
+- The bank contains 204 real child candidate moments and 1,632 same-moment
+  counterpart rows: real child, random, unigram, bigram, trigram, LSTM k3, LSTM
+  k4, and LSTM k5.
+- Saved review tables to:
+
+```text
+results/context_example_candidate_bank_for_review/candidate_real_rows.csv
+results/context_example_candidate_bank_for_review/candidate_counterparts_long.csv
+results/context_example_candidate_bank_for_review/candidate_bank_wide.csv
+```
+
+- Command:
+
+```bash
+env MPLCONFIGDIR=/tmp/matplotlib .venv/bin/python src/build_context_example_candidate_bank.py --per-age-type 30 --max-per-child-type 12
+```
+
+## 2026-06-25 - Optimality frontier context-direction fix
+
+- Updated the Way 2 effort-frontier plots in `docs/june_25th_optimality_checks.md`
+  / `.html` so the right-hand context panel displays `k3 - k0` rather than
+  `k0 - k3`.
+- This is a display-direction change only: larger context-driven surprisal
+  reductions now appear lower on the y-axis, matching the total-bits panel.
+- Regenerated the four effort-frontier figures under
+  `figs/june_25_optimality_checks/`.
+
+## 2026-06-25 - Fifth June 25 page for concrete examples
+
+- Added `docs/june_25th_context_examples.md` / `.html` and linked it from the
+  June 25 meeting index as a fifth page.
+- This small paired-example page was later superseded for manual selection by
+  the private candidate bank above.
+- The page uses `results/yang_followup/yang_followup_analysis_rows.csv.gz` to
+  select readable high-vs-low caretaker-context example pairs. Pairs are real
+  child `k3` rows with the same child, same age bin, exact same child word
+  count, and nearby ages.
+- Saved selected examples to:
+
+```text
+results/june_25_context_examples/context_modulation_example_pairs.csv
+```
+
+- Also clarified the optimality Way 2 page text: the frontier plots are
+  descriptive means by exact effort value and do not control for age, child
+  identity, or time.
+- Verification: local HTML link/image audit over the June 25 index,
+  examples page, and optimality page found `0` missing references.
+
+## 2026-06-25 - Fourth June 25 page for optimality checks
+
+- Extended `src/build_june_25_meeting_index.py` with a fourth June 25 page for
+  matched child-vs-baseline optimality-style checks. The third June 25 page is
+  kept as the regression-line comparison page.
+- The checks reuse the cached paired files under
+  `results/route1_real_vs_controls_context_report/`, matching each real child
+  utterance to random, unigram, bigram, trigram, and LSTM k3/k4/k5 alternatives
+  with the same utterance id, same `k3` context, and exact same word count.
+- The page implements three checks: same-effort percentile among baselines,
+  effort-information frontier/envelope, and context-gain advantage. The
+  frontier section now includes separate views for words, morphemes, CMU/pkg
+  syllables, and phonemes.
+- New generated outputs:
+
+```text
+docs/june_25th_optimality_checks.md
+docs/june_25th_optimality_checks.html
+results/june_25_optimality_checks/
+figs/june_25_optimality_checks/
+```
+
+- Main read: each baseline has `446,508` matched rows and `0` word-count
+  mismatches. Real utterances have lower `k3` total bits than matched baselines
+  on average, especially random/unigram/bigram/trigram, while real utterances
+  show higher context gain than matched baselines.
+- Verification: `MPLCONFIGDIR=/tmp/matplotlib .venv/bin/python
+  src/build_june_25_meeting_index.py` completed, and local HTML link/image
+  audit over the June 25 index, optimality page, and third page found `0`
+  missing references.
+
+## 2026-06-25 - Yang feedback follow-up analyses
+
+- Added `src/build_yang_followup_analyses.py` to answer the supervisor's
+  follow-up questions about caretaker-context modulation, concrete examples,
+  effort analogues, and developmental onset.
+- Built a matched analysis table from real-child `k3` rows and caretaker `k0`
+  rows, reconstructing up to three previous caretaker utterances per child
+  response. Outputs:
+
+```text
+docs/yang_feedback_followup_report.md
+docs/yang_feedback_followup_report.html
+docs/yang_feedback_followup_report.embedded.html
+results/yang_followup/yang_followup_analysis_rows.csv.gz
+results/yang_followup/yang_followup_model_summary.csv
+results/yang_followup/age_bin_modulation_coefficients.csv
+results/yang_followup/matched_context_examples.csv
+figs/yang_followup/
+```
+
+- Main read: child `sum_bits` shows clear caretaker-context modulation after
+  age, child effort, and child identity controls. Direct summed caretaker
+  `sum_bits` over the previous up-to-three caretaker utterances is negatively
+  associated with child `sum_bits` when context length is controlled. The
+  child-effort analogue is much weaker: parent context word count is not a
+  clear predictor of child word count in the parallel model, while context
+  entropy has only a tiny positive association.
+- Developmental read: age-bin plots suggest the context-entropy modulation is
+  already visible early, while parent-context-effort modulation of child
+  `sum_bits` becomes more negative after the earliest bin and is strongest in
+  the mid-age bins, with later bins noisier.
+- Verification: `python3 -m py_compile src/build_yang_followup_analyses.py`
+  passed; local HTML image audit found `0` missing images.
+
 ## Current State
 
 TODO: Summarize what currently works.

@@ -1,0 +1,445 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Yang Feedback Follow-up</title>
+<style>
+:root {
+  color-scheme: light;
+  --ink: #1e2528;
+  --muted: #5e686d;
+  --line: #d9e0df;
+  --paper: #ffffff;
+  --soft: #f5f7f6;
+  --accent: #2f6f73;
+  --accent2: #c76f2c;
+}
+body {
+  margin: 0;
+  background: #eef2f1;
+  color: var(--ink);
+  font: 16px/1.58 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+main {
+  max-width: 980px;
+  margin: 34px auto 56px;
+  padding: 48px 58px;
+  background: var(--paper);
+  box-shadow: 0 18px 50px rgba(31, 45, 48, 0.12);
+}
+h1, h2, h3, h4 {
+  line-height: 1.18;
+  margin: 1.6em 0 0.55em;
+}
+h1 {
+  margin-top: 0;
+  font-size: 2.25rem;
+  border-bottom: 3px solid var(--accent);
+  padding-bottom: 0.45em;
+}
+h2 {
+  font-size: 1.55rem;
+  color: var(--accent);
+}
+h3 {
+  font-size: 1.18rem;
+}
+p {
+  margin: 0.75em 0;
+}
+a {
+  color: var(--accent);
+}
+blockquote {
+  border-left: 4px solid var(--accent2);
+  margin: 1.1em 0;
+  padding: 0.05em 1.1em;
+  color: var(--muted);
+  background: #fff8f2;
+}
+code {
+  background: var(--soft);
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  padding: 0.08em 0.3em;
+  font-family: "SFMono-Regular", Consolas, monospace;
+  font-size: 0.92em;
+}
+pre {
+  background: #f5f7f6;
+  color: var(--ink);
+  border: 1px solid var(--line);
+  padding: 1em;
+  overflow-x: auto;
+  border-radius: 7px;
+}
+pre code {
+  background: transparent;
+  border: 0;
+  padding: 0;
+  color: inherit;
+}
+table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 1.15em 0 1.45em;
+  font-size: 0.95em;
+}
+.plot-layout {
+  table-layout: fixed;
+  margin: 1.1em auto 1.45em;
+}
+.plot-layout,
+.plot-layout tr,
+.plot-layout td {
+  border: 0;
+  background: transparent;
+}
+.plot-layout td {
+  padding: 0.35em 0.55em 0.95em;
+  text-align: center;
+  vertical-align: top;
+}
+.plot-layout img {
+  width: 100%;
+  max-width: 100%;
+  margin: 0 auto 0.35em;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: white;
+}
+.plot-layout .centered-cell img {
+  width: 54%;
+}
+.plot-caption {
+  color: var(--muted);
+  font-size: 0.85em;
+  line-height: 1.35;
+}
+th, td {
+  border: 1px solid var(--line);
+  padding: 0.54em 0.68em;
+  vertical-align: top;
+}
+th {
+  background: #e7efed;
+  text-align: left;
+}
+tr:nth-child(even) td {
+  background: #fafbfb;
+}
+.plot-layout tr:nth-child(even) td {
+  background: transparent;
+}
+img {
+  max-width: 100%;
+  display: block;
+  margin: 1.1em auto 0.45em;
+}
+.figure-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.05rem 1.25rem;
+  align-items: start;
+  margin: 1.1em 0 1.45em;
+}
+.figure-grid.two-one {
+  max-width: 900px;
+  margin-left: auto;
+  margin-right: auto;
+}
+.figure-grid.five-panel {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+.figure-grid figure {
+  margin: 0;
+}
+.figure-grid img {
+  width: 100%;
+  max-width: 100%;
+  margin: 0;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: white;
+}
+.figure-grid figcaption {
+  color: var(--muted);
+  font-size: 0.85em;
+  line-height: 1.35;
+  text-align: center;
+  margin-top: 0.35em;
+}
+.figure-grid .centered {
+  grid-column: 1 / -1;
+  justify-self: center;
+  max-width: 58%;
+}
+.figure-grid.two-one .centered {
+  max-width: 54%;
+}
+.figure-grid.five-panel .centered {
+  max-width: 52%;
+}
+ul, ol {
+  padding-left: 1.4em;
+}
+.caption {
+  color: var(--muted);
+  font-size: 0.92em;
+  margin-top: -0.15em;
+}
+@media print {
+  body {
+    background: white;
+  }
+  main {
+    box-shadow: none;
+    margin: 0;
+    max-width: none;
+    padding: 28px;
+  }
+}
+@media screen and (max-width: 540px) {
+  .figure-grid {
+    grid-template-columns: 1fr;
+  }
+  .figure-grid .centered,
+  .figure-grid.five-panel .centered {
+    grid-column: auto;
+    max-width: 100%;
+  }
+}
+</style>
+</head>
+<body>
+<main>
+<h1>Yang Feedback Follow-up</h1>
+<p>This is a technical follow-up to the supervisor-facing report. It does not replace the main report.</p>
+<h2>Point-by-point response</h2>
+<ol>
+<li><strong>Question being answered.</strong> The current Route 1 analyses mainly answer: what factors predict or modulate the informativeness of child speech? They show modulation of child <code>sum_bits</code> after controlling age, child effort, and child identity.</li>
+<li><strong>Caretaker-context interpretation.</strong> The current Model 4 context predictors are <code>parent_context_nb_words</code> and <code>context_entropy_bits</code>. The entropy variable is next-token uncertainty after the preceding caretaker context; it is not identical to caretaker utterance informativeness. Therefore, this follow-up adds a direct companion predictor: the summed k0 <code>sum_bits</code> of the previous up-to-three caretaker utterances.</li>
+<li><strong>Concrete examples.</strong> The table below gives illustrative matched cases where child word count is the same within the pair. These examples are for intuition only; the regression is the evidential test.</li>
+<li><strong>Context window clarification.</strong> <code>k1</code>, <code>k2</code>, and <code>k3</code> mean previous caretaker utterances, not words. The supervisor-report Model 4 uses <code>k3</code>: up to three previous caretaker utterances in the same session. There is no word cap inside each caretaker utterance beyond the fact that the window is bounded to three utterances.</li>
+<li><strong>Effort analogue.</strong> A first-pass child-effort model is included below: child word count is predicted from age, preceding-context effort, context entropy, and child identity. This is the natural next Route 1 sibling model.</li>
+<li><strong>When modulation emerges.</strong> Two plots below visualize whether context modulation changes with age: one using continuous age interactions, and one using age-bin-specific context coefficients.</li>
+</ol>
+<h2>Model summary</h2>
+<table>
+<thead><tr>
+<th>model</th>
+<th>term</th>
+<th>estimate</th>
+<th>95% CI</th>
+<th>p</th>
+<th>n</th>
+<th>R2</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>M4 current context controls</td>
+<td>parent_context_words_c</td>
+<td>-0.0428</td>
+<td>-0.0592 to -0.0264</td>
+<td>&lt;.001</td>
+<td>441413</td>
+<td>0.627</td>
+</tr>
+<tr>
+<td>M4 current context controls</td>
+<td>context_entropy_c</td>
+<td>-0.4698</td>
+<td>-0.5440 to -0.3956</td>
+<td>&lt;.001</td>
+<td>441413</td>
+<td>0.627</td>
+</tr>
+<tr>
+<td>Direct caretaker information</td>
+<td>parent_context_words_c</td>
+<td>0.0694</td>
+<td>0.0329 to 0.1058</td>
+<td>&lt;.001</td>
+<td>441413</td>
+<td>0.627</td>
+</tr>
+<tr>
+<td>Direct caretaker information</td>
+<td>prior_caretaker_sum_bits_c</td>
+<td>-0.0194</td>
+<td>-0.0249 to -0.0139</td>
+<td>&lt;.001</td>
+<td>441413</td>
+<td>0.627</td>
+</tr>
+<tr>
+<td>Age-varying informativeness modulation</td>
+<td>parent_context_words_c</td>
+<td>-0.0415</td>
+<td>-0.0620 to -0.0210</td>
+<td>&lt;.001</td>
+<td>441413</td>
+<td>0.627</td>
+</tr>
+<tr>
+<td>Age-varying informativeness modulation</td>
+<td>context_entropy_c</td>
+<td>-0.4678</td>
+<td>-0.5364 to -0.3991</td>
+<td>&lt;.001</td>
+<td>441413</td>
+<td>0.627</td>
+</tr>
+<tr>
+<td>Age-varying informativeness modulation</td>
+<td>age_c:parent_context_words_c</td>
+<td>-0.0035</td>
+<td>-0.0062 to -9.06e-04</td>
+<td>0.008</td>
+<td>441413</td>
+<td>0.627</td>
+</tr>
+<tr>
+<td>Age-varying informativeness modulation</td>
+<td>age_c:context_entropy_c</td>
+<td>0.0075</td>
+<td>-0.0032 to 0.0182</td>
+<td>0.170</td>
+<td>441413</td>
+<td>0.627</td>
+</tr>
+<tr>
+<td>Child effort modulation</td>
+<td>parent_context_words_c</td>
+<td>0.0023</td>
+<td>-0.0013 to 0.0060</td>
+<td>0.213</td>
+<td>441413</td>
+<td>0.133</td>
+</tr>
+<tr>
+<td>Child effort modulation</td>
+<td>context_entropy_c</td>
+<td>0.0102</td>
+<td>0.0013 to 0.0190</td>
+<td>0.024</td>
+<td>441413</td>
+<td>0.133</td>
+</tr>
+<tr>
+<td>Age-varying child effort modulation</td>
+<td>parent_context_words_c</td>
+<td>0.0025</td>
+<td>-0.0014 to 0.0065</td>
+<td>0.213</td>
+<td>441413</td>
+<td>0.133</td>
+</tr>
+<tr>
+<td>Age-varying child effort modulation</td>
+<td>context_entropy_c</td>
+<td>0.0100</td>
+<td>0.0011 to 0.0189</td>
+<td>0.027</td>
+<td>441413</td>
+<td>0.133</td>
+</tr>
+<tr>
+<td>Age-varying child effort modulation</td>
+<td>age_c:parent_context_words_c</td>
+<td>-4.53e-04</td>
+<td>-0.0011 to 1.59e-04</td>
+<td>0.147</td>
+<td>441413</td>
+<td>0.133</td>
+</tr>
+<tr>
+<td>Age-varying child effort modulation</td>
+<td>age_c:context_entropy_c</td>
+<td>-0.0012</td>
+<td>-0.0023 to -1.30e-04</td>
+<td>0.029</td>
+<td>441413</td>
+<td>0.133</td>
+</tr>
+</tbody></table>
+<h2>Matched examples</h2>
+<table>
+<thead><tr>
+<th>age_bin</th>
+<th>child_words</th>
+<th>high_context_words</th>
+<th>high_context_bits</th>
+<th>high_context_child_bits</th>
+<th>high_context_text</th>
+<th>high_context_child_response</th>
+<th>low_context_words</th>
+<th>low_context_bits</th>
+<th>low_context_child_bits</th>
+<th>low_context_text</th>
+<th>low_context_child_response</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>048-053</td>
+<td>7</td>
+<td>40</td>
+<td>299.5</td>
+<td>14.7</td>
+<td>when the little fish had learned to swim together like one giant fish he said I&#x27;ll be the eye. d you know why he was going to be the eye? why d you think he&#x27;s going to b...</td>
+<td>why he&#x27;s going to be the eye?</td>
+<td>6</td>
+<td>104.9</td>
+<td>120.1</td>
+<td>your what? no no Adam. yes.</td>
+<td>I wan a show Pucilia Urs la.</td>
+</tr>
+<tr>
+<td>024-029</td>
+<td>8</td>
+<td>30</td>
+<td>218.6</td>
+<td>7.2</td>
+<td>way far away from the bridge and the crack and the track. he went as far as he could. oh me oh my oh me oh my he sa:id.</td>
+<td>oh me oh my oh me oh my.</td>
+<td>6</td>
+<td>111.3</td>
+<td>110.4</td>
+<td>orzo? yum! they are so lucky.</td>
+<td>I think Loley Worm&#x27;s going to pour orzo.</td>
+</tr>
+<tr>
+<td>024-029</td>
+<td>6</td>
+<td>19</td>
+<td>216.1</td>
+<td>11.5</td>
+<td>Shamu. do you can you introduce your friends to Amanda? hello Shamu do they both swim in the sea?</td>
+<td>they both swim in the sea.</td>
+<td>8</td>
+<td>107.4</td>
+<td>112.8</td>
+<td>those aren&#x27;t beans they&#x27;re peas. what else? no.</td>
+<td>man too_man Hum z_Dum.</td>
+</tr>
+</tbody></table>
+<p>Saved full example table:</p>
+<pre><code>results/yang_followup/matched_context_examples.csv</code></pre>
+<h2>Age-varying modulation plots</h2>
+<img src="../figs/yang_followup/age_varying_informativeness_modulation.png" alt="Age-varying informativeness modulation">
+<img src="../figs/yang_followup/age_varying_effort_modulation.png" alt="Age-varying effort modulation">
+<img src="../figs/yang_followup/age_bin_modulation_coefficients.png" alt="Age-bin modulation coefficients">
+<h2>Original near-optimality question</h2>
+<p>The original question asks whether children are near-optimally informative, not just whether their informativeness is modulated. The present Route 1 results are evidence for modulation, but not a full optimality test. A stronger optimality test needs counterfactual alternatives for the same context and comparable effort, then asks where the real child utterance lies relative to those alternatives or an effort-information frontier. Route 2 is the closer bridge to that question: for each caretaker context, generate/sample possible child responses, score their effort and informativeness, and compare the actual child response to the response set. The current Route 2 response-space entropy work is therefore not a distraction; it is the machinery needed to define the alternative response space for an optimality-style analysis.</p>
+<h2>Saved artifacts</h2>
+<pre><code>Rows: 441,413
+results/yang_followup/yang_followup_analysis_rows.csv.gz
+results/yang_followup/yang_followup_model_summary.csv
+results/yang_followup/age_bin_modulation_coefficients.csv
+figs/yang_followup/</code></pre>
+</main>
+</body>
+</html>

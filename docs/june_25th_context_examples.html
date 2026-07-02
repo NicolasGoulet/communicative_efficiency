@@ -1,0 +1,483 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Concrete Context-Modulation Examples</title>
+<style>
+:root {
+  color-scheme: light;
+  --ink: #1e2528;
+  --muted: #5e686d;
+  --line: #d9e0df;
+  --paper: #ffffff;
+  --soft: #f5f7f6;
+  --accent: #2f6f73;
+  --accent2: #c76f2c;
+}
+body {
+  margin: 0;
+  background: #eef2f1;
+  color: var(--ink);
+  font: 16px/1.58 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+main {
+  max-width: 980px;
+  margin: 34px auto 56px;
+  padding: 48px 58px;
+  background: var(--paper);
+  box-shadow: 0 18px 50px rgba(31, 45, 48, 0.12);
+}
+h1, h2, h3, h4 {
+  line-height: 1.18;
+  margin: 1.6em 0 0.55em;
+}
+h1 {
+  margin-top: 0;
+  font-size: 2.25rem;
+  border-bottom: 3px solid var(--accent);
+  padding-bottom: 0.45em;
+}
+h2 {
+  font-size: 1.55rem;
+  color: var(--accent);
+}
+h3 {
+  font-size: 1.18rem;
+}
+p {
+  margin: 0.75em 0;
+}
+a {
+  color: var(--accent);
+}
+blockquote {
+  border-left: 4px solid var(--accent2);
+  margin: 1.1em 0;
+  padding: 0.05em 1.1em;
+  color: var(--muted);
+  background: #fff8f2;
+}
+code {
+  background: var(--soft);
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  padding: 0.08em 0.3em;
+  font-family: "SFMono-Regular", Consolas, monospace;
+  font-size: 0.92em;
+}
+pre {
+  background: #f5f7f6;
+  color: var(--ink);
+  border: 1px solid var(--line);
+  padding: 1em;
+  overflow-x: auto;
+  border-radius: 7px;
+}
+pre code {
+  background: transparent;
+  border: 0;
+  padding: 0;
+  color: inherit;
+}
+table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 1.15em 0 1.45em;
+  font-size: 0.95em;
+}
+.plot-layout {
+  table-layout: fixed;
+  margin: 1.1em auto 1.45em;
+}
+.plot-layout,
+.plot-layout tr,
+.plot-layout td {
+  border: 0;
+  background: transparent;
+}
+.plot-layout td {
+  padding: 0.35em 0.55em 0.95em;
+  text-align: center;
+  vertical-align: top;
+}
+.plot-layout img {
+  width: 100%;
+  max-width: 100%;
+  margin: 0 auto 0.35em;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: white;
+}
+.plot-layout .centered-cell img {
+  width: 54%;
+}
+.plot-caption {
+  color: var(--muted);
+  font-size: 0.85em;
+  line-height: 1.35;
+}
+th, td {
+  border: 1px solid var(--line);
+  padding: 0.54em 0.68em;
+  vertical-align: top;
+}
+th {
+  background: #e7efed;
+  text-align: left;
+}
+tr:nth-child(even) td {
+  background: #fafbfb;
+}
+.plot-layout tr:nth-child(even) td {
+  background: transparent;
+}
+img {
+  max-width: 100%;
+  display: block;
+  margin: 1.1em auto 0.45em;
+}
+.figure-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.05rem 1.25rem;
+  align-items: start;
+  margin: 1.1em 0 1.45em;
+}
+.figure-grid.two-one {
+  max-width: 900px;
+  margin-left: auto;
+  margin-right: auto;
+}
+.figure-grid.five-panel {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+.figure-grid figure {
+  margin: 0;
+}
+.figure-grid img {
+  width: 100%;
+  max-width: 100%;
+  margin: 0;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: white;
+}
+.figure-grid figcaption {
+  color: var(--muted);
+  font-size: 0.85em;
+  line-height: 1.35;
+  text-align: center;
+  margin-top: 0.35em;
+}
+.figure-grid .centered {
+  grid-column: 1 / -1;
+  justify-self: center;
+  max-width: 58%;
+}
+.figure-grid.two-one .centered {
+  max-width: 54%;
+}
+.figure-grid.five-panel .centered {
+  max-width: 52%;
+}
+ul, ol {
+  padding-left: 1.4em;
+}
+.caption {
+  color: var(--muted);
+  font-size: 0.92em;
+  margin-top: -0.15em;
+}
+@media print {
+  body {
+    background: white;
+  }
+  main {
+    box-shadow: none;
+    margin: 0;
+    max-width: none;
+    padding: 28px;
+  }
+}
+@media screen and (max-width: 540px) {
+  .figure-grid {
+    grid-template-columns: 1fr;
+  }
+  .figure-grid .centered,
+  .figure-grid.five-panel .centered {
+    grid-column: auto;
+    max-width: 100%;
+  }
+}
+</style>
+</head>
+<body>
+<main>
+<h1>Concrete Context-Modulation Examples</h1>
+<p>Illustrative real-child examples for the caretaker-context modulation question. These examples do not replace the regression; they are a readable example bank.</p>
+<p>Selection rule: real child <code>k3</code> rows only; paired examples have the same child, same age bin, exact same child word count, and nearby ages. The higher-context side has a longer/higher-bit preceding caretaker context; the lower-context side has a shorter/lower-bit preceding caretaker context.</p>
+<p>Columns: <code>context bits</code> is the summed surprisal of the previous up-to-three caretaker utterances. <code>child k3 bits</code> is the child response surprisal with the <code>k3</code> context.</p>
+<h3>Pair 1: 024-029, 9 child words</h3>
+<p>Same child: <code>Providence / Naima</code>. Age gap between examples: <code>0.3</code> months. Low-context child response has <code>90.6</code> more <code>k3</code> bits than the high-context response.</p>
+<table>
+<thead><tr>
+<th>side</th>
+<th>age</th>
+<th>context words</th>
+<th>context bits</th>
+<th>child k3 bits</th>
+<th>caretaker context</th>
+<th>child response</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>Higher caretaker context</td>
+<td>29.9</td>
+<td>31</td>
+<td>216.3</td>
+<td>20.7</td>
+<td>but if yer gonna pour beans yer gonna do it here is what I&#x27;m trying to tell you. it&#x27;s easier that way. it&#x27;s a good idea to do it that way.</td>
+<td>why is it easier to do it that way?</td>
+</tr>
+<tr>
+<td>Lower caretaker context</td>
+<td>29.6</td>
+<td>10</td>
+<td>126.5</td>
+<td>111.4</td>
+<td>good. is Sleepy Bear sad or happy right now? good.</td>
+<td>and Lucille and Asha Bash Asha Basha is happy.</td>
+</tr>
+</tbody></table>
+<h3>Pair 2: 042-047, 9 child words</h3>
+<p>Same child: <code>Brown / Sarah</code>. Age gap between examples: <code>0.7</code> months. Low-context child response has <code>89.9</code> more <code>k3</code> bits than the high-context response.</p>
+<table>
+<thead><tr>
+<th>side</th>
+<th>age</th>
+<th>context words</th>
+<th>context bits</th>
+<th>child k3 bits</th>
+<th>caretaker context</th>
+<th>child response</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>Higher caretaker context</td>
+<td>44.9</td>
+<td>22</td>
+<td>206.4</td>
+<td>8.2</td>
+<td>pattycake pattycake baker&#x27;s man. bake me a cake as quick as you can. hit it pat it put it in an oven.</td>
+<td>hit it pat it put it in an oven.</td>
+</tr>
+<tr>
+<td>Lower caretaker context</td>
+<td>44.2</td>
+<td>6</td>
+<td>114.3</td>
+<td>98.1</td>
+<td>that&#x27;s not. your what? what pigs?</td>
+<td>my only one Kent brought me for Chr Christmas.</td>
+</tr>
+</tbody></table>
+<h3>Pair 3: 036-041, 9 child words</h3>
+<p>Same child: <code>Brown / Adam</code>. Age gap between examples: <code>1.4</code> months. Low-context child response has <code>89.8</code> more <code>k3</code> bits than the high-context response.</p>
+<table>
+<thead><tr>
+<th>side</th>
+<th>age</th>
+<th>context words</th>
+<th>context bits</th>
+<th>child k3 bits</th>
+<th>caretaker context</th>
+<th>child response</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>Higher caretaker context</td>
+<td>42.0</td>
+<td>19</td>
+<td>216.1</td>
+<td>32.4</td>
+<td>watch the propeller Paul. Paul can you say airplane. Paul Adam wants to know if you can say airplane.</td>
+<td>I want you to know can you say airplane?</td>
+</tr>
+<tr>
+<td>Lower caretaker context</td>
+<td>40.6</td>
+<td>6</td>
+<td>94.3</td>
+<td>122.2</td>
+<td>yes. they should turn right. yes.</td>
+<td>and dey going down Trow nine six Trowbridge street.</td>
+</tr>
+</tbody></table>
+<h3>Pair 4: 024-029, 8 child words</h3>
+<p>Same child: <code>Providence / Naima</code>. Age gap between examples: <code>2.7</code> months. Low-context child response has <code>89.2</code> more <code>k3</code> bits than the high-context response.</p>
+<table>
+<thead><tr>
+<th>side</th>
+<th>age</th>
+<th>context words</th>
+<th>context bits</th>
+<th>child k3 bits</th>
+<th>caretaker context</th>
+<th>child response</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>Higher caretaker context</td>
+<td>29.2</td>
+<td>56</td>
+<td>352.0</td>
+<td>21.2</td>
+<td>oh you want Daddy to clean I thought Mommy just did Mommy just cleaned you up like a baby do you want Daddy to clean you up. I think I just cleaned you up like a baby but I think your hands still have some residue on th...</td>
+<td>no I want Daddy to clean them up.</td>
+</tr>
+<tr>
+<td>Lower caretaker context</td>
+<td>26.6</td>
+<td>6</td>
+<td>111.3</td>
+<td>110.4</td>
+<td>orzo? yum! they are so lucky.</td>
+<td>I think Loley Worm&#x27;s going to pour orzo.</td>
+</tr>
+</tbody></table>
+<h3>Pair 5: 006-023, 8 child words</h3>
+<p>Same child: <code>Brown / Eve</code>. Age gap between examples: <code>1.0</code> months. Low-context child response has <code>85.5</code> more <code>k3</code> bits than the high-context response.</p>
+<table>
+<thead><tr>
+<th>side</th>
+<th>age</th>
+<th>context words</th>
+<th>context bits</th>
+<th>child k3 bits</th>
+<th>caretaker context</th>
+<th>child response</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>Higher caretaker context</td>
+<td>23.0</td>
+<td>20</td>
+<td>217.8</td>
+<td>40.9</td>
+<td>well these we&#x27;re gonna send to Granny. Mom&#x27;s just put stamps on them. we&#x27;re gonna put them in the mailbox.</td>
+<td>let me put put it in the mailbox.</td>
+</tr>
+<tr>
+<td>Lower caretaker context</td>
+<td>22.0</td>
+<td>10</td>
+<td>98.7</td>
+<td>126.4</td>
+<td>she did it. you did? why did you do it?</td>
+<td>Cromer Cromer bring Mommy Papa Mommy an Daddy.</td>
+</tr>
+</tbody></table>
+<h3>Pair 6: 048-053, 7 child words</h3>
+<p>Same child: <code>Brown / Adam</code>. Age gap between examples: <code>0.0</code> months. Low-context child response has <code>83.9</code> more <code>k3</code> bits than the high-context response.</p>
+<table>
+<thead><tr>
+<th>side</th>
+<th>age</th>
+<th>context words</th>
+<th>context bits</th>
+<th>child k3 bits</th>
+<th>caretaker context</th>
+<th>child response</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>Higher caretaker context</td>
+<td>50.6</td>
+<td>40</td>
+<td>299.5</td>
+<td>14.7</td>
+<td>when the little fish had learned to swim together like one giant fish he said I&#x27;ll be the eye. d you know why he was going to be the eye? why d you think he&#x27;s going to be the eye?</td>
+<td>why he&#x27;s going to be the eye?</td>
+</tr>
+<tr>
+<td>Lower caretaker context</td>
+<td>50.6</td>
+<td>11</td>
+<td>119.8</td>
+<td>98.6</td>
+<td>let&#x27;s put those in first. in this box. I think so.</td>
+<td>you wan a see dese intelligen slides?</td>
+</tr>
+</tbody></table>
+<h3>Pair 7: 030-035, 8 child words</h3>
+<p>Same child: <code>Manchester / Joel</code>. Age gap between examples: <code>2.8</code> months. Low-context child response has <code>81.0</code> more <code>k3</code> bits than the high-context response.</p>
+<table>
+<thead><tr>
+<th>side</th>
+<th>age</th>
+<th>context words</th>
+<th>context bits</th>
+<th>child k3 bits</th>
+<th>caretaker context</th>
+<th>child response</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>Higher caretaker context</td>
+<td>34.4</td>
+<td>26</td>
+<td>255.0</td>
+<td>24.5</td>
+<td>it&#x27;s right down the back of the tellie. I can&#x27;t get that until your Dad gets. and that&#x27;ll probably be midnight because he&#x27;s gone to Devon.</td>
+<td>it&#x27;s gone down the back of the tellie.</td>
+</tr>
+<tr>
+<td>Lower caretaker context</td>
+<td>31.5</td>
+<td>4</td>
+<td>96.2</td>
+<td>105.4</td>
+<td>oh. video what? says?</td>
+<td>hafta see poor Sally&#x27;s on all video sets.</td>
+</tr>
+</tbody></table>
+<h3>Pair 8: 054-059, 6 child words</h3>
+<p>Same child: <code>Brown / Sarah</code>. Age gap between examples: <code>0.2</code> months. Low-context child response has <code>77.7</code> more <code>k3</code> bits than the high-context response.</p>
+<table>
+<thead><tr>
+<th>side</th>
+<th>age</th>
+<th>context words</th>
+<th>context bits</th>
+<th>child k3 bits</th>
+<th>caretaker context</th>
+<th>child response</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>Higher caretaker context</td>
+<td>56.4</td>
+<td>30</td>
+<td>246.9</td>
+<td>17.3</td>
+<td>what else does your mother tell you? what is it you like to do best Sarah at supper time? when Mama&#x27;s gettin supper what do you like to do best?</td>
+<td>I like to set the table.</td>
+</tr>
+<tr>
+<td>Lower caretaker context</td>
+<td>56.2</td>
+<td>10</td>
+<td>134.5</td>
+<td>95.0</td>
+<td>don&#x27;t cut the door off. huh? oh just the line?</td>
+<td>ain&#x27;t dat a funny noise kwawu?</td>
+</tr>
+</tbody></table>
+<h2>Saved Artifact</h2>
+<pre><code>results/june_25_context_examples/context_modulation_example_pairs.csv</code></pre>
+</main>
+</body>
+</html>

@@ -1,0 +1,499 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Optimality Checks</title>
+<style>
+:root {
+  color-scheme: light;
+  --ink: #1e2528;
+  --muted: #5e686d;
+  --line: #d9e0df;
+  --paper: #ffffff;
+  --soft: #f5f7f6;
+  --accent: #2f6f73;
+  --accent2: #c76f2c;
+}
+body {
+  margin: 0;
+  background: #eef2f1;
+  color: var(--ink);
+  font: 16px/1.58 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+main {
+  max-width: 980px;
+  margin: 34px auto 56px;
+  padding: 48px 58px;
+  background: var(--paper);
+  box-shadow: 0 18px 50px rgba(31, 45, 48, 0.12);
+}
+h1, h2, h3, h4 {
+  line-height: 1.18;
+  margin: 1.6em 0 0.55em;
+}
+h1 {
+  margin-top: 0;
+  font-size: 2.25rem;
+  border-bottom: 3px solid var(--accent);
+  padding-bottom: 0.45em;
+}
+h2 {
+  font-size: 1.55rem;
+  color: var(--accent);
+}
+h3 {
+  font-size: 1.18rem;
+}
+p {
+  margin: 0.75em 0;
+}
+a {
+  color: var(--accent);
+}
+blockquote {
+  border-left: 4px solid var(--accent2);
+  margin: 1.1em 0;
+  padding: 0.05em 1.1em;
+  color: var(--muted);
+  background: #fff8f2;
+}
+code {
+  background: var(--soft);
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  padding: 0.08em 0.3em;
+  font-family: "SFMono-Regular", Consolas, monospace;
+  font-size: 0.92em;
+}
+pre {
+  background: #f5f7f6;
+  color: var(--ink);
+  border: 1px solid var(--line);
+  padding: 1em;
+  overflow-x: auto;
+  border-radius: 7px;
+}
+pre code {
+  background: transparent;
+  border: 0;
+  padding: 0;
+  color: inherit;
+}
+table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 1.15em 0 1.45em;
+  font-size: 0.95em;
+}
+.plot-layout {
+  table-layout: fixed;
+  margin: 1.1em auto 1.45em;
+}
+.plot-layout,
+.plot-layout tr,
+.plot-layout td {
+  border: 0;
+  background: transparent;
+}
+.plot-layout td {
+  padding: 0.35em 0.55em 0.95em;
+  text-align: center;
+  vertical-align: top;
+}
+.plot-layout img {
+  width: 100%;
+  max-width: 100%;
+  margin: 0 auto 0.35em;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: white;
+}
+.plot-layout .centered-cell img {
+  width: 54%;
+}
+.plot-caption {
+  color: var(--muted);
+  font-size: 0.85em;
+  line-height: 1.35;
+}
+th, td {
+  border: 1px solid var(--line);
+  padding: 0.54em 0.68em;
+  vertical-align: top;
+}
+th {
+  background: #e7efed;
+  text-align: left;
+}
+tr:nth-child(even) td {
+  background: #fafbfb;
+}
+.plot-layout tr:nth-child(even) td {
+  background: transparent;
+}
+img {
+  max-width: 100%;
+  display: block;
+  margin: 1.1em auto 0.45em;
+}
+.figure-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.05rem 1.25rem;
+  align-items: start;
+  margin: 1.1em 0 1.45em;
+}
+.figure-grid.two-one {
+  max-width: 900px;
+  margin-left: auto;
+  margin-right: auto;
+}
+.figure-grid.five-panel {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+.figure-grid figure {
+  margin: 0;
+}
+.figure-grid img {
+  width: 100%;
+  max-width: 100%;
+  margin: 0;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: white;
+}
+.figure-grid figcaption {
+  color: var(--muted);
+  font-size: 0.85em;
+  line-height: 1.35;
+  text-align: center;
+  margin-top: 0.35em;
+}
+.figure-grid .centered {
+  grid-column: 1 / -1;
+  justify-self: center;
+  max-width: 58%;
+}
+.figure-grid.two-one .centered {
+  max-width: 54%;
+}
+.figure-grid.five-panel .centered {
+  max-width: 52%;
+}
+ul, ol {
+  padding-left: 1.4em;
+}
+.caption {
+  color: var(--muted);
+  font-size: 0.92em;
+  margin-top: -0.15em;
+}
+@media print {
+  body {
+    background: white;
+  }
+  main {
+    box-shadow: none;
+    margin: 0;
+    max-width: none;
+    padding: 28px;
+  }
+}
+@media screen and (max-width: 540px) {
+  .figure-grid {
+    grid-template-columns: 1fr;
+  }
+  .figure-grid .centered,
+  .figure-grid.five-panel .centered {
+    grid-column: auto;
+    max-width: 100%;
+  }
+}
+</style>
+</head>
+<body>
+<main>
+<h1>Optimality Checks</h1>
+<p>Baseline-based counterfactual checks for the original optimality question. These use scored generated alternatives that are already matched to the real child utterance.</p>
+<p>Matching rule: same utterance id, same <code>k3</code> caretaker context, and exact same word count.</p>
+<p>Technical direction: lower <code>k3</code> total bits means lower surprisal under the context. <code>context_gain = k0 sum_bits - k3 sum_bits</code>; positive real-minus-baseline gain means the real utterance benefits more from the context.</p>
+<h2>Way 1: Same-Effort Percentile</h2>
+<p>For each real utterance, rank the real <code>k3</code> total bits among the seven matched baselines.</p>
+<p>How obtained: each row uses the same child utterance id, same <code>k3</code> caretaker context, and exact same word count. Negative real-minus-baseline bits means the real utterance is less surprising than the matched baseline.</p>
+<table>
+<thead><tr>
+<th>comparison</th>
+<th>matched rows</th>
+<th>word mismatches</th>
+<th>mean real-baseline k3 bits</th>
+<th>median real-baseline k3 bits</th>
+<th>mean real-baseline context gain</th>
+<th>baseline higher k3 bits</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>Real vs Random</td>
+<td>446,508</td>
+<td>0</td>
+<td>-34.40</td>
+<td>-25.23</td>
+<td>5.76</td>
+<td>96.5%</td>
+</tr>
+<tr>
+<td>Real vs Unigram</td>
+<td>446,508</td>
+<td>0</td>
+<td>-15.12</td>
+<td>-11.39</td>
+<td>4.27</td>
+<td>83.6%</td>
+</tr>
+<tr>
+<td>Real vs Bigram</td>
+<td>446,508</td>
+<td>0</td>
+<td>-10.08</td>
+<td>-7.71</td>
+<td>2.81</td>
+<td>75.0%</td>
+</tr>
+<tr>
+<td>Real vs Trigram</td>
+<td>446,508</td>
+<td>0</td>
+<td>-6.96</td>
+<td>-4.49</td>
+<td>1.75</td>
+<td>66.3%</td>
+</tr>
+<tr>
+<td>Real vs LSTM k3</td>
+<td>446,508</td>
+<td>0</td>
+<td>-1.71</td>
+<td>-1.54</td>
+<td>2.24</td>
+<td>56.5%</td>
+</tr>
+<tr>
+<td>Real vs LSTM k4</td>
+<td>446,508</td>
+<td>0</td>
+<td>-1.80</td>
+<td>-1.57</td>
+<td>2.14</td>
+<td>56.6%</td>
+</tr>
+<tr>
+<td>Real vs LSTM k5</td>
+<td>446,508</td>
+<td>0</td>
+<td>-1.80</td>
+<td>-1.61</td>
+<td>2.16</td>
+<td>56.8%</td>
+</tr>
+<tr>
+<td>Real vs all seven baselines</td>
+<td>446,508</td>
+<td>0</td>
+<td>-7.60</td>
+<td>-6.32</td>
+<td>3.18</td>
+<td>70.2%</td>
+</tr>
+</tbody></table>
+<p>Plot note: the percentile panel shows where the real utterance falls among the seven baseline alternatives; the share panel shows how often baseline alternatives have higher <code>k3</code> bits; the gap panel shows real minus the median baseline.</p>
+<div class="figure-grid">
+<figure class="centered">
+<img src="../figs/june_25_optimality_checks/same_effort_percentile_by_age.png" alt="Same-context, same-word-count position among baseline alternatives.">
+<figcaption>Same-context, same-word-count position among baseline alternatives.</figcaption>
+</figure>
+</div>
+<h2>Way 2: Effort-Information Frontier</h2>
+<p>Compare the real child effort-information curve to the envelope formed by the matched baseline sources.</p>
+<p>This is descriptive: it groups by exact effort value and plots means. It does not control for age, child identity, or time; age-stratified/frontier models would be a separate follow-up.</p>
+<p>Words are exact-matched by construction. Morphemes, syllables, and phonemes are measured effort dimensions of the same matched utterances, not additional matching constraints.</p>
+<p>How obtained: rows are grouped by exact effort value. The real line is the mean real child value. The grey band is the range of baseline source means. The dashed line is the best baseline frontier: lowest total bits on the left, largest context-driven reduction on the right.</p>
+<p>Plot direction: the right panel displays <code>k3 - k0</code> rather than <code>k0 - k3</code>, so larger context-driven reductions appear lower on the y-axis, matching the total-bits panel.</p>
+<table>
+<thead><tr>
+<th>effort unit</th>
+<th>frontier metric</th>
+<th>weighted mean</th>
+<th>min exact-effort gap</th>
+<th>max exact-effort gap</th>
+<th>exact effort values</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>Words</td>
+<td>Real minus lowest baseline total-bits frontier</td>
+<td>-1.60</td>
+<td>-13.37</td>
+<td>-0.33</td>
+<td>1-12</td>
+</tr>
+<tr>
+<td>Words</td>
+<td>Real minus median baseline total bits</td>
+<td>-6.81</td>
+<td>-39.95</td>
+<td>-2.21</td>
+<td>1-12</td>
+</tr>
+<tr>
+<td>Words</td>
+<td>Real minus highest baseline context-gain frontier</td>
+<td>1.74</td>
+<td>1.30</td>
+<td>3.25</td>
+<td>1-12</td>
+</tr>
+<tr>
+<td>Words</td>
+<td>Real minus median baseline context gain</td>
+<td>2.24</td>
+<td>1.96</td>
+<td>4.34</td>
+<td>1-12</td>
+</tr>
+<tr>
+<td>Morphemes</td>
+<td>Real minus lowest baseline total-bits frontier</td>
+<td>-2.09</td>
+<td>-17.02</td>
+<td>-0.31</td>
+<td>1-12</td>
+</tr>
+<tr>
+<td>Morphemes</td>
+<td>Real minus median baseline total bits</td>
+<td>-6.83</td>
+<td>-35.60</td>
+<td>-2.04</td>
+<td>1-12</td>
+</tr>
+<tr>
+<td>Morphemes</td>
+<td>Real minus highest baseline context-gain frontier</td>
+<td>1.76</td>
+<td>1.24</td>
+<td>2.85</td>
+<td>1-12</td>
+</tr>
+<tr>
+<td>Morphemes</td>
+<td>Real minus median baseline context gain</td>
+<td>2.22</td>
+<td>1.60</td>
+<td>4.09</td>
+<td>1-12</td>
+</tr>
+<tr>
+<td>Syllables</td>
+<td>Real minus lowest baseline total-bits frontier</td>
+<td>-3.42</td>
+<td>-13.59</td>
+<td>-1.80</td>
+<td>1-12</td>
+</tr>
+<tr>
+<td>Syllables</td>
+<td>Real minus median baseline total bits</td>
+<td>-6.51</td>
+<td>-25.64</td>
+<td>-2.70</td>
+<td>1-12</td>
+</tr>
+<tr>
+<td>Syllables</td>
+<td>Real minus highest baseline context-gain frontier</td>
+<td>1.66</td>
+<td>0.62</td>
+<td>3.15</td>
+<td>1-12</td>
+</tr>
+<tr>
+<td>Syllables</td>
+<td>Real minus median baseline context gain</td>
+<td>2.06</td>
+<td>0.90</td>
+<td>3.92</td>
+<td>1-12</td>
+</tr>
+<tr>
+<td>Phonemes</td>
+<td>Real minus lowest baseline total-bits frontier</td>
+<td>-3.47</td>
+<td>-6.72</td>
+<td>-1.71</td>
+<td>2-13</td>
+</tr>
+<tr>
+<td>Phonemes</td>
+<td>Real minus median baseline total bits</td>
+<td>-5.07</td>
+<td>-11.80</td>
+<td>-2.27</td>
+<td>2-13</td>
+</tr>
+<tr>
+<td>Phonemes</td>
+<td>Real minus highest baseline context-gain frontier</td>
+<td>1.23</td>
+<td>-1.13</td>
+<td>2.32</td>
+<td>2-13</td>
+</tr>
+<tr>
+<td>Phonemes</td>
+<td>Real minus median baseline context gain</td>
+<td>1.65</td>
+<td>-0.07</td>
+<td>2.68</td>
+<td>2-13</td>
+</tr>
+</tbody></table>
+<div class="figure-grid">
+<figure>
+<img src="../figs/june_25_optimality_checks/effort_information_frontier_nb_words.png" alt="Words effort frontier. The grey band is the range of baseline source means; dashed lines mark the best baseline frontier for each panel.">
+<figcaption>Words effort frontier. The grey band is the range of baseline source means; dashed lines mark the best baseline frontier for each panel.</figcaption>
+</figure>
+<figure>
+<img src="../figs/june_25_optimality_checks/effort_information_frontier_nb_morphemes.png" alt="Morphemes effort frontier. The grey band is the range of baseline source means; dashed lines mark the best baseline frontier for each panel.">
+<figcaption>Morphemes effort frontier. The grey band is the range of baseline source means; dashed lines mark the best baseline frontier for each panel.</figcaption>
+</figure>
+<figure>
+<img src="../figs/june_25_optimality_checks/effort_information_frontier_nb_syllables_cmu_or_pkg.png" alt="Syllables effort frontier. The grey band is the range of baseline source means; dashed lines mark the best baseline frontier for each panel.">
+<figcaption>Syllables effort frontier. The grey band is the range of baseline source means; dashed lines mark the best baseline frontier for each panel.</figcaption>
+</figure>
+<figure>
+<img src="../figs/june_25_optimality_checks/effort_information_frontier_nb_phonemes.png" alt="Phonemes effort frontier. The grey band is the range of baseline source means; dashed lines mark the best baseline frontier for each panel.">
+<figcaption>Phonemes effort frontier. The grey band is the range of baseline source means; dashed lines mark the best baseline frontier for each panel.</figcaption>
+</figure>
+</div>
+<h2>Way 3: Context-Gain Advantage</h2>
+<p>Compare how much the previous caretaker context reduces surprisal for the real child utterance versus each matched baseline.</p>
+<p>How obtained: <code>context_gain = k0 sum_bits - k3 sum_bits</code>. Positive real-minus-baseline context gain means the same caretaker context reduces surprisal more for the real child utterance than for the generated alternative.</p>
+<p>This repeats the context-gain column from Way 1, but shows it by age and baseline type.</p>
+<div class="figure-grid">
+<figure class="centered">
+<img src="../figs/june_25_optimality_checks/context_gain_advantage_by_age.png" alt="Real-minus-baseline context gain by age.">
+<figcaption>Real-minus-baseline context gain by age.</figcaption>
+</figure>
+</div>
+<h2>Saved Artifacts</h2>
+<pre><code>results/june_25_optimality_checks/matched_pairwise_baseline_gaps.csv.gz
+results/june_25_optimality_checks/baseline_set_position_by_utterance.csv.gz
+results/june_25_optimality_checks/same_effort_baseline_summary.csv
+results/june_25_optimality_checks/effort_frontier_by_exact_effort.csv
+results/june_25_optimality_checks/effort_frontier_summary.csv
+figs/june_25_optimality_checks/</code></pre>
+</main>
+</body>
+</html>
