@@ -129,11 +129,14 @@ scope, not as an optional later extension.
       `git@github.com:NicolasGoulet/child_complexity_predictors.git` on branch
       `main`.
       Latest production-path commit: `b1be9cb`.
-- [x] Add one cross-repo Mila smoke-test Slurm script in the brain repo:
-      `scripts/mila_modular_repos_smoke.sbatch`. It creates tiny fixture data,
-      runs all three repo test suites, runs n-gram generation, runs a tiny LSTM
-      smoke if torch is importable, runs n-gram Bayes decomposition, and runs
-      complexity extraction plus trajectory export.
+- [x] Add one cross-repo Mila smoke-test Slurm script in the execution repo,
+      not the local brain repo:
+      `generate_baselines_mila/slurm/modular_repos_smoke.sbatch`. It creates
+      tiny fixture data, runs all three modular repo test suites, runs n-gram
+      generation, runs a tiny LSTM smoke if torch is importable, runs n-gram
+      Bayes decomposition, and runs complexity extraction plus trajectory
+      export. On Mila, clone only the three modular execution repos; do not
+      require `communicative_efficiency` there.
 - [x] Document the modular repo Git-vs-rsync data policy in
       `docs/modular_repo_data_policy.md`: only code/configs/docs/tests/tiny
       fixtures go through Git; real preprocessed data and generated/scored

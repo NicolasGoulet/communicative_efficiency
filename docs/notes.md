@@ -6189,17 +6189,19 @@ child_complexity_predictors -> origin/main at b1be9cb
 - `child_complexity_predictors` now includes lexical trajectory exports:
   cumulative child vocabulary size, cumulative TTR, age-bin vocabulary/TTR, and
   age-bin MLU-style summary tables.
-- Added one cross-repo Mila smoke-test script:
+- Added one cross-repo Mila smoke-test script. Correction on 2026-07-06: this
+  belongs in the execution repo, not the local brain repo, so
+  `communicative_efficiency` does not need to be cloned on Mila:
 
 ```text
-scripts/mila_modular_repos_smoke.sbatch
+generate_baselines_mila/slurm/modular_repos_smoke.sbatch
 ```
 
 - The smoke script creates tiny fixture CSVs on the cluster, runs all three
   unit-test suites, runs one real tiny job per repo, and writes outputs under:
 
 ```text
-results/modular_repo_smoke/<slurm_job_id>/
+generate_baselines_mila/results/modular_repo_smoke/<slurm_job_id>/
 ```
 
 - Local smoke test with torch from the main uv environment passed on
@@ -6209,7 +6211,7 @@ results/modular_repo_smoke/<slurm_job_id>/
 UV_CACHE_DIR=/tmp/uv-cache \
 PYTHON_CMD='uv run --project /home/apaixonada/EvaPortelance/Projet_1/communicative_efficiency python' \
 SMOKE_ROOT=/tmp/modular_repo_smoke_local \
-bash scripts/mila_modular_repos_smoke.sbatch
+bash /home/apaixonada/EvaPortelance/Projet_1/generate_baselines_mila/slurm/modular_repos_smoke.sbatch
 ```
 
 - Local smoke output summary:
@@ -6218,6 +6220,11 @@ bash scripts/mila_modular_repos_smoke.sbatch
   `2` rows, Bayes tests passed and n-gram Bayes wrote `2` rows, complexity
   tests passed, utterance complexity wrote `3` rows, trajectory wrote `3` rows,
   and age-bin summary wrote `3` rows.
+- The relocated no-main-repo script was re-run locally from
+  `generate_baselines_mila/slurm/modular_repos_smoke.sbatch` with
+  `SMOKE_ROOT=/tmp/modular_repo_smoke_from_generate`; it passed with the same
+  row counts and did not require running from the `communicative_efficiency`
+  repo.
 
 - Verification for the Slurm robustness update:
 

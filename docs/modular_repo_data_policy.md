@@ -23,9 +23,11 @@ Use three levels before production-scale runs.
 
 1. **Synthetic smoke tests.**
    These are tiny generated CSVs created by
-   `scripts/mila_modular_repos_smoke.sbatch`. They verify that code,
-   imports, Slurm working directories, output writing, checksums, and tiny
-   LSTM/Bayes/complexity paths work.
+   `generate_baselines_mila/slurm/modular_repos_smoke.sbatch`. They verify
+   that code, imports, Slurm working directories, output writing, checksums,
+   and tiny LSTM/Bayes/complexity paths work. This smoke script lives in the
+   execution repo so `communicative_efficiency` does not need to be cloned on
+   Mila.
 
 2. **PBM cleaned-data integration tests.**
    Use the existing cleaned PBM child files already present in
@@ -60,7 +62,7 @@ rsync -avhP data/big_cleaned_dataset/default_naturalistic_merged_006_023/ \
 Mila back to local, after a run:
 
 ```bash
-rsync -avhP gouletn@login.server.mila.quebec:/network/scratch/g/gouletn/communicative_efficiency/results/modular_repo_smoke/<job_id>/ \
+rsync -avhP gouletn@login.server.mila.quebec:/network/scratch/g/gouletn/generate_baselines_mila/results/modular_repo_smoke/<job_id>/ \
   results/modular_repo_smoke/<job_id>/
 ```
 
@@ -68,8 +70,9 @@ Adjust source and destination paths to the actual cluster checkout location.
 
 ## Repo Roles
 
-- `communicative_efficiency`: brain repo, reports, compact analyses, smoke
-  orchestration, and documentation.
+- `communicative_efficiency`: local brain repo for reports, compact analyses,
+  and documentation. It is not required on Mila for modular execution smoke
+  tests.
 - `generate_baselines_mila`: generated baselines and scorer-ready exports.
 - `bayes_efficiency_mila`: Bayes decomposition pilots and future likelihood
   scoring.
