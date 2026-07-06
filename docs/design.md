@@ -302,6 +302,20 @@ Compute classes:
 - **Mila GPU / cluster scoring:** Mistral scoring, large LLM generation,
   sampled-response cloud scoring, and any large neural estimate of `p(c | u)`.
 
+Data movement policy:
+
+- Git carries only code, tests, docs, Slurm scripts, tiny synthetic fixtures,
+  and manifest templates.
+- Real cleaned CHILDES/preprocessed data, generated utterances, model
+  checkpoints, logs, and scored outputs are transferred with `rsync` and remain
+  out of Git.
+- The first real-data integration layer should use the existing PBM cleaned
+  files already present in `compute_surprisal_mila/data/` for Brown,
+  Manchester, and Providence.
+- Full strict-naturalistic production begins only after synthetic smoke and
+  PBM integration tests pass, then the full preprocessed bundle is rsynced to
+  Mila cluster storage.
+
 ## Planned Analyses
 
 TODO: Describe the analysis plan.

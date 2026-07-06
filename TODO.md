@@ -134,6 +134,17 @@ scope, not as an optional later extension.
       runs all three repo test suites, runs n-gram generation, runs a tiny LSTM
       smoke if torch is importable, runs n-gram Bayes decomposition, and runs
       complexity extraction plus trajectory export.
+- [x] Document the modular repo Git-vs-rsync data policy in
+      `docs/modular_repo_data_policy.md`: only code/configs/docs/tests/tiny
+      fixtures go through Git; real preprocessed data and generated/scored
+      outputs move with `rsync`.
+- [ ] Build PBM cleaned-data integration manifests using the existing
+      `compute_surprisal_mila/data/{Brown,Manchester,Providence}/*/chi.csv`
+      cleaned utterance files as the first real-data test layer after synthetic
+      smoke.
+- [ ] After synthetic and PBM integration tests pass, `rsync` the full
+      strict-naturalistic preprocessed bundle to Mila cluster storage and run
+      production-scale manifests there.
 - [x] Add an initial CPU Slurm scaffold for manifest-driven
       n-gram/random/unigram/bigram/trigram generation.
 - [ ] Extend the CPU Slurm scaffold into job arrays over age bin, corpus scope,

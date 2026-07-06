@@ -6235,6 +6235,45 @@ PYTHONPYCACHEPREFIX=/tmp/child_complexity_predictors_pycache PYTHONPATH=src pyth
 bash -n slurm/cpu_complexity_predictors.sbatch
 ```
 
+## 2026-07-06 - Modular repo data policy and PBM integration layer
+
+- Confirmed the modular repo data policy:
+  Git carries only code, tests, docs, Slurm scripts, tiny synthetic fixtures,
+  and manifest templates. Real cleaned CHILDES/preprocessed data, generated
+  utterance outputs, model checkpoints, logs, and scored outputs remain out of
+  Git and move with `rsync`.
+- Added the policy document:
+
+```text
+docs/modular_repo_data_policy.md
+```
+
+- Recorded the intended testing ladder:
+  synthetic smoke first, PBM cleaned-data integration second, full
+  strict-naturalistic production third.
+- Existing local PBM cleaned-data test source is visible in:
+
+```text
+/home/apaixonada/EvaPortelance/Projet_1/compute_surprisal_mila/data/Brown/*/chi.csv
+/home/apaixonada/EvaPortelance/Projet_1/compute_surprisal_mila/data/Manchester/*/chi.csv
+/home/apaixonada/EvaPortelance/Projet_1/compute_surprisal_mila/data/Providence/*/chi.csv
+```
+
+- These PBM cleaned utterance files are the correct first real-data integration
+  layer because they match the previous Brown/Manchester/Providence
+  proof-of-concept and scored-output work.
+- After the synthetic and PBM integration tests pass on Mila, the next step is
+  to `rsync` the full preprocessed strict-naturalistic bundle to cluster
+  storage and run full production manifests there.
+- Updated the TODOs in all three modular repos so the same policy travels with
+  each standalone clone:
+
+```text
+generate_baselines_mila/TODO.md
+bayes_efficiency_mila/TODO.md
+child_complexity_predictors/TODO.md
+```
+
 - Verification:
 
 ```bash
