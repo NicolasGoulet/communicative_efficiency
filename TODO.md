@@ -22,6 +22,356 @@ When a task is completed, move any useful result or decision into
 - TODO: Decide whether supervisor-report captions should explicitly say shaded bands are 95% fitted-mean CIs and that some M1 bands are nearly invisible because the estimated interval is extremely narrow.
 - TODO: Keep `compute_surprisal_mila` as the scoring/HPC/audit repo. Treat older Route 1 reports there as archive/scaffold, not as the evidential baseline for the restarted analyses.
 - TODO: Hand off the PBM additive same-length LSTM generated utterances to `compute_surprisal_mila` for scoring with the same logic used for random/unigram/bigram/trigram baselines. Keep `lstm_additive_k3`, `lstm_additive_k4`, and `lstm_additive_k5` separate as distinct generated-baseline conditions.
+- [x] 2026-07-05: Scaffold the July Meeting HTML index and empty supervisor-facing section pages so the reports can be filled one page at a time.
+
+## Recovered Initial Formulation: Bayes And Complexity TODOs
+
+2026-07-05 source: `docs/Communicative_Efficiency (1).pdf`, the downloaded
+initial project formulation. This is now treated as part of the core project
+scope, not as an optional later extension.
+
+### Informativeness Formulations To Implement / Compare
+
+- [x] Restate the initial informativeness formulation in `docs/design.md`:
+      unconditional `p(u)`, direct contextual `p(u | c)`, and Bayes
+      decomposition `p(u | c) = p(c | u) * p(u) / p(c)`.
+- [ ] Keep the current Mistral contextual surprisal analyses as the direct
+      `p(u | c)` family. Do not discard them: they are one legitimate
+      operationalization of contextual informativeness.
+- [ ] Add a Bayes-decomposition design note for reports: for a fixed context
+      `c`, compare candidate utterances by `log p(u) + log p(c | u)`, because
+      `log p(c)` is a context-specific constant.
+- [ ] Build additive age-bin `p(u)` prior tables for real and generated child
+      utterances using the existing random/unigram/bigram/trigram dictionaries.
+      Keep PBM proof-of-concept priors and full strict-naturalistic priors
+      separate.
+- [ ] Prototype an LSTM-based `p(u)` prior only after the additive LSTM
+      generation/scoring artifacts are stable. CPU smoke tests are fine; real
+      training belongs on Mila GPUs.
+- [ ] Define at least two candidate `p(c | u)` likelihood approximations before
+      coding production runs:
+      reverse n-gram/discourse model, and neural scorer that evaluates
+      caretaker context compatibility with a candidate child utterance.
+- [ ] Add a tiny local CPU smoke test for the Bayes algebra using fake
+      probabilities so sign conventions are verified before any Mila run.
+- [ ] Build a compact Bayes pilot table on a small audited subset with columns:
+      `context_id`, `utterance_id`, `source_model`, `log2_p_u`,
+      `log2_p_c_given_u`, `bayes_log2_score_unnormalized`,
+      `direct_mistral_sum_bits`, effort columns, age, child, and provenance.
+- [ ] Compare direct `p(u | c)` surprisal with Bayes-decomposed scores on real
+      child utterances before using Bayes-derived results in supervisor-facing
+      claims.
+- [ ] In all reports, label Bayes scores as decomposition-based or
+      posterior-style scores unless the normalizer `p(c)` has actually been
+      estimated.
+
+### Complexity / Effort Predictors To Add
+
+- [x] Restate the initial complexity formulation in `docs/design.md`: MLU in
+      orthographic, phonotactic, and word space; dependency length; grammatical
+      complexity through MLU; lexical complexity through vocabulary size.
+- [ ] Create a CPU-first predictor extractor for orthographic MLU:
+      word count, character count, mean word length, and age-bin/child-session
+      aggregates.
+- [ ] Create or audit morpheme-count extraction from CHAT-derived morphology
+      where available. Record missingness by corpus, child, age bin, and
+      session before using it as a primary outcome.
+- [ ] Add syllable, phoneme, and simple phonotactic-shape predictors. Start
+      with a deterministic CPU method, then document which utterances cannot be
+      mapped reliably.
+- [ ] Add lexical-complexity predictors: cumulative child vocabulary size,
+      age-bin vocabulary size, type-token ratio, moving-average lexical
+      diversity, and age-conditioned lexical rarity.
+- [ ] Run a dependency-length feasibility audit on a small, age-stratified,
+      corpus-stratified sample. Do not make dependency length a primary
+      predictor until parser failure modes on short child utterances are
+      documented.
+- [ ] Build per-child and per-age-bin complexity trajectories so grammatical
+      and lexical complexity can be analyzed alongside informativeness and
+      production effort.
+- [ ] Join complexity predictors to Route 1/Route 2 analysis-ready tables only
+      after row keys and missingness have been audited.
+- [ ] Add sensitivity analyses that ask whether age trends in informativeness
+      survive controls for MLU, vocabulary size, and dependency/phonological
+      complexity.
+
+### Modular Repositories And Cluster Work
+
+- [x] Create a lightweight `generate_baselines_mila` repo for baseline
+      generation only. It should generate CPU n-gram/random baselines and GPU
+      LSTM/neural baselines from manifest inputs, then export scorer-ready CSVs.
+      Initial local repo path:
+      `/home/apaixonada/EvaPortelance/Projet_1/generate_baselines_mila`.
+      Initial commit: `8251088` (`Initial baseline generation scaffold`).
+      Pushed to `git@github.com:NicolasGoulet/generate_baselines_mila.git`
+      on branch `main`.
+      Latest production-path commit: `d10e417`.
+- [x] Implement the first runnable CPU path in `generate_baselines_mila`:
+      manifest-driven additive age-bin random, unigram, bigram, and trigram
+      same-length generation with checksum/audit sidecars and unit tests.
+- [ ] Keep this repo as the brain/reporting repo. It should prepare manifests,
+      receive compact audited outputs, build analyses, and generate reports,
+      but should not own multi-GB Mila scoring outputs.
+- [ ] Keep `compute_surprisal_mila` as the direct LLM surprisal scoring repo.
+- [x] Create a separate local `bayes_efficiency_mila` repo for `p(c | u)`
+      likelihood scoring and Bayes-decomposition table building. Initial local
+      repo path:
+      `/home/apaixonada/EvaPortelance/Projet_1/bayes_efficiency_mila`.
+      Initial commit: `c37acd5` (`Initial Bayes decomposition scaffold`).
+      Pushed to `git@github.com:NicolasGoulet/bayes_efficiency_mila.git` on
+      branch `main`.
+      Latest production-path commit: `74eb1f8`.
+- [x] Create a separate local `child_complexity_predictors` repo for MLU and
+      complexity predictor extraction. Initial local repo path:
+      `/home/apaixonada/EvaPortelance/Projet_1/child_complexity_predictors`.
+      Initial commit: `758a388` (`Initial complexity predictor scaffold`).
+      Pushed to
+      `git@github.com:NicolasGoulet/child_complexity_predictors.git` on branch
+      `main`.
+      Latest production-path commit: `b1be9cb`.
+- [x] Add one cross-repo Mila smoke-test Slurm script in the brain repo:
+      `scripts/mila_modular_repos_smoke.sbatch`. It creates tiny fixture data,
+      runs all three repo test suites, runs n-gram generation, runs a tiny LSTM
+      smoke if torch is importable, runs n-gram Bayes decomposition, and runs
+      complexity extraction plus trajectory export.
+- [x] Add an initial CPU Slurm scaffold for manifest-driven
+      n-gram/random/unigram/bigram/trigram generation.
+- [ ] Extend the CPU Slurm scaffold into job arrays over age bin, corpus scope,
+      context window, and split once the production manifests are written.
+- [x] Add a GPU LSTM Slurm scaffold and manifest with an explicit
+      not-implemented CLI guard so nobody can accidentally claim LSTM
+      generation ran before the real port exists.
+- [ ] Port or wrap the real LSTM training/generation code into
+      `generate_baselines_mila`, add tests, and make the GPU Slurm command
+      execute real training artifacts.
+- [ ] Add checksums/manifests to every generated-baseline export so scorer
+      repos can verify that row order, row ids, context windows, and utterance
+      counts match expectations.
+- [ ] Preserve existing PBM proof-of-concept outputs. Build full
+      strict-naturalistic baselines as new outputs with explicit names rather
+      than overwriting old real utterances or old generated baselines.
+
+## Current Route 2 Response-Space Preparation
+
+2026-07-02 status: the Mila response-space generation run is complete enough
+to begin Route 2 table construction. Production run:
+
+```text
+/network/scratch/g/gouletn/compute_surprisal_mila/response_entropy_runs/20260618_164333
+```
+
+Known run summary from the Mila audit:
+
+- `context_ks`: `k3`
+- `prompt_variant`: `Caregiver`
+- `temperature`: `0.5`
+- `manifest_contexts`: `268,712`
+- `selected_rows`: `26,871,200 / 26,871,200`
+- `incomplete_settings`: `176`
+- `fallback_settings`: `176`
+- `invalid_fallback_selected_rows`: `6,584`
+
+### Route 2 Build Principles
+
+- Do not pull the full `selected_samples` or `all_attempts` production outputs
+  to the laptop unless there is a specific audit reason. Build compact
+  generated-response effort summaries on Mila, then `rsync` compact products
+  back.
+- Keep `compute_surprisal_mila` as the Slurm/HPC/audit repo. Put cluster-side
+  summarization scripts there; put downstream analysis/report builders here.
+- Use one stable context key everywhere:
+  `response_entropy_context_id = sha256(normalize_context(context_text))[:24]`.
+  Do not assume older `context_entropy_context_id` columns are equivalent
+  without an audit.
+- Restrict the first production Route 2 table to
+  `role == child`, `target_variant == real`, `context_k == k3`, nonempty
+  `context_text`, `prompt_variant == Caregiver`, and `temperature == 0.5`.
+- Preserve row provenance: `score_id`, `utterance_id`, `dataset`, `child_id`,
+  `session_id`, `age_months`, `age_bin`, `file`, `line_no`, `utt_id`,
+  `context_text`, and `target_utterance_clean`.
+- Treat the `176` incomplete contexts as visible audit flags, not hidden
+  failures. Main models can exclude or sensitivity-check them, but the table
+  must carry `fallback_used`, `valid_selected_count`, and
+  `invalid_selected_count`.
+- Do not claim the generated samples hold meaning constant. Frame them as a
+  context-conditioned response space.
+
+### Route 2 Inputs
+
+- Real child row base:
+
+```text
+results/route1_analysis_dataset/route1_scored_utterance_effort_context_entropy_long.csv.gz
+```
+
+- Compact real-child context/effort helper, useful for fast audits:
+
+```text
+results/context_predictor_permutations/route1_real_child_context_measures_k3.csv.gz
+```
+
+- Mila response-entropy features:
+
+```text
+/network/scratch/g/gouletn/compute_surprisal_mila/response_entropy_runs/20260618_164333/merged/context_response_entropy_features.csv.gz
+```
+
+- Mila selected generated samples for cluster-side aggregation only:
+
+```text
+/network/scratch/g/gouletn/compute_surprisal_mila/response_entropy_runs/20260618_164333/shard_outputs/shard_*/selected_samples.csv.gz
+```
+
+### Immediate Route 2 TODOs
+
+- [x] In `compute_surprisal_mila`, add a CPU Slurm summarizer that streams
+      `shard_outputs/shard_*/selected_samples.csv.gz` and writes a compact
+      `generated_response_effort_summary_by_context.csv.gz`.
+- [x] The generated-effort summary must be valid-only by default and include:
+      sample count, word/character mean, SD, median, p10, p25, p75, p90, min,
+      max, and a compact word-count histogram JSON by `context_id`,
+      `prompt_variant`, and `temperature`.
+- [x] Include audit columns in the summary: selected rows, valid rows, invalid
+      fallback rows, fallback used, incomplete context flag, and source shard
+      coverage.
+- [x] `rsync` only compact Route 2 products back to the laptop:
+      `context_response_entropy_features.csv.gz`,
+      `setting_summary.csv.gz`, and
+      `generated_response_effort_summary_by_context.csv.gz`.
+- [x] Add a local `communicative_efficiency` builder that filters real child
+      `k3` rows, recomputes `response_entropy_context_id`, and joins response
+      entropy plus generated effort summaries. The builder now caches the
+      filtered Route 1 base at
+      `results/route2_response_space/route2_real_child_k3_base_rows.csv.gz`
+      so reruns do not rescan the 1.7GB Route 1 long table unless
+      `--rebuild-route1-cache` is passed.
+- [x] Output the first analysis-ready table:
+
+```text
+results/route2_response_space/route2_child_response_space_effort_table.csv.gz
+```
+
+- [x] The first table must add these predictors to actual real-child rows:
+      `response_entropy_bits`, `response_unique_response_count`,
+      `response_top_probability`, `generated_expected_words`,
+      `generated_median_words`, `generated_p90_words`,
+      `child_words_minus_generated_mean`, `child_words_z_vs_generated`,
+      `child_words_percentile_in_generated_distribution`,
+      `child_shorter_than_generated_median`,
+      `child_longer_than_generated_p90`, `fallback_used_for_context`,
+      and `valid_sample_count`.
+- [x] Write a join audit with row counts: eligible real child rows, matched
+      response-entropy rows, matched generated-effort rows, missing context
+      ids, duplicate context ids, and counts by age bin/dataset.
+- [x] Write a manual-review sample CSV of joined rows: random rows, high
+      entropy, low entropy, child much shorter than generated expectation,
+      child much longer than generated expectation, and fallback contexts.
+- [x] Make first-pass plots only after the table audit is clean: child length
+      percentile in generated response space by age, generated expected length
+      by child age, response entropy by child age, and child length residual
+      versus response entropy.
+- [x] Fit first-pass models after the clean table audit. This was upgraded from
+      tiny OLS sanity models to a repeated-measures suite: child-session GEE,
+      child-session Mundlak within/between age GEE, child-session MixedLM
+      random effects where stable, and row-level OLS child-FE/clustered-SE as a
+      comparator.
+
+### Later Full Communicative-Efficiency Cloud
+
+- [x] Build an available-now information-effort cloud from already scored
+      real, random, unigram, bigram, trigram, and additive LSTM rows. This is
+      the decoupled-generator baseline cloud we already had: non-Mistral
+      generators scored under the common Mistral scorer.
+- [ ] Use the existing scored baseline cloud as the first evidence layer in
+      the July communicative-efficiency materials:
+
+```text
+results/existing_scored_baseline_efficiency_cloud/
+figs/existing_scored_baseline_efficiency_cloud/
+docs/existing_scored_baseline_efficiency_cloud.md
+docs/existing_scored_baseline_efficiency_cloud.html
+```
+
+- [ ] Create a scoring bundle for generated selected samples so Mila can score
+      `sampled_response_text` under the same `context_text` with Mistral.
+- [ ] Score generated responses on Mila, not on the laptop.
+- [ ] Build a cloud table with one generated response row per context/sample:
+      generated effort plus generated surprisal/information.
+- [ ] Treat Mistral-generated + Mistral-scored samples as a **Mistral
+      self-reference cloud**, not as independent evidence. Keep it, but label
+      it separately from decoupled-generator clouds.
+- [ ] If compute allows, add another LLM generator and score those samples with
+      Mistral. This would create a stronger decoupled-generator LLM cloud:
+      other-model-generated + Mistral-scored.
+- [ ] Continue using `response_entropy_bits` from the Mistral response-space
+      run as a context-level scorer-uncertainty predictor/stratifier. Do not
+      describe it as model-independent behavioral uncertainty.
+- [ ] Join each real child utterance to its generated response cloud and compute
+      cloud-relative information/effort metrics: information percentile,
+      effort percentile, efficiency rank, Pareto/frontier indicator, and
+      distance to generated frontier.
+- [ ] Keep the length-only Route 2 table and the full information-effort cloud
+      as separate products so the first analysis is not blocked by the later
+      Mila scoring run.
+
+### Current Response-Space Analysis TODOs
+
+- [x] Build compact response-space predictor exports so the new predictors are
+      usable beyond the Route 2 table without inflating the 11.6M-row Route 1
+      long table:
+
+```text
+results/route2_response_space_analysis/response_space_predictors_by_context.csv.gz
+results/route2_response_space_analysis/response_space_predictors_by_utterance.csv.gz
+```
+
+- [x] Build Route 2 effort-choice plots requested by the supervisor framing:
+      child length percentile in the generated response distribution by age,
+      generated expected response length by age, response entropy by age, child
+      length residual versus response entropy, and actual child length versus
+      generated expected length.
+- [x] Fit focused Route 2 effort models, not a giant model zoo, while respecting
+      repeated measures: child effort outcomes (`nb_words`, morphemes,
+      syllables, phonemes) as a function of response entropy, generated
+      expected effort, context length, next-token context entropy, and age using
+      child-session aggregates, GEE grouped by child, mixed models with child
+      random effects where stable, and within/between-child age decomposition.
+      Keep OLS with child fixed effects and clustered SE only as a baseline
+      comparator.
+- [x] Fit a fallback-sensitivity Route 2 check excluding the `176` fallback
+      contexts / `218` fallback child rows.
+- [x] Build Route 1 response-space-enriched information models on actual real
+      child rows: `sum_bits` and `mean_bits_per_token` as outcomes, with child
+      effort, age, context entropy, response entropy, and generated expected
+      effort. Use the same repeated-measures strategy: child-session aggregate
+      GEE, mixed models where stable, within/between-child age decomposition,
+      and OLS child-fixed-effect/clustered-SE only as a comparator. Treat this
+      as Route 1 predictor enrichment, not as the full generated-response
+      information-effort cloud.
+- [x] Generate compact coefficient tables, prediction grids, and plots for the
+      Route 1 response-space enrichment so the new predictors can be inspected
+      alongside the older Route 1 fixed-effort story.
+- [x] Write an audit/report Markdown summarizing row counts, formulas, model
+      interpretations, and limitations, especially that generated responses are
+      context-conditioned alternatives and are not held-meaning paraphrases.
+- [x] Build the dedicated Route 2 peer-review relative-effort suite: outcomes
+      are child effort residual/percentile/ratio against the generated
+      response-space length distribution for the same caregiver context, plus
+      binary indicators for shorter than generated median and longer than
+      generated p90. Fit the full age/response-entropy/context-demand ladder
+      with row-level child-FE clustered models, child-session GEE,
+      child-session Mundlak GEE, child-session MixedLM checks, and no-fallback
+      final-model sensitivity.
+- [x] Generate the Route 2 relative-effort audit, age-bin descriptives,
+      response-entropy-bin descriptives, final coefficient tables, prediction
+      grids, figures, and supervisor-readable Markdown/HTML report:
+
+```text
+results/route2_relative_effort_model_suite/
+figs/route2_relative_effort_model_suite/
+docs/route2_relative_effort_model_suite.md
+docs/route2_relative_effort_model_suite.html
+```
 
 ## Next Priority: Route 1 Best-Model Robustness Package Before Supervisor Report
 

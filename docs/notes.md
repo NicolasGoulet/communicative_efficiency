@@ -5759,3 +5759,492 @@ src/build_supervisor_report_todo_plots.py
   `.embedded.html`, `docs/june_25th_meeting_index.html`, and the June 25th
   linked pages. Verification: Python syntax checks passed and the local
   standard-library link/image audit found `0` missing links.
+
+## 2026-07-02 - Route 2 response-space table planning
+
+- Recorded the production response-space generation run as the starting point
+  for Route 2 table construction:
+
+```text
+/network/scratch/g/gouletn/compute_surprisal_mila/response_entropy_runs/20260618_164333
+```
+
+- Current audit state: `268,712` k3 contexts, `26,871,200` selected rows,
+  `176` incomplete/fallback settings, and `6,584` invalid fallback selected
+  rows.
+- Decided the first Route 2 product should be a compact length/effort table:
+  real child k3 rows joined to context-level response entropy and generated
+  valid-response length summaries. This does not require scoring generated
+  responses yet.
+- Decided the full communicative-efficiency point-cloud analysis is a later
+  Mila scoring step: score each generated sampled response under its context,
+  then compare the real child utterance to the generated information-effort
+  cloud.
+- Added a detailed TODO block in `TODO.md` covering cluster-side aggregation,
+  compact rsync products, local row-level joins, required audit files, first
+  plots, sanity models, and the later generated-response scoring cloud.
+
+## 2026-07-02 - Route 2 response-space table built locally
+
+- Pulled the compact Mila products under:
+
+```text
+/home/apaixonada/EvaPortelance/Projet_1/compute_surprisal_mila/mila_results/response_entropy_generation/20260618_164333/merged
+```
+
+- Added `src/build_route2_response_space_table.py` and
+  `tests/test_build_route2_response_space_table.py`.
+- Built the first local Route 2 child-row table:
+
+```text
+results/route2_response_space/route2_child_response_space_effort_table.csv.gz
+```
+
+- Join audit:
+  - Route 1 rows scanned on the initial build: `11,607,680`
+  - real-child k3 rows before nonempty-context filter: `446,985`
+  - retained real-child k3 rows: `444,325`
+  - unique response-entropy contexts: `268,712`
+  - matched response-entropy rows: `444,325`
+  - matched generated-effort rows: `444,325`
+  - missing response-entropy rows: `0`
+  - missing generated-effort rows: `0`
+  - fallback-used contexts: `176`
+  - fallback-used child rows: `218`
+- Seeded a reusable Route 1 base cache from the already-built joined table so
+  future Route 2 rebuilds do not rescan the 1.7GB Route 1 long CSV by default:
+
+```text
+results/route2_response_space/route2_real_child_k3_base_rows.csv.gz
+results/route2_response_space/route2_real_child_k3_base_rows_audit.json
+```
+
+- The builder uses that cache unless `--rebuild-route1-cache` is passed. The
+  sidecar records the `2,660` real-child k3 rows excluded for empty context.
+- Verification:
+
+```bash
+env UV_CACHE_DIR=/tmp/uv-cache uv run python -m unittest tests.test_build_route2_response_space_table
+env UV_CACHE_DIR=/tmp/uv-cache uv run python -m py_compile src/build_route2_response_space_table.py
+```
+
+## 2026-07-02 - Route 1 / Route 2 response-space analysis suite
+
+- Added `src/build_response_space_analysis_suite.py` and
+  `tests/test_build_response_space_analysis_suite.py`.
+- Built a focused response-space analysis suite from:
+
+```text
+results/route2_response_space/route2_child_response_space_effort_table.csv.gz
+```
+
+- The analysis explicitly avoids an OLS-only interpretation. It fits each
+  focused model through repeated-measures estimators:
+  - row-level OLS with child fixed effects and child-clustered SE as a baseline
+    comparator;
+  - child-session aggregate Gaussian GEE grouped by child;
+  - child-session aggregate Mundlak / within-between-child age GEE;
+  - child-session aggregate MixedLM with child random intercept and random age
+    slope where statsmodels can fit it.
+- Scope audit: the current production response-space table covers `444,325`
+  utterance rows, `268,712` unique response-entropy contexts, `21` children,
+  and `3` datasets (`Brown`, `Manchester`, `Providence`). This is not the full
+  79-child cleaned bundle; the report now says this explicitly.
+- Wrote reusable predictor exports so response-space predictors can be used by
+  Route 1 analyses without bloating the 11.6M-row long table:
+
+```text
+results/route2_response_space_analysis/response_space_predictors_by_context.csv.gz
+results/route2_response_space_analysis/response_space_predictors_by_utterance.csv.gz
+results/route2_response_space_analysis/route1_real_child_response_space_enriched.csv.gz
+```
+
+- Wrote Route 2/Route 1 plots and model outputs:
+
+```text
+results/route2_response_space_analysis/response_space_analysis_audit.csv
+results/route2_response_space_analysis/response_space_model_summary.csv
+results/route2_response_space_analysis/response_space_model_coefficients.csv
+results/route2_response_space_analysis/response_space_summary_by_age_bin.csv
+results/route2_response_space_analysis/response_entropy_binned_residual_summary.csv
+figs/route2_response_space_analysis/
+docs/response_space_route1_route2_analysis.md
+docs/response_space_route1_route2_analysis.html
+```
+
+- First-pass descriptive pattern from the age-bin summaries: actual child word
+  count rises with age, generated expected word count is flatter, and the
+  child's percentile in the generated word-count distribution rises with age.
+  The richer repeated-measures models are in the coefficient table; row-level
+  OLS and child-session models should be interpreted separately.
+- Verification:
+
+```bash
+env MPLCONFIGDIR=/tmp/matplotlib UV_CACHE_DIR=/tmp/uv-cache uv run python -m unittest tests.test_build_response_space_analysis_suite tests.test_build_route2_response_space_table
+env MPLCONFIGDIR=/tmp/matplotlib UV_CACHE_DIR=/tmp/uv-cache uv run python src/build_response_space_analysis_suite.py
+```
+
+## 2026-07-04 - Route 2 relative-effort model suite
+
+- Added a dedicated Route 2 peer-review suite:
+
+```text
+src/build_route2_relative_effort_model_suite.py
+tests/test_build_route2_relative_effort_model_suite.py
+```
+
+- Ran the full suite on:
+
+```text
+results/route2_response_space/route2_child_response_space_effort_table.csv.gz
+```
+
+- Outputs:
+
+```text
+results/route2_relative_effort_model_suite/route2_relative_effort_audit.csv
+results/route2_relative_effort_model_suite/route2_relative_effort_summary_by_age_bin.csv
+results/route2_relative_effort_model_suite/route2_relative_effort_summary_by_response_entropy_bin.csv
+results/route2_relative_effort_model_suite/route2_relative_effort_model_summary.csv
+results/route2_relative_effort_model_suite/route2_relative_effort_model_coefficients.csv
+results/route2_relative_effort_model_suite/*_prediction_grid.csv
+figs/route2_relative_effort_model_suite/
+docs/route2_relative_effort_model_suite.md
+docs/route2_relative_effort_model_suite.html
+```
+
+- Audit: `444,325` child utterance rows, `268,712` response-space contexts,
+  `21` children, `3` datasets, `218` fallback child rows across `176`
+  fallback contexts. All `144 / 144` model fits completed.
+- Core descriptive result: real child utterances are usually shorter than the
+  generated response-space length distribution for the same caregiver context.
+  The mean residual moves from `-2.28` words in `006-023` months to roughly
+  `-0.76` to `-0.79` words in later bins, and the generated-distribution
+  percentile rises from `0.25` to about `0.44`.
+- Response-entropy gradient: lowest response-entropy bins are near the
+  generated midpoint (`residual=-0.03`, percentile `0.55`), while the highest
+  bin is far below it (`residual=-3.21`, percentile `0.19`,
+  shorter-than-generated-median rate `0.86`).
+- Primary inferential read from the final child-session GEE: age predicts
+  movement toward the generated response-space distribution, generated expected
+  effort predicts stronger child-shortening relative to that distribution, and
+  the age by response-entropy interaction indicates weaker developmental
+  catch-up in higher-response-entropy contexts. No-fallback final-model
+  sensitivity preserved the core estimates.
+- Verification:
+
+```bash
+MPLCONFIGDIR=/tmp/matplotlib .venv/bin/python src/build_route2_relative_effort_model_suite.py
+MPLCONFIGDIR=/tmp/matplotlib .venv/bin/python -m unittest tests.test_build_route2_response_space_table tests.test_build_response_space_analysis_suite tests.test_build_route2_relative_effort_model_suite
+.venv/bin/python -m py_compile src/build_route2_relative_effort_model_suite.py
+```
+
+## 2026-07-05 - July Meeting report scaffold
+
+- Added a July Meeting HTML scaffold matching the compact June 25th meeting
+  index style, with no date in the visible title.
+- Added the builder:
+
+```text
+src/build_july_meeting_index.py
+```
+
+- Generated the main index and blank supervisor-facing section pages:
+
+```text
+docs/july_meeting_index.html
+docs/july_meeting_used_data.html
+docs/july_meeting_definitions.html
+docs/july_meeting_predicting_utterance_informativeness.html
+docs/july_meeting_predicting_utterance_production_effort.html
+docs/july_meeting_developmental_trajectory_communicative_efficiency.html
+```
+
+- The section pages intentionally contain only their titles for now.
+- Verification:
+
+```bash
+.venv/bin/python -m py_compile src/build_july_meeting_index.py
+.venv/bin/python src/build_july_meeting_index.py
+.venv/bin/python -c "from pathlib import Path; import re; idx=Path('docs/july_meeting_index.html'); hrefs=re.findall(r'href=\"([^\"]+)\"', idx.read_text()); missing=[h for h in hrefs if not (idx.parent/h).exists()]; print('hrefs', len(hrefs)); print('missing', missing)"
+```
+
+## 2026-07-05 - Existing scored baseline efficiency cloud
+
+- Added an available-now information-effort cloud builder from already scored
+  real, random, n-gram, and additive LSTM rows:
+
+```text
+src/build_existing_scored_baseline_efficiency_cloud.py
+tests/test_build_existing_scored_baseline_efficiency_cloud.py
+```
+
+- This uses the already scored `child`, `k3` rows from:
+
+```text
+results/route1_analysis_dataset/route1_scored_utterance_effort_context_entropy_with_lstm_long.csv.gz
+```
+
+- It joins Mistral response entropy from:
+
+```text
+results/route2_response_space/route2_child_response_space_effort_table.csv.gz
+```
+
+- Outputs:
+
+```text
+results/existing_scored_baseline_efficiency_cloud/
+figs/existing_scored_baseline_efficiency_cloud/
+docs/existing_scored_baseline_efficiency_cloud.md
+docs/existing_scored_baseline_efficiency_cloud.html
+```
+
+- Audit: scanned `16,965,776` long-table rows; retained `3,572,541` child
+  `k3` cloud rows across `8` sources; matched response entropy for
+  `3,551,245` rows; saved a `96,000`-row plotting sample.
+- Source means under the common Mistral `k3` scorer: real child `26.73` mean
+  bits, LSTM k3/k4/k5 about `28.42-28.51`, trigram `33.68`, bigram `36.79`,
+  unigram `41.83`, random `61.11`. Mean word effort is matched at about
+  `2.66` words across these child/baseline rows.
+- Design interpretation: this is the decoupled-generator cloud we already had,
+  because random, n-gram, and LSTM utterances were not generated by Mistral but
+  are scored under the common Mistral scorer. Mistral-generated samples should
+  still be scored later, but labeled as a Mistral self-reference cloud.
+- Response entropy remains useful as the Mistral scorer's context-level
+  uncertainty predictor/stratifier, not as model-independent behavioral
+  uncertainty.
+- Verification:
+
+```bash
+MPLCONFIGDIR=/tmp/matplotlib .venv/bin/python src/build_existing_scored_baseline_efficiency_cloud.py
+.venv/bin/python -m py_compile src/build_existing_scored_baseline_efficiency_cloud.py
+MPLCONFIGDIR=/tmp/matplotlib .venv/bin/python -m unittest tests.test_build_existing_scored_baseline_efficiency_cloud
+.venv/bin/python -c "from pathlib import Path; import re; md=Path('docs/existing_scored_baseline_efficiency_cloud.md'); imgs=re.findall(r'!\[[^\]]*\]\(([^\)]+)\)', md.read_text()); missing=[img for img in imgs if not (md.parent/img).resolve().exists()]; print('images', len(imgs)); print('missing', missing)"
+```
+
+## 2026-07-05 - Recovered initial Bayes and complexity formulation
+
+- Reopened the downloaded initial project formulation:
+
+```text
+docs/Communicative_Efficiency (1).pdf
+```
+
+- Confirmed that the original formulation included three informativeness
+  families:
+  direct utterance prior `p(u)`, contextual probability `p(u | c)`, and a
+  Bayes decomposition `p(u | c) = p(c | u) * p(u) / p(c)`.
+- Confirmed that the original complexity formulation explicitly included
+  MLU-style measures in orthographic, phonotactic, and word space, with later
+  notes connecting MLU to grammatical complexity and vocabulary size to lexical
+  complexity.
+- Updated `docs/design.md` so the project distinguishes:
+  unconditional `p(u)`, direct contextual Mistral `p(u | c)`, and
+  Bayes-decomposed posterior-style scores.
+- Added implementation TODOs in `TODO.md` for:
+  additive age-bin `p(u)` priors, candidate `p(c | u)` likelihood models,
+  Bayes pilot tables, direct-versus-Bayes comparison, orthographic and
+  grammatical MLU, phonological/phonotactic complexity, dependency length,
+  vocabulary-size/lexical-complexity predictors, and sensitivity analyses.
+- Recorded the intended compute/repo split:
+  this repository remains the brain/reporting repo,
+  `compute_surprisal_mila` remains direct neural surprisal scoring,
+  a new `generate_baselines_mila` repo should own cluster-ready baseline
+  generation, and a future `bayes_efficiency_mila` repo should own Bayes
+  likelihood scoring and decomposition tables.
+
+## 2026-07-05 - New baseline-generation repo scaffold
+
+- Created a new lightweight sibling git repo:
+
+```text
+/home/apaixonada/EvaPortelance/Projet_1/generate_baselines_mila
+```
+
+- Repo purpose: baseline utterance generation only. The main
+  `communicative_efficiency` repo remains the brain/reporting/data-linking
+  repo, while `compute_surprisal_mila` remains the neural surprisal scoring
+  repo.
+- Initial commit:
+
+```text
+8251088 Initial baseline generation scaffold
+```
+
+- Local Git identity configured for the repo:
+
+```text
+Nicolas Goulet <nicolas.goulet@hec.ca>
+```
+
+- Intended remote configured:
+
+```text
+git@github.com:NicolasGoulet/generate_baselines_mila.git
+```
+
+- Initial push attempt failed because GitHub reported `Repository not found`.
+  After the empty remote was created, a nested empty clone was accidentally
+  created inside the real repo; it was removed and the actual local scaffold was
+  pushed successfully to `origin/main`.
+- Implemented runnable CPU baseline generation:
+  manifest-driven additive age-bin random, unigram, bigram, and trigram
+  same-length generation with context-tail conditioning, scorer-ready CSV
+  export, and JSON audit sidecars with SHA-256 checksums.
+- Added honest GPU LSTM scaffolding only: config and Slurm template exist, but
+  the CLI returns `not_implemented` until real LSTM training/generation code is
+  ported and tested.
+- Verification:
+
+```bash
+cd /home/apaixonada/EvaPortelance/Projet_1/generate_baselines_mila
+PYTHONPATH=src python3 -m unittest discover -s tests
+PYTHONPYCACHEPREFIX=/tmp/generate_baselines_mila_pycache PYTHONPATH=src python3 -m py_compile src/generate_baselines_mila/*.py
+PYTHONPATH=src python3 -m generate_baselines_mila describe-compute-lanes
+PYTHONPATH=src python3 -m generate_baselines_mila validate-manifest --manifest configs/ngram_additive_example.json
+```
+
+## 2026-07-05 - Additional modular repos scaffolded
+
+- Created the two remaining local sibling repos from the modularization plan:
+
+```text
+/home/apaixonada/EvaPortelance/Projet_1/bayes_efficiency_mila
+/home/apaixonada/EvaPortelance/Projet_1/child_complexity_predictors
+```
+
+- `bayes_efficiency_mila` purpose: Bayes-style decomposition pilots and future
+  `p(c | u)` likelihood scoring. The initial CPU path combines prior
+  `log2_p_u` and likelihood `log2_p_c_given_u` tables into:
+
+```text
+bayes_log2_score_unnormalized = log2_p_u + log2_p_c_given_u
+bayes_bits_unnormalized = -bayes_log2_score_unnormalized
+```
+
+- `bayes_efficiency_mila` initial commit:
+
+```text
+c37acd5 Initial Bayes decomposition scaffold
+```
+
+- `bayes_efficiency_mila` intended remote:
+
+```text
+git@github.com:NicolasGoulet/bayes_efficiency_mila.git
+```
+
+- `child_complexity_predictors` purpose: CPU-first MLU and complexity
+  predictors. The initial extractor computes orthographic word count,
+  orthographic character count, mean word length, utterance type count,
+  estimated syllable count, a simple phoneme proxy, and an empty/punctuation
+  flag.
+- `child_complexity_predictors` initial commit:
+
+```text
+758a388 Initial complexity predictor scaffold
+```
+
+- `child_complexity_predictors` intended remote:
+
+```text
+git@github.com:NicolasGoulet/child_complexity_predictors.git
+```
+
+- After the empty GitHub repositories were created, both additional repos were
+  pushed successfully:
+
+```text
+bayes_efficiency_mila -> origin/main at c37acd5
+child_complexity_predictors -> origin/main at 758a388
+```
+
+- 2026-07-06 update: patched all three modular repos so their Slurm scripts
+  `cd` to the repo root and export `PYTHONPATH=$REPO_ROOT/src` before invoking
+  package CLIs. This makes the scripts safer when submitted from a fresh clone
+  or from a different working directory on Mila.
+
+```text
+generate_baselines_mila -> origin/main at df024e9
+bayes_efficiency_mila -> origin/main at bc702c8
+child_complexity_predictors -> origin/main at 8026670
+```
+
+- 2026-07-06 production-path update:
+
+```text
+generate_baselines_mila -> origin/main at d10e417
+bayes_efficiency_mila -> origin/main at 74eb1f8
+child_complexity_predictors -> origin/main at b1be9cb
+```
+
+- `generate_baselines_mila` now includes a real optional PyTorch LSTM
+  generation path with CPU smoke / GPU production support, additive age-bin
+  training, checkpoint/vocab/audit artifacts, and tests that run a tiny
+  one-epoch LSTM when torch is available.
+- `bayes_efficiency_mila` now includes a CPU n-gram Bayes decomposition path
+  that estimates `p(u)` and a reverse/context `p(c | u)` compatibility score,
+  then writes unnormalized Bayes log-score and bits columns.
+- `child_complexity_predictors` now includes lexical trajectory exports:
+  cumulative child vocabulary size, cumulative TTR, age-bin vocabulary/TTR, and
+  age-bin MLU-style summary tables.
+- Added one cross-repo Mila smoke-test script:
+
+```text
+scripts/mila_modular_repos_smoke.sbatch
+```
+
+- The smoke script creates tiny fixture CSVs on the cluster, runs all three
+  unit-test suites, runs one real tiny job per repo, and writes outputs under:
+
+```text
+results/modular_repo_smoke/<slurm_job_id>/
+```
+
+- Local smoke test with torch from the main uv environment passed on
+  2026-07-06:
+
+```bash
+UV_CACHE_DIR=/tmp/uv-cache \
+PYTHON_CMD='uv run --project /home/apaixonada/EvaPortelance/Projet_1/communicative_efficiency python' \
+SMOKE_ROOT=/tmp/modular_repo_smoke_local \
+bash scripts/mila_modular_repos_smoke.sbatch
+```
+
+- Local smoke output summary:
+  `generate_baselines_mila` unit tests passed (`6` tests, `2` expected skips
+  under torch-present uv), n-gram generation wrote `8` rows, tiny LSTM wrote
+  `2` rows, Bayes tests passed and n-gram Bayes wrote `2` rows, complexity
+  tests passed, utterance complexity wrote `3` rows, trajectory wrote `3` rows,
+  and age-bin summary wrote `3` rows.
+
+- Verification for the Slurm robustness update:
+
+```bash
+cd /home/apaixonada/EvaPortelance/Projet_1/generate_baselines_mila
+PYTHONPYCACHEPREFIX=/tmp/generate_baselines_mila_pycache PYTHONPATH=src python3 -m unittest discover -s tests
+bash -n slurm/cpu_ngram_baselines.sbatch slurm/gpu_lstm_baselines.sbatch
+
+cd /home/apaixonada/EvaPortelance/Projet_1/bayes_efficiency_mila
+PYTHONPYCACHEPREFIX=/tmp/bayes_efficiency_mila_pycache PYTHONPATH=src python3 -m unittest discover -s tests
+bash -n slurm/cpu_bayes_pilot.sbatch slurm/gpu_context_likelihood.sbatch
+
+cd /home/apaixonada/EvaPortelance/Projet_1/child_complexity_predictors
+PYTHONPYCACHEPREFIX=/tmp/child_complexity_predictors_pycache PYTHONPATH=src python3 -m unittest discover -s tests
+bash -n slurm/cpu_complexity_predictors.sbatch
+```
+
+- Verification:
+
+```bash
+cd /home/apaixonada/EvaPortelance/Projet_1/bayes_efficiency_mila
+PYTHONPYCACHEPREFIX=/tmp/bayes_efficiency_mila_pycache PYTHONPATH=src python3 -m unittest discover -s tests
+PYTHONPYCACHEPREFIX=/tmp/bayes_efficiency_mila_pycache PYTHONPATH=src python3 -m py_compile src/bayes_efficiency_mila/*.py
+PYTHONPATH=src python3 -m bayes_efficiency_mila validate-manifest --manifest configs/bayes_pilot_example.json
+
+cd /home/apaixonada/EvaPortelance/Projet_1/child_complexity_predictors
+PYTHONPYCACHEPREFIX=/tmp/child_complexity_predictors_pycache PYTHONPATH=src python3 -m unittest discover -s tests
+PYTHONPYCACHEPREFIX=/tmp/child_complexity_predictors_pycache PYTHONPATH=src python3 -m py_compile src/child_complexity_predictors/*.py
+PYTHONPATH=src python3 -m child_complexity_predictors validate-manifest --manifest configs/complexity_example.json
+```

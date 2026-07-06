@@ -13,24 +13,91 @@ The goal of this project is to study the developmental trajectory of communicati
 
 ### Informativeness
 
-TODO: Define how informativeness is currently measured.
+The initial project formulation distinguishes at least three related
+informativeness families. We should keep them separate in code, tables, and
+reports.
 
-Possible measure family:
+1. **Unconditional utterance prior, p(u).** A child utterance is informative
+   when it is less expected under an utterance model. This can be approximated
+   with n-gram models:
+
+```text
+p(u) = p(w1) * p(w2 | w1) * p(w3 | w2, w1) * ...
+```
+
+   In practice, we use truncated models such as unigram, bigram, and trigram
+   baselines. Neural language models can provide the same family of measure.
+
+2. **Direct contextual utterance probability, p(u | c).** A child utterance is
+   informative relative to the caretaker context `c` in which it occurs. This
+   is the family used by the current Mistral contextual surprisal work: context
+   tokens condition the model, but reported target surprisal is computed only
+   over the child utterance tokens.
+
+3. **Bayes decomposition of contextual probability.** The initial formulation
+   also proposes:
+
+```text
+p(u | c) = p(c | u) * p(u) / p(c)
+```
+
+   Equivalently, for comparing candidate utterances within the same fixed
+   context `c`, the context normalizer `p(c)` is constant and the ranking can
+   be approximated by:
+
+```text
+log p(u | c) = log p(c | u) + log p(u) + constant_for_c
+```
+
+   This is not the same product as our direct Mistral `p(u | c)` scoring. It
+   requires a separate estimate of the utterance prior `p(u)` and a separate
+   estimate of the context likelihood or discourse fit term `p(c | u)`. The
+   prior can initially come from additive age-bin n-gram or LSTM models. The
+   likelihood term needs its own method, for example a reverse discourse model
+   that estimates how compatible a caretaker context is with a candidate child
+   utterance.
+
+Current measured informativeness columns are:
 
 - token surprisal
 - utterance total surprisal
 - mean bits per evaluated token
+- direct contextual surprisal under the selected scorer/context window
 
 ### Complexity / Effort
 
-WORK IN PROGRESS : This section is not complete yet, but it describes our current approaches to modeling complexity and effort.
+WORK IN PROGRESS: This section describes the current and planned approaches to
+modeling complexity and production effort. The initial project document
+explicitly named MLU-style complexity as part of the original formulation, so
+this should be treated as core rather than as later polish.
 
 There are many possible ways of quantifying effort based on text, right now we are using :
 
-- word count : This is the most straightforward : the effort needed to produce an utterance is the sum of the used words
-- morpheme count : A bit more refined : the effort needed to produce an utterance is the sum of the produced morphemes
-- syllable count :  
-- token count : This is not really relevant but is implicitely considered / used. After all, we are taking our utterances and tokenizing them using our used LLM's tokenizer. We are preserving the relation between the original word and its tokens.
+- word count: the simplest orthographic MLU-style measure.
+- morpheme count: a more refined MLU-style grammatical effort measure when
+  CHAT morphology is available or recoverable.
+- syllable count: a phonological/phonotactic effort proxy.
+- phoneme count and phonotactic shape: planned measures for spoken-form effort.
+- token count: implicit in LLM scoring because each utterance is tokenized by
+  the scorer. It is useful as a scoring diagnostic but should not replace
+  child-language effort measures.
+
+Additional complexity families from the initial formulation and later notes:
+
+- **Orthographic MLU:** mean words or characters per utterance. This is easy,
+  CPU-only, and already partly represented by word and character counts.
+- **Grammatical MLU:** mean morphemes per utterance, approximating grammatical
+  complexity in child language.
+- **Phonological/phonotactic complexity:** syllables, phonemes, syllable
+  structure, and related child-language measures such as word complexity or
+  mean babbling level where the data support them.
+- **Dependency length / syntactic complexity:** dependency distance, number of
+  dependencies, parse depth, or related parser-derived measures. This needs a
+  feasibility audit because toddler utterances and CHAT transcripts can be hard
+  for general parsers.
+- **Lexical complexity:** vocabulary size, age-bin type counts, type-token
+  ratio, moving-average lexical diversity, lexical rarity, and possibly
+  age-conditioned word frequency. This is distinct from utterance length.
 
 ### Efficiency
 
@@ -197,6 +264,44 @@ Still planned:
 
 - LLM model generation: for each existing dataset, we train a simple LLM (most probably an architecture from the BabyLM challenge). We then train it on every data BUT the currently considered dataset. We then generate for each utterance an utterance of the same length but generated with the trained LLM. It remains to be determined what will be the logic for determining the used vocabulary of the output head.
 
+## Compute Placement And Repo Boundaries
+
+This repository remains the project brain: data links, bundle creation,
+analysis tables, supervisor-facing reports, and compact local diagnostics.
+Large scoring and generation runs should live in smaller cluster-oriented
+repositories.
+
+Existing boundary:
+
+- `compute_surprisal_mila`: Mila/HPC repo for Mistral and other neural
+  surprisal scoring. This repo should receive only compact audited outputs via
+  symlink or rsync.
+
+New local sibling repos:
+
+- `generate_baselines_mila`: cluster-ready baseline generation only. It should
+  generate random, unigram, bigram, trigram, LSTM, and future generator
+  utterances from scorer-ready inputs. It should not compute final Mistral
+  surprisal.
+- `bayes_efficiency_mila`: Bayes decomposition repo, especially `p(c | u)`
+  likelihood scoring and posterior-style tables. This is conceptually
+  different from direct target-token surprisal.
+- `child_complexity_predictors`: lightweight predictor extraction repo for
+  MLU, morphemes, syllables, phonemes, dependency length, and vocabulary-size
+  predictors. This is CPU-first and should export compact tables back into
+  this repo.
+
+Compute classes:
+
+- **CPU-only / CPU-first:** n-gram count dictionaries, random/unigram/bigram/
+  trigram generation, word/character MLU, vocabulary-size predictors, lexical
+  diversity, most aggregation, joins, audits, and plotting.
+- **CPU-feasible but GPU-optimized:** LSTM training and generation, neural
+  dependency parsing if selected, and small neural language-model experiments.
+  These can run on CPU for smoke tests, but production should use Mila GPUs.
+- **Mila GPU / cluster scoring:** Mistral scoring, large LLM generation,
+  sampled-response cloud scoring, and any large neural estimate of `p(c | u)`.
+
 ## Planned Analyses
 
 TODO: Describe the analysis plan.
@@ -205,6 +310,10 @@ TODO: Describe the analysis plan.
 
 - TODO: What does "efficiency" mean for the first paper draft?
 - TODO: Which complexity measure is primary?
+- TODO: Should the main informativeness result be direct `p(u | c)`, Bayes
+  decomposed `p(c | u) * p(u)`, or a transparent comparison of both?
+- TODO: How should `p(c | u)` be approximated without pretending that the
+  caretaker context temporally follows the child utterance?
 - TODO: Are age effects analyzed continuously, by bins, or both?
 - TODO: Which corpora are included in the main analysis?
 
