@@ -1,0 +1,829 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Existing Scored Baseline Efficiency Cloud</title>
+<style>
+:root {
+  color-scheme: light;
+  --ink: #1e2528;
+  --muted: #5e686d;
+  --line: #d9e0df;
+  --paper: #ffffff;
+  --soft: #f5f7f6;
+  --accent: #2f6f73;
+  --accent2: #c76f2c;
+}
+body {
+  margin: 0;
+  background: #eef2f1;
+  color: var(--ink);
+  font: 16px/1.58 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+main {
+  max-width: 980px;
+  margin: 34px auto 56px;
+  padding: 48px 58px;
+  background: var(--paper);
+  box-shadow: 0 18px 50px rgba(31, 45, 48, 0.12);
+}
+h1, h2, h3, h4 {
+  line-height: 1.18;
+  margin: 1.6em 0 0.55em;
+}
+h1 {
+  margin-top: 0;
+  font-size: 2.25rem;
+  border-bottom: 3px solid var(--accent);
+  padding-bottom: 0.45em;
+}
+h2 {
+  font-size: 1.55rem;
+  color: var(--accent);
+}
+h3 {
+  font-size: 1.18rem;
+}
+p {
+  margin: 0.75em 0;
+}
+a {
+  color: var(--accent);
+}
+blockquote {
+  border-left: 4px solid var(--accent2);
+  margin: 1.1em 0;
+  padding: 0.05em 1.1em;
+  color: var(--muted);
+  background: #fff8f2;
+}
+code {
+  background: var(--soft);
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  padding: 0.08em 0.3em;
+  font-family: "SFMono-Regular", Consolas, monospace;
+  font-size: 0.92em;
+}
+pre {
+  background: #f5f7f6;
+  color: var(--ink);
+  border: 1px solid var(--line);
+  padding: 1em;
+  overflow-x: auto;
+  border-radius: 7px;
+}
+pre code {
+  background: transparent;
+  border: 0;
+  padding: 0;
+  color: inherit;
+}
+table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 1.15em 0 1.45em;
+  font-size: 0.95em;
+}
+.plot-layout {
+  table-layout: fixed;
+  margin: 1.1em auto 1.45em;
+}
+.plot-layout,
+.plot-layout tr,
+.plot-layout td {
+  border: 0;
+  background: transparent;
+}
+.plot-layout td {
+  padding: 0.35em 0.55em 0.95em;
+  text-align: center;
+  vertical-align: top;
+}
+.plot-layout img {
+  width: 100%;
+  max-width: 100%;
+  margin: 0 auto 0.35em;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: white;
+}
+.plot-layout .centered-cell img {
+  width: 54%;
+}
+.plot-caption {
+  color: var(--muted);
+  font-size: 0.85em;
+  line-height: 1.35;
+}
+th, td {
+  border: 1px solid var(--line);
+  padding: 0.54em 0.68em;
+  vertical-align: top;
+}
+th {
+  background: #e7efed;
+  text-align: left;
+}
+tr:nth-child(even) td {
+  background: #fafbfb;
+}
+.plot-layout tr:nth-child(even) td {
+  background: transparent;
+}
+img {
+  max-width: 100%;
+  display: block;
+  margin: 1.1em auto 0.45em;
+}
+.figure-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.05rem 1.25rem;
+  align-items: start;
+  margin: 1.1em 0 1.45em;
+}
+.figure-grid.two-one {
+  max-width: 900px;
+  margin-left: auto;
+  margin-right: auto;
+}
+.figure-grid.five-panel {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+.figure-grid figure {
+  margin: 0;
+}
+.figure-grid img {
+  width: 100%;
+  max-width: 100%;
+  margin: 0;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: white;
+}
+.figure-grid figcaption {
+  color: var(--muted);
+  font-size: 0.85em;
+  line-height: 1.35;
+  text-align: center;
+  margin-top: 0.35em;
+}
+.figure-grid .centered {
+  grid-column: 1 / -1;
+  justify-self: center;
+  max-width: 58%;
+}
+.figure-grid.two-one .centered {
+  max-width: 54%;
+}
+.figure-grid.five-panel .centered {
+  max-width: 52%;
+}
+ul, ol {
+  padding-left: 1.4em;
+}
+.caption {
+  color: var(--muted);
+  font-size: 0.92em;
+  margin-top: -0.15em;
+}
+@media print {
+  body {
+    background: white;
+  }
+  main {
+    box-shadow: none;
+    margin: 0;
+    max-width: none;
+    padding: 28px;
+  }
+}
+@media screen and (max-width: 540px) {
+  .figure-grid {
+    grid-template-columns: 1fr;
+  }
+  .figure-grid .centered,
+  .figure-grid.five-panel .centered {
+    grid-column: auto;
+    max-width: 100%;
+  }
+}
+</style>
+</head>
+<body>
+<main>
+<h1>Existing Scored Baseline Efficiency Cloud</h1>
+<p>This report uses the cloud we already have: real child utterances, random baselines, n-gram baselines, and additive LSTM baselines, all scored under the same Mistral surprisal model. It is different from the future Mistral-generated response cloud. Here, the generators are already decoupled from the scorer for random, n-gram, and LSTM baselines.</p>
+<h2>Why This Is Useful Now</h2>
+<ul>
+<li>It gives an immediate information-effort cloud without waiting for Mistral-generated sampled responses to be scored.</li>
+<li>It compares real child utterances to multiple non-Mistral generators under one common scorer.</li>
+<li>It can be used as an early communicative-efficiency visualization: age, effort, and Mistral information in one space.</li>
+<li>Mistral response entropy is retained as a context-level scorer uncertainty predictor, not as independent behavioral evidence.</li>
+</ul>
+<h2>Inputs</h2>
+<ul>
+<li>Scored long table: <code>results/route1_analysis_dataset/route1_scored_utterance_effort_context_entropy_with_lstm_long.csv.gz</code></li>
+<li>Response entropy table: <code>results/route2_response_space/route2_child_response_space_effort_table.csv.gz</code></li>
+<li>Output directory: <code>results/existing_scored_baseline_efficiency_cloud</code></li>
+<li>Figure directory: <code>figs/existing_scored_baseline_efficiency_cloud</code></li>
+</ul>
+<h2>Audit</h2>
+<p>The builder scanned <code>16965776</code> long-table rows and retained <code>3572541</code> child <code>k3</code> cloud rows across <code>8</code> sources.</p>
+<table>
+<thead><tr>
+<th>metric</th>
+<th>value</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>input_rows_read</td>
+<td>1.697e+07</td>
+</tr>
+<tr>
+<td>filtered_child_k3_cloud_rows</td>
+<td>3.573e+06</td>
+</tr>
+<tr>
+<td>response_entropy_matched_rows</td>
+<td>3.551e+06</td>
+</tr>
+<tr>
+<td>sample_rows</td>
+<td>9.6e+04</td>
+</tr>
+<tr>
+<td>sources</td>
+<td>8</td>
+</tr>
+<tr>
+<td>response_entropy_lookup_rows</td>
+<td>4.443e+05</td>
+</tr>
+</tbody></table>
+<h2>Source-Level Means</h2>
+<table>
+<thead><tr>
+<th>source_label</th>
+<th>n</th>
+<th>mean_sum_bits</th>
+<th>mean_nb_words</th>
+<th>mean_bits_per_word</th>
+<th>mean_response_entropy_bits</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>Real child</td>
+<td>4.47e+05</td>
+<td>26.73</td>
+<td>2.663</td>
+<td>11.77</td>
+<td>5.121</td>
+</tr>
+<tr>
+<td>Random</td>
+<td>4.465e+05</td>
+<td>61.11</td>
+<td>2.661</td>
+<td>24.19</td>
+<td>5.121</td>
+</tr>
+<tr>
+<td>Unigram</td>
+<td>4.465e+05</td>
+<td>41.83</td>
+<td>2.661</td>
+<td>17.01</td>
+<td>5.121</td>
+</tr>
+<tr>
+<td>Bigram</td>
+<td>4.465e+05</td>
+<td>36.79</td>
+<td>2.661</td>
+<td>15.25</td>
+<td>5.121</td>
+</tr>
+<tr>
+<td>Trigram</td>
+<td>4.465e+05</td>
+<td>33.68</td>
+<td>2.661</td>
+<td>14.12</td>
+<td>5.121</td>
+</tr>
+<tr>
+<td>LSTM k3</td>
+<td>4.465e+05</td>
+<td>28.42</td>
+<td>2.661</td>
+<td>12.35</td>
+<td>5.121</td>
+</tr>
+<tr>
+<td>LSTM k4</td>
+<td>4.465e+05</td>
+<td>28.51</td>
+<td>2.661</td>
+<td>12.36</td>
+<td>5.121</td>
+</tr>
+<tr>
+<td>LSTM k5</td>
+<td>4.465e+05</td>
+<td>28.51</td>
+<td>2.661</td>
+<td>12.39</td>
+<td>5.121</td>
+</tr>
+</tbody></table>
+<h2>Figures</h2>
+<h3>3D sampled cloud: age, effort, information</h3>
+<img src="../figs/existing_scored_baseline_efficiency_cloud/existing_scored_baseline_3d_sampled_cloud.png" alt="3D sampled cloud: age, effort, information">
+<h3>3D centroid trajectories by source</h3>
+<img src="../figs/existing_scored_baseline_efficiency_cloud/existing_scored_baseline_3d_centroid_trajectories.png" alt="3D centroid trajectories by source">
+<h3>Effort-information sampled facets</h3>
+<img src="../figs/existing_scored_baseline_efficiency_cloud/existing_scored_baseline_effort_information_facets.png" alt="Effort-information sampled facets">
+<h3>Age-bin cloud centroids</h3>
+<img src="../figs/existing_scored_baseline_efficiency_cloud/existing_scored_baseline_age_centroids.png" alt="Age-bin cloud centroids">
+<h3>Fixed-word information trajectories</h3>
+<img src="../figs/existing_scored_baseline_efficiency_cloud/existing_scored_baseline_fixed_word_trajectories.png" alt="Fixed-word information trajectories">
+<h3>Response-entropy stratified cloud means</h3>
+<img src="../figs/existing_scored_baseline_efficiency_cloud/existing_scored_baseline_response_entropy_panels.png" alt="Response-entropy stratified cloud means">
+<h3>Same-utterance real-vs-baseline gaps</h3>
+<img src="../figs/existing_scored_baseline_efficiency_cloud/existing_scored_baseline_pairwise_gap_by_age.png" alt="Same-utterance real-vs-baseline gaps">
+<h2>Same-Utterance Real-Vs-Baseline Gap Summary</h2>
+<p>Positive <code>control minus real</code> means the generated control has higher Mistral k3 surprisal than the real child utterance for the matched utterance.</p>
+<table>
+<thead><tr>
+<th>source_label</th>
+<th>age_bin</th>
+<th>n</th>
+<th>mean_control_minus_real_k3_bits</th>
+<th>baseline_higher_k3_bits_rate</th>
+<th>mean_control_minus_real_context_gain</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>Bigram</td>
+<td>006-023</td>
+<td>6.282e+04</td>
+<td>6.855</td>
+<td>0.6784</td>
+<td>-2.776</td>
+</tr>
+<tr>
+<td>Bigram</td>
+<td>024-029</td>
+<td>1.622e+05</td>
+<td>8.561</td>
+<td>0.7276</td>
+<td>-2.925</td>
+</tr>
+<tr>
+<td>Bigram</td>
+<td>030-035</td>
+<td>1.424e+05</td>
+<td>11.24</td>
+<td>0.7822</td>
+<td>-3.117</td>
+</tr>
+<tr>
+<td>Bigram</td>
+<td>036-041</td>
+<td>3.721e+04</td>
+<td>11.96</td>
+<td>0.7755</td>
+<td>-2.253</td>
+</tr>
+<tr>
+<td>Bigram</td>
+<td>042-047</td>
+<td>1.634e+04</td>
+<td>16.1</td>
+<td>0.8247</td>
+<td>-2.781</td>
+</tr>
+<tr>
+<td>Bigram</td>
+<td>048-053</td>
+<td>1.291e+04</td>
+<td>13.86</td>
+<td>0.7868</td>
+<td>-1.45</td>
+</tr>
+<tr>
+<td>Bigram</td>
+<td>054-059</td>
+<td>1.003e+04</td>
+<td>15.15</td>
+<td>0.7994</td>
+<td>-1.204</td>
+</tr>
+<tr>
+<td>Bigram</td>
+<td>060-065</td>
+<td>2542</td>
+<td>16.64</td>
+<td>0.8415</td>
+<td>-1.386</td>
+</tr>
+<tr>
+<td>LSTM k3</td>
+<td>006-023</td>
+<td>6.282e+04</td>
+<td>1.71</td>
+<td>0.5475</td>
+<td>-2.923</td>
+</tr>
+<tr>
+<td>LSTM k3</td>
+<td>024-029</td>
+<td>1.622e+05</td>
+<td>1.046</td>
+<td>0.541</td>
+<td>-2.18</td>
+</tr>
+<tr>
+<td>LSTM k3</td>
+<td>030-035</td>
+<td>1.424e+05</td>
+<td>2.385</td>
+<td>0.5984</td>
+<td>-2.501</td>
+</tr>
+<tr>
+<td>LSTM k3</td>
+<td>036-041</td>
+<td>3.721e+04</td>
+<td>1.294</td>
+<td>0.5545</td>
+<td>-1.502</td>
+</tr>
+<tr>
+<td>LSTM k3</td>
+<td>042-047</td>
+<td>1.634e+04</td>
+<td>3.889</td>
+<td>0.6182</td>
+<td>-2.069</td>
+</tr>
+<tr>
+<td>LSTM k3</td>
+<td>048-053</td>
+<td>1.291e+04</td>
+<td>0.831</td>
+<td>0.5385</td>
+<td>-0.9179</td>
+</tr>
+<tr>
+<td>LSTM k3</td>
+<td>054-059</td>
+<td>1.003e+04</td>
+<td>1.296</td>
+<td>0.5505</td>
+<td>-0.4424</td>
+</tr>
+<tr>
+<td>LSTM k3</td>
+<td>060-065</td>
+<td>2542</td>
+<td>3.923</td>
+<td>0.6188</td>
+<td>-0.4892</td>
+</tr>
+<tr>
+<td>LSTM k4</td>
+<td>006-023</td>
+<td>6.282e+04</td>
+<td>1.96</td>
+<td>0.5551</td>
+<td>-2.964</td>
+</tr>
+<tr>
+<td>LSTM k4</td>
+<td>024-029</td>
+<td>1.622e+05</td>
+<td>1.255</td>
+<td>0.5457</td>
+<td>-2.088</td>
+</tr>
+<tr>
+<td>LSTM k4</td>
+<td>030-035</td>
+<td>1.424e+05</td>
+<td>2.255</td>
+<td>0.5921</td>
+<td>-2.227</td>
+</tr>
+<tr>
+<td>LSTM k4</td>
+<td>036-041</td>
+<td>3.721e+04</td>
+<td>1.502</td>
+<td>0.562</td>
+<td>-1.832</td>
+</tr>
+<tr>
+<td>LSTM k4</td>
+<td>042-047</td>
+<td>1.634e+04</td>
+<td>3.663</td>
+<td>0.6128</td>
+<td>-1.927</td>
+</tr>
+<tr>
+<td>LSTM k4</td>
+<td>048-053</td>
+<td>1.291e+04</td>
+<td>0.9178</td>
+<td>0.538</td>
+<td>-0.7078</td>
+</tr>
+<tr>
+<td>LSTM k4</td>
+<td>054-059</td>
+<td>1.003e+04</td>
+<td>1.934</td>
+<td>0.5678</td>
+<td>-0.4476</td>
+</tr>
+<tr>
+<td>LSTM k4</td>
+<td>060-065</td>
+<td>2542</td>
+<td>3.13</td>
+<td>0.5944</td>
+<td>-0.4972</td>
+</tr>
+<tr>
+<td>LSTM k5</td>
+<td>006-023</td>
+<td>6.282e+04</td>
+<td>1.915</td>
+<td>0.5543</td>
+<td>-2.837</td>
+</tr>
+<tr>
+<td>LSTM k5</td>
+<td>024-029</td>
+<td>1.622e+05</td>
+<td>1.371</td>
+<td>0.5547</td>
+<td>-2.227</td>
+</tr>
+<tr>
+<td>LSTM k5</td>
+<td>030-035</td>
+<td>1.424e+05</td>
+<td>2.194</td>
+<td>0.5902</td>
+<td>-2.275</td>
+</tr>
+<tr>
+<td>LSTM k5</td>
+<td>036-041</td>
+<td>3.721e+04</td>
+<td>1.407</td>
+<td>0.5559</td>
+<td>-1.495</td>
+</tr>
+<tr>
+<td>LSTM k5</td>
+<td>042-047</td>
+<td>1.634e+04</td>
+<td>3.419</td>
+<td>0.6053</td>
+<td>-1.909</td>
+</tr>
+<tr>
+<td>LSTM k5</td>
+<td>048-053</td>
+<td>1.291e+04</td>
+<td>1.002</td>
+<td>0.5387</td>
+<td>-0.6088</td>
+</tr>
+<tr>
+<td>LSTM k5</td>
+<td>054-059</td>
+<td>1.003e+04</td>
+<td>1.791</td>
+<td>0.5589</td>
+<td>-0.4548</td>
+</tr>
+<tr>
+<td>LSTM k5</td>
+<td>060-065</td>
+<td>2542</td>
+<td>3.433</td>
+<td>0.6058</td>
+<td>-0.5049</td>
+</tr>
+<tr>
+<td>Random</td>
+<td>006-023</td>
+<td>6.282e+04</td>
+<td>22.59</td>
+<td>0.9324</td>
+<td>-5.771</td>
+</tr>
+<tr>
+<td>Random</td>
+<td>024-029</td>
+<td>1.622e+05</td>
+<td>28.62</td>
+<td>0.959</td>
+<td>-5.822</td>
+</tr>
+<tr>
+<td>Random</td>
+<td>030-035</td>
+<td>1.424e+05</td>
+<td>37.84</td>
+<td>0.9769</td>
+<td>-6.099</td>
+</tr>
+<tr>
+<td>Random</td>
+<td>036-041</td>
+<td>3.721e+04</td>
+<td>43.96</td>
+<td>0.981</td>
+<td>-5.281</td>
+</tr>
+<tr>
+<td>Random</td>
+<td>042-047</td>
+<td>1.634e+04</td>
+<td>53.51</td>
+<td>0.9856</td>
+<td>-5.738</td>
+</tr>
+<tr>
+<td>Random</td>
+<td>048-053</td>
+<td>1.291e+04</td>
+<td>53.3</td>
+<td>0.9836</td>
+<td>-4.341</td>
+</tr>
+<tr>
+<td>Random</td>
+<td>054-059</td>
+<td>1.003e+04</td>
+<td>56.46</td>
+<td>0.9834</td>
+<td>-3.905</td>
+</tr>
+<tr>
+<td>Random</td>
+<td>060-065</td>
+<td>2542</td>
+<td>57.27</td>
+<td>0.9874</td>
+<td>-4.151</td>
+</tr>
+<tr>
+<td>Trigram</td>
+<td>006-023</td>
+<td>6.282e+04</td>
+<td>3.934</td>
+<td>0.5673</td>
+<td>-1.46</td>
+</tr>
+<tr>
+<td>Trigram</td>
+<td>024-029</td>
+<td>1.622e+05</td>
+<td>5.859</td>
+<td>0.6423</td>
+<td>-1.826</td>
+</tr>
+<tr>
+<td>Trigram</td>
+<td>030-035</td>
+<td>1.424e+05</td>
+<td>8.015</td>
+<td>0.7006</td>
+<td>-2.085</td>
+</tr>
+<tr>
+<td>Trigram</td>
+<td>036-041</td>
+<td>3.721e+04</td>
+<td>8.508</td>
+<td>0.698</td>
+<td>-1.377</td>
+</tr>
+<tr>
+<td>Trigram</td>
+<td>042-047</td>
+<td>1.634e+04</td>
+<td>11.76</td>
+<td>0.7452</td>
+<td>-1.764</td>
+</tr>
+<tr>
+<td>Trigram</td>
+<td>048-053</td>
+<td>1.291e+04</td>
+<td>9.577</td>
+<td>0.7141</td>
+<td>-0.6467</td>
+</tr>
+<tr>
+<td>Trigram</td>
+<td>054-059</td>
+<td>1.003e+04</td>
+<td>10.56</td>
+<td>0.7246</td>
+<td>-0.4713</td>
+</tr>
+<tr>
+<td>Trigram</td>
+<td>060-065</td>
+<td>2542</td>
+<td>12.6</td>
+<td>0.7785</td>
+<td>-0.7233</td>
+</tr>
+<tr>
+<td>Unigram</td>
+<td>006-023</td>
+<td>6.282e+04</td>
+<td>10.84</td>
+<td>0.7753</td>
+<td>-4.548</td>
+</tr>
+<tr>
+<td>Unigram</td>
+<td>024-029</td>
+<td>1.622e+05</td>
+<td>12.83</td>
+<td>0.8135</td>
+<td>-4.333</td>
+</tr>
+<tr>
+<td>Unigram</td>
+<td>030-035</td>
+<td>1.424e+05</td>
+<td>16.53</td>
+<td>0.8634</td>
+<td>-4.53</td>
+</tr>
+<tr>
+<td>Unigram</td>
+<td>036-041</td>
+<td>3.721e+04</td>
+<td>18.22</td>
+<td>0.8685</td>
+<td>-3.647</td>
+</tr>
+<tr>
+<td>Unigram</td>
+<td>042-047</td>
+<td>1.634e+04</td>
+<td>23.39</td>
+<td>0.9033</td>
+<td>-4.183</td>
+</tr>
+<tr>
+<td>Unigram</td>
+<td>048-053</td>
+<td>1.291e+04</td>
+<td>21.51</td>
+<td>0.8844</td>
+<td>-2.763</td>
+</tr>
+<tr>
+<td>Unigram</td>
+<td>054-059</td>
+<td>1.003e+04</td>
+<td>23.24</td>
+<td>0.8849</td>
+<td>-2.546</td>
+</tr>
+<tr>
+<td>Unigram</td>
+<td>060-065</td>
+<td>2542</td>
+<td>24.75</td>
+<td>0.9068</td>
+<td>-2.754</td>
+</tr>
+</tbody></table>
+<h2>Interpretation Boundary</h2>
+<ul>
+<li>This is an already-scored baseline cloud, not a Mistral sampled-response cloud.</li>
+<li>Random, n-gram, and LSTM utterances are not same-meaning paraphrases; they are matched baseline alternatives or generated utterances under the same child/context rows.</li>
+<li>Response entropy from the Mistral-generated response-space run remains useful as the scorer model&#x27;s context-level uncertainty, but it should be named that way.</li>
+<li>The future full cloud should include scored Mistral-generated samples as a self-reference condition and, ideally, other-generator samples scored by Mistral as decoupled-generator conditions.</li>
+</ul>
+</main>
+</body>
+</html>

@@ -16,10 +16,19 @@ MAX_ACCEPTED_ROWS="${MAX_ACCEPTED_ROWS:-160}"
 MAX_REJECTED_PER_REASON="${MAX_REJECTED_PER_REASON:-60}"
 MAX_FALLBACK_ROWS="${MAX_FALLBACK_ROWS:-500}"
 REVIEW_SEED="${REVIEW_SEED:-20260702}"
+export RUN_ROOT REVIEW_SHARDS MAX_ACCEPTED_ROWS MAX_REJECTED_PER_REASON MAX_FALLBACK_ROWS REVIEW_SEED
 
 cd "$PROJECT_ROOT"
 
-python3 - <<'PY'
+if command -v uv >/dev/null 2>&1; then
+    PYTHON_CMD=(uv run python)
+elif [[ -x .venv/bin/python ]]; then
+    PYTHON_CMD=(.venv/bin/python)
+else
+    PYTHON_CMD=(python3)
+fi
+
+"${PYTHON_CMD[@]}" - <<'PY'
 from __future__ import annotations
 
 import os
