@@ -3,6 +3,22 @@
 Living project memory: discoveries, decisions, bugs, commands that worked, and
 current state. Prefer dated notes.
 
+## 2026-07-06 - Mila HOME/SCRATCH split for modular repos
+
+- Corrected the modular Mila workflow after sysadmin guidance: permanent Git
+  checkouts for `generate_baselines_mila`, `bayes_efficiency_mila`, and
+  `child_complexity_predictors` should live under `$HOME` as sibling repos.
+- `$SCRATCH` should hold job outputs, temporary data, rsynced full datasets,
+  and logs when possible. After compact outputs are rsynced back and audited,
+  remove the corresponding scratch job directories.
+- `communicative_efficiency` remains local-only for analysis/reporting and is
+  not required on Mila for the modular smoke test.
+- Updated `generate_baselines_mila/slurm/modular_repos_smoke.sbatch` so smoke
+  artifacts default to `$SCRATCH/modular_repo_smoke/<job_id>` on Mila, with a
+  local `results/` fallback only when `$SCRATCH` is unavailable. The smoke
+  output includes `cleanup_after_rsync.sh` so the scratch job directory can be
+  removed after retrieval.
+
 ## 2026-06-25 - Private context example candidate bank
 
 - Added `src/build_context_example_candidate_bank.py` for a private, long-form

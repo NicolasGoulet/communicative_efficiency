@@ -135,12 +135,16 @@ scope, not as an optional later extension.
       tiny fixture data, runs all three modular repo test suites, runs n-gram
       generation, runs a tiny LSTM smoke if torch is importable, runs n-gram
       Bayes decomposition, and runs complexity extraction plus trajectory
-      export. On Mila, clone only the three modular execution repos; do not
-      require `communicative_efficiency` there.
+      export. On Mila, keep only the three modular execution repo checkouts in
+      a permanent `$HOME` code directory as siblings; do not require
+      `communicative_efficiency` there. The smoke runner writes job artifacts
+      to `$SCRATCH/modular_repo_smoke/<job_id>` by default.
 - [x] Document the modular repo Git-vs-rsync data policy in
       `docs/modular_repo_data_policy.md`: only code/configs/docs/tests/tiny
       fixtures go through Git; real preprocessed data and generated/scored
-      outputs move with `rsync`.
+      outputs move with `rsync`; permanent Git checkouts belong in `$HOME`
+      while outputs and temporary files belong in `$SCRATCH` and must be
+      removed after retrieval/audit.
 - [ ] Build PBM cleaned-data integration manifests using the existing
       `compute_surprisal_mila/data/{Brown,Manchester,Providence}/*/chi.csv`
       cleaned utterance files as the first real-data test layer after synthetic

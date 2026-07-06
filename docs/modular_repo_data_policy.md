@@ -29,6 +29,19 @@ Use three levels before production-scale runs.
    execution repo so `communicative_efficiency` does not need to be cloned on
    Mila.
 
+   On Mila, keep the three modular Git checkouts in a permanent code directory
+   under `$HOME`, for example:
+
+```text
+$HOME/communicative_efficiency_repos/generate_baselines_mila
+$HOME/communicative_efficiency_repos/bayes_efficiency_mila
+$HOME/communicative_efficiency_repos/child_complexity_predictors
+```
+
+   The smoke runner writes artifacts to `$SCRATCH/modular_repo_smoke/<job_id>`
+   by default. That keeps temporary outputs on scratch while leaving the code
+   in a recoverable, persistent location.
+
 2. **PBM cleaned-data integration tests.**
    Use the existing cleaned PBM child files already present in
    `compute_surprisal_mila`:
@@ -46,7 +59,8 @@ Use three levels before production-scale runs.
 3. **Full strict-naturalistic production runs.**
    After synthetic and PBM integration tests pass, transfer the full
    preprocessed/strict-naturalistic data to Mila with `rsync`. Production data
-   stays on cluster storage and out of Git.
+   stays on scratch/cluster storage and out of Git. Retrieve compact audited
+   outputs, then remove scratch job directories when they are no longer needed.
 
 ## Data Movement
 
@@ -56,17 +70,24 @@ Local to Mila:
 
 ```bash
 rsync -avhP data/big_cleaned_dataset/default_naturalistic_merged_006_023/ \
-  gouletn@login.server.mila.quebec:/network/scratch/g/gouletn/communicative_efficiency/data/big_cleaned_dataset/default_naturalistic_merged_006_023/
+  gouletn@login.server.mila.quebec:/network/scratch/g/gouletn/communicative_efficiency_data/big_cleaned_dataset/default_naturalistic_merged_006_023/
 ```
 
 Mila back to local, after a run:
 
 ```bash
-rsync -avhP gouletn@login.server.mila.quebec:/network/scratch/g/gouletn/generate_baselines_mila/results/modular_repo_smoke/<job_id>/ \
+rsync -avhP gouletn@login.server.mila.quebec:/network/scratch/g/gouletn/modular_repo_smoke/<job_id>/ \
   results/modular_repo_smoke/<job_id>/
 ```
 
-Adjust source and destination paths to the actual cluster checkout location.
+Adjust source and destination paths to the actual cluster storage location.
+
+After retrieved outputs have been audited locally, clean the corresponding
+scratch directory on Mila:
+
+```bash
+ssh gouletn@login.server.mila.quebec 'bash "$SCRATCH/modular_repo_smoke/<job_id>/cleanup_after_rsync.sh"'
+```
 
 ## Repo Roles
 
