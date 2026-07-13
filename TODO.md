@@ -16,13 +16,38 @@ When a task is completed, move any useful result or decision into
 
 ## Current Focus
 
-- TODO: Restart Route 1 analyses from zero in this repo on 2026-06-02, using `docs/route1_from_zero_handoff_2026-06-01.md` as the project compass. Start with audited real-child Mistral scores, recomputed cleaned word counts, descriptive plots, and the simplest defensible age/length/child model before adding contexts, baselines, or LSTM comparisons.
-- TODO: Build the supervisor-facing utterance-information report in `docs/predicting_utterance_level_information_report.md`, focused only on utterance-level informational content and its controls.
-- TODO: Decide whether the direct row-count effort and `n_eval_tokens` tail diagnostics should be included as an appendix/check in the supervisor-facing materials or kept only as working diagnostics.
-- TODO: Decide whether supervisor-report captions should explicitly say shaded bands are 95% fitted-mean CIs and that some M1 bands are nearly invisible because the estimated interval is extremely narrow.
-- TODO: Keep `compute_surprisal_mila` as the scoring/HPC/audit repo. Treat older Route 1 reports there as archive/scaffold, not as the evidential baseline for the restarted analyses.
-- TODO: Hand off the PBM additive same-length LSTM generated utterances to `compute_surprisal_mila` for scoring with the same logic used for random/unigram/bigram/trigram baselines. Keep `lstm_additive_k3`, `lstm_additive_k4`, and `lstm_additive_k5` separate as distinct generated-baseline conditions.
+- [x] 2026-06-03: Rebuild the PBM Route 1 analysis from audited Mistral
+      scores with recomputed effort measures and child-aware models.
+- [x] 2026-06-04: Score the PBM additive same-length LSTM k3/k4/k5
+      conditions and keep them as separate generated-baseline sources.
+- [x] 2026-06-25: Build the initial supervisor-facing utterance-information
+      Markdown/HTML report.
+- [ ] Run and audit the benchmark-gated full 79-child Mistral expansion in
+      `compute_surprisal_mila`. Do not mark complete until the retrieved run
+      report has the final `COMPLETE_AND_AUDITED` marker.
+- [ ] Reconcile `docs/predicting_utterance_level_information_report.md` with
+      the completed LSTM scoring, response-space run, Bayes pilot, complexity
+      products, and July onset work. Keep it PBM-scoped until the 79-child
+      scoring and analysis are complete.
+- [ ] Add child-level bootstrap intervals to the developmental-onset report
+      and repeat onset timing with word, morpheme, syllable, and phoneme effort
+      controls before promoting an onset claim.
+- [ ] Decide whether the direct row-count effort and `n_eval_tokens` tail
+      diagnostics belong in a supervisor-facing appendix or only in technical
+      working materials.
+- [ ] Decide whether supervisor-report captions should explicitly say shaded
+      bands are 95% fitted-mean CIs and that some bands are nearly invisible
+      because the fitted-mean interval is extremely narrow.
+- [x] Keep `compute_surprisal_mila` as the direct scoring/HPC/audit repo and
+      this repository as the local brain/analysis/reporting repo.
 - [x] 2026-07-05: Scaffold the July Meeting HTML index and empty supervisor-facing section pages so the reports can be filled one page at a time.
+- [x] 2026-07-09: Build a working developmental-onset report that asks when the communicative-efficiency signal becomes detectable rather than only whether a downward trend exists.
+- [x] 2026-07-09: Build a multi-page New Efforts Working Report that gathers CE onset, Bayes-decomposed surprisal, complexity metrics, and a promotion plan for the July supervisor pages.
+- [x] 2026-07-09: Extend the child utterance-count report with age coverage, per-child mini metadata profiles, online source-backed metadata patches, and SES/race/sex/nationality availability summaries.
+- [ ] If SES, race/ethnicity, parental education, sex/gender, or nationality
+      become model predictors, run a new documented coding pass that separates
+      child-specific values from corpus-level, predominant-community, and
+      unavailable fields.
 
 ## Recovered Initial Formulation: Bayes And Complexity TODOs
 
@@ -35,7 +60,7 @@ scope, not as an optional later extension.
 - [x] Restate the initial informativeness formulation in `docs/design.md`:
       unconditional `p(u)`, direct contextual `p(u | c)`, and Bayes
       decomposition `p(u | c) = p(c | u) * p(u) / p(c)`.
-- [ ] Keep the current Mistral contextual surprisal analyses as the direct
+- [x] Keep the current Mistral contextual surprisal analyses as the direct
       `p(u | c)` family. Do not discard them: they are one legitimate
       operationalization of contextual informativeness.
 - [ ] Add a Bayes-decomposition design note for reports: for a fixed context
@@ -54,11 +79,11 @@ scope, not as an optional later extension.
       caretaker context compatibility with a candidate child utterance.
 - [ ] Add a tiny local CPU smoke test for the Bayes algebra using fake
       probabilities so sign conventions are verified before any Mila run.
-- [ ] Build a compact Bayes pilot table on a small audited subset with columns:
+- [x] Build a compact Bayes pilot table on a small audited subset with columns:
       `context_id`, `utterance_id`, `source_model`, `log2_p_u`,
       `log2_p_c_given_u`, `bayes_log2_score_unnormalized`,
       `direct_mistral_sum_bits`, effort columns, age, child, and provenance.
-- [ ] Compare direct `p(u | c)` surprisal with Bayes-decomposed scores on real
+- [x] Compare direct `p(u | c)` surprisal with Bayes-decomposed scores on real
       child utterances before using Bayes-derived results in supervisor-facing
       claims.
 - [ ] In all reports, label Bayes scores as decomposition-based or
@@ -70,7 +95,7 @@ scope, not as an optional later extension.
 - [x] Restate the initial complexity formulation in `docs/design.md`: MLU in
       orthographic, phonotactic, and word space; dependency length; grammatical
       complexity through MLU; lexical complexity through vocabulary size.
-- [ ] Create a CPU-first predictor extractor for orthographic MLU:
+- [x] Create a CPU-first predictor extractor for orthographic MLU:
       word count, character count, mean word length, and age-bin/child-session
       aggregates.
 - [ ] Create or audit morpheme-count extraction from CHAT-derived morphology
@@ -86,10 +111,10 @@ scope, not as an optional later extension.
       corpus-stratified sample. Do not make dependency length a primary
       predictor until parser failure modes on short child utterances are
       documented.
-- [ ] Build per-child and per-age-bin complexity trajectories so grammatical
+- [x] Build per-child and per-age-bin complexity trajectories so grammatical
       and lexical complexity can be analyzed alongside informativeness and
       production effort.
-- [ ] Join complexity predictors to Route 1/Route 2 analysis-ready tables only
+- [x] Join complexity predictors to Route 1/Route 2 analysis-ready tables only
       after row keys and missingness have been audited.
 - [ ] Add sensitivity analyses that ask whether age trends in informativeness
       survive controls for MLU, vocabulary size, and dependency/phonological
@@ -105,7 +130,7 @@ scope, not as an optional later extension.
       Initial commit: `8251088` (`Initial baseline generation scaffold`).
       Pushed to `git@github.com:NicolasGoulet/generate_baselines_mila.git`
       on branch `main`.
-      Latest production-path commit: `d10e417`.
+      Latest production-path commit: `7ffca3d`.
 - [x] Implement the first runnable CPU path in `generate_baselines_mila`:
       manifest-driven additive age-bin random, unigram, bigram, and trigram
       same-length generation with checksum/audit sidecars and unit tests.
@@ -120,7 +145,7 @@ scope, not as an optional later extension.
       Initial commit: `c37acd5` (`Initial Bayes decomposition scaffold`).
       Pushed to `git@github.com:NicolasGoulet/bayes_efficiency_mila.git` on
       branch `main`.
-      Latest production-path commit: `74eb1f8`.
+      Latest production-path commit: `67bbcfc`.
 - [x] Create a separate local `child_complexity_predictors` repo for MLU and
       complexity predictor extraction. Initial local repo path:
       `/home/apaixonada/EvaPortelance/Projet_1/child_complexity_predictors`.
@@ -128,7 +153,7 @@ scope, not as an optional later extension.
       Pushed to
       `git@github.com:NicolasGoulet/child_complexity_predictors.git` on branch
       `main`.
-      Latest production-path commit: `b1be9cb`.
+      Latest production-path commit: `33497c2`.
 - [x] Add one cross-repo Mila smoke-test Slurm script in the execution repo,
       not the local brain repo:
       `generate_baselines_mila/slurm/modular_repos_smoke.sbatch`. It creates
@@ -145,10 +170,10 @@ scope, not as an optional later extension.
       outputs move with `rsync`; permanent Git checkouts belong in `$HOME`
       while outputs and temporary files belong in `$SCRATCH` and must be
       removed after retrieval/audit.
-- [ ] Build PBM cleaned-data integration manifests using the existing
+- [x] Build PBM cleaned-data integration manifests using the existing
       `compute_surprisal_mila/data/{Brown,Manchester,Providence}/*/chi.csv`
-      cleaned utterance files as the first real-data test layer after synthetic
-      smoke.
+      cleaned utterance files or strict-naturalistic bundle scoring CSVs as
+      the first real-data test layer after synthetic smoke.
 - [ ] After synthetic and PBM integration tests pass, `rsync` the full
       strict-naturalistic preprocessed bundle to Mila cluster storage and run
       production-scale manifests there.

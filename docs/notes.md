@@ -3,6 +3,161 @@
 Living project memory: discoveries, decisions, bugs, commands that worked, and
 current state. Prefer dated notes.
 
+## 2026-07-13 - Project-state audit and agent-guidance refresh
+
+- Audited the current brain/reporting repository, the active supervisor and
+  July working reports, the local scored/result handoffs, the sibling
+  `compute_surprisal_mila` repository, and the three modular execution repos.
+- Updated `AGENTS.md` to replace the stale June LSTM-next framing with the
+  verified July state: completed PBM LSTM scoring, completed PBM response-space
+  generation and analyses, July Bayes/complexity products, the still-PBM scope
+  of current claims, and the pending benchmark-gated 79-child Mistral run.
+- Added explicit reporting boundaries: the current Bayes score is
+  unnormalized, response samples are not same-meaning paraphrases, response
+  entropy is Mistral-relative, and a negative fixed-effort Mistral age slope is
+  not by itself a complete normative definition of communicative efficiency.
+- Refreshed the top `TODO.md` focus block so agents do not restart the completed
+  Route 1 rebuild or PBM additive LSTM scoring. Historical lower sections were
+  left intact.
+- No scoring, GPU training, cluster submission, or raw-data mutation was
+  performed during this audit.
+
+Verification:
+
+```bash
+.venv/bin/python -m unittest discover -s tests
+```
+
+- Result: 370 tests passed in 248.283 seconds.
+- The suite emitted Statsmodels convergence, perfect-separation,
+  non-positive-definite Hessian, and small-fixture numerical warnings; no tests
+  failed. Production model-fit warnings remain audit items rather than being
+  dismissed because the unit suite passes.
+
+## 2026-07-09 - Developmental onset / "kick-in" working report
+
+- Built a standalone working report for the supervisor question "when does the
+  communicative-efficiency signal kick in?":
+  `docs/developmental_onset_working_report.md` and
+  `docs/developmental_onset_working_report.html`.
+- The report uses the June 4 meeting transcript as the local anchor: the
+  relevant ask is not only a raw downward trend, but whether surprisal decreases
+  after controlling for child identity and utterance length.
+- Main analysis input is the PBM/Yang follow-up real-child table, filtered to
+  441,413 nonempty real child `k3` utterance rows and 77 child-age cells.
+- Main fixed-effort timing model is utterance-level OLS with child fixed
+  effects, exact/top-coded word-count controls, and child-clustered standard
+  errors. The continuous age slope is negative:
+  `-0.132` bits/month, 95% CI `[-0.180, -0.083]`.
+- The first exact-word-count age-bin decrease relative to `006-023` is
+  `024-029`: `-0.913` bits, 95% CI `[-1.584, -0.243]`. Later age bins remain
+  negative in this model.
+- Context entropy modulation is already CI-negative in `006-023`; parent
+  context word modulation becomes CI-negative in `024-029`.
+- Same-context paired real-vs-trigram gaps are positive from `006-023` for both
+  direct Mistral and Bayes-decomposition bits/token.
+- Included a child-age aggregate sensitivity check. It does not reproduce the
+  same simple age-bin decrease, so the supervisor-facing claim should be tied
+  explicitly to the utterance-level fixed-effort model and accompanied by a
+  robustness note.
+- Outputs are under `results/developmental_onset_report/`; figures are under
+  `figs/developmental_onset_report/`.
+
+## 2026-07-09 - New Efforts Working Report
+
+- Built a compact multi-page report to inspect the newest analysis layer before
+  promoting pieces into the clean July supervisor-facing pages:
+  `docs/new_efforts_report_index.html`.
+- Pages:
+  `docs/new_efforts_overview.html`,
+  `docs/new_efforts_ce_kickoff.html`,
+  `docs/new_efforts_bayes_surprisal.html`,
+  `docs/new_efforts_complexity_metrics.html`, and
+  `docs/new_efforts_promotion_plan.html`.
+- Source script: `src/build_new_efforts_report.py`.
+- The report is generated from already-audited local outputs under
+  `results/developmental_onset_report/` and
+  `results/bayes_information_report/`, with figures linked from
+  `figs/developmental_onset_report/` and `figs/bayes_information_report/`.
+- Verification after generation: 5 markdown pages, 14 linked figures, 0 missing
+  images, and 0 missing internal links.
+
+## 2026-07-09 - Child utterance count histogram
+
+- Built a quick coverage plot/report for total child utterances per individual
+  child in the current strict naturalistic bundle:
+  `docs/child_utterance_count_histogram.html`.
+- Source table:
+  `results/big_cleaned_dataset/default_naturalistic_merged_006_023/all_child_longitudinal_age_coverage_summary.csv`.
+- The bundle has 79 children and 1,140,218 child utterances. Median per child
+  is 2,989; range is 274 to 154,593.
+- Figures:
+  `figs/child_utterance_count_histogram/child_utterance_counts_thin_vertical.png`
+  and
+  `figs/child_utterance_count_histogram/child_utterance_counts_horizontal.png`.
+- Added age-coverage timeline figures to the same report:
+  `figs/child_utterance_count_histogram/child_age_coverage_sorted_by_first_age.png`
+  and
+  `figs/child_utterance_count_histogram/child_age_coverage_sorted_by_utterance_count.png`.
+
+## 2026-07-08 - Bayes-decomposed informativeness working report
+
+- Built a standalone working report for Bayes-decomposed informativeness:
+  `docs/bayes_information_working_report.md` and
+  `docs/bayes_information_working_report.html`.
+- Joined local products from the Mila modular runs:
+  `pbm_ngram_bayes_scores.csv.gz`,
+  `pbm_candidate_complexity.csv.gz`, real-child lexical trajectories, and the
+  existing direct Mistral Route 1 long table.
+- Main joined product:
+  `results/bayes_information_report/pbm_bayes_mistral_complexity_joined.csv.gz`.
+  The audit has 0 missing Mistral rows and 0 missing complexity rows for all
+  Bayes rows. Row counts are 446,508 each for real/unigram/bigram/trigram and
+  446,492 for random, matching the 16 skipped empty random candidates from the
+  Mila audit.
+- First paired checks show generated baselines have higher Bayes and direct
+  Mistral bits/token than real child utterances in the same contexts. Mean
+  baseline-minus-real Bayes gaps are about 14.65 random, 4.40 unigram, 3.03
+  bigram, and 1.98 trigram bits/token; direct Mistral gaps are about 3.35,
+  3.03, 1.96, and 1.30 bits/token respectively.
+- Report figures are under `figs/bayes_information_report/`; model and summary
+  tables are under `results/bayes_information_report/`.
+
+## 2026-07-06 - Modular production runners for full-79 and PBM jobs
+
+- Pushed production-prep updates to the three Mila execution repos:
+  `generate_baselines_mila` commit `7ffca3d`,
+  `bayes_efficiency_mila` commit `67bbcfc`, and
+  `child_complexity_predictors` commit `33497c2`.
+- `generate_baselines_mila` now has
+  `slurm/full_79_ngram_baselines.sbatch`, which builds a compact full-79
+  manifest/input from the extracted strict-naturalistic bundle and then runs
+  same-length random/unigram/bigram/trigram generation.
+- `bayes_efficiency_mila` now has `slurm/pbm_ngram_bayes.sbatch`, which trains
+  CPU n-gram `p(u)` and reverse `p(c | u)` models from the extracted bundle
+  and scores the PBM real + random/unigram/bigram/trigram candidate cloud.
+- `child_complexity_predictors` now has
+  `slurm/pbm_complexity_predictors.sbatch`, which exports PBM real-child
+  complexity/trajectory tables plus utterance-level complexity predictors for
+  the PBM real + n-gram candidate cloud.
+- Local verification: all three unit-test suites passed; `bash -n slurm/*.sbatch`
+  passed in all three repos; Brown-only real-bundle schema smoke passed with
+  92,555 real child rows and 462,774 candidate rows for Bayes/complexity.
+- Pulled and audited Mila production logs on 2026-07-08. Jobs completed
+  successfully:
+  `full79_ngram` job `10064187`,
+  `pbm_ngram_bayes` job `10064188`, and
+  `pbm_complexity` job `10064189`.
+- Full-79 n-gram generation used 1,140,218 real child rows with 0 duplicate
+  row ids and wrote 4,560,872 generated rows.
+- PBM Bayes n-gram scoring trained on 1,140,218 full-79 rows and scored
+  2,232,524 PBM candidate rows: real/bigram/unigram/trigram each 446,508,
+  random 446,492, with 16 empty generated random candidates skipped at
+  candidate-table creation.
+- PBM complexity extraction wrote 446,508 real-child predictor rows,
+  446,508 trajectory rows, 78 age-bin summary rows, and 2,232,524 candidate
+  predictor rows.
+
 ## 2026-07-06 - Mila HOME/SCRATCH split for modular repos
 
 - Corrected the modular Mila workflow after sysadmin guidance: permanent Git
@@ -6309,4 +6464,58 @@ cd /home/apaixonada/EvaPortelance/Projet_1/child_complexity_predictors
 PYTHONPYCACHEPREFIX=/tmp/child_complexity_predictors_pycache PYTHONPATH=src python3 -m unittest discover -s tests
 PYTHONPYCACHEPREFIX=/tmp/child_complexity_predictors_pycache PYTHONPATH=src python3 -m py_compile src/child_complexity_predictors/*.py
 PYTHONPATH=src python3 -m child_complexity_predictors validate-manifest --manifest configs/complexity_example.json
+```
+
+## 2026-07-09 - Child coverage and demographic metadata report
+
+- Extended `docs/child_utterance_count_histogram.html` with:
+  - thin and horizontal per-child utterance-count plots,
+  - child age-coverage timelines sorted by first age and by utterance count,
+  - demographic metadata availability summaries,
+  - per-dataset child mini profile tables.
+- Inputs:
+
+```text
+results/big_cleaned_dataset/default_naturalistic_merged_006_023/all_child_longitudinal_age_coverage_summary.csv
+results/big_cleaned_dataset/default_naturalistic_merged_006_023/all_child_longitudinal_age_points.csv
+results/metadata/strict_naturalistic_child_demographic_codebook_2026-06-03.csv
+configs/child_demographic_online_value_patches.csv
+configs/child_demographic_online_research_audit.csv
+```
+
+- Outputs:
+
+```text
+docs/child_utterance_count_histogram.md
+docs/child_utterance_count_histogram.html
+results/child_utterance_count_histogram/child_metadata_profile.csv
+results/child_utterance_count_histogram/child_metadata_availability_summary.csv
+results/child_utterance_count_histogram/dataset_metadata_availability_summary.csv
+results/child_utterance_count_histogram/child_demographic_online_research_audit.csv
+figs/child_utterance_count_histogram/child_age_coverage_sorted_by_first_age.png
+figs/child_utterance_count_histogram/child_age_coverage_sorted_by_utterance_count.png
+```
+
+- The report builder was split into modular pieces:
+  `src/child_coverage_data.py` for loading/enrichment/source patches,
+  `src/child_coverage_plots.py` for figures,
+  `src/child_coverage_report.py` for Markdown/HTML generation, and
+  `src/build_child_utterance_count_histogram.py` as orchestration only.
+- Online source pass: official TalkBank corpus pages were checked for local
+  metadata holes. This added source-backed sex/gender patches for
+  MPI-EVA-Manchester/Gina and MPI-EVA-Manchester/Helen. It did not add new
+  SES, race/ethnicity, or child-specific nationality values because the checked
+  public pages did not support defensible child-level coding for those fields.
+- Current metadata status across 79 children: sex/gender marker known for 78,
+  SES/social-class documented at child, corpus, or community level for 33,
+  race/ethnicity documented at child, corpus, or community level for 6,
+  parental education documented for 8, and child-specific nationality available
+  for 0. Corpus region is included as dataset-level provenance only and should
+  not be interpreted as nationality.
+- Verification:
+
+```bash
+.venv/bin/python -m unittest tests.test_child_coverage_report
+.venv/bin/python -m py_compile src/child_coverage_data.py src/child_coverage_plots.py src/child_coverage_report.py src/build_child_utterance_count_histogram.py
+MPLCONFIGDIR=/tmp/matplotlib .venv/bin/python src/build_child_utterance_count_histogram.py
 ```

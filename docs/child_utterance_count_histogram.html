@@ -1,0 +1,3546 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Child Utterance Counts</title>
+<style>
+:root {
+  color-scheme: light;
+  --ink: #1e2528;
+  --muted: #5e686d;
+  --line: #d9e0df;
+  --paper: #ffffff;
+  --soft: #f5f7f6;
+  --accent: #2f6f73;
+  --accent2: #c76f2c;
+}
+body {
+  margin: 0;
+  background: #eef2f1;
+  color: var(--ink);
+  font: 16px/1.58 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+main {
+  max-width: 980px;
+  margin: 34px auto 56px;
+  padding: 48px 58px;
+  background: var(--paper);
+  box-shadow: 0 18px 50px rgba(31, 45, 48, 0.12);
+}
+h1, h2, h3, h4 {
+  line-height: 1.18;
+  margin: 1.6em 0 0.55em;
+}
+h1 {
+  margin-top: 0;
+  font-size: 2.25rem;
+  border-bottom: 3px solid var(--accent);
+  padding-bottom: 0.45em;
+}
+h2 {
+  font-size: 1.55rem;
+  color: var(--accent);
+}
+h3 {
+  font-size: 1.18rem;
+}
+p {
+  margin: 0.75em 0;
+}
+a {
+  color: var(--accent);
+}
+blockquote {
+  border-left: 4px solid var(--accent2);
+  margin: 1.1em 0;
+  padding: 0.05em 1.1em;
+  color: var(--muted);
+  background: #fff8f2;
+}
+code {
+  background: var(--soft);
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  padding: 0.08em 0.3em;
+  font-family: "SFMono-Regular", Consolas, monospace;
+  font-size: 0.92em;
+}
+pre {
+  background: #f5f7f6;
+  color: var(--ink);
+  border: 1px solid var(--line);
+  padding: 1em;
+  overflow-x: auto;
+  border-radius: 7px;
+}
+pre code {
+  background: transparent;
+  border: 0;
+  padding: 0;
+  color: inherit;
+}
+table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 1.15em 0 1.45em;
+  font-size: 0.95em;
+}
+.plot-layout {
+  table-layout: fixed;
+  margin: 1.1em auto 1.45em;
+}
+.plot-layout,
+.plot-layout tr,
+.plot-layout td {
+  border: 0;
+  background: transparent;
+}
+.plot-layout td {
+  padding: 0.35em 0.55em 0.95em;
+  text-align: center;
+  vertical-align: top;
+}
+.plot-layout img {
+  width: 100%;
+  max-width: 100%;
+  margin: 0 auto 0.35em;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: white;
+}
+.plot-layout .centered-cell img {
+  width: 54%;
+}
+.plot-caption {
+  color: var(--muted);
+  font-size: 0.85em;
+  line-height: 1.35;
+}
+th, td {
+  border: 1px solid var(--line);
+  padding: 0.54em 0.68em;
+  vertical-align: top;
+}
+th {
+  background: #e7efed;
+  text-align: left;
+}
+tr:nth-child(even) td {
+  background: #fafbfb;
+}
+.plot-layout tr:nth-child(even) td {
+  background: transparent;
+}
+img {
+  max-width: 100%;
+  display: block;
+  margin: 1.1em auto 0.45em;
+}
+.figure-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.05rem 1.25rem;
+  align-items: start;
+  margin: 1.1em 0 1.45em;
+}
+.figure-grid.two-one {
+  max-width: 900px;
+  margin-left: auto;
+  margin-right: auto;
+}
+.figure-grid.five-panel {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+.figure-grid figure {
+  margin: 0;
+}
+.figure-grid img {
+  width: 100%;
+  max-width: 100%;
+  margin: 0;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: white;
+}
+.figure-grid figcaption {
+  color: var(--muted);
+  font-size: 0.85em;
+  line-height: 1.35;
+  text-align: center;
+  margin-top: 0.35em;
+}
+.figure-grid .centered {
+  grid-column: 1 / -1;
+  justify-self: center;
+  max-width: 58%;
+}
+.figure-grid.two-one .centered {
+  max-width: 54%;
+}
+.figure-grid.five-panel .centered {
+  max-width: 52%;
+}
+ul, ol {
+  padding-left: 1.4em;
+}
+.caption {
+  color: var(--muted);
+  font-size: 0.92em;
+  margin-top: -0.15em;
+}
+@media print {
+  body {
+    background: white;
+  }
+  main {
+    box-shadow: none;
+    margin: 0;
+    max-width: none;
+    padding: 28px;
+  }
+}
+@media screen and (max-width: 540px) {
+  .figure-grid {
+    grid-template-columns: 1fr;
+  }
+  .figure-grid .centered,
+  .figure-grid.five-panel .centered {
+    grid-column: auto;
+    max-width: 100%;
+  }
+}
+</style>
+</head>
+<body>
+<main>
+<h1>Child Utterance Counts</h1>
+<p>This plot uses the current strict naturalistic coverage summary:</p>
+<p><code>results/big_cleaned_dataset/default_naturalistic_merged_006_023/all_child_longitudinal_age_coverage_summary.csv</code></p>
+<h2>Summary</h2>
+<table>
+<thead><tr>
+<th>children</th>
+<th>total_child_utterances</th>
+<th>median_per_child</th>
+<th>min_per_child</th>
+<th>max_per_child</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>79</td>
+<td>1,140,218</td>
+<td>2,989</td>
+<td>274</td>
+<td>154,593</td>
+</tr>
+</tbody></table>
+<h2>Thin-Bar Histogram</h2>
+<p>Bars are sorted from the highest to lowest child utterance count. The y-axis is log-scaled because a few children have very large counts compared with many small Wells children.</p>
+<img src="../figs/child_utterance_count_histogram/child_utterance_counts_thin_vertical.png" alt="Thin vertical bars by child">
+<h2>Readable Horizontal Version</h2>
+<p>Same data, rotated for labels.</p>
+<img src="../figs/child_utterance_count_histogram/child_utterance_counts_horizontal.png" alt="Horizontal bars by child">
+<h2>Age Range Covered By Each Child</h2>
+<p>Line segments show the minimum-to-maximum age range available for each child. Dots show the observed recording ages inside that range, with larger dots indicating more child utterances at that exact age.</p>
+<img src="../figs/child_utterance_count_histogram/child_age_coverage_sorted_by_first_age.png" alt="Age coverage sorted by first observed age">
+<h2>Age Range In The Same Order As The Histogram</h2>
+<p>This is the same coverage information, but sorted by total child utterance count to match the thin-bar histogram above.</p>
+<img src="../figs/child_utterance_count_histogram/child_age_coverage_sorted_by_utterance_count.png" alt="Age coverage sorted by utterance count">
+<h2>Demographic Metadata Availability</h2>
+<p>This section uses the current strict-naturalistic demographic codebook plus a small online source-backed patch file:</p>
+<p><code>results/metadata/strict_naturalistic_child_demographic_codebook_2026-06-03.csv</code></p>
+<p><code>configs/child_demographic_online_value_patches.csv</code></p>
+<p>Unknown means &quot;not available in the current extracted metadata&quot;, not that the child lacks the attribute. Nationality is not currently available as a child-specific extracted field; the report therefore includes only dataset-level corpus region.</p>
+<p>Full CSVs:</p>
+<ul>
+<li><a href="../results/child_utterance_count_histogram/child_metadata_profile.csv">child metadata profile</a></li>
+<li><a href="../results/child_utterance_count_histogram/child_metadata_availability_summary.csv">field availability summary</a></li>
+<li><a href="../results/child_utterance_count_histogram/dataset_metadata_availability_summary.csv">dataset metadata summary</a></li>
+<li><a href="../results/child_utterance_count_histogram/child_demographic_online_research_audit.csv">online research audit</a></li>
+</ul>
+<table>
+<thead><tr>
+<th>field</th>
+<th>known_child_specific</th>
+<th>known_corpus_level</th>
+<th>known_predominant_or_community</th>
+<th>unknown_or_unavailable</th>
+<th>total_children</th>
+<th>note</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>SES / social class</td>
+<td>3</td>
+<td>15</td>
+<td>15</td>
+<td>46</td>
+<td>79</td>
+<td>Current codebook combines local CHAT metadata and manual TalkBank page checks.</td>
+</tr>
+<tr>
+<td>Race / ethnicity</td>
+<td>2</td>
+<td>1</td>
+<td>3</td>
+<td>73</td>
+<td>79</td>
+<td>Sparse; community-level descriptions should not be treated as child-specific race codes.</td>
+</tr>
+<tr>
+<td>Parental education</td>
+<td>2</td>
+<td>6</td>
+<td>0</td>
+<td>71</td>
+<td>79</td>
+<td>Available only when documented in corpus-level or child-specific notes.</td>
+</tr>
+<tr>
+<td>Sex / gender marker</td>
+<td>78</td>
+<td>0</td>
+<td>0</td>
+<td>1</td>
+<td>79</td>
+<td>From local extracted metadata plus documented online patches; label kept as sex because that is the source-field name.</td>
+</tr>
+<tr>
+<td>Child-specific nationality</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>79</td>
+<td>79</td>
+<td>Not currently extracted locally. Corpus region is shown separately and must not be interpreted as nationality.</td>
+</tr>
+<tr>
+<td>Corpus region</td>
+<td>0</td>
+<td>79</td>
+<td>0</td>
+<td>0</td>
+<td>79</td>
+<td>Dataset-level geography only.</td>
+</tr>
+</tbody></table>
+<h2>Online Research Audit</h2>
+<p>Official corpus pages were checked where local metadata had holes. The only new value patches found in this pass are the Gina and Helen sex/gender markers from the official MPI-EVA-Manchester page. The SES/race/nationality holes mostly remain unavailable in public corpus pages, so they stay coded as unknown/unavailable instead of being guessed.</p>
+<table>
+<thead><tr>
+<th>dataset</th>
+<th>child_id</th>
+<th>fields_checked</th>
+<th>result</th>
+<th>source_type</th>
+<th>source_url</th>
+<th>source_note</th>
+<th>coding_decision</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>Demetras1</td>
+<td>*</td>
+<td>SES/race/nationality</td>
+<td>not_found_on_public_corpus_page</td>
+<td>official_talkbank_page</td>
+<td>https://talkbank.org/childes/access/Eng-NA/Demetras1.html</td>
+<td>Official page gives participant count, USA location, Trevor birthdate, and recording design; it does not expose SES, race/ethnicity, or child-specific nationality.</td>
+<td>Keep SES/race/nationality unknown in current extracted metadata.</td>
+</tr>
+<tr>
+<td>Kuczaj</td>
+<td>*</td>
+<td>SES/race/nationality</td>
+<td>not_found_on_public_corpus_page</td>
+<td>official_talkbank_page</td>
+<td>https://talkbank.org/childes/access/Eng-NA/Kuczaj.html</td>
+<td>Official page gives participant count, USA location, diary-study design, and Abe&#x27;s recording ages; it does not expose SES, race/ethnicity, or child-specific nationality.</td>
+<td>Keep SES/race/nationality unknown in current extracted metadata.</td>
+</tr>
+<tr>
+<td>MPI-EVA-Manchester</td>
+<td>Gina</td>
+<td>sex</td>
+<td>patched_from_official_page_pronouns</td>
+<td>official_talkbank_page</td>
+<td>https://talkbank.org/childes/access/Eng-UK/MPI-EVA-Manchester.html</td>
+<td>Official page uses feminine pronouns for Gina/Rubi, including her play and her mother.</td>
+<td>Patch sex marker to female with medium confidence.</td>
+</tr>
+<tr>
+<td>MPI-EVA-Manchester</td>
+<td>Helen</td>
+<td>sex</td>
+<td>patched_from_official_page_pronouns</td>
+<td>official_talkbank_page</td>
+<td>https://talkbank.org/childes/access/Eng-UK/MPI-EVA-Manchester.html</td>
+<td>Official page uses feminine pronouns for Helen/Hannah, including her play and her mother.</td>
+<td>Patch sex marker to female with medium confidence.</td>
+</tr>
+<tr>
+<td>MPI-EVA-Manchester</td>
+<td>*</td>
+<td>SES/race/nationality</td>
+<td>not_found_on_public_corpus_page</td>
+<td>official_talkbank_page</td>
+<td>https://talkbank.org/childes/access/Eng-UK/MPI-EVA-Manchester.html</td>
+<td>Official page documents four dense-sampling children in England, home recordings, and pseudonym/true-name notes; it does not expose SES, race/ethnicity, or child-specific nationality.</td>
+<td>Keep SES/race/nationality unknown in current extracted metadata.</td>
+</tr>
+<tr>
+<td>Providence</td>
+<td>*</td>
+<td>sex/language_background</td>
+<td>already_available_or_confirmed</td>
+<td>official_talkbank_page</td>
+<td>https://talkbank.org/phon/access/Eng-NA/Providence.html</td>
+<td>Official page lists the six children&#x27;s sex markers and says the corpus contains monolingual English-speaking children in Providence, RI.</td>
+<td>No new SES/race/nationality values; local sex markers are already populated.</td>
+</tr>
+<tr>
+<td>Providence</td>
+<td>*</td>
+<td>SES/race/nationality</td>
+<td>not_found_on_public_corpus_page</td>
+<td>official_talkbank_page</td>
+<td>https://talkbank.org/phon/access/Eng-NA/Providence.html</td>
+<td>Official page gives sex, age range, sessions, monolingual English background, and collection design, but no SES, race/ethnicity, or child-specific nationality.</td>
+<td>Keep SES/race/nationality unknown in current extracted metadata.</td>
+</tr>
+<tr>
+<td>Sachs</td>
+<td>*</td>
+<td>SES/race/nationality</td>
+<td>not_found_on_public_corpus_page</td>
+<td>official_talkbank_page</td>
+<td>https://talkbank.org/childes/access/Eng-NA/Sachs.html</td>
+<td>Official page says this is Jacqueline Sachs&#x27; longitudinal study of her daughter Naomi and gives USA location and age coverage; it does not expose SES, race/ethnicity, or child-specific nationality.</td>
+<td>Keep SES/race/nationality unknown in current extracted metadata.</td>
+</tr>
+<tr>
+<td>Weist</td>
+<td>Ben</td>
+<td>sex</td>
+<td>not_found_on_public_corpus_page</td>
+<td>official_talkbank_page</td>
+<td>https://talkbank.org/childes/access/Eng-NA/Weist.html</td>
+<td>Official page lists Ben with birthdate, ages, and transcripts, and documents middle-class professional-parent family background for all Fredonia children; it does not expose Ben&#x27;s sex marker.</td>
+<td>Keep Ben sex marker unknown rather than inferring from name.</td>
+</tr>
+<tr>
+<td>Weist</td>
+<td>*</td>
+<td>SES/parental_education</td>
+<td>already_available_or_confirmed</td>
+<td>official_talkbank_page</td>
+<td>https://talkbank.org/childes/access/Eng-NA/Weist.html</td>
+<td>Official page says all Fredonia children came from middle-class homes and their parents were professionals.</td>
+<td>Keep existing corpus-level SES and parental-education coding.</td>
+</tr>
+<tr>
+<td>Wells</td>
+<td>*</td>
+<td>SES/race/nationality</td>
+<td>not_exposed_per_child_on_public_page</td>
+<td>official_talkbank_page</td>
+<td>https://talkbank.org/childes/access/Eng-UK/Wells.html</td>
+<td>Official page says family-background details were collected and used for sample design, but the current public page does not expose per-child SES, race/ethnicity, or child-specific nationality values.</td>
+<td>Keep Wells SES/race/nationality unavailable in current metadata until deeper original materials are coded.</td>
+</tr>
+</tbody></table>
+<h2>Dataset-Level Metadata Coverage</h2>
+<table>
+<thead><tr>
+<th>dataset</th>
+<th>children</th>
+<th>child_utterances</th>
+<th>sex_known</th>
+<th>ses_known</th>
+<th>race_known</th>
+<th>parent_education_known</th>
+<th>corpus_regions</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>Wells</td>
+<td>32</td>
+<td>37,967</td>
+<td>32</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>UK</td>
+</tr>
+<tr>
+<td>Manchester</td>
+<td>12</td>
+<td>232,614</td>
+<td>12</td>
+<td>12</td>
+<td>0</td>
+<td>0</td>
+<td>UK</td>
+</tr>
+<tr>
+<td>Belfast</td>
+<td>8</td>
+<td>22,942</td>
+<td>8</td>
+<td>8</td>
+<td>0</td>
+<td>0</td>
+<td>UK / Northern Ireland</td>
+</tr>
+<tr>
+<td>Providence</td>
+<td>6</td>
+<td>121,339</td>
+<td>6</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>US</td>
+</tr>
+<tr>
+<td>Weist</td>
+<td>6</td>
+<td>46,347</td>
+<td>5</td>
+<td>6</td>
+<td>0</td>
+<td>6</td>
+<td>US</td>
+</tr>
+<tr>
+<td>MPI-EVA-Manchester</td>
+<td>4</td>
+<td>462,100</td>
+<td>4</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>UK</td>
+</tr>
+<tr>
+<td>Brown</td>
+<td>3</td>
+<td>92,555</td>
+<td>3</td>
+<td>2</td>
+<td>1</td>
+<td>1</td>
+<td>US</td>
+</tr>
+<tr>
+<td>Post</td>
+<td>3</td>
+<td>8,068</td>
+<td>3</td>
+<td>3</td>
+<td>3</td>
+<td>0</td>
+<td>US</td>
+</tr>
+<tr>
+<td>Demetras1</td>
+<td>1</td>
+<td>6,842</td>
+<td>1</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>US</td>
+</tr>
+<tr>
+<td>Forrester</td>
+<td>1</td>
+<td>6,663</td>
+<td>1</td>
+<td>1</td>
+<td>1</td>
+<td>0</td>
+<td>UK</td>
+</tr>
+<tr>
+<td>Kuczaj</td>
+<td>1</td>
+<td>37,109</td>
+<td>1</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>US</td>
+</tr>
+<tr>
+<td>Lara</td>
+<td>1</td>
+<td>49,328</td>
+<td>1</td>
+<td>1</td>
+<td>1</td>
+<td>1</td>
+<td>UK</td>
+</tr>
+<tr>
+<td>Sachs</td>
+<td>1</td>
+<td>16,344</td>
+<td>1</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>US</td>
+</tr>
+</tbody></table>
+<h2>Child Mini Reports</h2>
+<p>Each row is one child. The source labels are intentionally explicit: child-specific is strongest; corpus-level and community-level entries are useful documentation but should be used cautiously in models.</p>
+<h3>Belfast</h3>
+<table>
+<thead><tr>
+<th>child_id</th>
+<th>child_utterances</th>
+<th>age_range_months</th>
+<th>sex</th>
+<th>sex_source_type</th>
+<th>corpus_region</th>
+<th>ses_label</th>
+<th>ses_scope</th>
+<th>race_ethnicity</th>
+<th>race_scope</th>
+<th>parental_education</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>Barbara</td>
+<td>2,901</td>
+<td>28.3-49.6</td>
+<td>female</td>
+<td>local_extracted_metadata</td>
+<td>UK / Northern Ireland</td>
+<td>upper-working-class children</td>
+<td>corpus_level</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+</tr>
+<tr>
+<td>Conor</td>
+<td>3,920</td>
+<td>44.5-54.2</td>
+<td>male</td>
+<td>local_extracted_metadata</td>
+<td>UK / Northern Ireland</td>
+<td>upper-working-class children</td>
+<td>corpus_level</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+</tr>
+<tr>
+<td>Courtney</td>
+<td>2,423</td>
+<td>40-48.4</td>
+<td>female</td>
+<td>local_extracted_metadata</td>
+<td>UK / Northern Ireland</td>
+<td>upper-working-class children</td>
+<td>corpus_level</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+</tr>
+<tr>
+<td>David</td>
+<td>2,572</td>
+<td>24.1-50.1</td>
+<td>male</td>
+<td>local_extracted_metadata</td>
+<td>UK / Northern Ireland</td>
+<td>upper-working-class children</td>
+<td>corpus_level</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+</tr>
+<tr>
+<td>John</td>
+<td>1,994</td>
+<td>42.0-52.0</td>
+<td>male</td>
+<td>local_extracted_metadata</td>
+<td>UK / Northern Ireland</td>
+<td>upper-working-class children</td>
+<td>corpus_level</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+</tr>
+<tr>
+<td>Michelle</td>
+<td>3,505</td>
+<td>28.9-52.6</td>
+<td>female</td>
+<td>local_extracted_metadata</td>
+<td>UK / Northern Ireland</td>
+<td>upper-working-class children</td>
+<td>corpus_level</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+</tr>
+<tr>
+<td>Rachel</td>
+<td>1,606</td>
+<td>29.8-38.1</td>
+<td>female</td>
+<td>local_extracted_metadata</td>
+<td>UK / Northern Ireland</td>
+<td>upper-working-class children</td>
+<td>corpus_level</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+</tr>
+<tr>
+<td>Stuart</td>
+<td>4,021</td>
+<td>41.4-53.1</td>
+<td>male</td>
+<td>local_extracted_metadata</td>
+<td>UK / Northern Ireland</td>
+<td>upper-working-class children</td>
+<td>corpus_level</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+</tr>
+</tbody></table>
+<h3>Brown</h3>
+<table>
+<thead><tr>
+<th>child_id</th>
+<th>child_utterances</th>
+<th>age_range_months</th>
+<th>sex</th>
+<th>sex_source_type</th>
+<th>corpus_region</th>
+<th>ses_label</th>
+<th>ses_scope</th>
+<th>race_ethnicity</th>
+<th>race_scope</th>
+<th>parental_education</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>Adam</td>
+<td>46,496</td>
+<td>27.1-62.4</td>
+<td>male</td>
+<td>local_extracted_metadata</td>
+<td>US</td>
+<td>middle-class well-educated family</td>
+<td>child_specific</td>
+<td>Black</td>
+<td>child_specific</td>
+<td>well_educated_family</td>
+</tr>
+<tr>
+<td>Eve</td>
+<td>11,750</td>
+<td>18-27</td>
+<td>female</td>
+<td>local_extracted_metadata</td>
+<td>US</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+</tr>
+<tr>
+<td>Sarah</td>
+<td>34,309</td>
+<td>27.2-61.2</td>
+<td>female</td>
+<td>local_extracted_metadata</td>
+<td>US</td>
+<td>working-class family</td>
+<td>child_specific</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+</tr>
+</tbody></table>
+<h3>Demetras1</h3>
+<table>
+<thead><tr>
+<th>child_id</th>
+<th>child_utterances</th>
+<th>age_range_months</th>
+<th>sex</th>
+<th>sex_source_type</th>
+<th>corpus_region</th>
+<th>ses_label</th>
+<th>ses_scope</th>
+<th>race_ethnicity</th>
+<th>race_scope</th>
+<th>parental_education</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>Trevor</td>
+<td>6,842</td>
+<td>24.9-47.9</td>
+<td>male</td>
+<td>local_extracted_metadata</td>
+<td>US</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+</tr>
+</tbody></table>
+<h3>Forrester</h3>
+<table>
+<thead><tr>
+<th>child_id</th>
+<th>child_utterances</th>
+<th>age_range_months</th>
+<th>sex</th>
+<th>sex_source_type</th>
+<th>corpus_region</th>
+<th>ses_label</th>
+<th>ses_scope</th>
+<th>race_ethnicity</th>
+<th>race_scope</th>
+<th>parental_education</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>Ella</td>
+<td>6,663</td>
+<td>12.0-60</td>
+<td>female</td>
+<td>local_extracted_metadata</td>
+<td>UK</td>
+<td>middle-class participants</td>
+<td>corpus_level_single_child</td>
+<td>White</td>
+<td>corpus_level_single_child</td>
+<td>unknown</td>
+</tr>
+</tbody></table>
+<h3>Kuczaj</h3>
+<table>
+<thead><tr>
+<th>child_id</th>
+<th>child_utterances</th>
+<th>age_range_months</th>
+<th>sex</th>
+<th>sex_source_type</th>
+<th>corpus_region</th>
+<th>ses_label</th>
+<th>ses_scope</th>
+<th>race_ethnicity</th>
+<th>race_scope</th>
+<th>parental_education</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>Abe</td>
+<td>37,109</td>
+<td>28.8-60.4</td>
+<td>male</td>
+<td>local_extracted_metadata</td>
+<td>US</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+</tr>
+</tbody></table>
+<h3>Lara</h3>
+<table>
+<thead><tr>
+<th>child_id</th>
+<th>child_utterances</th>
+<th>age_range_months</th>
+<th>sex</th>
+<th>sex_source_type</th>
+<th>corpus_region</th>
+<th>ses_label</th>
+<th>ses_scope</th>
+<th>race_ethnicity</th>
+<th>race_scope</th>
+<th>parental_education</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>Lara</td>
+<td>49,328</td>
+<td>21.4-39.8</td>
+<td>female</td>
+<td>local_extracted_metadata</td>
+<td>UK</td>
+<td>two white university-graduate parents</td>
+<td>child_specific</td>
+<td>White</td>
+<td>child_specific</td>
+<td>two_university_graduate_parents</td>
+</tr>
+</tbody></table>
+<h3>MPI-EVA-Manchester</h3>
+<table>
+<thead><tr>
+<th>child_id</th>
+<th>child_utterances</th>
+<th>age_range_months</th>
+<th>sex</th>
+<th>sex_source_type</th>
+<th>corpus_region</th>
+<th>ses_label</th>
+<th>ses_scope</th>
+<th>race_ethnicity</th>
+<th>race_scope</th>
+<th>parental_education</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>Eleanor</td>
+<td>85,263</td>
+<td>24.1-37</td>
+<td>female</td>
+<td>local_extracted_metadata</td>
+<td>UK</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+</tr>
+<tr>
+<td>Fraser</td>
+<td>150,447</td>
+<td>24.0-37.1</td>
+<td>male</td>
+<td>local_extracted_metadata</td>
+<td>UK</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+</tr>
+<tr>
+<td>Gina</td>
+<td>71,797</td>
+<td>36.0-56.0</td>
+<td>female</td>
+<td>official_talkbank_page</td>
+<td>UK</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+</tr>
+<tr>
+<td>Helen</td>
+<td>154,593</td>
+<td>36.1-61.6</td>
+<td>female</td>
+<td>official_talkbank_page</td>
+<td>UK</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+</tr>
+</tbody></table>
+<h3>Manchester</h3>
+<table>
+<thead><tr>
+<th>child_id</th>
+<th>child_utterances</th>
+<th>age_range_months</th>
+<th>sex</th>
+<th>sex_source_type</th>
+<th>corpus_region</th>
+<th>ses_label</th>
+<th>ses_scope</th>
+<th>race_ethnicity</th>
+<th>race_scope</th>
+<th>parental_education</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>Anne</td>
+<td>20,707</td>
+<td>22.2-33.3</td>
+<td>female</td>
+<td>local_extracted_metadata</td>
+<td>UK</td>
+<td>predominantly middle-class families</td>
+<td>corpus_level_predominant</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+</tr>
+<tr>
+<td>Aran</td>
+<td>17,588</td>
+<td>23.4-34.9</td>
+<td>male</td>
+<td>local_extracted_metadata</td>
+<td>UK</td>
+<td>predominantly middle-class families</td>
+<td>corpus_level_predominant</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+</tr>
+<tr>
+<td>Becky</td>
+<td>24,432</td>
+<td>24.2-35.5</td>
+<td>female</td>
+<td>local_extracted_metadata</td>
+<td>UK</td>
+<td>predominantly middle-class families</td>
+<td>corpus_level_predominant</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+</tr>
+<tr>
+<td>Carl</td>
+<td>25,663</td>
+<td>20.7-32.5</td>
+<td>male</td>
+<td>local_extracted_metadata</td>
+<td>UK</td>
+<td>predominantly middle-class families</td>
+<td>corpus_level_predominant</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+</tr>
+<tr>
+<td>Dominic</td>
+<td>21,927</td>
+<td>22.8-34.5</td>
+<td>male</td>
+<td>local_extracted_metadata</td>
+<td>UK</td>
+<td>predominantly middle-class families</td>
+<td>corpus_level_predominant</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+</tr>
+<tr>
+<td>Gail</td>
+<td>17,280</td>
+<td>23.9-35.4</td>
+<td>female</td>
+<td>local_extracted_metadata</td>
+<td>UK</td>
+<td>predominantly middle-class families</td>
+<td>corpus_level_predominant</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+</tr>
+<tr>
+<td>Joel</td>
+<td>18,756</td>
+<td>23.0-34.4</td>
+<td>male</td>
+<td>local_extracted_metadata</td>
+<td>UK</td>
+<td>predominantly middle-class families</td>
+<td>corpus_level_predominant</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+</tr>
+<tr>
+<td>John</td>
+<td>13,770</td>
+<td>23.5-34.8</td>
+<td>male</td>
+<td>local_extracted_metadata</td>
+<td>UK</td>
+<td>predominantly middle-class families</td>
+<td>corpus_level_predominant</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+</tr>
+<tr>
+<td>Liz</td>
+<td>16,676</td>
+<td>23.3-34.6</td>
+<td>female</td>
+<td>local_extracted_metadata</td>
+<td>UK</td>
+<td>predominantly middle-class families</td>
+<td>corpus_level_predominant</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+</tr>
+<tr>
+<td>Nicole</td>
+<td>17,798</td>
+<td>24.8-36.3</td>
+<td>female</td>
+<td>local_extracted_metadata</td>
+<td>UK</td>
+<td>predominantly middle-class families</td>
+<td>corpus_level_predominant</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+</tr>
+<tr>
+<td>Ruth</td>
+<td>20,831</td>
+<td>23.5-35.7</td>
+<td>female</td>
+<td>local_extracted_metadata</td>
+<td>UK</td>
+<td>predominantly middle-class families</td>
+<td>corpus_level_predominant</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+</tr>
+<tr>
+<td>Warren</td>
+<td>17,186</td>
+<td>22.2-33.7</td>
+<td>male</td>
+<td>local_extracted_metadata</td>
+<td>UK</td>
+<td>predominantly middle-class families</td>
+<td>corpus_level_predominant</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+</tr>
+</tbody></table>
+<h3>Post</h3>
+<table>
+<thead><tr>
+<th>child_id</th>
+<th>child_utterances</th>
+<th>age_range_months</th>
+<th>sex</th>
+<th>sex_source_type</th>
+<th>corpus_region</th>
+<th>ses_label</th>
+<th>ses_scope</th>
+<th>race_ethnicity</th>
+<th>race_scope</th>
+<th>parental_education</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>Lew</td>
+<td>2,442</td>
+<td>22.7-32.2</td>
+<td>female</td>
+<td>local_extracted_metadata</td>
+<td>US</td>
+<td>predominantly white working-class rural Southern community</td>
+<td>community_or_study_population</td>
+<td>predominantly_white_community</td>
+<td>community_description</td>
+<td>unknown</td>
+</tr>
+<tr>
+<td>She</td>
+<td>2,637</td>
+<td>19.6-29.3</td>
+<td>female</td>
+<td>local_extracted_metadata</td>
+<td>US</td>
+<td>predominantly white working-class rural Southern community</td>
+<td>community_or_study_population</td>
+<td>predominantly_white_community</td>
+<td>community_description</td>
+<td>unknown</td>
+</tr>
+<tr>
+<td>Tow</td>
+<td>2,989</td>
+<td>19.2-29.1</td>
+<td>female</td>
+<td>local_extracted_metadata</td>
+<td>US</td>
+<td>predominantly white working-class rural Southern community</td>
+<td>community_or_study_population</td>
+<td>predominantly_white_community</td>
+<td>community_description</td>
+<td>unknown</td>
+</tr>
+</tbody></table>
+<h3>Providence</h3>
+<table>
+<thead><tr>
+<th>child_id</th>
+<th>child_utterances</th>
+<th>age_range_months</th>
+<th>sex</th>
+<th>sex_source_type</th>
+<th>corpus_region</th>
+<th>ses_label</th>
+<th>ses_scope</th>
+<th>race_ethnicity</th>
+<th>race_scope</th>
+<th>parental_education</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>Alex</td>
+<td>19,155</td>
+<td>16.9-41.5</td>
+<td>male</td>
+<td>local_extracted_metadata</td>
+<td>US</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+</tr>
+<tr>
+<td>Ethan</td>
+<td>13,604</td>
+<td>11.1-35.0</td>
+<td>male</td>
+<td>local_extracted_metadata</td>
+<td>US</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+</tr>
+<tr>
+<td>Lily</td>
+<td>28,028</td>
+<td>13.1-48.1</td>
+<td>female</td>
+<td>local_extracted_metadata</td>
+<td>US</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+</tr>
+<tr>
+<td>Naima</td>
+<td>33,778</td>
+<td>11.9-46.3</td>
+<td>female</td>
+<td>local_extracted_metadata</td>
+<td>US</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+</tr>
+<tr>
+<td>Violet</td>
+<td>10,795</td>
+<td>14-47.8</td>
+<td>female</td>
+<td>local_extracted_metadata</td>
+<td>US</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+</tr>
+<tr>
+<td>William</td>
+<td>15,979</td>
+<td>16.4-40.6</td>
+<td>male</td>
+<td>local_extracted_metadata</td>
+<td>US</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+</tr>
+</tbody></table>
+<h3>Sachs</h3>
+<table>
+<thead><tr>
+<th>child_id</th>
+<th>child_utterances</th>
+<th>age_range_months</th>
+<th>sex</th>
+<th>sex_source_type</th>
+<th>corpus_region</th>
+<th>ses_label</th>
+<th>ses_scope</th>
+<th>race_ethnicity</th>
+<th>race_scope</th>
+<th>parental_education</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>Naomi</td>
+<td>16,344</td>
+<td>15.0-57.1</td>
+<td>female</td>
+<td>local_extracted_metadata</td>
+<td>US</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+</tr>
+</tbody></table>
+<h3>Weist</h3>
+<table>
+<thead><tr>
+<th>child_id</th>
+<th>child_utterances</th>
+<th>age_range_months</th>
+<th>sex</th>
+<th>sex_source_type</th>
+<th>corpus_region</th>
+<th>ses_label</th>
+<th>ses_scope</th>
+<th>race_ethnicity</th>
+<th>race_scope</th>
+<th>parental_education</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>Ben</td>
+<td>3,371</td>
+<td>28.2-39.7</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>US</td>
+<td>middle-class homes with professional parents</td>
+<td>corpus_level</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>professional_parents</td>
+</tr>
+<tr>
+<td>Emily</td>
+<td>7,437</td>
+<td>30.2-53.6</td>
+<td>female</td>
+<td>local_extracted_metadata</td>
+<td>US</td>
+<td>middle-class homes with professional parents</td>
+<td>corpus_level</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>professional_parents</td>
+</tr>
+<tr>
+<td>Emma</td>
+<td>6,863</td>
+<td>31.3-56.1</td>
+<td>female</td>
+<td>local_extracted_metadata</td>
+<td>US</td>
+<td>middle-class homes with professional parents</td>
+<td>corpus_level</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>professional_parents</td>
+</tr>
+<tr>
+<td>Jillian</td>
+<td>5,876</td>
+<td>25.0-34</td>
+<td>female</td>
+<td>local_extracted_metadata</td>
+<td>US</td>
+<td>middle-class homes with professional parents</td>
+<td>corpus_level</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>professional_parents</td>
+</tr>
+<tr>
+<td>Matt</td>
+<td>11,113</td>
+<td>27.3-60.2</td>
+<td>male</td>
+<td>local_extracted_metadata</td>
+<td>US</td>
+<td>middle-class homes with professional parents</td>
+<td>corpus_level</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>professional_parents</td>
+</tr>
+<tr>
+<td>Roman</td>
+<td>11,687</td>
+<td>26.7-55.7</td>
+<td>male</td>
+<td>local_extracted_metadata</td>
+<td>US</td>
+<td>middle-class homes with professional parents</td>
+<td>corpus_level</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>professional_parents</td>
+</tr>
+</tbody></table>
+<h3>Wells</h3>
+<table>
+<thead><tr>
+<th>child_id</th>
+<th>child_utterances</th>
+<th>age_range_months</th>
+<th>sex</th>
+<th>sex_source_type</th>
+<th>corpus_region</th>
+<th>ses_label</th>
+<th>ses_scope</th>
+<th>race_ethnicity</th>
+<th>race_scope</th>
+<th>parental_education</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>Abigail</td>
+<td>1,161</td>
+<td>17.9-56</td>
+<td>female</td>
+<td>local_extracted_metadata</td>
+<td>UK</td>
+<td>unknown</td>
+<td>unavailable_in_current_metadata</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+</tr>
+<tr>
+<td>Benjamin</td>
+<td>1,471</td>
+<td>17.7-60.8</td>
+<td>male</td>
+<td>local_extracted_metadata</td>
+<td>UK</td>
+<td>unknown</td>
+<td>unavailable_in_current_metadata</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+</tr>
+<tr>
+<td>Betty</td>
+<td>1,949</td>
+<td>18.1-59.1</td>
+<td>male</td>
+<td>local_extracted_metadata</td>
+<td>UK</td>
+<td>unknown</td>
+<td>unavailable_in_current_metadata</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+</tr>
+<tr>
+<td>Darren</td>
+<td>1,566</td>
+<td>18.1-58.2</td>
+<td>male</td>
+<td>local_extracted_metadata</td>
+<td>UK</td>
+<td>unknown</td>
+<td>unavailable_in_current_metadata</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+</tr>
+<tr>
+<td>Debbie</td>
+<td>1,412</td>
+<td>18.3-47.9</td>
+<td>female</td>
+<td>local_extracted_metadata</td>
+<td>UK</td>
+<td>unknown</td>
+<td>unavailable_in_current_metadata</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+</tr>
+<tr>
+<td>Ellen</td>
+<td>2,577</td>
+<td>17.9-57.7</td>
+<td>female</td>
+<td>local_extracted_metadata</td>
+<td>UK</td>
+<td>unknown</td>
+<td>unavailable_in_current_metadata</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+</tr>
+<tr>
+<td>Elspeth</td>
+<td>1,258</td>
+<td>18-60.1</td>
+<td>female</td>
+<td>local_extracted_metadata</td>
+<td>UK</td>
+<td>unknown</td>
+<td>unavailable_in_current_metadata</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+</tr>
+<tr>
+<td>Frances</td>
+<td>1,516</td>
+<td>18.0-58.3</td>
+<td>female</td>
+<td>local_extracted_metadata</td>
+<td>UK</td>
+<td>unknown</td>
+<td>unavailable_in_current_metadata</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+</tr>
+<tr>
+<td>Gary</td>
+<td>1,909</td>
+<td>18-57</td>
+<td>male</td>
+<td>local_extracted_metadata</td>
+<td>UK</td>
+<td>unknown</td>
+<td>unavailable_in_current_metadata</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+</tr>
+<tr>
+<td>Gavin</td>
+<td>1,753</td>
+<td>18.7-57.6</td>
+<td>male</td>
+<td>local_extracted_metadata</td>
+<td>UK</td>
+<td>unknown</td>
+<td>unavailable_in_current_metadata</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+</tr>
+<tr>
+<td>Geoffrey</td>
+<td>1,288</td>
+<td>18-59.7</td>
+<td>male</td>
+<td>local_extracted_metadata</td>
+<td>UK</td>
+<td>unknown</td>
+<td>unavailable_in_current_metadata</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+</tr>
+<tr>
+<td>Gerald</td>
+<td>1,610</td>
+<td>18.2-57.2</td>
+<td>male</td>
+<td>local_extracted_metadata</td>
+<td>UK</td>
+<td>unknown</td>
+<td>unavailable_in_current_metadata</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+</tr>
+<tr>
+<td>Harriet</td>
+<td>1,431</td>
+<td>18.1-58.1</td>
+<td>female</td>
+<td>local_extracted_metadata</td>
+<td>UK</td>
+<td>unknown</td>
+<td>unavailable_in_current_metadata</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+</tr>
+<tr>
+<td>Iris</td>
+<td>1,601</td>
+<td>18-56.1</td>
+<td>female</td>
+<td>local_extracted_metadata</td>
+<td>UK</td>
+<td>unknown</td>
+<td>unavailable_in_current_metadata</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+</tr>
+<tr>
+<td>Jack</td>
+<td>2,172</td>
+<td>17.9-57.0</td>
+<td>male</td>
+<td>local_extracted_metadata</td>
+<td>UK</td>
+<td>unknown</td>
+<td>unavailable_in_current_metadata</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+</tr>
+<tr>
+<td>Jason</td>
+<td>1,312</td>
+<td>18-60.6</td>
+<td>male</td>
+<td>local_extracted_metadata</td>
+<td>UK</td>
+<td>unknown</td>
+<td>unavailable_in_current_metadata</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+</tr>
+<tr>
+<td>Jonathan</td>
+<td>2,320</td>
+<td>18.2-55.5</td>
+<td>male</td>
+<td>local_extracted_metadata</td>
+<td>UK</td>
+<td>unknown</td>
+<td>unavailable_in_current_metadata</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+</tr>
+<tr>
+<td>Laura</td>
+<td>889</td>
+<td>18.0-42.1</td>
+<td>female</td>
+<td>local_extracted_metadata</td>
+<td>UK</td>
+<td>unknown</td>
+<td>unavailable_in_current_metadata</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+</tr>
+<tr>
+<td>Lee</td>
+<td>424</td>
+<td>17.9-42.0</td>
+<td>male</td>
+<td>local_extracted_metadata</td>
+<td>UK</td>
+<td>unknown</td>
+<td>unavailable_in_current_metadata</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+</tr>
+<tr>
+<td>Martin</td>
+<td>663</td>
+<td>17.9-41.9</td>
+<td>male</td>
+<td>local_extracted_metadata</td>
+<td>UK</td>
+<td>unknown</td>
+<td>unavailable_in_current_metadata</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+</tr>
+<tr>
+<td>Nancy</td>
+<td>471</td>
+<td>18.1-39.1</td>
+<td>female</td>
+<td>local_extracted_metadata</td>
+<td>UK</td>
+<td>unknown</td>
+<td>unavailable_in_current_metadata</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+</tr>
+<tr>
+<td>Neil</td>
+<td>659</td>
+<td>18.1-42.0</td>
+<td>male</td>
+<td>local_extracted_metadata</td>
+<td>UK</td>
+<td>unknown</td>
+<td>unavailable_in_current_metadata</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+</tr>
+<tr>
+<td>Neville</td>
+<td>1,024</td>
+<td>17.8-41.9</td>
+<td>male</td>
+<td>local_extracted_metadata</td>
+<td>UK</td>
+<td>unknown</td>
+<td>unavailable_in_current_metadata</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+</tr>
+<tr>
+<td>Olivia</td>
+<td>911</td>
+<td>18-41.7</td>
+<td>female</td>
+<td>local_extracted_metadata</td>
+<td>UK</td>
+<td>unknown</td>
+<td>unavailable_in_current_metadata</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+</tr>
+<tr>
+<td>Penny</td>
+<td>766</td>
+<td>18.3-41.9</td>
+<td>female</td>
+<td>local_extracted_metadata</td>
+<td>UK</td>
+<td>unknown</td>
+<td>unavailable_in_current_metadata</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+</tr>
+<tr>
+<td>Rosie</td>
+<td>274</td>
+<td>19-42.4</td>
+<td>female</td>
+<td>local_extracted_metadata</td>
+<td>UK</td>
+<td>unknown</td>
+<td>unavailable_in_current_metadata</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+</tr>
+<tr>
+<td>Samantha</td>
+<td>652</td>
+<td>18.2-42.4</td>
+<td>female</td>
+<td>local_extracted_metadata</td>
+<td>UK</td>
+<td>unknown</td>
+<td>unavailable_in_current_metadata</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+</tr>
+<tr>
+<td>Sean</td>
+<td>342</td>
+<td>18.4-42.3</td>
+<td>male</td>
+<td>local_extracted_metadata</td>
+<td>UK</td>
+<td>unknown</td>
+<td>unavailable_in_current_metadata</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+</tr>
+<tr>
+<td>Sheila</td>
+<td>684</td>
+<td>21.1-42.8</td>
+<td>female</td>
+<td>local_extracted_metadata</td>
+<td>UK</td>
+<td>unknown</td>
+<td>unavailable_in_current_metadata</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+</tr>
+<tr>
+<td>Simon</td>
+<td>538</td>
+<td>17.7-41.7</td>
+<td>male</td>
+<td>local_extracted_metadata</td>
+<td>UK</td>
+<td>unknown</td>
+<td>unavailable_in_current_metadata</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+</tr>
+<tr>
+<td>Stella</td>
+<td>710</td>
+<td>18.3-42</td>
+<td>female</td>
+<td>local_extracted_metadata</td>
+<td>UK</td>
+<td>unknown</td>
+<td>unavailable_in_current_metadata</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+</tr>
+<tr>
+<td>Tony</td>
+<td>654</td>
+<td>17.9-42.3</td>
+<td>male</td>
+<td>local_extracted_metadata</td>
+<td>UK</td>
+<td>unknown</td>
+<td>unavailable_in_current_metadata</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+</tr>
+</tbody></table>
+<h2>Demographic Source Notes</h2>
+<p>These rows show the provenance notes currently available for children or corpora with any non-empty metadata source fields. The full CSV above preserves all profile columns.</p>
+<table>
+<thead><tr>
+<th>dataset</th>
+<th>child_id</th>
+<th>sex_source_type</th>
+<th>sex_source_url</th>
+<th>sex_source_note</th>
+<th>sex_confidence</th>
+<th>ses_source_type</th>
+<th>ses_source_url</th>
+<th>ses_source_note</th>
+<th>race_source_type</th>
+<th>race_source_url</th>
+<th>race_source_note</th>
+<th>parental_education_source_url</th>
+<th>parental_education_source_note</th>
+<th>demographic_notes</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>Belfast</td>
+<td>Barbara</td>
+<td>local_extracted_metadata</td>
+<td>local_extracted_metadata</td>
+<td>Sex/gender marker came from local extracted CHAT/metadata rows.</td>
+<td>medium</td>
+<td>official_talkbank_page</td>
+<td>https://talkbank.org/childes/access/Eng-UK/Belfast.html</td>
+<td>Project description describes the study as eight upper-working-class children in Belfast; recruitment targeted families with local input from upper-working-class and lower-middle-class adults.</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>Overrides local CHAT MC tag because official corpus description is more specific.</td>
+<td>unknown</td>
+</tr>
+<tr>
+<td>Belfast</td>
+<td>Conor</td>
+<td>local_extracted_metadata</td>
+<td>local_extracted_metadata</td>
+<td>Sex/gender marker came from local extracted CHAT/metadata rows.</td>
+<td>medium</td>
+<td>official_talkbank_page</td>
+<td>https://talkbank.org/childes/access/Eng-UK/Belfast.html</td>
+<td>Project description describes the study as eight upper-working-class children in Belfast; recruitment targeted families with local input from upper-working-class and lower-middle-class adults.</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>Overrides local CHAT MC tag because official corpus description is more specific.</td>
+<td>unknown</td>
+</tr>
+<tr>
+<td>Belfast</td>
+<td>Courtney</td>
+<td>local_extracted_metadata</td>
+<td>local_extracted_metadata</td>
+<td>Sex/gender marker came from local extracted CHAT/metadata rows.</td>
+<td>medium</td>
+<td>official_talkbank_page</td>
+<td>https://talkbank.org/childes/access/Eng-UK/Belfast.html</td>
+<td>Project description describes the study as eight upper-working-class children in Belfast; recruitment targeted families with local input from upper-working-class and lower-middle-class adults.</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>Overrides local CHAT MC tag because official corpus description is more specific.</td>
+<td>unknown</td>
+</tr>
+<tr>
+<td>Belfast</td>
+<td>David</td>
+<td>local_extracted_metadata</td>
+<td>local_extracted_metadata</td>
+<td>Sex/gender marker came from local extracted CHAT/metadata rows.</td>
+<td>medium</td>
+<td>official_talkbank_page</td>
+<td>https://talkbank.org/childes/access/Eng-UK/Belfast.html</td>
+<td>Project description describes the study as eight upper-working-class children in Belfast; recruitment targeted families with local input from upper-working-class and lower-middle-class adults.</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>Overrides local CHAT MC tag because official corpus description is more specific.</td>
+<td>unknown</td>
+</tr>
+<tr>
+<td>Belfast</td>
+<td>John</td>
+<td>local_extracted_metadata</td>
+<td>local_extracted_metadata</td>
+<td>Sex/gender marker came from local extracted CHAT/metadata rows.</td>
+<td>medium</td>
+<td>official_talkbank_page</td>
+<td>https://talkbank.org/childes/access/Eng-UK/Belfast.html</td>
+<td>Project description describes the study as eight upper-working-class children in Belfast; recruitment targeted families with local input from upper-working-class and lower-middle-class adults.</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>Overrides local CHAT MC tag because official corpus description is more specific.</td>
+<td>unknown</td>
+</tr>
+<tr>
+<td>Belfast</td>
+<td>Michelle</td>
+<td>local_extracted_metadata</td>
+<td>local_extracted_metadata</td>
+<td>Sex/gender marker came from local extracted CHAT/metadata rows.</td>
+<td>medium</td>
+<td>official_talkbank_page</td>
+<td>https://talkbank.org/childes/access/Eng-UK/Belfast.html</td>
+<td>Project description describes the study as eight upper-working-class children in Belfast; recruitment targeted families with local input from upper-working-class and lower-middle-class adults.</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>Overrides local CHAT MC tag because official corpus description is more specific.</td>
+<td>unknown</td>
+</tr>
+<tr>
+<td>Belfast</td>
+<td>Rachel</td>
+<td>local_extracted_metadata</td>
+<td>local_extracted_metadata</td>
+<td>Sex/gender marker came from local extracted CHAT/metadata rows.</td>
+<td>medium</td>
+<td>official_talkbank_page</td>
+<td>https://talkbank.org/childes/access/Eng-UK/Belfast.html</td>
+<td>Project description describes the study as eight upper-working-class children in Belfast; recruitment targeted families with local input from upper-working-class and lower-middle-class adults.</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>Overrides local CHAT MC tag because official corpus description is more specific.</td>
+<td>unknown</td>
+</tr>
+<tr>
+<td>Belfast</td>
+<td>Stuart</td>
+<td>local_extracted_metadata</td>
+<td>local_extracted_metadata</td>
+<td>Sex/gender marker came from local extracted CHAT/metadata rows.</td>
+<td>medium</td>
+<td>official_talkbank_page</td>
+<td>https://talkbank.org/childes/access/Eng-UK/Belfast.html</td>
+<td>Project description describes the study as eight upper-working-class children in Belfast; recruitment targeted families with local input from upper-working-class and lower-middle-class adults.</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>Overrides local CHAT MC tag because official corpus description is more specific.</td>
+<td>unknown</td>
+</tr>
+<tr>
+<td>Brown</td>
+<td>Adam</td>
+<td>local_extracted_metadata</td>
+<td>local_extracted_metadata</td>
+<td>Sex/gender marker came from local extracted CHAT/metadata rows.</td>
+<td>medium</td>
+<td>official_talkbank_page</td>
+<td>https://talkbank.org/childes/access/Eng-NA/Brown.html</td>
+<td>Official Brown page describes Adam&#x27;s family as middle class and well educated.</td>
+<td>official_talkbank_page</td>
+<td>https://talkbank.org/childes/access/Eng-NA/Brown.html</td>
+<td>Official Brown page describes Adam as Black and as a Standard American English speaker rather than an AAE speaker.</td>
+<td>https://talkbank.org/childes/access/Eng-NA/Brown.html</td>
+<td>Official Brown page describes Adam&#x27;s family as well educated.</td>
+<td>unknown</td>
+</tr>
+<tr>
+<td>Brown</td>
+<td>Eve</td>
+<td>local_extracted_metadata</td>
+<td>local_extracted_metadata</td>
+<td>Sex/gender marker came from local extracted CHAT/metadata rows.</td>
+<td>medium</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>Official Brown page does not appear to provide Eve SES/class or race/ethnicity.</td>
+<td>unknown</td>
+</tr>
+<tr>
+<td>Brown</td>
+<td>Sarah</td>
+<td>local_extracted_metadata</td>
+<td>local_extracted_metadata</td>
+<td>Sex/gender marker came from local extracted CHAT/metadata rows.</td>
+<td>medium</td>
+<td>official_talkbank_page</td>
+<td>https://talkbank.org/childes/access/Eng-NA/Brown.html</td>
+<td>Official Brown page describes Sarah as the child of a working-class family.</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>No source found for race/ethnicity.</td>
+<td>unknown</td>
+</tr>
+<tr>
+<td>Demetras1</td>
+<td>Trevor</td>
+<td>local_extracted_metadata</td>
+<td>local_extracted_metadata</td>
+<td>Sex/gender marker came from local extracted CHAT/metadata rows.</td>
+<td>medium</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>Official TalkBank page does not appear to provide SES/class or race/ethnicity.</td>
+<td>unknown</td>
+</tr>
+<tr>
+<td>Forrester</td>
+<td>Ella</td>
+<td>local_extracted_metadata</td>
+<td>local_extracted_metadata</td>
+<td>Sex/gender marker came from local extracted CHAT/metadata rows.</td>
+<td>medium</td>
+<td>official_talkbank_page</td>
+<td>https://talkbank.org/childes/access/Eng-UK/Forrester.html</td>
+<td>Official Forrester page states all participants in the dialogs are British white and middle class.</td>
+<td>official_talkbank_page</td>
+<td>https://talkbank.org/childes/access/Eng-UK/Forrester.html</td>
+<td>Official Forrester page states all participants in the dialogs are British white and middle class.</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>One-child corpus; corpus-level description effectively applies to the included child/family.</td>
+</tr>
+<tr>
+<td>Kuczaj</td>
+<td>Abe</td>
+<td>local_extracted_metadata</td>
+<td>local_extracted_metadata</td>
+<td>Sex/gender marker came from local extracted CHAT/metadata rows.</td>
+<td>medium</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>Official TalkBank page does not appear to provide SES/class or race/ethnicity.</td>
+<td>unknown</td>
+</tr>
+<tr>
+<td>Lara</td>
+<td>Lara</td>
+<td>local_extracted_metadata</td>
+<td>local_extracted_metadata</td>
+<td>Sex/gender marker came from local extracted CHAT/metadata rows.</td>
+<td>medium</td>
+<td>official_talkbank_page</td>
+<td>https://talkbank.org/childes/access/Eng-UK/Lara.html</td>
+<td>Official Lara page describes Lara as the first-born monolingual English daughter of two white university graduates.</td>
+<td>official_talkbank_page</td>
+<td>https://talkbank.org/childes/access/Eng-UK/Lara.html</td>
+<td>Official Lara page describes Lara as the daughter of two white university graduates.</td>
+<td>https://talkbank.org/childes/access/Eng-UK/Lara.html</td>
+<td>Official Lara page describes both parents as university graduates.</td>
+<td>unknown</td>
+</tr>
+<tr>
+<td>MPI-EVA-Manchester</td>
+<td>Eleanor</td>
+<td>local_extracted_metadata</td>
+<td>local_extracted_metadata</td>
+<td>Sex/gender marker came from local extracted CHAT/metadata rows.</td>
+<td>medium</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>Official TalkBank page does not appear to provide SES/class or race/ethnicity.</td>
+<td>unknown</td>
+</tr>
+<tr>
+<td>MPI-EVA-Manchester</td>
+<td>Fraser</td>
+<td>local_extracted_metadata</td>
+<td>local_extracted_metadata</td>
+<td>Sex/gender marker came from local extracted CHAT/metadata rows.</td>
+<td>medium</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>Official TalkBank page does not appear to provide SES/class or race/ethnicity.</td>
+<td>unknown</td>
+</tr>
+<tr>
+<td>MPI-EVA-Manchester</td>
+<td>Gina</td>
+<td>official_talkbank_page</td>
+<td>https://talkbank.org/childes/access/Eng-UK/MPI-EVA-Manchester.html</td>
+<td>Official page describes Gina/Rubi recordings with phrases including &quot;her play&quot; and &quot;her mother&quot;.</td>
+<td>medium</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>Official TalkBank page does not appear to provide SES/class or race/ethnicity.</td>
+<td>unknown</td>
+</tr>
+<tr>
+<td>MPI-EVA-Manchester</td>
+<td>Helen</td>
+<td>official_talkbank_page</td>
+<td>https://talkbank.org/childes/access/Eng-UK/MPI-EVA-Manchester.html</td>
+<td>Official page describes Helen/Hannah recordings with phrases including &quot;her play&quot; and &quot;her mother&quot;.</td>
+<td>medium</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>Official TalkBank page does not appear to provide SES/class or race/ethnicity.</td>
+<td>unknown</td>
+</tr>
+<tr>
+<td>Manchester</td>
+<td>Anne</td>
+<td>local_extracted_metadata</td>
+<td>local_extracted_metadata</td>
+<td>Sex/gender marker came from local extracted CHAT/metadata rows.</td>
+<td>medium</td>
+<td>official_talkbank_page</td>
+<td>https://talkbank.org/childes/access/Eng-UK/Manchester.html</td>
+<td>Official Manchester page says SES was not a recruitment criterion but children were from predominantly middle-class families.</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>This is corpus-level and not child-specific.</td>
+<td>unknown</td>
+</tr>
+<tr>
+<td>Manchester</td>
+<td>Aran</td>
+<td>local_extracted_metadata</td>
+<td>local_extracted_metadata</td>
+<td>Sex/gender marker came from local extracted CHAT/metadata rows.</td>
+<td>medium</td>
+<td>official_talkbank_page</td>
+<td>https://talkbank.org/childes/access/Eng-UK/Manchester.html</td>
+<td>Official Manchester page says SES was not a recruitment criterion but children were from predominantly middle-class families.</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>This is corpus-level and not child-specific.</td>
+<td>unknown</td>
+</tr>
+<tr>
+<td>Manchester</td>
+<td>Becky</td>
+<td>local_extracted_metadata</td>
+<td>local_extracted_metadata</td>
+<td>Sex/gender marker came from local extracted CHAT/metadata rows.</td>
+<td>medium</td>
+<td>official_talkbank_page</td>
+<td>https://talkbank.org/childes/access/Eng-UK/Manchester.html</td>
+<td>Official Manchester page says SES was not a recruitment criterion but children were from predominantly middle-class families.</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>This is corpus-level and not child-specific.</td>
+<td>unknown</td>
+</tr>
+<tr>
+<td>Manchester</td>
+<td>Carl</td>
+<td>local_extracted_metadata</td>
+<td>local_extracted_metadata</td>
+<td>Sex/gender marker came from local extracted CHAT/metadata rows.</td>
+<td>medium</td>
+<td>official_talkbank_page</td>
+<td>https://talkbank.org/childes/access/Eng-UK/Manchester.html</td>
+<td>Official Manchester page says SES was not a recruitment criterion but children were from predominantly middle-class families.</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>This is corpus-level and not child-specific.</td>
+<td>unknown</td>
+</tr>
+<tr>
+<td>Manchester</td>
+<td>Dominic</td>
+<td>local_extracted_metadata</td>
+<td>local_extracted_metadata</td>
+<td>Sex/gender marker came from local extracted CHAT/metadata rows.</td>
+<td>medium</td>
+<td>official_talkbank_page</td>
+<td>https://talkbank.org/childes/access/Eng-UK/Manchester.html</td>
+<td>Official Manchester page says SES was not a recruitment criterion but children were from predominantly middle-class families.</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>This is corpus-level and not child-specific.</td>
+<td>unknown</td>
+</tr>
+<tr>
+<td>Manchester</td>
+<td>Gail</td>
+<td>local_extracted_metadata</td>
+<td>local_extracted_metadata</td>
+<td>Sex/gender marker came from local extracted CHAT/metadata rows.</td>
+<td>medium</td>
+<td>official_talkbank_page</td>
+<td>https://talkbank.org/childes/access/Eng-UK/Manchester.html</td>
+<td>Official Manchester page says SES was not a recruitment criterion but children were from predominantly middle-class families.</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>This is corpus-level and not child-specific.</td>
+<td>unknown</td>
+</tr>
+<tr>
+<td>Manchester</td>
+<td>Joel</td>
+<td>local_extracted_metadata</td>
+<td>local_extracted_metadata</td>
+<td>Sex/gender marker came from local extracted CHAT/metadata rows.</td>
+<td>medium</td>
+<td>official_talkbank_page</td>
+<td>https://talkbank.org/childes/access/Eng-UK/Manchester.html</td>
+<td>Official Manchester page says SES was not a recruitment criterion but children were from predominantly middle-class families.</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>This is corpus-level and not child-specific.</td>
+<td>unknown</td>
+</tr>
+<tr>
+<td>Manchester</td>
+<td>John</td>
+<td>local_extracted_metadata</td>
+<td>local_extracted_metadata</td>
+<td>Sex/gender marker came from local extracted CHAT/metadata rows.</td>
+<td>medium</td>
+<td>official_talkbank_page</td>
+<td>https://talkbank.org/childes/access/Eng-UK/Manchester.html</td>
+<td>Official Manchester page says SES was not a recruitment criterion but children were from predominantly middle-class families.</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>This is corpus-level and not child-specific.</td>
+<td>unknown</td>
+</tr>
+<tr>
+<td>Manchester</td>
+<td>Liz</td>
+<td>local_extracted_metadata</td>
+<td>local_extracted_metadata</td>
+<td>Sex/gender marker came from local extracted CHAT/metadata rows.</td>
+<td>medium</td>
+<td>official_talkbank_page</td>
+<td>https://talkbank.org/childes/access/Eng-UK/Manchester.html</td>
+<td>Official Manchester page says SES was not a recruitment criterion but children were from predominantly middle-class families.</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>This is corpus-level and not child-specific.</td>
+<td>unknown</td>
+</tr>
+<tr>
+<td>Manchester</td>
+<td>Nicole</td>
+<td>local_extracted_metadata</td>
+<td>local_extracted_metadata</td>
+<td>Sex/gender marker came from local extracted CHAT/metadata rows.</td>
+<td>medium</td>
+<td>official_talkbank_page</td>
+<td>https://talkbank.org/childes/access/Eng-UK/Manchester.html</td>
+<td>Official Manchester page says SES was not a recruitment criterion but children were from predominantly middle-class families.</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>This is corpus-level and not child-specific.</td>
+<td>unknown</td>
+</tr>
+<tr>
+<td>Manchester</td>
+<td>Ruth</td>
+<td>local_extracted_metadata</td>
+<td>local_extracted_metadata</td>
+<td>Sex/gender marker came from local extracted CHAT/metadata rows.</td>
+<td>medium</td>
+<td>official_talkbank_page</td>
+<td>https://talkbank.org/childes/access/Eng-UK/Manchester.html</td>
+<td>Official Manchester page says SES was not a recruitment criterion but children were from predominantly middle-class families.</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>This is corpus-level and not child-specific.</td>
+<td>unknown</td>
+</tr>
+<tr>
+<td>Manchester</td>
+<td>Warren</td>
+<td>local_extracted_metadata</td>
+<td>local_extracted_metadata</td>
+<td>Sex/gender marker came from local extracted CHAT/metadata rows.</td>
+<td>medium</td>
+<td>official_talkbank_page</td>
+<td>https://talkbank.org/childes/access/Eng-UK/Manchester.html</td>
+<td>Official Manchester page says SES was not a recruitment criterion but children were from predominantly middle-class families.</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>This is corpus-level and not child-specific.</td>
+<td>unknown</td>
+</tr>
+<tr>
+<td>Post</td>
+<td>Lew</td>
+<td>local_extracted_metadata</td>
+<td>local_extracted_metadata</td>
+<td>Sex/gender marker came from local extracted CHAT/metadata rows.</td>
+<td>medium</td>
+<td>official_talkbank_page</td>
+<td>https://talkbank.org/childes/access/Eng-NA/Post.html</td>
+<td>Official Post page says the area was chosen as a rural Southern community with a predominantly white working-class population and that participating families lived in that community.</td>
+<td>official_talkbank_page</td>
+<td>https://talkbank.org/childes/access/Eng-NA/Post.html</td>
+<td>Official Post page describes the community as predominantly white; this is not an individual child race code.</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>Use class more confidently than race; race remains community-level only.</td>
+</tr>
+<tr>
+<td>Post</td>
+<td>She</td>
+<td>local_extracted_metadata</td>
+<td>local_extracted_metadata</td>
+<td>Sex/gender marker came from local extracted CHAT/metadata rows.</td>
+<td>medium</td>
+<td>official_talkbank_page</td>
+<td>https://talkbank.org/childes/access/Eng-NA/Post.html</td>
+<td>Official Post page says the area was chosen as a rural Southern community with a predominantly white working-class population and that participating families lived in that community.</td>
+<td>official_talkbank_page</td>
+<td>https://talkbank.org/childes/access/Eng-NA/Post.html</td>
+<td>Official Post page describes the community as predominantly white; this is not an individual child race code.</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>Use class more confidently than race; race remains community-level only.</td>
+</tr>
+<tr>
+<td>Post</td>
+<td>Tow</td>
+<td>local_extracted_metadata</td>
+<td>local_extracted_metadata</td>
+<td>Sex/gender marker came from local extracted CHAT/metadata rows.</td>
+<td>medium</td>
+<td>official_talkbank_page</td>
+<td>https://talkbank.org/childes/access/Eng-NA/Post.html</td>
+<td>Official Post page says the area was chosen as a rural Southern community with a predominantly white working-class population and that participating families lived in that community.</td>
+<td>official_talkbank_page</td>
+<td>https://talkbank.org/childes/access/Eng-NA/Post.html</td>
+<td>Official Post page describes the community as predominantly white; this is not an individual child race code.</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>Use class more confidently than race; race remains community-level only.</td>
+</tr>
+<tr>
+<td>Providence</td>
+<td>Alex</td>
+<td>local_extracted_metadata</td>
+<td>local_extracted_metadata</td>
+<td>Sex/gender marker came from local extracted CHAT/metadata rows.</td>
+<td>medium</td>
+<td>official_talkbank_page</td>
+<td>https://talkbank.org/phon/access/Eng-NA/Providence.html</td>
+<td>Official Providence page provides sex age sessions and monolingual home interaction description but no SES/class or race/ethnicity.</td>
+<td>official_talkbank_page</td>
+<td>https://talkbank.org/phon/access/Eng-NA/Providence.html</td>
+<td>Official Providence page does not appear to provide race/ethnicity.</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>Ethan later diagnosed with Asperger&#x27;s at age 5 per official page; not SES/race.</td>
+</tr>
+<tr>
+<td>Providence</td>
+<td>Ethan</td>
+<td>local_extracted_metadata</td>
+<td>local_extracted_metadata</td>
+<td>Sex/gender marker came from local extracted CHAT/metadata rows.</td>
+<td>medium</td>
+<td>official_talkbank_page</td>
+<td>https://talkbank.org/phon/access/Eng-NA/Providence.html</td>
+<td>Official Providence page provides sex age sessions and monolingual home interaction description but no SES/class or race/ethnicity.</td>
+<td>official_talkbank_page</td>
+<td>https://talkbank.org/phon/access/Eng-NA/Providence.html</td>
+<td>Official Providence page does not appear to provide race/ethnicity.</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>Ethan later diagnosed with Asperger&#x27;s at age 5 per official page; not SES/race.</td>
+</tr>
+<tr>
+<td>Providence</td>
+<td>Lily</td>
+<td>local_extracted_metadata</td>
+<td>local_extracted_metadata</td>
+<td>Sex/gender marker came from local extracted CHAT/metadata rows.</td>
+<td>medium</td>
+<td>official_talkbank_page</td>
+<td>https://talkbank.org/phon/access/Eng-NA/Providence.html</td>
+<td>Official Providence page provides sex age sessions and monolingual home interaction description but no SES/class or race/ethnicity.</td>
+<td>official_talkbank_page</td>
+<td>https://talkbank.org/phon/access/Eng-NA/Providence.html</td>
+<td>Official Providence page does not appear to provide race/ethnicity.</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>Ethan later diagnosed with Asperger&#x27;s at age 5 per official page; not SES/race.</td>
+</tr>
+<tr>
+<td>Providence</td>
+<td>Naima</td>
+<td>local_extracted_metadata</td>
+<td>local_extracted_metadata</td>
+<td>Sex/gender marker came from local extracted CHAT/metadata rows.</td>
+<td>medium</td>
+<td>official_talkbank_page</td>
+<td>https://talkbank.org/phon/access/Eng-NA/Providence.html</td>
+<td>Official Providence page provides sex age sessions and monolingual home interaction description but no SES/class or race/ethnicity.</td>
+<td>official_talkbank_page</td>
+<td>https://talkbank.org/phon/access/Eng-NA/Providence.html</td>
+<td>Official Providence page does not appear to provide race/ethnicity.</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>Ethan later diagnosed with Asperger&#x27;s at age 5 per official page; not SES/race.</td>
+</tr>
+<tr>
+<td>Providence</td>
+<td>Violet</td>
+<td>local_extracted_metadata</td>
+<td>local_extracted_metadata</td>
+<td>Sex/gender marker came from local extracted CHAT/metadata rows.</td>
+<td>medium</td>
+<td>official_talkbank_page</td>
+<td>https://talkbank.org/phon/access/Eng-NA/Providence.html</td>
+<td>Official Providence page provides sex age sessions and monolingual home interaction description but no SES/class or race/ethnicity.</td>
+<td>official_talkbank_page</td>
+<td>https://talkbank.org/phon/access/Eng-NA/Providence.html</td>
+<td>Official Providence page does not appear to provide race/ethnicity.</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>Ethan later diagnosed with Asperger&#x27;s at age 5 per official page; not SES/race.</td>
+</tr>
+<tr>
+<td>Providence</td>
+<td>William</td>
+<td>local_extracted_metadata</td>
+<td>local_extracted_metadata</td>
+<td>Sex/gender marker came from local extracted CHAT/metadata rows.</td>
+<td>medium</td>
+<td>official_talkbank_page</td>
+<td>https://talkbank.org/phon/access/Eng-NA/Providence.html</td>
+<td>Official Providence page provides sex age sessions and monolingual home interaction description but no SES/class or race/ethnicity.</td>
+<td>official_talkbank_page</td>
+<td>https://talkbank.org/phon/access/Eng-NA/Providence.html</td>
+<td>Official Providence page does not appear to provide race/ethnicity.</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>Ethan later diagnosed with Asperger&#x27;s at age 5 per official page; not SES/race.</td>
+</tr>
+<tr>
+<td>Sachs</td>
+<td>Naomi</td>
+<td>local_extracted_metadata</td>
+<td>local_extracted_metadata</td>
+<td>Sex/gender marker came from local extracted CHAT/metadata rows.</td>
+<td>medium</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>Official TalkBank page does not appear to provide SES/class or race/ethnicity.</td>
+<td>unknown</td>
+</tr>
+<tr>
+<td>Weist</td>
+<td>Ben</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>official_talkbank_page</td>
+<td>https://talkbank.org/childes/access/Eng-NA/Weist.html</td>
+<td>Official Weist page says all Fredonia children came from middle-class homes and their parents were professionals.</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>https://talkbank.org/childes/access/Eng-NA/Weist.html</td>
+<td>Official Weist page says parents were professionals.</td>
+<td>unknown</td>
+</tr>
+<tr>
+<td>Weist</td>
+<td>Emily</td>
+<td>local_extracted_metadata</td>
+<td>local_extracted_metadata</td>
+<td>Sex/gender marker came from local extracted CHAT/metadata rows.</td>
+<td>medium</td>
+<td>official_talkbank_page</td>
+<td>https://talkbank.org/childes/access/Eng-NA/Weist.html</td>
+<td>Official Weist page says all Fredonia children came from middle-class homes and their parents were professionals.</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>https://talkbank.org/childes/access/Eng-NA/Weist.html</td>
+<td>Official Weist page says parents were professionals.</td>
+<td>unknown</td>
+</tr>
+<tr>
+<td>Weist</td>
+<td>Emma</td>
+<td>local_extracted_metadata</td>
+<td>local_extracted_metadata</td>
+<td>Sex/gender marker came from local extracted CHAT/metadata rows.</td>
+<td>medium</td>
+<td>official_talkbank_page</td>
+<td>https://talkbank.org/childes/access/Eng-NA/Weist.html</td>
+<td>Official Weist page says all Fredonia children came from middle-class homes and their parents were professionals.</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>https://talkbank.org/childes/access/Eng-NA/Weist.html</td>
+<td>Official Weist page says parents were professionals.</td>
+<td>unknown</td>
+</tr>
+<tr>
+<td>Weist</td>
+<td>Jillian</td>
+<td>local_extracted_metadata</td>
+<td>local_extracted_metadata</td>
+<td>Sex/gender marker came from local extracted CHAT/metadata rows.</td>
+<td>medium</td>
+<td>official_talkbank_page</td>
+<td>https://talkbank.org/childes/access/Eng-NA/Weist.html</td>
+<td>Official Weist page says all Fredonia children came from middle-class homes and their parents were professionals.</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>https://talkbank.org/childes/access/Eng-NA/Weist.html</td>
+<td>Official Weist page says parents were professionals.</td>
+<td>unknown</td>
+</tr>
+<tr>
+<td>Weist</td>
+<td>Matt</td>
+<td>local_extracted_metadata</td>
+<td>local_extracted_metadata</td>
+<td>Sex/gender marker came from local extracted CHAT/metadata rows.</td>
+<td>medium</td>
+<td>official_talkbank_page</td>
+<td>https://talkbank.org/childes/access/Eng-NA/Weist.html</td>
+<td>Official Weist page says all Fredonia children came from middle-class homes and their parents were professionals.</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>https://talkbank.org/childes/access/Eng-NA/Weist.html</td>
+<td>Official Weist page says parents were professionals.</td>
+<td>unknown</td>
+</tr>
+<tr>
+<td>Weist</td>
+<td>Roman</td>
+<td>local_extracted_metadata</td>
+<td>local_extracted_metadata</td>
+<td>Sex/gender marker came from local extracted CHAT/metadata rows.</td>
+<td>medium</td>
+<td>official_talkbank_page</td>
+<td>https://talkbank.org/childes/access/Eng-NA/Weist.html</td>
+<td>Official Weist page says all Fredonia children came from middle-class homes and their parents were professionals.</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>https://talkbank.org/childes/access/Eng-NA/Weist.html</td>
+<td>Official Weist page says parents were professionals.</td>
+<td>unknown</td>
+</tr>
+<tr>
+<td>Wells</td>
+<td>Abigail</td>
+<td>local_extracted_metadata</td>
+<td>local_extracted_metadata</td>
+<td>Sex/gender marker came from local extracted CHAT/metadata rows.</td>
+<td>medium</td>
+<td>official_talkbank_page</td>
+<td>https://talkbank.org/childes/access/Eng-UK/Wells.html</td>
+<td>Official Wells page says family-background details were collected and used for sample design but the current local extracted metadata and page do not expose per-child SES/class values.</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>Potentially recoverable only from deeper original Wells materials if available.</td>
+</tr>
+<tr>
+<td>Wells</td>
+<td>Benjamin</td>
+<td>local_extracted_metadata</td>
+<td>local_extracted_metadata</td>
+<td>Sex/gender marker came from local extracted CHAT/metadata rows.</td>
+<td>medium</td>
+<td>official_talkbank_page</td>
+<td>https://talkbank.org/childes/access/Eng-UK/Wells.html</td>
+<td>Official Wells page says family-background details were collected and used for sample design but the current local extracted metadata and page do not expose per-child SES/class values.</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>Potentially recoverable only from deeper original Wells materials if available.</td>
+</tr>
+<tr>
+<td>Wells</td>
+<td>Betty</td>
+<td>local_extracted_metadata</td>
+<td>local_extracted_metadata</td>
+<td>Sex/gender marker came from local extracted CHAT/metadata rows.</td>
+<td>medium</td>
+<td>official_talkbank_page</td>
+<td>https://talkbank.org/childes/access/Eng-UK/Wells.html</td>
+<td>Official Wells page says family-background details were collected and used for sample design but the current local extracted metadata and page do not expose per-child SES/class values.</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>Potentially recoverable only from deeper original Wells materials if available.</td>
+</tr>
+<tr>
+<td>Wells</td>
+<td>Darren</td>
+<td>local_extracted_metadata</td>
+<td>local_extracted_metadata</td>
+<td>Sex/gender marker came from local extracted CHAT/metadata rows.</td>
+<td>medium</td>
+<td>official_talkbank_page</td>
+<td>https://talkbank.org/childes/access/Eng-UK/Wells.html</td>
+<td>Official Wells page says family-background details were collected and used for sample design but the current local extracted metadata and page do not expose per-child SES/class values.</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>Potentially recoverable only from deeper original Wells materials if available.</td>
+</tr>
+<tr>
+<td>Wells</td>
+<td>Debbie</td>
+<td>local_extracted_metadata</td>
+<td>local_extracted_metadata</td>
+<td>Sex/gender marker came from local extracted CHAT/metadata rows.</td>
+<td>medium</td>
+<td>official_talkbank_page</td>
+<td>https://talkbank.org/childes/access/Eng-UK/Wells.html</td>
+<td>Official Wells page says family-background details were collected and used for sample design but the current local extracted metadata and page do not expose per-child SES/class values.</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>Potentially recoverable only from deeper original Wells materials if available.</td>
+</tr>
+<tr>
+<td>Wells</td>
+<td>Ellen</td>
+<td>local_extracted_metadata</td>
+<td>local_extracted_metadata</td>
+<td>Sex/gender marker came from local extracted CHAT/metadata rows.</td>
+<td>medium</td>
+<td>official_talkbank_page</td>
+<td>https://talkbank.org/childes/access/Eng-UK/Wells.html</td>
+<td>Official Wells page says family-background details were collected and used for sample design but the current local extracted metadata and page do not expose per-child SES/class values.</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>Potentially recoverable only from deeper original Wells materials if available.</td>
+</tr>
+<tr>
+<td>Wells</td>
+<td>Elspeth</td>
+<td>local_extracted_metadata</td>
+<td>local_extracted_metadata</td>
+<td>Sex/gender marker came from local extracted CHAT/metadata rows.</td>
+<td>medium</td>
+<td>official_talkbank_page</td>
+<td>https://talkbank.org/childes/access/Eng-UK/Wells.html</td>
+<td>Official Wells page says family-background details were collected and used for sample design but the current local extracted metadata and page do not expose per-child SES/class values.</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>Potentially recoverable only from deeper original Wells materials if available.</td>
+</tr>
+<tr>
+<td>Wells</td>
+<td>Frances</td>
+<td>local_extracted_metadata</td>
+<td>local_extracted_metadata</td>
+<td>Sex/gender marker came from local extracted CHAT/metadata rows.</td>
+<td>medium</td>
+<td>official_talkbank_page</td>
+<td>https://talkbank.org/childes/access/Eng-UK/Wells.html</td>
+<td>Official Wells page says family-background details were collected and used for sample design but the current local extracted metadata and page do not expose per-child SES/class values.</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>Potentially recoverable only from deeper original Wells materials if available.</td>
+</tr>
+<tr>
+<td>Wells</td>
+<td>Gary</td>
+<td>local_extracted_metadata</td>
+<td>local_extracted_metadata</td>
+<td>Sex/gender marker came from local extracted CHAT/metadata rows.</td>
+<td>medium</td>
+<td>official_talkbank_page</td>
+<td>https://talkbank.org/childes/access/Eng-UK/Wells.html</td>
+<td>Official Wells page says family-background details were collected and used for sample design but the current local extracted metadata and page do not expose per-child SES/class values.</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>Potentially recoverable only from deeper original Wells materials if available.</td>
+</tr>
+<tr>
+<td>Wells</td>
+<td>Gavin</td>
+<td>local_extracted_metadata</td>
+<td>local_extracted_metadata</td>
+<td>Sex/gender marker came from local extracted CHAT/metadata rows.</td>
+<td>medium</td>
+<td>official_talkbank_page</td>
+<td>https://talkbank.org/childes/access/Eng-UK/Wells.html</td>
+<td>Official Wells page says family-background details were collected and used for sample design but the current local extracted metadata and page do not expose per-child SES/class values.</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>Potentially recoverable only from deeper original Wells materials if available.</td>
+</tr>
+<tr>
+<td>Wells</td>
+<td>Geoffrey</td>
+<td>local_extracted_metadata</td>
+<td>local_extracted_metadata</td>
+<td>Sex/gender marker came from local extracted CHAT/metadata rows.</td>
+<td>medium</td>
+<td>official_talkbank_page</td>
+<td>https://talkbank.org/childes/access/Eng-UK/Wells.html</td>
+<td>Official Wells page says family-background details were collected and used for sample design but the current local extracted metadata and page do not expose per-child SES/class values.</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>Potentially recoverable only from deeper original Wells materials if available.</td>
+</tr>
+<tr>
+<td>Wells</td>
+<td>Gerald</td>
+<td>local_extracted_metadata</td>
+<td>local_extracted_metadata</td>
+<td>Sex/gender marker came from local extracted CHAT/metadata rows.</td>
+<td>medium</td>
+<td>official_talkbank_page</td>
+<td>https://talkbank.org/childes/access/Eng-UK/Wells.html</td>
+<td>Official Wells page says family-background details were collected and used for sample design but the current local extracted metadata and page do not expose per-child SES/class values.</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>Potentially recoverable only from deeper original Wells materials if available.</td>
+</tr>
+<tr>
+<td>Wells</td>
+<td>Harriet</td>
+<td>local_extracted_metadata</td>
+<td>local_extracted_metadata</td>
+<td>Sex/gender marker came from local extracted CHAT/metadata rows.</td>
+<td>medium</td>
+<td>official_talkbank_page</td>
+<td>https://talkbank.org/childes/access/Eng-UK/Wells.html</td>
+<td>Official Wells page says family-background details were collected and used for sample design but the current local extracted metadata and page do not expose per-child SES/class values.</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>Potentially recoverable only from deeper original Wells materials if available.</td>
+</tr>
+<tr>
+<td>Wells</td>
+<td>Iris</td>
+<td>local_extracted_metadata</td>
+<td>local_extracted_metadata</td>
+<td>Sex/gender marker came from local extracted CHAT/metadata rows.</td>
+<td>medium</td>
+<td>official_talkbank_page</td>
+<td>https://talkbank.org/childes/access/Eng-UK/Wells.html</td>
+<td>Official Wells page says family-background details were collected and used for sample design but the current local extracted metadata and page do not expose per-child SES/class values.</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>Potentially recoverable only from deeper original Wells materials if available.</td>
+</tr>
+<tr>
+<td>Wells</td>
+<td>Jack</td>
+<td>local_extracted_metadata</td>
+<td>local_extracted_metadata</td>
+<td>Sex/gender marker came from local extracted CHAT/metadata rows.</td>
+<td>medium</td>
+<td>official_talkbank_page</td>
+<td>https://talkbank.org/childes/access/Eng-UK/Wells.html</td>
+<td>Official Wells page says family-background details were collected and used for sample design but the current local extracted metadata and page do not expose per-child SES/class values.</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>Potentially recoverable only from deeper original Wells materials if available.</td>
+</tr>
+<tr>
+<td>Wells</td>
+<td>Jason</td>
+<td>local_extracted_metadata</td>
+<td>local_extracted_metadata</td>
+<td>Sex/gender marker came from local extracted CHAT/metadata rows.</td>
+<td>medium</td>
+<td>official_talkbank_page</td>
+<td>https://talkbank.org/childes/access/Eng-UK/Wells.html</td>
+<td>Official Wells page says family-background details were collected and used for sample design but the current local extracted metadata and page do not expose per-child SES/class values.</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>Potentially recoverable only from deeper original Wells materials if available.</td>
+</tr>
+<tr>
+<td>Wells</td>
+<td>Jonathan</td>
+<td>local_extracted_metadata</td>
+<td>local_extracted_metadata</td>
+<td>Sex/gender marker came from local extracted CHAT/metadata rows.</td>
+<td>medium</td>
+<td>official_talkbank_page</td>
+<td>https://talkbank.org/childes/access/Eng-UK/Wells.html</td>
+<td>Official Wells page says family-background details were collected and used for sample design but the current local extracted metadata and page do not expose per-child SES/class values.</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>Potentially recoverable only from deeper original Wells materials if available.</td>
+</tr>
+<tr>
+<td>Wells</td>
+<td>Laura</td>
+<td>local_extracted_metadata</td>
+<td>local_extracted_metadata</td>
+<td>Sex/gender marker came from local extracted CHAT/metadata rows.</td>
+<td>medium</td>
+<td>official_talkbank_page</td>
+<td>https://talkbank.org/childes/access/Eng-UK/Wells.html</td>
+<td>Official Wells page says family-background details were collected and used for sample design but the current local extracted metadata and page do not expose per-child SES/class values.</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>Potentially recoverable only from deeper original Wells materials if available.</td>
+</tr>
+<tr>
+<td>Wells</td>
+<td>Lee</td>
+<td>local_extracted_metadata</td>
+<td>local_extracted_metadata</td>
+<td>Sex/gender marker came from local extracted CHAT/metadata rows.</td>
+<td>medium</td>
+<td>official_talkbank_page</td>
+<td>https://talkbank.org/childes/access/Eng-UK/Wells.html</td>
+<td>Official Wells page says family-background details were collected and used for sample design but the current local extracted metadata and page do not expose per-child SES/class values.</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>Potentially recoverable only from deeper original Wells materials if available.</td>
+</tr>
+<tr>
+<td>Wells</td>
+<td>Martin</td>
+<td>local_extracted_metadata</td>
+<td>local_extracted_metadata</td>
+<td>Sex/gender marker came from local extracted CHAT/metadata rows.</td>
+<td>medium</td>
+<td>official_talkbank_page</td>
+<td>https://talkbank.org/childes/access/Eng-UK/Wells.html</td>
+<td>Official Wells page says family-background details were collected and used for sample design but the current local extracted metadata and page do not expose per-child SES/class values.</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>Potentially recoverable only from deeper original Wells materials if available.</td>
+</tr>
+<tr>
+<td>Wells</td>
+<td>Nancy</td>
+<td>local_extracted_metadata</td>
+<td>local_extracted_metadata</td>
+<td>Sex/gender marker came from local extracted CHAT/metadata rows.</td>
+<td>medium</td>
+<td>official_talkbank_page</td>
+<td>https://talkbank.org/childes/access/Eng-UK/Wells.html</td>
+<td>Official Wells page says family-background details were collected and used for sample design but the current local extracted metadata and page do not expose per-child SES/class values.</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>Potentially recoverable only from deeper original Wells materials if available.</td>
+</tr>
+<tr>
+<td>Wells</td>
+<td>Neil</td>
+<td>local_extracted_metadata</td>
+<td>local_extracted_metadata</td>
+<td>Sex/gender marker came from local extracted CHAT/metadata rows.</td>
+<td>medium</td>
+<td>official_talkbank_page</td>
+<td>https://talkbank.org/childes/access/Eng-UK/Wells.html</td>
+<td>Official Wells page says family-background details were collected and used for sample design but the current local extracted metadata and page do not expose per-child SES/class values.</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>Potentially recoverable only from deeper original Wells materials if available.</td>
+</tr>
+<tr>
+<td>Wells</td>
+<td>Neville</td>
+<td>local_extracted_metadata</td>
+<td>local_extracted_metadata</td>
+<td>Sex/gender marker came from local extracted CHAT/metadata rows.</td>
+<td>medium</td>
+<td>official_talkbank_page</td>
+<td>https://talkbank.org/childes/access/Eng-UK/Wells.html</td>
+<td>Official Wells page says family-background details were collected and used for sample design but the current local extracted metadata and page do not expose per-child SES/class values.</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>Potentially recoverable only from deeper original Wells materials if available.</td>
+</tr>
+<tr>
+<td>Wells</td>
+<td>Olivia</td>
+<td>local_extracted_metadata</td>
+<td>local_extracted_metadata</td>
+<td>Sex/gender marker came from local extracted CHAT/metadata rows.</td>
+<td>medium</td>
+<td>official_talkbank_page</td>
+<td>https://talkbank.org/childes/access/Eng-UK/Wells.html</td>
+<td>Official Wells page says family-background details were collected and used for sample design but the current local extracted metadata and page do not expose per-child SES/class values.</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>Potentially recoverable only from deeper original Wells materials if available.</td>
+</tr>
+<tr>
+<td>Wells</td>
+<td>Penny</td>
+<td>local_extracted_metadata</td>
+<td>local_extracted_metadata</td>
+<td>Sex/gender marker came from local extracted CHAT/metadata rows.</td>
+<td>medium</td>
+<td>official_talkbank_page</td>
+<td>https://talkbank.org/childes/access/Eng-UK/Wells.html</td>
+<td>Official Wells page says family-background details were collected and used for sample design but the current local extracted metadata and page do not expose per-child SES/class values.</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>Potentially recoverable only from deeper original Wells materials if available.</td>
+</tr>
+<tr>
+<td>Wells</td>
+<td>Rosie</td>
+<td>local_extracted_metadata</td>
+<td>local_extracted_metadata</td>
+<td>Sex/gender marker came from local extracted CHAT/metadata rows.</td>
+<td>medium</td>
+<td>official_talkbank_page</td>
+<td>https://talkbank.org/childes/access/Eng-UK/Wells.html</td>
+<td>Official Wells page says family-background details were collected and used for sample design but the current local extracted metadata and page do not expose per-child SES/class values.</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>Potentially recoverable only from deeper original Wells materials if available.</td>
+</tr>
+<tr>
+<td>Wells</td>
+<td>Samantha</td>
+<td>local_extracted_metadata</td>
+<td>local_extracted_metadata</td>
+<td>Sex/gender marker came from local extracted CHAT/metadata rows.</td>
+<td>medium</td>
+<td>official_talkbank_page</td>
+<td>https://talkbank.org/childes/access/Eng-UK/Wells.html</td>
+<td>Official Wells page says family-background details were collected and used for sample design but the current local extracted metadata and page do not expose per-child SES/class values.</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>Potentially recoverable only from deeper original Wells materials if available.</td>
+</tr>
+<tr>
+<td>Wells</td>
+<td>Sean</td>
+<td>local_extracted_metadata</td>
+<td>local_extracted_metadata</td>
+<td>Sex/gender marker came from local extracted CHAT/metadata rows.</td>
+<td>medium</td>
+<td>official_talkbank_page</td>
+<td>https://talkbank.org/childes/access/Eng-UK/Wells.html</td>
+<td>Official Wells page says family-background details were collected and used for sample design but the current local extracted metadata and page do not expose per-child SES/class values.</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>Potentially recoverable only from deeper original Wells materials if available.</td>
+</tr>
+<tr>
+<td>Wells</td>
+<td>Sheila</td>
+<td>local_extracted_metadata</td>
+<td>local_extracted_metadata</td>
+<td>Sex/gender marker came from local extracted CHAT/metadata rows.</td>
+<td>medium</td>
+<td>official_talkbank_page</td>
+<td>https://talkbank.org/childes/access/Eng-UK/Wells.html</td>
+<td>Official Wells page says family-background details were collected and used for sample design but the current local extracted metadata and page do not expose per-child SES/class values.</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>Potentially recoverable only from deeper original Wells materials if available.</td>
+</tr>
+<tr>
+<td>Wells</td>
+<td>Simon</td>
+<td>local_extracted_metadata</td>
+<td>local_extracted_metadata</td>
+<td>Sex/gender marker came from local extracted CHAT/metadata rows.</td>
+<td>medium</td>
+<td>official_talkbank_page</td>
+<td>https://talkbank.org/childes/access/Eng-UK/Wells.html</td>
+<td>Official Wells page says family-background details were collected and used for sample design but the current local extracted metadata and page do not expose per-child SES/class values.</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>Potentially recoverable only from deeper original Wells materials if available.</td>
+</tr>
+<tr>
+<td>Wells</td>
+<td>Stella</td>
+<td>local_extracted_metadata</td>
+<td>local_extracted_metadata</td>
+<td>Sex/gender marker came from local extracted CHAT/metadata rows.</td>
+<td>medium</td>
+<td>official_talkbank_page</td>
+<td>https://talkbank.org/childes/access/Eng-UK/Wells.html</td>
+<td>Official Wells page says family-background details were collected and used for sample design but the current local extracted metadata and page do not expose per-child SES/class values.</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>Potentially recoverable only from deeper original Wells materials if available.</td>
+</tr>
+<tr>
+<td>Wells</td>
+<td>Tony</td>
+<td>local_extracted_metadata</td>
+<td>local_extracted_metadata</td>
+<td>Sex/gender marker came from local extracted CHAT/metadata rows.</td>
+<td>medium</td>
+<td>official_talkbank_page</td>
+<td>https://talkbank.org/childes/access/Eng-UK/Wells.html</td>
+<td>Official Wells page says family-background details were collected and used for sample design but the current local extracted metadata and page do not expose per-child SES/class values.</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>unknown</td>
+<td>Potentially recoverable only from deeper original Wells materials if available.</td>
+</tr>
+</tbody></table>
+<h2>Largest Children</h2>
+<table>
+<thead><tr>
+<th>dataset</th>
+<th>child_id</th>
+<th>child_utterances</th>
+<th>child_sessions</th>
+<th>child_age_min_months</th>
+<th>child_age_max_months</th>
+<th>child_age_bins</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>MPI-EVA-Manchester</td>
+<td>Helen</td>
+<td>154,593</td>
+<td>184</td>
+<td>36.07</td>
+<td>61.63</td>
+<td>5</td>
+</tr>
+<tr>
+<td>MPI-EVA-Manchester</td>
+<td>Fraser</td>
+<td>150,447</td>
+<td>205</td>
+<td>24.03</td>
+<td>37.10</td>
+<td>3</td>
+</tr>
+<tr>
+<td>MPI-EVA-Manchester</td>
+<td>Eleanor</td>
+<td>85,263</td>
+<td>180</td>
+<td>24.07</td>
+<td>37</td>
+<td>3</td>
+</tr>
+<tr>
+<td>MPI-EVA-Manchester</td>
+<td>Gina</td>
+<td>71,797</td>
+<td>118</td>
+<td>36.03</td>
+<td>55.97</td>
+<td>4</td>
+</tr>
+<tr>
+<td>Lara</td>
+<td>Lara</td>
+<td>49,328</td>
+<td>120</td>
+<td>21.43</td>
+<td>39.83</td>
+<td>4</td>
+</tr>
+<tr>
+<td>Brown</td>
+<td>Adam</td>
+<td>46,496</td>
+<td>55</td>
+<td>27.13</td>
+<td>62.40</td>
+<td>7</td>
+</tr>
+<tr>
+<td>Kuczaj</td>
+<td>Abe</td>
+<td>37,109</td>
+<td>210</td>
+<td>28.80</td>
+<td>60.37</td>
+<td>7</td>
+</tr>
+<tr>
+<td>Brown</td>
+<td>Sarah</td>
+<td>34,309</td>
+<td>139</td>
+<td>27.17</td>
+<td>61.20</td>
+<td>7</td>
+</tr>
+<tr>
+<td>Providence</td>
+<td>Naima</td>
+<td>33,778</td>
+<td>87</td>
+<td>11.87</td>
+<td>46.33</td>
+<td>5</td>
+</tr>
+<tr>
+<td>Providence</td>
+<td>Lily</td>
+<td>28,028</td>
+<td>79</td>
+<td>13.07</td>
+<td>48.07</td>
+<td>6</td>
+</tr>
+<tr>
+<td>Manchester</td>
+<td>Carl</td>
+<td>25,663</td>
+<td>33</td>
+<td>20.73</td>
+<td>32.50</td>
+<td>3</td>
+</tr>
+<tr>
+<td>Manchester</td>
+<td>Becky</td>
+<td>24,432</td>
+<td>34</td>
+<td>24.23</td>
+<td>35.50</td>
+<td>2</td>
+</tr>
+</tbody></table>
+<h2>Smallest Children</h2>
+<table>
+<thead><tr>
+<th>dataset</th>
+<th>child_id</th>
+<th>child_utterances</th>
+<th>child_sessions</th>
+<th>child_age_min_months</th>
+<th>child_age_max_months</th>
+<th>child_age_bins</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>Wells</td>
+<td>Penny</td>
+<td>766</td>
+<td>9</td>
+<td>18.30</td>
+<td>41.87</td>
+<td>4</td>
+</tr>
+<tr>
+<td>Wells</td>
+<td>Stella</td>
+<td>710</td>
+<td>8</td>
+<td>18.27</td>
+<td>42</td>
+<td>5</td>
+</tr>
+<tr>
+<td>Wells</td>
+<td>Sheila</td>
+<td>684</td>
+<td>9</td>
+<td>21.07</td>
+<td>42.83</td>
+<td>5</td>
+</tr>
+<tr>
+<td>Wells</td>
+<td>Martin</td>
+<td>663</td>
+<td>9</td>
+<td>17.87</td>
+<td>41.93</td>
+<td>4</td>
+</tr>
+<tr>
+<td>Wells</td>
+<td>Neil</td>
+<td>659</td>
+<td>8</td>
+<td>18.13</td>
+<td>42.03</td>
+<td>5</td>
+</tr>
+<tr>
+<td>Wells</td>
+<td>Tony</td>
+<td>654</td>
+<td>9</td>
+<td>17.87</td>
+<td>42.27</td>
+<td>5</td>
+</tr>
+<tr>
+<td>Wells</td>
+<td>Samantha</td>
+<td>652</td>
+<td>9</td>
+<td>18.20</td>
+<td>42.37</td>
+<td>5</td>
+</tr>
+<tr>
+<td>Wells</td>
+<td>Simon</td>
+<td>538</td>
+<td>9</td>
+<td>17.70</td>
+<td>41.73</td>
+<td>4</td>
+</tr>
+<tr>
+<td>Wells</td>
+<td>Nancy</td>
+<td>471</td>
+<td>8</td>
+<td>18.07</td>
+<td>39.10</td>
+<td>4</td>
+</tr>
+<tr>
+<td>Wells</td>
+<td>Lee</td>
+<td>424</td>
+<td>8</td>
+<td>17.93</td>
+<td>41.97</td>
+<td>4</td>
+</tr>
+<tr>
+<td>Wells</td>
+<td>Sean</td>
+<td>342</td>
+<td>9</td>
+<td>18.37</td>
+<td>42.30</td>
+<td>5</td>
+</tr>
+<tr>
+<td>Wells</td>
+<td>Rosie</td>
+<td>274</td>
+<td>9</td>
+<td>19</td>
+<td>42.37</td>
+<td>5</td>
+</tr>
+</tbody></table>
+<h2>Dataset Contribution</h2>
+<table>
+<thead><tr>
+<th>dataset</th>
+<th>children</th>
+<th>utterances</th>
+<th>share_pct</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>MPI-EVA-Manchester</td>
+<td>4</td>
+<td>462,100</td>
+<td>40.53</td>
+</tr>
+<tr>
+<td>Manchester</td>
+<td>12</td>
+<td>232,614</td>
+<td>20.40</td>
+</tr>
+<tr>
+<td>Providence</td>
+<td>6</td>
+<td>121,339</td>
+<td>10.64</td>
+</tr>
+<tr>
+<td>Brown</td>
+<td>3</td>
+<td>92,555</td>
+<td>8.12</td>
+</tr>
+<tr>
+<td>Lara</td>
+<td>1</td>
+<td>49,328</td>
+<td>4.33</td>
+</tr>
+<tr>
+<td>Weist</td>
+<td>6</td>
+<td>46,347</td>
+<td>4.06</td>
+</tr>
+<tr>
+<td>Wells</td>
+<td>32</td>
+<td>37,967</td>
+<td>3.33</td>
+</tr>
+<tr>
+<td>Kuczaj</td>
+<td>1</td>
+<td>37,109</td>
+<td>3.25</td>
+</tr>
+<tr>
+<td>Belfast</td>
+<td>8</td>
+<td>22,942</td>
+<td>2.01</td>
+</tr>
+<tr>
+<td>Sachs</td>
+<td>1</td>
+<td>16,344</td>
+<td>1.43</td>
+</tr>
+<tr>
+<td>Post</td>
+<td>3</td>
+<td>8,068</td>
+<td>0.71</td>
+</tr>
+<tr>
+<td>Demetras1</td>
+<td>1</td>
+<td>6,842</td>
+<td>0.60</td>
+</tr>
+<tr>
+<td>Forrester</td>
+<td>1</td>
+<td>6,663</td>
+<td>0.58</td>
+</tr>
+</tbody></table>
+</main>
+</body>
+</html>

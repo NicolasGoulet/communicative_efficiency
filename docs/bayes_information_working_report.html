@@ -1,0 +1,651 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bayes-Decomposed Informativeness Working Report</title>
+<style>
+:root {
+  color-scheme: light;
+  --ink: #1e2528;
+  --muted: #5e686d;
+  --line: #d9e0df;
+  --paper: #ffffff;
+  --soft: #f5f7f6;
+  --accent: #2f6f73;
+  --accent2: #c76f2c;
+}
+body {
+  margin: 0;
+  background: #eef2f1;
+  color: var(--ink);
+  font: 16px/1.58 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+main {
+  max-width: 980px;
+  margin: 34px auto 56px;
+  padding: 48px 58px;
+  background: var(--paper);
+  box-shadow: 0 18px 50px rgba(31, 45, 48, 0.12);
+}
+h1, h2, h3, h4 {
+  line-height: 1.18;
+  margin: 1.6em 0 0.55em;
+}
+h1 {
+  margin-top: 0;
+  font-size: 2.25rem;
+  border-bottom: 3px solid var(--accent);
+  padding-bottom: 0.45em;
+}
+h2 {
+  font-size: 1.55rem;
+  color: var(--accent);
+}
+h3 {
+  font-size: 1.18rem;
+}
+p {
+  margin: 0.75em 0;
+}
+a {
+  color: var(--accent);
+}
+blockquote {
+  border-left: 4px solid var(--accent2);
+  margin: 1.1em 0;
+  padding: 0.05em 1.1em;
+  color: var(--muted);
+  background: #fff8f2;
+}
+code {
+  background: var(--soft);
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  padding: 0.08em 0.3em;
+  font-family: "SFMono-Regular", Consolas, monospace;
+  font-size: 0.92em;
+}
+pre {
+  background: #f5f7f6;
+  color: var(--ink);
+  border: 1px solid var(--line);
+  padding: 1em;
+  overflow-x: auto;
+  border-radius: 7px;
+}
+pre code {
+  background: transparent;
+  border: 0;
+  padding: 0;
+  color: inherit;
+}
+table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 1.15em 0 1.45em;
+  font-size: 0.95em;
+}
+.plot-layout {
+  table-layout: fixed;
+  margin: 1.1em auto 1.45em;
+}
+.plot-layout,
+.plot-layout tr,
+.plot-layout td {
+  border: 0;
+  background: transparent;
+}
+.plot-layout td {
+  padding: 0.35em 0.55em 0.95em;
+  text-align: center;
+  vertical-align: top;
+}
+.plot-layout img {
+  width: 100%;
+  max-width: 100%;
+  margin: 0 auto 0.35em;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: white;
+}
+.plot-layout .centered-cell img {
+  width: 54%;
+}
+.plot-caption {
+  color: var(--muted);
+  font-size: 0.85em;
+  line-height: 1.35;
+}
+th, td {
+  border: 1px solid var(--line);
+  padding: 0.54em 0.68em;
+  vertical-align: top;
+}
+th {
+  background: #e7efed;
+  text-align: left;
+}
+tr:nth-child(even) td {
+  background: #fafbfb;
+}
+.plot-layout tr:nth-child(even) td {
+  background: transparent;
+}
+img {
+  max-width: 100%;
+  display: block;
+  margin: 1.1em auto 0.45em;
+}
+.figure-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.05rem 1.25rem;
+  align-items: start;
+  margin: 1.1em 0 1.45em;
+}
+.figure-grid.two-one {
+  max-width: 900px;
+  margin-left: auto;
+  margin-right: auto;
+}
+.figure-grid.five-panel {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+.figure-grid figure {
+  margin: 0;
+}
+.figure-grid img {
+  width: 100%;
+  max-width: 100%;
+  margin: 0;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: white;
+}
+.figure-grid figcaption {
+  color: var(--muted);
+  font-size: 0.85em;
+  line-height: 1.35;
+  text-align: center;
+  margin-top: 0.35em;
+}
+.figure-grid .centered {
+  grid-column: 1 / -1;
+  justify-self: center;
+  max-width: 58%;
+}
+.figure-grid.two-one .centered {
+  max-width: 54%;
+}
+.figure-grid.five-panel .centered {
+  max-width: 52%;
+}
+ul, ol {
+  padding-left: 1.4em;
+}
+.caption {
+  color: var(--muted);
+  font-size: 0.92em;
+  margin-top: -0.15em;
+}
+@media print {
+  body {
+    background: white;
+  }
+  main {
+    box-shadow: none;
+    margin: 0;
+    max-width: none;
+    padding: 28px;
+  }
+}
+@media screen and (max-width: 540px) {
+  .figure-grid {
+    grid-template-columns: 1fr;
+  }
+  .figure-grid .centered,
+  .figure-grid.five-panel .centered {
+    grid-column: auto;
+    max-width: 100%;
+  }
+}
+</style>
+</head>
+<body>
+<main>
+<h1>Bayes-Decomposed Informativeness Working Report</h1>
+<p>This is a working report for the new Bayes-style information family. It is intentionally separate from the supervisor-facing July pages for now. The goal is to check whether the decomposition score behaves sensibly before we decide which results deserve promotion.</p>
+<h2>What Was Scored</h2>
+<p>The Bayes table uses the decomposition</p>
+<pre><code>log2 score(u, c) = log2 p(u) + log2 p(c | u)
+bits = -log2 score(u, c)</code></pre>
+<p>The normalizer <code>p(c)</code> has <strong>not</strong> been estimated. That means these are unnormalized decomposition bits, useful for comparing candidate utterances in the same context and for exploratory analyses, but not a fully normalized posterior probability.</p>
+<p>Inputs:</p>
+<ul>
+<li>Bayes scores: <code>results/mila_modular_runs_2026_07_08/products/pbm_ngram_bayes_scores/pbm_ngram_bayes_scores.csv.gz</code></li>
+<li>Complexity predictors: <code>results/mila_modular_runs_2026_07_08/products/pbm_complexity_predictors/pbm_candidate_complexity.csv.gz</code></li>
+<li>Direct contextual Mistral scores: <code>results/route1_analysis_dataset/route1_scored_utterance_effort_context_entropy_with_lstm_long.csv.gz</code></li>
+<li>Joined analysis table: <code>results/bayes_information_report/pbm_bayes_mistral_complexity_joined.csv.gz</code></li>
+</ul>
+<h2>Audit</h2>
+<table>
+<thead><tr>
+<th>source_model</th>
+<th>bayes_rows</th>
+<th>mistral_raw_rows</th>
+<th>joined_rows</th>
+<th>missing_mistral_rows</th>
+<th>missing_complexity_rows</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>real</td>
+<td>446508.000</td>
+<td>446985.000</td>
+<td>446508.000</td>
+<td>0.000</td>
+<td>0.000</td>
+</tr>
+<tr>
+<td>random</td>
+<td>446492.000</td>
+<td>446508.000</td>
+<td>446492.000</td>
+<td>0.000</td>
+<td>0.000</td>
+</tr>
+<tr>
+<td>unigram</td>
+<td>446508.000</td>
+<td>446508.000</td>
+<td>446508.000</td>
+<td>0.000</td>
+<td>0.000</td>
+</tr>
+<tr>
+<td>bigram</td>
+<td>446508.000</td>
+<td>446508.000</td>
+<td>446508.000</td>
+<td>0.000</td>
+<td>0.000</td>
+</tr>
+<tr>
+<td>trigram</td>
+<td>446508.000</td>
+<td>446508.000</td>
+<td>446508.000</td>
+<td>0.000</td>
+<td>0.000</td>
+</tr>
+</tbody></table>
+<p>The join is clean enough for working analyses: Bayes and complexity products match exactly, and the direct Mistral table joins by <code>row_uid + source_model</code>. The <code>random</code> source has 16 fewer Bayes/complexity rows because empty generated random candidates were removed before scoring.</p>
+<h2>Source-Level Patterns</h2>
+<table>
+<thead><tr>
+<th>source</th>
+<th>n</th>
+<th>bayes_bits_per_token_mean</th>
+<th>bayes_prior_bits_per_token_mean</th>
+<th>bayes_context_bits_mean</th>
+<th>mistral_bits_per_token_mean</th>
+<th>orthographic_word_count_mean</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>Real child</td>
+<td>446508.000</td>
+<td>71.752</td>
+<td>10.743</td>
+<td>106.054</td>
+<td>6.493</td>
+<td>2.661</td>
+</tr>
+<tr>
+<td>Random</td>
+<td>446492.000</td>
+<td>86.396</td>
+<td>22.818</td>
+<td>110.371</td>
+<td>9.843</td>
+<td>2.661</td>
+</tr>
+<tr>
+<td>Unigram</td>
+<td>446508.000</td>
+<td>76.154</td>
+<td>14.428</td>
+<td>107.169</td>
+<td>9.524</td>
+<td>2.661</td>
+</tr>
+<tr>
+<td>Bigram</td>
+<td>446508.000</td>
+<td>74.782</td>
+<td>13.133</td>
+<td>107.089</td>
+<td>8.453</td>
+<td>2.661</td>
+</tr>
+<tr>
+<td>Trigram</td>
+<td>446508.000</td>
+<td>73.730</td>
+<td>12.203</td>
+<td>106.937</td>
+<td>7.792</td>
+<td>2.661</td>
+</tr>
+</tbody></table>
+<p>Lower bits mean the model finds the utterance more expected or compatible. The most important comparison is not raw total bits alone, because utterance length matters; the main plots use bits per token where possible.</p>
+<img src="../figs/bayes_information_report/bayes_bits_per_token_by_age_source.png" alt="Bayes bits per token by age and source">
+<img src="../figs/bayes_information_report/mistral_bits_per_token_by_age_source.png" alt="Direct Mistral bits per token by age and source">
+<img src="../figs/bayes_information_report/bayes_component_bits_by_age_source.png" alt="Bayes prior component by age and source">
+<h2>Does Bayes Agree With Direct Mistral Surprisal?</h2>
+<table>
+<thead><tr>
+<th>source_model</th>
+<th>n</th>
+<th>pearson_bayes_mistral_per_token</th>
+<th>spearman_bayes_mistral_per_token</th>
+<th>pearson_prior_mistral_per_token</th>
+<th>pearson_context_mistral_total</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>real</td>
+<td>446508.000</td>
+<td>0.053</td>
+<td>0.046</td>
+<td>0.349</td>
+<td>0.006</td>
+</tr>
+<tr>
+<td>random</td>
+<td>446492.000</td>
+<td>-0.074</td>
+<td>-0.108</td>
+<td>-0.112</td>
+<td>0.062</td>
+</tr>
+<tr>
+<td>unigram</td>
+<td>446508.000</td>
+<td>-0.144</td>
+<td>-0.183</td>
+<td>0.066</td>
+<td>0.063</td>
+</tr>
+<tr>
+<td>bigram</td>
+<td>446508.000</td>
+<td>-0.038</td>
+<td>-0.069</td>
+<td>0.051</td>
+<td>0.064</td>
+</tr>
+<tr>
+<td>trigram</td>
+<td>446508.000</td>
+<td>-0.044</td>
+<td>-0.073</td>
+<td>0.078</td>
+<td>0.043</td>
+</tr>
+</tbody></table>
+<img src="../figs/bayes_information_report/bayes_vs_mistral_scatter.png" alt="Bayes versus direct Mistral scatter">
+<p>The decomposition and direct Mistral scores are not supposed to be identical. They use different estimators: the Bayes pilot uses count-based <code>p(u)</code> and reverse discourse <code>p(c | u)</code>, while direct Mistral estimates contextual target surprisal more directly. Agreement is therefore evidence of convergence; disagreement is scientifically informative rather than automatically a bug.</p>
+<h2>Paired Real-Versus-Baseline Checks</h2>
+<p>Each generated baseline is paired to the same real child row and same context. Positive values below mean the generated baseline has more bits than the real child utterance.</p>
+<table>
+<thead><tr>
+<th>source</th>
+<th>n</th>
+<th>delta_bayes_bits_per_token_vs_real_mean</th>
+<th>delta_mistral_bits_per_token_vs_real_mean</th>
+<th>delta_words_vs_real_mean</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>Random</td>
+<td>446492.000</td>
+<td>14.646</td>
+<td>3.351</td>
+<td>-2.40e-04</td>
+</tr>
+<tr>
+<td>Unigram</td>
+<td>446508.000</td>
+<td>4.402</td>
+<td>3.031</td>
+<td>-2.24e-06</td>
+</tr>
+<tr>
+<td>Bigram</td>
+<td>446508.000</td>
+<td>3.030</td>
+<td>1.960</td>
+<td>2.24e-06</td>
+</tr>
+<tr>
+<td>Trigram</td>
+<td>446508.000</td>
+<td>1.978</td>
+<td>1.300</td>
+<td>-2.24e-06</td>
+</tr>
+</tbody></table>
+<img src="../figs/bayes_information_report/paired_bayes_gap_by_age.png" alt="Paired Bayes gaps">
+<img src="../figs/bayes_information_report/paired_mistral_gap_by_age.png" alt="Paired Mistral gaps">
+<p>The same-context percentile view asks: among random/unigram/bigram/trigram alternatives for a row, what fraction have higher bits than the real child utterance?</p>
+<table>
+<thead><tr>
+<th>age_bin</th>
+<th>n</th>
+<th>real_bayes_worse_pct</th>
+<th>real_mistral_worse_pct</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>006-023</td>
+<td>62816.00</td>
+<td>69.84</td>
+<td>69.90</td>
+</tr>
+<tr>
+<td>024-029</td>
+<td>162210.00</td>
+<td>76.65</td>
+<td>74.71</td>
+</tr>
+<tr>
+<td>030-035</td>
+<td>142447.00</td>
+<td>79.94</td>
+<td>79.79</td>
+</tr>
+<tr>
+<td>036-041</td>
+<td>37206.00</td>
+<td>79.61</td>
+<td>79.65</td>
+</tr>
+<tr>
+<td>042-047</td>
+<td>16345.00</td>
+<td>80.96</td>
+<td>83.76</td>
+</tr>
+<tr>
+<td>048-053</td>
+<td>12909.00</td>
+<td>81.36</td>
+<td>81.38</td>
+</tr>
+<tr>
+<td>054-059</td>
+<td>10033.00</td>
+<td>81.22</td>
+<td>82.70</td>
+</tr>
+<tr>
+<td>060-065</td>
+<td>2542.00</td>
+<td>83.13</td>
+<td>85.27</td>
+</tr>
+</tbody></table>
+<img src="../figs/bayes_information_report/real_advantage_percentiles_by_age.png" alt="Real-child advantage percentiles">
+<h2>Complexity And Effort</h2>
+<p>The new complexity repo adds orthographic MLU-style predictors, syllable/phoneme proxies, and lexical trajectory fields. These are not a replacement for the previous effort measures; they are extra controls and developmental descriptors.</p>
+<img src="../figs/bayes_information_report/real_child_complexity_trajectories.png" alt="Real child complexity trajectories">
+<h2>First Regression Models</h2>
+<p>These are working models using heteroskedasticity-robust standard errors on a stratified sample where needed. They are meant to guide the next report iteration, not to be the final inferential specification.</p>
+<table>
+<thead><tr>
+<th>model</th>
+<th>formula</th>
+<th>n</th>
+<th>r2</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>Direct surprisal from Bayes score</td>
+<td>mistral_bits_per_token ~ bayes_bits_per_token + orthographic_word_count + C(source_model) + C(age_bin)</td>
+<td>249998.000</td>
+<td>0.229</td>
+</tr>
+<tr>
+<td>Direct surprisal from Bayes components</td>
+<td>mistral_bits_per_token ~ bayes_prior_bits_per_token + bayes_context_bits + orthographic_word_count + C(source_model) + C(age_bin)</td>
+<td>249998.000</td>
+<td>0.236</td>
+</tr>
+<tr>
+<td>Real-child direct surprisal with lexical complexity</td>
+<td>mistral_bits_per_token ~ bayes_prior_bits_per_token + bayes_context_bits + orthographic_word_count + lexical_cumulative_child_vocab_size + lexical_cumulative_child_ttr + C(age_bin) + C(child_id)</td>
+<td>250000.000</td>
+<td>0.157</td>
+</tr>
+<tr>
+<td>Paired baseline gap alignment</td>
+<td>delta_mistral_bits_per_token_vs_real ~ delta_bayes_bits_per_token_vs_real + delta_words_vs_real + C(source_model) + C(age_bin)</td>
+<td>249998.000</td>
+<td>0.104</td>
+</tr>
+</tbody></table>
+<p>Key coefficients:</p>
+<table>
+<thead><tr>
+<th>model</th>
+<th>term</th>
+<th>estimate</th>
+<th>std_error</th>
+<th>p_value</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>Direct surprisal from Bayes score</td>
+<td>bayes_bits_per_token</td>
+<td>-8.32e-04</td>
+<td>1.21e-04</td>
+<td>5.75e-12</td>
+</tr>
+<tr>
+<td>Direct surprisal from Bayes score</td>
+<td>orthographic_word_count</td>
+<td>0.0501</td>
+<td>0.0029</td>
+<td>2.63e-65</td>
+</tr>
+<tr>
+<td>Direct surprisal from Bayes components</td>
+<td>bayes_prior_bits_per_token</td>
+<td>0.0452</td>
+<td>0.0011</td>
+<td>0.0000</td>
+</tr>
+<tr>
+<td>Direct surprisal from Bayes components</td>
+<td>bayes_context_bits</td>
+<td>3.54e-04</td>
+<td>8.71e-05</td>
+<td>4.74e-05</td>
+</tr>
+<tr>
+<td>Direct surprisal from Bayes components</td>
+<td>orthographic_word_count</td>
+<td>0.0859</td>
+<td>0.0026</td>
+<td>1.01e-242</td>
+</tr>
+<tr>
+<td>Real-child direct surprisal with lexical complexity</td>
+<td>bayes_prior_bits_per_token</td>
+<td>0.1758</td>
+<td>0.0013</td>
+<td>0.0000</td>
+</tr>
+<tr>
+<td>Real-child direct surprisal with lexical complexity</td>
+<td>bayes_context_bits</td>
+<td>-0.0011</td>
+<td>9.38e-05</td>
+<td>1.35e-32</td>
+</tr>
+<tr>
+<td>Real-child direct surprisal with lexical complexity</td>
+<td>orthographic_word_count</td>
+<td>-0.0277</td>
+<td>0.0020</td>
+<td>1.39e-44</td>
+</tr>
+<tr>
+<td>Real-child direct surprisal with lexical complexity</td>
+<td>lexical_cumulative_child_vocab_size</td>
+<td>-2.03e-04</td>
+<td>1.61e-05</td>
+<td>2.29e-36</td>
+</tr>
+<tr>
+<td>Real-child direct surprisal with lexical complexity</td>
+<td>lexical_cumulative_child_ttr</td>
+<td>0.2821</td>
+<td>0.1466</td>
+<td>0.0544</td>
+</tr>
+<tr>
+<td>Paired baseline gap alignment</td>
+<td>delta_bayes_bits_per_token_vs_real</td>
+<td>0.0738</td>
+<td>8.49e-04</td>
+<td>0.0000</td>
+</tr>
+<tr>
+<td>Paired baseline gap alignment</td>
+<td>delta_words_vs_real</td>
+<td>0.8811</td>
+<td>0.5281</td>
+<td>0.0952</td>
+</tr>
+</tbody></table>
+<h2>Current Scientific Read</h2>
+<ol>
+<li>The Bayes products are runnable and joinable with the existing direct Mistral route.</li>
+<li>The decomposition gives us two interpretable components: a prior/utterance-family term <code>p(u)</code> and a context-compatibility term <code>p(c | u)</code>.</li>
+<li>The paired real-versus-baseline view is the most defensible immediate use: for the same child moment and context, ask whether the real utterance is favored relative to generated alternatives.</li>
+<li>The Bayes score should stay labeled as an unnormalized decomposition score until we estimate or explicitly condition away <code>p(c)</code>.</li>
+</ol>
+<h2>Next Decisions</h2>
+<ul>
+<li>Decide whether the first supervisor-facing use should show paired real-versus-baseline gaps, correlations with Mistral, or complexity-controlled real-child developmental models.</li>
+<li>Add a sensitivity where Bayes <code>p(u)</code> is trained PBM-only rather than full-79, to show the full-79 result is not an artifact of training scope.</li>
+<li>Add the neural likelihood route only after the count-based decomposition has been explained and stabilized.</li>
+</ul>
+</main>
+</body>
+</html>

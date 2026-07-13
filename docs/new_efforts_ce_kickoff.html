@@ -1,0 +1,502 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>When CE Kicks In</title>
+<style>
+:root {
+  color-scheme: light;
+  --ink: #1e2528;
+  --muted: #5e686d;
+  --line: #d9e0df;
+  --paper: #ffffff;
+  --soft: #f5f7f6;
+  --accent: #2f6f73;
+  --accent2: #c76f2c;
+}
+body {
+  margin: 0;
+  background: #eef2f1;
+  color: var(--ink);
+  font: 16px/1.58 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+main {
+  max-width: 980px;
+  margin: 34px auto 56px;
+  padding: 48px 58px;
+  background: var(--paper);
+  box-shadow: 0 18px 50px rgba(31, 45, 48, 0.12);
+}
+h1, h2, h3, h4 {
+  line-height: 1.18;
+  margin: 1.6em 0 0.55em;
+}
+h1 {
+  margin-top: 0;
+  font-size: 2.25rem;
+  border-bottom: 3px solid var(--accent);
+  padding-bottom: 0.45em;
+}
+h2 {
+  font-size: 1.55rem;
+  color: var(--accent);
+}
+h3 {
+  font-size: 1.18rem;
+}
+p {
+  margin: 0.75em 0;
+}
+a {
+  color: var(--accent);
+}
+blockquote {
+  border-left: 4px solid var(--accent2);
+  margin: 1.1em 0;
+  padding: 0.05em 1.1em;
+  color: var(--muted);
+  background: #fff8f2;
+}
+code {
+  background: var(--soft);
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  padding: 0.08em 0.3em;
+  font-family: "SFMono-Regular", Consolas, monospace;
+  font-size: 0.92em;
+}
+pre {
+  background: #f5f7f6;
+  color: var(--ink);
+  border: 1px solid var(--line);
+  padding: 1em;
+  overflow-x: auto;
+  border-radius: 7px;
+}
+pre code {
+  background: transparent;
+  border: 0;
+  padding: 0;
+  color: inherit;
+}
+table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 1.15em 0 1.45em;
+  font-size: 0.95em;
+}
+.plot-layout {
+  table-layout: fixed;
+  margin: 1.1em auto 1.45em;
+}
+.plot-layout,
+.plot-layout tr,
+.plot-layout td {
+  border: 0;
+  background: transparent;
+}
+.plot-layout td {
+  padding: 0.35em 0.55em 0.95em;
+  text-align: center;
+  vertical-align: top;
+}
+.plot-layout img {
+  width: 100%;
+  max-width: 100%;
+  margin: 0 auto 0.35em;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: white;
+}
+.plot-layout .centered-cell img {
+  width: 54%;
+}
+.plot-caption {
+  color: var(--muted);
+  font-size: 0.85em;
+  line-height: 1.35;
+}
+th, td {
+  border: 1px solid var(--line);
+  padding: 0.54em 0.68em;
+  vertical-align: top;
+}
+th {
+  background: #e7efed;
+  text-align: left;
+}
+tr:nth-child(even) td {
+  background: #fafbfb;
+}
+.plot-layout tr:nth-child(even) td {
+  background: transparent;
+}
+img {
+  max-width: 100%;
+  display: block;
+  margin: 1.1em auto 0.45em;
+}
+.figure-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.05rem 1.25rem;
+  align-items: start;
+  margin: 1.1em 0 1.45em;
+}
+.figure-grid.two-one {
+  max-width: 900px;
+  margin-left: auto;
+  margin-right: auto;
+}
+.figure-grid.five-panel {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+.figure-grid figure {
+  margin: 0;
+}
+.figure-grid img {
+  width: 100%;
+  max-width: 100%;
+  margin: 0;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: white;
+}
+.figure-grid figcaption {
+  color: var(--muted);
+  font-size: 0.85em;
+  line-height: 1.35;
+  text-align: center;
+  margin-top: 0.35em;
+}
+.figure-grid .centered {
+  grid-column: 1 / -1;
+  justify-self: center;
+  max-width: 58%;
+}
+.figure-grid.two-one .centered {
+  max-width: 54%;
+}
+.figure-grid.five-panel .centered {
+  max-width: 52%;
+}
+ul, ol {
+  padding-left: 1.4em;
+}
+.caption {
+  color: var(--muted);
+  font-size: 0.92em;
+  margin-top: -0.15em;
+}
+@media print {
+  body {
+    background: white;
+  }
+  main {
+    box-shadow: none;
+    margin: 0;
+    max-width: none;
+    padding: 28px;
+  }
+}
+@media screen and (max-width: 540px) {
+  .figure-grid {
+    grid-template-columns: 1fr;
+  }
+  .figure-grid .centered,
+  .figure-grid.five-panel .centered {
+    grid-column: auto;
+    max-width: 100%;
+  }
+}
+</style>
+</head>
+<body>
+<main>
+<h1>When CE Kicks In</h1>
+<p>This page answers the supervisor question about timing: not just whether there is a downward trend, but <strong>when the signal becomes detectable</strong>.</p>
+<h2>Key Read</h2>
+<ul>
+<li>The fixed-word-count age-bin decrease is detectable by <code>024-029</code>.</li>
+<li>Context entropy modulation is detectable already in <code>006-023</code>.</li>
+<li>Parent-context-word modulation becomes detectable in <code>024-029</code>.</li>
+<li>Same-context real-vs-baseline advantages are already positive in <code>006-023</code>.</li>
+</ul>
+<h2>Onset Summary</h2>
+<table>
+<thead><tr>
+<th>signal</th>
+<th>operational_definition</th>
+<th>earliest_age_bin</th>
+<th>estimate</th>
+<th>ci_low</th>
+<th>ci_high</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>Continuous fixed-word-count age slope</td>
+<td>utterance-level OLS with child fixed effects, exact/top-coded word-count controls, child-clustered SEs</td>
+<td>whole range</td>
+<td>-0.132</td>
+<td>-0.180</td>
+<td>-0.083</td>
+</tr>
+<tr>
+<td>Earliest exact-word-count age-bin decrease</td>
+<td>age-bin model relative to 006-023 with child fixed effects and exact/top-coded word-count controls</td>
+<td>024-029</td>
+<td>-0.913</td>
+<td>-1.584</td>
+<td>-0.243</td>
+</tr>
+<tr>
+<td>context entropy modulation</td>
+<td>age-specific regression coefficient predicting child total bits</td>
+<td>006-023</td>
+<td>-0.435</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>parent context words modulation</td>
+<td>age-specific regression coefficient predicting child total bits</td>
+<td>024-029</td>
+<td>-0.028</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>Direct Mistral paired gap against trigram</td>
+<td>same-context generated baseline minus real child bits/token; positive means real child has lower bits</td>
+<td>006-023</td>
+<td>0.745</td>
+<td>0.576</td>
+<td>0.913</td>
+</tr>
+<tr>
+<td>Bayes decomposition paired gap against trigram</td>
+<td>same-context generated baseline minus real child bits/token; positive means real child has lower bits</td>
+<td>006-023</td>
+<td>1.604</td>
+<td>1.055</td>
+<td>2.154</td>
+</tr>
+</tbody></table>
+<img src="../figs/developmental_onset_report/onset_signal_map.png" alt="Onset signal map">
+<h2>Fixed-Effort Age-Bin Model</h2>
+<table>
+<thead><tr>
+<th>age_bin</th>
+<th>estimate_vs_006_023</th>
+<th>ci_low</th>
+<th>ci_high</th>
+<th>p_value</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>006-023</td>
+<td>0.0000</td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>024-029</td>
+<td>-0.9133</td>
+<td>-1.5839</td>
+<td>-0.2427</td>
+<td>0.0076</td>
+</tr>
+<tr>
+<td>030-035</td>
+<td>-2.0527</td>
+<td>-2.8777</td>
+<td>-1.2276</td>
+<td>1.08e-06</td>
+</tr>
+<tr>
+<td>036-041</td>
+<td>-2.0425</td>
+<td>-3.8048</td>
+<td>-0.2802</td>
+<td>0.0231</td>
+</tr>
+<tr>
+<td>042-047</td>
+<td>-4.2539</td>
+<td>-7.0300</td>
+<td>-1.4777</td>
+<td>0.0027</td>
+</tr>
+<tr>
+<td>048-053</td>
+<td>-2.6895</td>
+<td>-4.1492</td>
+<td>-1.2299</td>
+<td>3.05e-04</td>
+</tr>
+<tr>
+<td>054-059</td>
+<td>-3.3198</td>
+<td>-4.7708</td>
+<td>-1.8687</td>
+<td>7.33e-06</td>
+</tr>
+<tr>
+<td>060-065</td>
+<td>-8.4282</td>
+<td>-9.9811</td>
+<td>-6.8754</td>
+<td>1.99e-26</td>
+</tr>
+</tbody></table>
+<img src="../figs/developmental_onset_report/controlled_real_child_age_effects.png" alt="Controlled real child age effects">
+<h2>Change-Point Scan</h2>
+<table>
+<thead><tr>
+<th>breakpoint_month</th>
+<th>delta_aic_vs_best</th>
+<th>r2</th>
+<th>age_slope</th>
+<th>post_break_slope_change</th>
+<th>post_break_p</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>44.5</td>
+<td>0.0000</td>
+<td>0.6285</td>
+<td>-0.1731</td>
+<td>0.2237</td>
+<td>0.0110</td>
+</tr>
+</tbody></table>
+<img src="../figs/developmental_onset_report/piecewise_changepoint_scan.png" alt="Piecewise change-point scan">
+<h2>Paired Baseline Onset</h2>
+<table>
+<thead><tr>
+<th>signal</th>
+<th>source_model</th>
+<th>earliest_age_bin_ci_positive</th>
+<th>estimate_at_onset</th>
+<th>ci_low_at_onset</th>
+<th>ci_high_at_onset</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>Direct Mistral paired gap</td>
+<td>random</td>
+<td>006-023</td>
+<td>2.864</td>
+<td>2.547</td>
+<td>3.180</td>
+</tr>
+<tr>
+<td>Bayes decomposition paired gap</td>
+<td>random</td>
+<td>006-023</td>
+<td>13.981</td>
+<td>12.728</td>
+<td>15.234</td>
+</tr>
+<tr>
+<td>Direct Mistral paired gap</td>
+<td>unigram</td>
+<td>006-023</td>
+<td>2.306</td>
+<td>1.995</td>
+<td>2.616</td>
+</tr>
+<tr>
+<td>Bayes decomposition paired gap</td>
+<td>unigram</td>
+<td>006-023</td>
+<td>3.702</td>
+<td>2.802</td>
+<td>4.601</td>
+</tr>
+<tr>
+<td>Direct Mistral paired gap</td>
+<td>bigram</td>
+<td>006-023</td>
+<td>1.348</td>
+<td>1.093</td>
+<td>1.603</td>
+</tr>
+<tr>
+<td>Bayes decomposition paired gap</td>
+<td>bigram</td>
+<td>006-023</td>
+<td>2.533</td>
+<td>1.751</td>
+<td>3.316</td>
+</tr>
+<tr>
+<td>Direct Mistral paired gap</td>
+<td>trigram</td>
+<td>006-023</td>
+<td>0.745</td>
+<td>0.576</td>
+<td>0.913</td>
+</tr>
+<tr>
+<td>Bayes decomposition paired gap</td>
+<td>trigram</td>
+<td>006-023</td>
+<td>1.604</td>
+<td>1.055</td>
+<td>2.154</td>
+</tr>
+</tbody></table>
+<img src="../figs/developmental_onset_report/paired_real_advantage_onset.png" alt="Paired real advantage onset">
+<h2>Context Modulation</h2>
+<table>
+<thead><tr>
+<th>outcome</th>
+<th>predictor</th>
+<th>earliest_age_bin_ci_negative</th>
+<th>negative_estimate_at_onset</th>
+<th>earliest_age_bin_ci_positive</th>
+<th>positive_estimate_at_onset</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>child sum_bits</td>
+<td>context entropy</td>
+<td>006-023</td>
+<td>-0.435</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>child sum_bits</td>
+<td>parent context words</td>
+<td>024-029</td>
+<td>-0.028</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>child word count</td>
+<td>context entropy</td>
+<td></td>
+<td></td>
+<td>024-029</td>
+<td>0.025</td>
+</tr>
+<tr>
+<td>child word count</td>
+<td>parent context words</td>
+<td></td>
+<td></td>
+<td>006-023</td>
+<td>0.013</td>
+</tr>
+</tbody></table>
+<img src="../figs/developmental_onset_report/context_modulation_onset.png" alt="Context modulation onset">
+</main>
+</body>
+</html>
