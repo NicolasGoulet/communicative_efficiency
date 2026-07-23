@@ -1,0 +1,568 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mistral full-79: Child Trajectories</title>
+<style>
+:root {
+  color-scheme: light;
+  --ink: #1e2528;
+  --muted: #5e686d;
+  --line: #d9e0df;
+  --paper: #ffffff;
+  --soft: #f5f7f6;
+  --accent: #2f6f73;
+  --accent2: #c76f2c;
+}
+body {
+  margin: 0;
+  background: #eef2f1;
+  color: var(--ink);
+  font: 16px/1.58 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+main {
+  max-width: 980px;
+  margin: 34px auto 56px;
+  padding: 48px 58px;
+  background: var(--paper);
+  box-shadow: 0 18px 50px rgba(31, 45, 48, 0.12);
+}
+h1, h2, h3, h4 {
+  line-height: 1.18;
+  margin: 1.6em 0 0.55em;
+}
+h1 {
+  margin-top: 0;
+  font-size: 2.25rem;
+  border-bottom: 3px solid var(--accent);
+  padding-bottom: 0.45em;
+}
+h2 {
+  font-size: 1.55rem;
+  color: var(--accent);
+}
+h3 {
+  font-size: 1.18rem;
+}
+p {
+  margin: 0.75em 0;
+}
+a {
+  color: var(--accent);
+}
+blockquote {
+  border-left: 4px solid var(--accent2);
+  margin: 1.1em 0;
+  padding: 0.05em 1.1em;
+  color: var(--muted);
+  background: #fff8f2;
+}
+code {
+  background: var(--soft);
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  padding: 0.08em 0.3em;
+  font-family: "SFMono-Regular", Consolas, monospace;
+  font-size: 0.92em;
+}
+pre {
+  background: #f5f7f6;
+  color: var(--ink);
+  border: 1px solid var(--line);
+  padding: 1em;
+  overflow-x: auto;
+  border-radius: 7px;
+}
+pre code {
+  background: transparent;
+  border: 0;
+  padding: 0;
+  color: inherit;
+}
+table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 1.15em 0 1.45em;
+  font-size: 0.95em;
+}
+.plot-layout {
+  table-layout: fixed;
+  margin: 1.1em auto 1.45em;
+}
+.plot-layout,
+.plot-layout tr,
+.plot-layout td {
+  border: 0;
+  background: transparent;
+}
+.plot-layout td {
+  padding: 0.35em 0.55em 0.95em;
+  text-align: center;
+  vertical-align: top;
+}
+.plot-layout img {
+  width: 100%;
+  max-width: 100%;
+  margin: 0 auto 0.35em;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: white;
+}
+.plot-layout .centered-cell img {
+  width: 54%;
+}
+.plot-caption {
+  color: var(--muted);
+  font-size: 0.85em;
+  line-height: 1.35;
+}
+th, td {
+  border: 1px solid var(--line);
+  padding: 0.54em 0.68em;
+  vertical-align: top;
+}
+th {
+  background: #e7efed;
+  text-align: left;
+}
+tr:nth-child(even) td {
+  background: #fafbfb;
+}
+.plot-layout tr:nth-child(even) td {
+  background: transparent;
+}
+img {
+  max-width: 100%;
+  display: block;
+  margin: 1.1em auto 0.45em;
+}
+.figure-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.05rem 1.25rem;
+  align-items: start;
+  margin: 1.1em 0 1.45em;
+}
+.figure-grid.two-one {
+  max-width: 900px;
+  margin-left: auto;
+  margin-right: auto;
+}
+.figure-grid.five-panel {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+.figure-grid figure {
+  margin: 0;
+}
+.figure-grid img {
+  width: 100%;
+  max-width: 100%;
+  margin: 0;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: white;
+}
+.figure-grid figcaption {
+  color: var(--muted);
+  font-size: 0.85em;
+  line-height: 1.35;
+  text-align: center;
+  margin-top: 0.35em;
+}
+.figure-grid .centered {
+  grid-column: 1 / -1;
+  justify-self: center;
+  max-width: 58%;
+}
+.figure-grid.two-one .centered {
+  max-width: 54%;
+}
+.figure-grid.five-panel .centered {
+  max-width: 52%;
+}
+ul, ol {
+  padding-left: 1.4em;
+}
+.caption {
+  color: var(--muted);
+  font-size: 0.92em;
+  margin-top: -0.15em;
+}
+@media print {
+  body {
+    background: white;
+  }
+  main {
+    box-shadow: none;
+    margin: 0;
+    max-width: none;
+    padding: 28px;
+  }
+}
+@media screen and (max-width: 540px) {
+  .figure-grid {
+    grid-template-columns: 1fr;
+  }
+  .figure-grid .centered,
+  .figure-grid.five-panel .centered {
+    grid-column: auto;
+    max-width: 100%;
+  }
+}
+</style>
+</head>
+<body>
+<main>
+<h1>Mistral full-79: Individual Child Trajectories</h1>
+<p>Each point is a child-session-age mean. Point size reflects utterance count. Straight lines are shown only for children meeting the prespecified support rule. These child fits are descriptive and are not individually multiplicity-adjusted.</p>
+<h2>all79_descriptive</h2>
+<h3>Belfast</h3>
+<h4>Belfast/Barbara</h4>
+<img src="../figs/direct_surprisal_replication/mistral_full79/modular_visual/all79_descriptive/children/belfast_barbara.png" alt="Belfast/Barbara">
+<h4>Belfast/Conor</h4>
+<img src="../figs/direct_surprisal_replication/mistral_full79/modular_visual/all79_descriptive/children/belfast_conor.png" alt="Belfast/Conor">
+<h4>Belfast/Courtney</h4>
+<img src="../figs/direct_surprisal_replication/mistral_full79/modular_visual/all79_descriptive/children/belfast_courtney.png" alt="Belfast/Courtney">
+<h4>Belfast/David</h4>
+<img src="../figs/direct_surprisal_replication/mistral_full79/modular_visual/all79_descriptive/children/belfast_david.png" alt="Belfast/David">
+<h4>Belfast/John</h4>
+<img src="../figs/direct_surprisal_replication/mistral_full79/modular_visual/all79_descriptive/children/belfast_john.png" alt="Belfast/John">
+<h4>Belfast/Michelle</h4>
+<img src="../figs/direct_surprisal_replication/mistral_full79/modular_visual/all79_descriptive/children/belfast_michelle.png" alt="Belfast/Michelle">
+<h4>Belfast/Rachel</h4>
+<img src="../figs/direct_surprisal_replication/mistral_full79/modular_visual/all79_descriptive/children/belfast_rachel.png" alt="Belfast/Rachel">
+<h4>Belfast/Stuart</h4>
+<img src="../figs/direct_surprisal_replication/mistral_full79/modular_visual/all79_descriptive/children/belfast_stuart.png" alt="Belfast/Stuart">
+<h3>Brown</h3>
+<h4>Brown/Adam</h4>
+<img src="../figs/direct_surprisal_replication/mistral_full79/modular_visual/all79_descriptive/children/brown_adam.png" alt="Brown/Adam">
+<h4>Brown/Eve</h4>
+<img src="../figs/direct_surprisal_replication/mistral_full79/modular_visual/all79_descriptive/children/brown_eve.png" alt="Brown/Eve">
+<h4>Brown/Sarah</h4>
+<img src="../figs/direct_surprisal_replication/mistral_full79/modular_visual/all79_descriptive/children/brown_sarah.png" alt="Brown/Sarah">
+<h3>Demetras1</h3>
+<h4>Demetras1/Trevor</h4>
+<img src="../figs/direct_surprisal_replication/mistral_full79/modular_visual/all79_descriptive/children/demetras1_trevor.png" alt="Demetras1/Trevor">
+<h3>Forrester</h3>
+<h4>Forrester/Ella</h4>
+<img src="../figs/direct_surprisal_replication/mistral_full79/modular_visual/all79_descriptive/children/forrester_ella.png" alt="Forrester/Ella">
+<h3>Kuczaj</h3>
+<h4>Kuczaj/Abe</h4>
+<img src="../figs/direct_surprisal_replication/mistral_full79/modular_visual/all79_descriptive/children/kuczaj_abe.png" alt="Kuczaj/Abe">
+<h3>Lara</h3>
+<h4>Lara/Lara</h4>
+<img src="../figs/direct_surprisal_replication/mistral_full79/modular_visual/all79_descriptive/children/lara_lara.png" alt="Lara/Lara">
+<h3>MPI-EVA-Manchester</h3>
+<h4>MPI-EVA-Manchester/Eleanor</h4>
+<img src="../figs/direct_surprisal_replication/mistral_full79/modular_visual/all79_descriptive/children/mpi_eva_manchester_eleanor.png" alt="MPI-EVA-Manchester/Eleanor">
+<h4>MPI-EVA-Manchester/Fraser</h4>
+<img src="../figs/direct_surprisal_replication/mistral_full79/modular_visual/all79_descriptive/children/mpi_eva_manchester_fraser.png" alt="MPI-EVA-Manchester/Fraser">
+<h4>MPI-EVA-Manchester/Gina</h4>
+<img src="../figs/direct_surprisal_replication/mistral_full79/modular_visual/all79_descriptive/children/mpi_eva_manchester_gina.png" alt="MPI-EVA-Manchester/Gina">
+<h4>MPI-EVA-Manchester/Helen</h4>
+<img src="../figs/direct_surprisal_replication/mistral_full79/modular_visual/all79_descriptive/children/mpi_eva_manchester_helen.png" alt="MPI-EVA-Manchester/Helen">
+<h3>Manchester</h3>
+<h4>Manchester/Anne</h4>
+<img src="../figs/direct_surprisal_replication/mistral_full79/modular_visual/all79_descriptive/children/manchester_anne.png" alt="Manchester/Anne">
+<h4>Manchester/Aran</h4>
+<img src="../figs/direct_surprisal_replication/mistral_full79/modular_visual/all79_descriptive/children/manchester_aran.png" alt="Manchester/Aran">
+<h4>Manchester/Becky</h4>
+<img src="../figs/direct_surprisal_replication/mistral_full79/modular_visual/all79_descriptive/children/manchester_becky.png" alt="Manchester/Becky">
+<h4>Manchester/Carl</h4>
+<img src="../figs/direct_surprisal_replication/mistral_full79/modular_visual/all79_descriptive/children/manchester_carl.png" alt="Manchester/Carl">
+<h4>Manchester/Dominic</h4>
+<img src="../figs/direct_surprisal_replication/mistral_full79/modular_visual/all79_descriptive/children/manchester_dominic.png" alt="Manchester/Dominic">
+<h4>Manchester/Gail</h4>
+<img src="../figs/direct_surprisal_replication/mistral_full79/modular_visual/all79_descriptive/children/manchester_gail.png" alt="Manchester/Gail">
+<h4>Manchester/Joel</h4>
+<img src="../figs/direct_surprisal_replication/mistral_full79/modular_visual/all79_descriptive/children/manchester_joel.png" alt="Manchester/Joel">
+<h4>Manchester/John</h4>
+<img src="../figs/direct_surprisal_replication/mistral_full79/modular_visual/all79_descriptive/children/manchester_john.png" alt="Manchester/John">
+<h4>Manchester/Liz</h4>
+<img src="../figs/direct_surprisal_replication/mistral_full79/modular_visual/all79_descriptive/children/manchester_liz.png" alt="Manchester/Liz">
+<h4>Manchester/Nicole</h4>
+<img src="../figs/direct_surprisal_replication/mistral_full79/modular_visual/all79_descriptive/children/manchester_nicole.png" alt="Manchester/Nicole">
+<h4>Manchester/Ruth</h4>
+<img src="../figs/direct_surprisal_replication/mistral_full79/modular_visual/all79_descriptive/children/manchester_ruth.png" alt="Manchester/Ruth">
+<h4>Manchester/Warren</h4>
+<img src="../figs/direct_surprisal_replication/mistral_full79/modular_visual/all79_descriptive/children/manchester_warren.png" alt="Manchester/Warren">
+<h3>Post</h3>
+<h4>Post/Lew</h4>
+<img src="../figs/direct_surprisal_replication/mistral_full79/modular_visual/all79_descriptive/children/post_lew.png" alt="Post/Lew">
+<h4>Post/She</h4>
+<img src="../figs/direct_surprisal_replication/mistral_full79/modular_visual/all79_descriptive/children/post_she.png" alt="Post/She">
+<h4>Post/Tow</h4>
+<img src="../figs/direct_surprisal_replication/mistral_full79/modular_visual/all79_descriptive/children/post_tow.png" alt="Post/Tow">
+<h3>Providence</h3>
+<h4>Providence/Alex</h4>
+<img src="../figs/direct_surprisal_replication/mistral_full79/modular_visual/all79_descriptive/children/providence_alex.png" alt="Providence/Alex">
+<h4>Providence/Ethan</h4>
+<img src="../figs/direct_surprisal_replication/mistral_full79/modular_visual/all79_descriptive/children/providence_ethan.png" alt="Providence/Ethan">
+<h4>Providence/Lily</h4>
+<img src="../figs/direct_surprisal_replication/mistral_full79/modular_visual/all79_descriptive/children/providence_lily.png" alt="Providence/Lily">
+<h4>Providence/Naima</h4>
+<img src="../figs/direct_surprisal_replication/mistral_full79/modular_visual/all79_descriptive/children/providence_naima.png" alt="Providence/Naima">
+<h4>Providence/Violet</h4>
+<img src="../figs/direct_surprisal_replication/mistral_full79/modular_visual/all79_descriptive/children/providence_violet.png" alt="Providence/Violet">
+<h4>Providence/William</h4>
+<img src="../figs/direct_surprisal_replication/mistral_full79/modular_visual/all79_descriptive/children/providence_william.png" alt="Providence/William">
+<h3>Sachs</h3>
+<h4>Sachs/Naomi</h4>
+<img src="../figs/direct_surprisal_replication/mistral_full79/modular_visual/all79_descriptive/children/sachs_naomi.png" alt="Sachs/Naomi">
+<h3>Weist</h3>
+<h4>Weist/Ben</h4>
+<img src="../figs/direct_surprisal_replication/mistral_full79/modular_visual/all79_descriptive/children/weist_ben.png" alt="Weist/Ben">
+<h4>Weist/Emily</h4>
+<img src="../figs/direct_surprisal_replication/mistral_full79/modular_visual/all79_descriptive/children/weist_emily.png" alt="Weist/Emily">
+<h4>Weist/Emma</h4>
+<img src="../figs/direct_surprisal_replication/mistral_full79/modular_visual/all79_descriptive/children/weist_emma.png" alt="Weist/Emma">
+<h4>Weist/Jillian</h4>
+<img src="../figs/direct_surprisal_replication/mistral_full79/modular_visual/all79_descriptive/children/weist_jillian.png" alt="Weist/Jillian">
+<h4>Weist/Matt</h4>
+<img src="../figs/direct_surprisal_replication/mistral_full79/modular_visual/all79_descriptive/children/weist_matt.png" alt="Weist/Matt">
+<h4>Weist/Roman</h4>
+<img src="../figs/direct_surprisal_replication/mistral_full79/modular_visual/all79_descriptive/children/weist_roman.png" alt="Weist/Roman">
+<h3>Wells</h3>
+<h4>Wells/Abigail</h4>
+<img src="../figs/direct_surprisal_replication/mistral_full79/modular_visual/all79_descriptive/children/wells_abigail.png" alt="Wells/Abigail">
+<h4>Wells/Benjamin</h4>
+<img src="../figs/direct_surprisal_replication/mistral_full79/modular_visual/all79_descriptive/children/wells_benjamin.png" alt="Wells/Benjamin">
+<h4>Wells/Betty</h4>
+<img src="../figs/direct_surprisal_replication/mistral_full79/modular_visual/all79_descriptive/children/wells_betty.png" alt="Wells/Betty">
+<h4>Wells/Darren</h4>
+<img src="../figs/direct_surprisal_replication/mistral_full79/modular_visual/all79_descriptive/children/wells_darren.png" alt="Wells/Darren">
+<h4>Wells/Debbie</h4>
+<img src="../figs/direct_surprisal_replication/mistral_full79/modular_visual/all79_descriptive/children/wells_debbie.png" alt="Wells/Debbie">
+<h4>Wells/Ellen</h4>
+<img src="../figs/direct_surprisal_replication/mistral_full79/modular_visual/all79_descriptive/children/wells_ellen.png" alt="Wells/Ellen">
+<h4>Wells/Elspeth</h4>
+<img src="../figs/direct_surprisal_replication/mistral_full79/modular_visual/all79_descriptive/children/wells_elspeth.png" alt="Wells/Elspeth">
+<h4>Wells/Frances</h4>
+<img src="../figs/direct_surprisal_replication/mistral_full79/modular_visual/all79_descriptive/children/wells_frances.png" alt="Wells/Frances">
+<h4>Wells/Gary</h4>
+<img src="../figs/direct_surprisal_replication/mistral_full79/modular_visual/all79_descriptive/children/wells_gary.png" alt="Wells/Gary">
+<h4>Wells/Gavin</h4>
+<img src="../figs/direct_surprisal_replication/mistral_full79/modular_visual/all79_descriptive/children/wells_gavin.png" alt="Wells/Gavin">
+<h4>Wells/Geoffrey</h4>
+<img src="../figs/direct_surprisal_replication/mistral_full79/modular_visual/all79_descriptive/children/wells_geoffrey.png" alt="Wells/Geoffrey">
+<h4>Wells/Gerald</h4>
+<img src="../figs/direct_surprisal_replication/mistral_full79/modular_visual/all79_descriptive/children/wells_gerald.png" alt="Wells/Gerald">
+<h4>Wells/Harriet</h4>
+<img src="../figs/direct_surprisal_replication/mistral_full79/modular_visual/all79_descriptive/children/wells_harriet.png" alt="Wells/Harriet">
+<h4>Wells/Iris</h4>
+<img src="../figs/direct_surprisal_replication/mistral_full79/modular_visual/all79_descriptive/children/wells_iris.png" alt="Wells/Iris">
+<h4>Wells/Jack</h4>
+<img src="../figs/direct_surprisal_replication/mistral_full79/modular_visual/all79_descriptive/children/wells_jack.png" alt="Wells/Jack">
+<h4>Wells/Jason</h4>
+<img src="../figs/direct_surprisal_replication/mistral_full79/modular_visual/all79_descriptive/children/wells_jason.png" alt="Wells/Jason">
+<h4>Wells/Jonathan</h4>
+<img src="../figs/direct_surprisal_replication/mistral_full79/modular_visual/all79_descriptive/children/wells_jonathan.png" alt="Wells/Jonathan">
+<h4>Wells/Laura</h4>
+<img src="../figs/direct_surprisal_replication/mistral_full79/modular_visual/all79_descriptive/children/wells_laura.png" alt="Wells/Laura">
+<h4>Wells/Lee</h4>
+<img src="../figs/direct_surprisal_replication/mistral_full79/modular_visual/all79_descriptive/children/wells_lee.png" alt="Wells/Lee">
+<h4>Wells/Martin</h4>
+<img src="../figs/direct_surprisal_replication/mistral_full79/modular_visual/all79_descriptive/children/wells_martin.png" alt="Wells/Martin">
+<h4>Wells/Nancy</h4>
+<img src="../figs/direct_surprisal_replication/mistral_full79/modular_visual/all79_descriptive/children/wells_nancy.png" alt="Wells/Nancy">
+<h4>Wells/Neil</h4>
+<img src="../figs/direct_surprisal_replication/mistral_full79/modular_visual/all79_descriptive/children/wells_neil.png" alt="Wells/Neil">
+<h4>Wells/Neville</h4>
+<img src="../figs/direct_surprisal_replication/mistral_full79/modular_visual/all79_descriptive/children/wells_neville.png" alt="Wells/Neville">
+<h4>Wells/Olivia</h4>
+<img src="../figs/direct_surprisal_replication/mistral_full79/modular_visual/all79_descriptive/children/wells_olivia.png" alt="Wells/Olivia">
+<h4>Wells/Penny</h4>
+<img src="../figs/direct_surprisal_replication/mistral_full79/modular_visual/all79_descriptive/children/wells_penny.png" alt="Wells/Penny">
+<h4>Wells/Rosie</h4>
+<img src="../figs/direct_surprisal_replication/mistral_full79/modular_visual/all79_descriptive/children/wells_rosie.png" alt="Wells/Rosie">
+<h4>Wells/Samantha</h4>
+<img src="../figs/direct_surprisal_replication/mistral_full79/modular_visual/all79_descriptive/children/wells_samantha.png" alt="Wells/Samantha">
+<h4>Wells/Sean</h4>
+<img src="../figs/direct_surprisal_replication/mistral_full79/modular_visual/all79_descriptive/children/wells_sean.png" alt="Wells/Sean">
+<h4>Wells/Sheila</h4>
+<img src="../figs/direct_surprisal_replication/mistral_full79/modular_visual/all79_descriptive/children/wells_sheila.png" alt="Wells/Sheila">
+<h4>Wells/Simon</h4>
+<img src="../figs/direct_surprisal_replication/mistral_full79/modular_visual/all79_descriptive/children/wells_simon.png" alt="Wells/Simon">
+<h4>Wells/Stella</h4>
+<img src="../figs/direct_surprisal_replication/mistral_full79/modular_visual/all79_descriptive/children/wells_stella.png" alt="Wells/Stella">
+<h4>Wells/Tony</h4>
+<img src="../figs/direct_surprisal_replication/mistral_full79/modular_visual/all79_descriptive/children/wells_tony.png" alt="Wells/Tony">
+<h2>non_pbm_confirmation</h2>
+<h3>Belfast</h3>
+<h4>Belfast/Barbara</h4>
+<img src="../figs/direct_surprisal_replication/mistral_full79/modular_visual/non_pbm_confirmation/children/belfast_barbara.png" alt="Belfast/Barbara">
+<h4>Belfast/Conor</h4>
+<img src="../figs/direct_surprisal_replication/mistral_full79/modular_visual/non_pbm_confirmation/children/belfast_conor.png" alt="Belfast/Conor">
+<h4>Belfast/Courtney</h4>
+<img src="../figs/direct_surprisal_replication/mistral_full79/modular_visual/non_pbm_confirmation/children/belfast_courtney.png" alt="Belfast/Courtney">
+<h4>Belfast/David</h4>
+<img src="../figs/direct_surprisal_replication/mistral_full79/modular_visual/non_pbm_confirmation/children/belfast_david.png" alt="Belfast/David">
+<h4>Belfast/John</h4>
+<img src="../figs/direct_surprisal_replication/mistral_full79/modular_visual/non_pbm_confirmation/children/belfast_john.png" alt="Belfast/John">
+<h4>Belfast/Michelle</h4>
+<img src="../figs/direct_surprisal_replication/mistral_full79/modular_visual/non_pbm_confirmation/children/belfast_michelle.png" alt="Belfast/Michelle">
+<h4>Belfast/Rachel</h4>
+<img src="../figs/direct_surprisal_replication/mistral_full79/modular_visual/non_pbm_confirmation/children/belfast_rachel.png" alt="Belfast/Rachel">
+<h4>Belfast/Stuart</h4>
+<img src="../figs/direct_surprisal_replication/mistral_full79/modular_visual/non_pbm_confirmation/children/belfast_stuart.png" alt="Belfast/Stuart">
+<h3>Demetras1</h3>
+<h4>Demetras1/Trevor</h4>
+<img src="../figs/direct_surprisal_replication/mistral_full79/modular_visual/non_pbm_confirmation/children/demetras1_trevor.png" alt="Demetras1/Trevor">
+<h3>Forrester</h3>
+<h4>Forrester/Ella</h4>
+<img src="../figs/direct_surprisal_replication/mistral_full79/modular_visual/non_pbm_confirmation/children/forrester_ella.png" alt="Forrester/Ella">
+<h3>Kuczaj</h3>
+<h4>Kuczaj/Abe</h4>
+<img src="../figs/direct_surprisal_replication/mistral_full79/modular_visual/non_pbm_confirmation/children/kuczaj_abe.png" alt="Kuczaj/Abe">
+<h3>Lara</h3>
+<h4>Lara/Lara</h4>
+<img src="../figs/direct_surprisal_replication/mistral_full79/modular_visual/non_pbm_confirmation/children/lara_lara.png" alt="Lara/Lara">
+<h3>MPI-EVA-Manchester</h3>
+<h4>MPI-EVA-Manchester/Eleanor</h4>
+<img src="../figs/direct_surprisal_replication/mistral_full79/modular_visual/non_pbm_confirmation/children/mpi_eva_manchester_eleanor.png" alt="MPI-EVA-Manchester/Eleanor">
+<h4>MPI-EVA-Manchester/Fraser</h4>
+<img src="../figs/direct_surprisal_replication/mistral_full79/modular_visual/non_pbm_confirmation/children/mpi_eva_manchester_fraser.png" alt="MPI-EVA-Manchester/Fraser">
+<h4>MPI-EVA-Manchester/Gina</h4>
+<img src="../figs/direct_surprisal_replication/mistral_full79/modular_visual/non_pbm_confirmation/children/mpi_eva_manchester_gina.png" alt="MPI-EVA-Manchester/Gina">
+<h4>MPI-EVA-Manchester/Helen</h4>
+<img src="../figs/direct_surprisal_replication/mistral_full79/modular_visual/non_pbm_confirmation/children/mpi_eva_manchester_helen.png" alt="MPI-EVA-Manchester/Helen">
+<h3>Post</h3>
+<h4>Post/Lew</h4>
+<img src="../figs/direct_surprisal_replication/mistral_full79/modular_visual/non_pbm_confirmation/children/post_lew.png" alt="Post/Lew">
+<h4>Post/She</h4>
+<img src="../figs/direct_surprisal_replication/mistral_full79/modular_visual/non_pbm_confirmation/children/post_she.png" alt="Post/She">
+<h4>Post/Tow</h4>
+<img src="../figs/direct_surprisal_replication/mistral_full79/modular_visual/non_pbm_confirmation/children/post_tow.png" alt="Post/Tow">
+<h3>Sachs</h3>
+<h4>Sachs/Naomi</h4>
+<img src="../figs/direct_surprisal_replication/mistral_full79/modular_visual/non_pbm_confirmation/children/sachs_naomi.png" alt="Sachs/Naomi">
+<h3>Weist</h3>
+<h4>Weist/Ben</h4>
+<img src="../figs/direct_surprisal_replication/mistral_full79/modular_visual/non_pbm_confirmation/children/weist_ben.png" alt="Weist/Ben">
+<h4>Weist/Emily</h4>
+<img src="../figs/direct_surprisal_replication/mistral_full79/modular_visual/non_pbm_confirmation/children/weist_emily.png" alt="Weist/Emily">
+<h4>Weist/Emma</h4>
+<img src="../figs/direct_surprisal_replication/mistral_full79/modular_visual/non_pbm_confirmation/children/weist_emma.png" alt="Weist/Emma">
+<h4>Weist/Jillian</h4>
+<img src="../figs/direct_surprisal_replication/mistral_full79/modular_visual/non_pbm_confirmation/children/weist_jillian.png" alt="Weist/Jillian">
+<h4>Weist/Matt</h4>
+<img src="../figs/direct_surprisal_replication/mistral_full79/modular_visual/non_pbm_confirmation/children/weist_matt.png" alt="Weist/Matt">
+<h4>Weist/Roman</h4>
+<img src="../figs/direct_surprisal_replication/mistral_full79/modular_visual/non_pbm_confirmation/children/weist_roman.png" alt="Weist/Roman">
+<h3>Wells</h3>
+<h4>Wells/Abigail</h4>
+<img src="../figs/direct_surprisal_replication/mistral_full79/modular_visual/non_pbm_confirmation/children/wells_abigail.png" alt="Wells/Abigail">
+<h4>Wells/Benjamin</h4>
+<img src="../figs/direct_surprisal_replication/mistral_full79/modular_visual/non_pbm_confirmation/children/wells_benjamin.png" alt="Wells/Benjamin">
+<h4>Wells/Betty</h4>
+<img src="../figs/direct_surprisal_replication/mistral_full79/modular_visual/non_pbm_confirmation/children/wells_betty.png" alt="Wells/Betty">
+<h4>Wells/Darren</h4>
+<img src="../figs/direct_surprisal_replication/mistral_full79/modular_visual/non_pbm_confirmation/children/wells_darren.png" alt="Wells/Darren">
+<h4>Wells/Debbie</h4>
+<img src="../figs/direct_surprisal_replication/mistral_full79/modular_visual/non_pbm_confirmation/children/wells_debbie.png" alt="Wells/Debbie">
+<h4>Wells/Ellen</h4>
+<img src="../figs/direct_surprisal_replication/mistral_full79/modular_visual/non_pbm_confirmation/children/wells_ellen.png" alt="Wells/Ellen">
+<h4>Wells/Elspeth</h4>
+<img src="../figs/direct_surprisal_replication/mistral_full79/modular_visual/non_pbm_confirmation/children/wells_elspeth.png" alt="Wells/Elspeth">
+<h4>Wells/Frances</h4>
+<img src="../figs/direct_surprisal_replication/mistral_full79/modular_visual/non_pbm_confirmation/children/wells_frances.png" alt="Wells/Frances">
+<h4>Wells/Gary</h4>
+<img src="../figs/direct_surprisal_replication/mistral_full79/modular_visual/non_pbm_confirmation/children/wells_gary.png" alt="Wells/Gary">
+<h4>Wells/Gavin</h4>
+<img src="../figs/direct_surprisal_replication/mistral_full79/modular_visual/non_pbm_confirmation/children/wells_gavin.png" alt="Wells/Gavin">
+<h4>Wells/Geoffrey</h4>
+<img src="../figs/direct_surprisal_replication/mistral_full79/modular_visual/non_pbm_confirmation/children/wells_geoffrey.png" alt="Wells/Geoffrey">
+<h4>Wells/Gerald</h4>
+<img src="../figs/direct_surprisal_replication/mistral_full79/modular_visual/non_pbm_confirmation/children/wells_gerald.png" alt="Wells/Gerald">
+<h4>Wells/Harriet</h4>
+<img src="../figs/direct_surprisal_replication/mistral_full79/modular_visual/non_pbm_confirmation/children/wells_harriet.png" alt="Wells/Harriet">
+<h4>Wells/Iris</h4>
+<img src="../figs/direct_surprisal_replication/mistral_full79/modular_visual/non_pbm_confirmation/children/wells_iris.png" alt="Wells/Iris">
+<h4>Wells/Jack</h4>
+<img src="../figs/direct_surprisal_replication/mistral_full79/modular_visual/non_pbm_confirmation/children/wells_jack.png" alt="Wells/Jack">
+<h4>Wells/Jason</h4>
+<img src="../figs/direct_surprisal_replication/mistral_full79/modular_visual/non_pbm_confirmation/children/wells_jason.png" alt="Wells/Jason">
+<h4>Wells/Jonathan</h4>
+<img src="../figs/direct_surprisal_replication/mistral_full79/modular_visual/non_pbm_confirmation/children/wells_jonathan.png" alt="Wells/Jonathan">
+<h4>Wells/Laura</h4>
+<img src="../figs/direct_surprisal_replication/mistral_full79/modular_visual/non_pbm_confirmation/children/wells_laura.png" alt="Wells/Laura">
+<h4>Wells/Lee</h4>
+<img src="../figs/direct_surprisal_replication/mistral_full79/modular_visual/non_pbm_confirmation/children/wells_lee.png" alt="Wells/Lee">
+<h4>Wells/Martin</h4>
+<img src="../figs/direct_surprisal_replication/mistral_full79/modular_visual/non_pbm_confirmation/children/wells_martin.png" alt="Wells/Martin">
+<h4>Wells/Nancy</h4>
+<img src="../figs/direct_surprisal_replication/mistral_full79/modular_visual/non_pbm_confirmation/children/wells_nancy.png" alt="Wells/Nancy">
+<h4>Wells/Neil</h4>
+<img src="../figs/direct_surprisal_replication/mistral_full79/modular_visual/non_pbm_confirmation/children/wells_neil.png" alt="Wells/Neil">
+<h4>Wells/Neville</h4>
+<img src="../figs/direct_surprisal_replication/mistral_full79/modular_visual/non_pbm_confirmation/children/wells_neville.png" alt="Wells/Neville">
+<h4>Wells/Olivia</h4>
+<img src="../figs/direct_surprisal_replication/mistral_full79/modular_visual/non_pbm_confirmation/children/wells_olivia.png" alt="Wells/Olivia">
+<h4>Wells/Penny</h4>
+<img src="../figs/direct_surprisal_replication/mistral_full79/modular_visual/non_pbm_confirmation/children/wells_penny.png" alt="Wells/Penny">
+<h4>Wells/Rosie</h4>
+<img src="../figs/direct_surprisal_replication/mistral_full79/modular_visual/non_pbm_confirmation/children/wells_rosie.png" alt="Wells/Rosie">
+<h4>Wells/Samantha</h4>
+<img src="../figs/direct_surprisal_replication/mistral_full79/modular_visual/non_pbm_confirmation/children/wells_samantha.png" alt="Wells/Samantha">
+<h4>Wells/Sean</h4>
+<img src="../figs/direct_surprisal_replication/mistral_full79/modular_visual/non_pbm_confirmation/children/wells_sean.png" alt="Wells/Sean">
+<h4>Wells/Sheila</h4>
+<img src="../figs/direct_surprisal_replication/mistral_full79/modular_visual/non_pbm_confirmation/children/wells_sheila.png" alt="Wells/Sheila">
+<h4>Wells/Simon</h4>
+<img src="../figs/direct_surprisal_replication/mistral_full79/modular_visual/non_pbm_confirmation/children/wells_simon.png" alt="Wells/Simon">
+<h4>Wells/Stella</h4>
+<img src="../figs/direct_surprisal_replication/mistral_full79/modular_visual/non_pbm_confirmation/children/wells_stella.png" alt="Wells/Stella">
+<h4>Wells/Tony</h4>
+<img src="../figs/direct_surprisal_replication/mistral_full79/modular_visual/non_pbm_confirmation/children/wells_tony.png" alt="Wells/Tony">
+<h2>pbm_discovery</h2>
+<h3>Brown</h3>
+<h4>Brown/Adam</h4>
+<img src="../figs/direct_surprisal_replication/mistral_full79/modular_visual/pbm_discovery/children/brown_adam.png" alt="Brown/Adam">
+<h4>Brown/Eve</h4>
+<img src="../figs/direct_surprisal_replication/mistral_full79/modular_visual/pbm_discovery/children/brown_eve.png" alt="Brown/Eve">
+<h4>Brown/Sarah</h4>
+<img src="../figs/direct_surprisal_replication/mistral_full79/modular_visual/pbm_discovery/children/brown_sarah.png" alt="Brown/Sarah">
+<h3>Manchester</h3>
+<h4>Manchester/Anne</h4>
+<img src="../figs/direct_surprisal_replication/mistral_full79/modular_visual/pbm_discovery/children/manchester_anne.png" alt="Manchester/Anne">
+<h4>Manchester/Aran</h4>
+<img src="../figs/direct_surprisal_replication/mistral_full79/modular_visual/pbm_discovery/children/manchester_aran.png" alt="Manchester/Aran">
+<h4>Manchester/Becky</h4>
+<img src="../figs/direct_surprisal_replication/mistral_full79/modular_visual/pbm_discovery/children/manchester_becky.png" alt="Manchester/Becky">
+<h4>Manchester/Carl</h4>
+<img src="../figs/direct_surprisal_replication/mistral_full79/modular_visual/pbm_discovery/children/manchester_carl.png" alt="Manchester/Carl">
+<h4>Manchester/Dominic</h4>
+<img src="../figs/direct_surprisal_replication/mistral_full79/modular_visual/pbm_discovery/children/manchester_dominic.png" alt="Manchester/Dominic">
+<h4>Manchester/Gail</h4>
+<img src="../figs/direct_surprisal_replication/mistral_full79/modular_visual/pbm_discovery/children/manchester_gail.png" alt="Manchester/Gail">
+<h4>Manchester/Joel</h4>
+<img src="../figs/direct_surprisal_replication/mistral_full79/modular_visual/pbm_discovery/children/manchester_joel.png" alt="Manchester/Joel">
+<h4>Manchester/John</h4>
+<img src="../figs/direct_surprisal_replication/mistral_full79/modular_visual/pbm_discovery/children/manchester_john.png" alt="Manchester/John">
+<h4>Manchester/Liz</h4>
+<img src="../figs/direct_surprisal_replication/mistral_full79/modular_visual/pbm_discovery/children/manchester_liz.png" alt="Manchester/Liz">
+<h4>Manchester/Nicole</h4>
+<img src="../figs/direct_surprisal_replication/mistral_full79/modular_visual/pbm_discovery/children/manchester_nicole.png" alt="Manchester/Nicole">
+<h4>Manchester/Ruth</h4>
+<img src="../figs/direct_surprisal_replication/mistral_full79/modular_visual/pbm_discovery/children/manchester_ruth.png" alt="Manchester/Ruth">
+<h4>Manchester/Warren</h4>
+<img src="../figs/direct_surprisal_replication/mistral_full79/modular_visual/pbm_discovery/children/manchester_warren.png" alt="Manchester/Warren">
+<h3>Providence</h3>
+<h4>Providence/Alex</h4>
+<img src="../figs/direct_surprisal_replication/mistral_full79/modular_visual/pbm_discovery/children/providence_alex.png" alt="Providence/Alex">
+<h4>Providence/Ethan</h4>
+<img src="../figs/direct_surprisal_replication/mistral_full79/modular_visual/pbm_discovery/children/providence_ethan.png" alt="Providence/Ethan">
+<h4>Providence/Lily</h4>
+<img src="../figs/direct_surprisal_replication/mistral_full79/modular_visual/pbm_discovery/children/providence_lily.png" alt="Providence/Lily">
+<h4>Providence/Naima</h4>
+<img src="../figs/direct_surprisal_replication/mistral_full79/modular_visual/pbm_discovery/children/providence_naima.png" alt="Providence/Naima">
+<h4>Providence/Violet</h4>
+<img src="../figs/direct_surprisal_replication/mistral_full79/modular_visual/pbm_discovery/children/providence_violet.png" alt="Providence/Violet">
+<h4>Providence/William</h4>
+<img src="../figs/direct_surprisal_replication/mistral_full79/modular_visual/pbm_discovery/children/providence_william.png" alt="Providence/William">
+</main>
+</body>
+</html>

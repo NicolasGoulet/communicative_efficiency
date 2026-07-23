@@ -149,6 +149,27 @@ class Route1ModelReportSuiteTests(unittest.TestCase):
             self.assertTrue((output_dir / "baseline_trends.csv.gz").exists())
             self.assertTrue((output_dir / "role_trends.csv.gz").exists())
 
+    def test_read_zoo_data_allows_absent_scorer_specific_entropy(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            path = root / "toy_without_entropy.csv"
+            output_dir = root / "out"
+            output_dir.mkdir()
+            frame = toy_long_rows().drop(
+                columns=[column for column in toy_long_rows().columns if column.startswith("context_entropy_") or column.startswith("context_next_")]
+            )
+            frame.to_csv(path, index=False)
+
+            data = read_zoo_data(path, output_dir, chunksize=20)
+
+            self.assertFalse(data.real_k3.empty)
+            self.assertFalse(data.context_real.empty)
+            self.assertTrue(data.context_real["context_entropy_bits"].isna().all())
+            self.assertTrue(data.context_real["context_next_top1_prob"].isna().all())
+            self.assertTrue(
+                (data.entropy_status["context_entropy_join_status"].fillna("") == "").all()
+            )
+
     def test_fit_comparison_models_writes_pairwise_model_tables(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
@@ -219,6 +240,43 @@ class Route1ModelReportSuiteTests(unittest.TestCase):
             self.assertFalse(data.baseline_deltas.empty)
             self.assertTrue((output_dir / "comparison_model_summary.csv").exists())
             self.assertTrue((output_dir / "zoo_model_variant_manifest.csv").exists())
+
+    def test_run_suite_analysis_without_entropy_keeps_direct_models(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            path = root / "toy_without_entropy.csv"
+            output_dir = root / "out"
+            fig_dir = root / "figs"
+            frame = toy_long_rows().drop(
+                columns=[
+                    column
+                    for column in toy_long_rows().columns
+                    if column.startswith("context_entropy_")
+                    or column.startswith("context_next_")
+                ]
+            )
+            frame.to_csv(path, index=False)
+
+            run_suite_analysis(
+                input_csv=path,
+                output_dir=output_dir,
+                fig_dir=fig_dir,
+                chunksize=20,
+            )
+
+            summary = pd.read_csv(output_dir / "model_zoo_summary.csv")
+            direct = summary[
+                summary["model"].str.startswith("Z1 Information | child FE", na=False)
+            ]
+            entropy = summary[
+                summary["model"].str.startswith(("Z3 ", "Z4 ", "Z10 "), na=False)
+            ]
+            direct_context = summary[
+                summary["model"].str.startswith(("Z5 ", "Z6 "), na=False)
+            ]
+            self.assertTrue((direct["status"] == "fit").any())
+            self.assertFalse((entropy["status"] == "fit").any())
+            self.assertTrue((direct_context["status"] == "fit").any())
             self.assertTrue((fig_dir / "effort_controlled_comparison_model_r2.png").exists())
             self.assertTrue((fig_dir / "z1_family_coefficients.png").exists())
             model_summary = pd.read_csv(output_dir / "model_zoo_summary.csv")

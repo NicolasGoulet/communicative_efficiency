@@ -15,6 +15,7 @@ from __future__ import annotations
 
 import argparse
 import math
+import os
 import re
 from dataclasses import dataclass
 from pathlib import Path
@@ -227,6 +228,16 @@ USECOLS = [
     "context_next_top50_mass",
     "context_next_argmax_bits",
 ]
+OPTIONAL_CONTEXT_COLUMNS = [
+    "context_entropy_join_status",
+    "context_entropy_token_count",
+    "context_entropy_bits",
+    "context_next_top1_prob",
+    "context_next_top5_mass",
+    "context_next_top10_mass",
+    "context_next_top50_mass",
+    "context_next_argmax_bits",
+]
 NUMERIC_COLS = [
     "age_months",
     "sum_bits",
@@ -414,8 +425,12 @@ def add_standardized_columns(frame: pd.DataFrame, columns: Sequence[str]) -> pd.
             continue
         values = pd.to_numeric(out[col], errors="coerce")
         std = values.std(ddof=0)
-        if not math.isfinite(float(std)) or std == 0:
-            out[f"{col}_z"] = 0.0
+        if values.notna().sum() == 0:
+            out[f"{col}_z"] = np.nan
+        elif not math.isfinite(float(std)) or std == 0:
+            standardized = pd.Series(np.nan, index=out.index, dtype=float)
+            standardized.loc[values.notna()] = 0.0
+            out[f"{col}_z"] = standardized
         else:
             out[f"{col}_z"] = (values - values.mean()) / std
     return out
@@ -542,6 +557,10 @@ def coerce_delta_numeric(frame: pd.DataFrame) -> pd.DataFrame:
 def read_zoo_data(input_csv: Path, output_dir: Path, *, chunksize: int, max_rows: int | None = None) -> ZooData:
     """Read the Route 1 long table and create bounded modeling samples."""
 
+    available_columns = set(pd.read_csv(input_csv, nrows=0, keep_default_na=False).columns)
+    missing_required = sorted(set(USECOLS) - set(OPTIONAL_CONTEXT_COLUMNS) - available_columns)
+    if missing_required:
+        raise ValueError(f"Route 1 table is missing required columns: {missing_required}")
     real_parts: list[pd.DataFrame] = []
     context_parts: list[pd.DataFrame] = []
     baseline_sample_parts: list[pd.DataFrame] = []
@@ -570,6 +589,13 @@ def read_zoo_data(input_csv: Path, output_dir: Path, *, chunksize: int, max_rows
         keep_default_na=False,
         low_memory=False,
     ):
+        # Context-entropy fields are optional for alternate scorer tables. An
+        # absent scorer-specific entropy product should make those model
+        # families explicitly empty, not prevent all direct-score models from
+        # running.
+        for column in OPTIONAL_CONTEXT_COLUMNS:
+            if column not in chunk.columns:
+                chunk[column] = ""
         if max_rows is not None:
             remaining = max_rows - rows_seen
             if remaining <= 0:
@@ -628,7 +654,6 @@ def read_zoo_data(input_csv: Path, output_dir: Path, *, chunksize: int, max_rows
             chunk["role"].eq("child")
             & chunk["target_variant"].eq("real")
             & chunk["context_k"].isin(["k1", "k2", "k3"])
-            & chunk["context_entropy_join_status"].isin(["matched", "matched_text_fallback"])
         ].copy()
         if not context_real.empty:
             context_parts.append(stratified_sample(coerce_and_derive(context_real), ["child_id", "age_bin", "context_k"], 65))
@@ -824,6 +849,9 @@ def fit_model_zoo(data: ZooData, output_dir: Path) -> tuple[pd.DataFrame, pd.Dat
     summaries: list[dict[str, object]] = []
     coefficients: list[pd.DataFrame] = []
 
+    entropy_context = data.context_real.dropna(subset=["context_entropy_bits_z"])
+    certainty_context = data.context_real.dropna(subset=["context_next_top1_prob_z"])
+
     specs: list[tuple[str, str, str, pd.DataFrame, str]] = []
     for effort_col, effort_label in EFFORT_MEASURES:
         effort_z = f"{effort_col}_z"
@@ -852,7 +880,7 @@ def fit_model_zoo(data: ZooData, output_dir: Path) -> tuple[pd.DataFrame, pd.Dat
                 f"Z3 Effort from context entropy | effort={effort_label}",
                 f"Do children produce more {effort_label.lower()} after more uncertain caretaker contexts?",
                 f"{effort_col} ~ age_months_z * context_entropy_bits_z + log_context_words_plus1 + C(context_question_type)",
-                data.context_real,
+                entropy_context,
                 "gee_poisson",
             )
         )
@@ -863,7 +891,7 @@ def fit_model_zoo(data: ZooData, output_dir: Path) -> tuple[pd.DataFrame, pd.Dat
                 f"Z4 Information from context entropy | effort={effort_label}",
                 f"Is total child information related to context entropy after {effort_label.lower()} is controlled?",
                 f"sum_bits ~ age_months_z * context_entropy_bits_z + {effort_z} + log_context_words_plus1 + C(context_k)",
-                data.context_real,
+                entropy_context,
                 "gee_gamma_log",
             )
         )
@@ -872,7 +900,7 @@ def fit_model_zoo(data: ZooData, output_dir: Path) -> tuple[pd.DataFrame, pd.Dat
             (
                 f"Z5 Context window sensitivity | unit={unit_label}",
                 f"Does the age trajectory of information per {unit_label.lower()} change across k1/k2/k3 scoring windows?",
-                f"{outcome} ~ age_months_z * C(context_k) + {log_effort} + context_entropy_bits_z",
+                f"{outcome} ~ age_months_z * C(context_k) + {log_effort}",
                 data.context_real,
                 "gee_gaussian",
             )
@@ -882,7 +910,7 @@ def fit_model_zoo(data: ZooData, output_dir: Path) -> tuple[pd.DataFrame, pd.Dat
             (
                 f"Z6 Question-type effort | effort={effort_label}",
                 f"Does caretaker question type modulate child {effort_label.lower()}, and does that modulation change with age?",
-                f"{effort_col} ~ age_months_z * C(context_question_type) + context_entropy_bits_z + log_context_words_plus1",
+                f"{effort_col} ~ age_months_z * C(context_question_type) + log_context_words_plus1",
                 data.context_real,
                 "gee_poisson",
             )
@@ -925,7 +953,7 @@ def fit_model_zoo(data: ZooData, output_dir: Path) -> tuple[pd.DataFrame, pd.Dat
                 f"Z10 Context certainty | effort={effort_label}",
                 f"Is child {effort_label.lower()} lower when the model assigns high probability to the most likely next token?",
                 f"{effort_col} ~ age_months_z * context_next_top1_prob_z + log_context_words_plus1 + C(context_question_type)",
-                data.context_real,
+                certainty_context,
                 "gee_poisson",
             )
         )
@@ -1105,7 +1133,7 @@ def save_basic_zoo_tables(data: ZooData, output_dir: Path) -> dict[str, pd.DataF
         table.to_csv(output_dir / f"{name}.csv", index=False)
     predictor_dict = pd.DataFrame(
         [
-            {"predictor": "context_entropy_bits", "meaning": "Mistral next-token entropy after the preceding caretaker context."},
+            {"predictor": "context_entropy_bits", "meaning": "Scorer-specific next-token entropy after the preceding caretaker context."},
             {"predictor": "context_next_top1_prob", "meaning": "Probability assigned to the single most likely next token after the caretaker context."},
             {"predictor": "context_word_count", "meaning": "Surface word count of the preceding caretaker context window."},
             {"predictor": "context_question_type", "meaning": "Rule-based classification of the caretaker context as wh-question, yes/no question, other question, or not question."},
@@ -1863,41 +1891,44 @@ def plot_zoo_model_card_figures(data: ZooData, fig_dir: Path) -> None:
         ax.grid(alpha=0.20)
         save_plot(fig, fig_dir, "z9_phonological_efficiency")
 
-    # Z3, Z4, Z10
+    # Z3 and Z4 require scorer-specific next-token entropy. Keep these absent,
+    # rather than drawing empty figures, when a scorer handoff does not include
+    # that separate feature product.
     if not data.context_real.empty:
         frame = sample_for_plot(data.context_real.dropna(subset=["context_entropy_bits", "nb_words", "bits_per_word", "sum_bits"]))
-        fig, ax = plt.subplots(figsize=(8.7, 5.2))
-        sns.regplot(
-            data=frame,
-            x="context_entropy_bits",
-            y="nb_words",
-            scatter_kws={"s": 8, "alpha": 0.08},
-            line_kws={"linewidth": 2.4, "color": "#b8872d"},
-            ax=ax,
-        )
-        ax.set_title("Z3: Child Word Effort by Context Entropy")
-        ax.set_xlabel("Context entropy (bits)")
-        ax.set_ylabel("Child words")
-        ax.grid(alpha=0.20)
-        save_plot(fig, fig_dir, "z3_context_entropy_effort")
+        if not frame.empty:
+            fig, ax = plt.subplots(figsize=(8.7, 5.2))
+            sns.regplot(
+                data=frame,
+                x="context_entropy_bits",
+                y="nb_words",
+                scatter_kws={"s": 8, "alpha": 0.08},
+                line_kws={"linewidth": 2.4, "color": "#b8872d"},
+                ax=ax,
+            )
+            ax.set_title("Z3: Child Word Effort by Context Entropy")
+            ax.set_xlabel("Context entropy (bits)")
+            ax.set_ylabel("Child words")
+            ax.grid(alpha=0.20)
+            save_plot(fig, fig_dir, "z3_context_entropy_effort")
 
-        fig, ax = plt.subplots(figsize=(8.7, 5.2))
-        sns.regplot(
-            data=frame,
-            x="context_entropy_bits",
-            y="sum_bits",
-            scatter_kws={"s": 8, "alpha": 0.08},
-            line_kws={"linewidth": 2.4, "color": "#4869a8"},
-            ax=ax,
-        )
-        ax.set_title("Z4: Total Bits by Context Entropy")
-        ax.set_xlabel("Context entropy (bits)")
-        ax.set_ylabel("Total bits")
-        ax.grid(alpha=0.20)
-        save_plot(fig, fig_dir, "z4_context_entropy_density")
+            fig, ax = plt.subplots(figsize=(8.7, 5.2))
+            sns.regplot(
+                data=frame,
+                x="context_entropy_bits",
+                y="sum_bits",
+                scatter_kws={"s": 8, "alpha": 0.08},
+                line_kws={"linewidth": 2.4, "color": "#4869a8"},
+                ax=ax,
+            )
+            ax.set_title("Z4: Total Bits by Context Entropy")
+            ax.set_xlabel("Context entropy (bits)")
+            ax.set_ylabel("Total bits")
+            ax.grid(alpha=0.20)
+            save_plot(fig, fig_dir, "z4_context_entropy_density")
 
-        if "context_next_top1_prob" in frame.columns:
-            certainty = frame.dropna(subset=["context_next_top1_prob", "nb_words"])
+        certainty = sample_for_plot(data.context_real.dropna(subset=["context_next_top1_prob", "nb_words"]))
+        if not certainty.empty:
             fig, ax = plt.subplots(figsize=(8.7, 5.2))
             sns.regplot(
                 data=certainty,
@@ -2174,8 +2205,37 @@ def write_model_zoo_report(
     fig_dir: Path,
     md_path: Path,
     html_path: Path,
+    scorer_label: str = "Mistral",
+    report_title: str = "Expanded Internal Model Atlas",
 ) -> None:
     """Write the exploratory research-question model zoo report."""
+
+    def figure_href(filename: str) -> str:
+        return os.path.relpath(fig_dir / filename, start=md_path.parent).replace(os.sep, "/")
+
+    def figure_markdown(filename: str, alt: str, *, available: bool = True) -> str:
+        if not available or not (fig_dir / filename).exists():
+            return f"_Figure unavailable in this scorer run: {alt}._"
+        return f"![{alt}]({figure_href(filename)})"
+
+    entropy_available = bool(
+        "context_entropy_bits" in data.context_real.columns
+        and pd.to_numeric(data.context_real["context_entropy_bits"], errors="coerce").notna().any()
+    )
+    certainty_available = bool(
+        "context_next_top1_prob" in data.context_real.columns
+        and pd.to_numeric(data.context_real["context_next_top1_prob"], errors="coerce").notna().any()
+    )
+    context_predictability_notice = (
+        "Response-level entropy is absent, but this scorer run includes "
+        "next-token context entropy as a provisional context-predictability "
+        "measure. This is not entropy over complete possible responses."
+        if entropy_available
+        else "This scorer run includes neither response-level entropy nor "
+        "scorer-specific next-token entropy/top-k certainty features. The "
+        "Z3/Z4/Z10 families are therefore explicitly unavailable; no predictor "
+        "from another scorer is substituted."
+    )
 
     model_table = summary.copy()
     if not model_table.empty and "r2_or_observed_fitted_r2" in model_table.columns:
@@ -2331,7 +2391,7 @@ the inference is not word-only.
 trajectories. The bottom row plots real-minus-baseline differences, so zero
 means no gap and a changing line means the gap changes with age.
 
-![Child versus {variant} dashboard](../figs/utterance_information_research_model_zoo/child_vs_{variant}_dashboard.png)
+![Child versus {variant} dashboard]({figure_href(f"child_vs_{variant}_dashboard.png")})
 
 Model rows:
 
@@ -2380,6 +2440,11 @@ Key coefficients:
 
     def model_card_section(card: Mapping[str, str]) -> str:
         model_rows = rows_for_card(summary, card)
+        has_fit = bool(
+            not model_rows.empty
+            and "status" in model_rows.columns
+            and model_rows["status"].astype(str).eq("fit").any()
+        )
         coef_rows = cleaned_coef_rows(coefs, card["model"])
         if not coef_rows.empty:
             coef_rows = coef_rows[
@@ -2422,11 +2487,12 @@ subvariant in this family. Horizontal bars are approximate 95% intervals. If a
 bar crosses zero, the direction is uncertain in that subvariant; if the same
 term points the same way across subvariants, that pattern is more stable.
 
-![{card["short"]} coefficients](../figs/utterance_information_research_model_zoo/{family_coef_path.name})
+![{card["short"]} coefficients]({figure_href(family_coef_path.name)})
 """
-            if family_coef_path.exists()
+            if has_fit and family_coef_path.exists()
             else ""
         )
+        primary_plot_md = figure_markdown(card["plot"], f"{card['short']} plot", available=has_fit)
         return f"""## {card["short"]}: {card["title"]}
 
 **Question family.** {card.get("question_family", "Not specified.")}
@@ -2435,7 +2501,7 @@ term points the same way across subvariants, that pattern is more stable.
 
 **How to read this plot.** {card["plot_reading"]}
 
-![{card["short"]} plot](../figs/utterance_information_research_model_zoo/{card["plot"]})
+{primary_plot_md}
 
 **Compact result.** {card_takeaway(card)}
 
@@ -2454,11 +2520,15 @@ Family key coefficients:
 
     model_card_sections = "\n".join(model_card_section(card) for card in ZOO_CARD_DEFS)
 
-    md = f"""# Expanded Internal Model Atlas
+    md = f"""# {report_title}
 
 This is an internal modeling report, not the supervisor-facing document. Its job
 is to make the central communicative-efficiency comparisons explicit before we
 decide which results deserve promotion.
+
+Direct target scores in this run come from **{scorer_label}**. Any missing
+scorer-specific predictor family is recorded as unavailable rather than being
+silently borrowed from another scorer.
 
 ## Workflow Separation
 
@@ -2498,10 +2568,7 @@ Context entropy status:
 
 Response-level entropy features present: `{response_entropy_exists}`.
 
-If response-level entropy is absent, this report uses next-token context entropy
-as a provisional context-predictability measure. This is not the same thing as
-sampling full possible responses from the model, so final context-efficiency
-claims should wait for the response-level entropy audit.
+{context_predictability_notice}
 
 ## Derived Predictors
 
@@ -2512,7 +2579,7 @@ predictors. Darker positive cells mean two predictors rise together; darker
 negative cells mean one tends to fall when the other rises. This is a warning
 system for model design, not a result about development.
 
-![Predictor correlations](../figs/utterance_information_research_model_zoo/exploratory_predictor_correlation.png)
+{figure_markdown("exploratory_predictor_correlation.png", "Predictor correlations")}
 
 ## Model Family Manifest
 
@@ -2533,13 +2600,13 @@ from increasingly structured baselines over developmental time?
 This plot uses total utterance bits, so it is descriptive and still reflects
 utterance-size differences.
 
-![All baseline total bits](../figs/utterance_information_research_model_zoo/baseline_all_total_bits.png)
+![All baseline total bits]({figure_href("baseline_all_total_bits.png")})
 
 **How to read this plot.** This is the same baseline comparison after dividing
 total bits by word count. It is a direct information-density view, but it only
 controls word count, not phonemes, syllables, or morphemes.
 
-![All baseline bits per word](../figs/utterance_information_research_model_zoo/baseline_all_bits_per_word.png)
+![All baseline bits per word]({figure_href("baseline_all_bits_per_word.png")})
 
 Because the generated baselines are word-count matched but not necessarily
 phoneme-, syllable-, or morpheme-matched, effort profiles are checked directly.
@@ -2548,7 +2615,7 @@ phoneme-, syllable-, or morpheme-matched, effort profiles are checked directly.
 utterances differ in non-word effort units. The baselines are word-count
 matched, but they can still differ in morphemes, syllables, and phonemes.
 
-![Baseline effort profiles](../figs/utterance_information_research_model_zoo/baseline_effort_profiles_nonword_units.png)
+![Baseline effort profiles]({figure_href("baseline_effort_profiles_nonword_units.png")})
 
 Real-minus-baseline deltas:
 
@@ -2564,7 +2631,7 @@ that version. This is a model-fit overview, not the substantive effect itself:
 it shows whether the comparison model explains more or less variance depending
 on how effort is controlled.
 
-![Effort-controlled comparison model fit](../figs/utterance_information_research_model_zoo/effort_controlled_comparison_model_r2.png)
+![Effort-controlled comparison model fit]({figure_href("effort_controlled_comparison_model_r2.png")})
 
 **How to read this plot.** Each point is an age-related coefficient from an
 effort-controlled comparison model. Values to the right of zero mean the
@@ -2572,7 +2639,7 @@ age-related gap increases; values to the left mean it decreases. The same
 comparison is repeated under words, morphemes, syllables, and phonemes as
 separate effort controls.
 
-![Effort-controlled comparison age coefficients](../figs/utterance_information_research_model_zoo/effort_controlled_comparison_age_coefficients.png)
+![Effort-controlled comparison age coefficients]({figure_href("effort_controlled_comparison_age_coefficients.png")})
 
 Key comparison coefficients:
 
@@ -2596,7 +2663,7 @@ over the child's age. Because this is not row-matched, the plot is useful for a
 broad developmental contrast, not for claiming that a specific child response
 is more or less efficient than its caretaker context.
 
-![Child caretaker dashboard](../figs/utterance_information_research_model_zoo/child_vs_caretaker_dashboard.png)
+![Child caretaker dashboard]({figure_href("child_vs_caretaker_dashboard.png")})
 
 Model rows:
 
@@ -2617,20 +2684,20 @@ utterance length.
 caretaker context. A rising line would mean children use more words when the
 model sees the context as less predictive.
 
-![Context entropy and child words](../figs/utterance_information_research_model_zoo/context_entropy_child_words.png)
+{figure_markdown("context_entropy_child_words.png", "Context entropy and child words", available=entropy_available)}
 
 **How to read this plot.** This asks whether information density, not just
 utterance length, varies with context entropy. A rising line means higher bits
 per word in less predictable contexts.
 
-![Context entropy and bits per word](../figs/utterance_information_research_model_zoo/context_entropy_bits_per_word.png)
+{figure_markdown("context_entropy_bits_per_word.png", "Context entropy and bits per word", available=entropy_available)}
 
 **How to read this plot.** Lines compare child word count after different broad
 caretaker context types. This is a conversational-control check: wh-questions,
 yes/no questions, other questions, and non-questions can invite different
 response lengths.
 
-![Question type effort](../figs/utterance_information_research_model_zoo/question_type_child_words_by_age.png)
+{figure_markdown("question_type_child_words_by_age.png", "Question type effort")}
 
 Context-model rows:
 
@@ -2666,7 +2733,7 @@ outcome; negative values mean it decreases the outcome. Coefficients from
 different model families are not always on exactly the same interpretive scale,
 so use this as a map of candidates rather than as the final comparison.
 
-![Key coefficients](../figs/utterance_information_research_model_zoo/model_zoo_key_coefficients.png)
+![Key coefficients]({figure_href("model_zoo_key_coefficients.png")})
 
 ## What This Report Suggests Checking Next
 
@@ -2848,11 +2915,19 @@ def render_suite_reports_from_outputs(
     detail_html_path: Path = DETAIL_DOC_HTML,
     zoo_md_path: Path = ZOO_DOC_MD,
     zoo_html_path: Path = ZOO_DOC_HTML,
+    scorer_label: str = "Mistral",
+    report_title: str = "Expanded Internal Model Atlas",
+    render_extended: bool = True,
 ) -> Mapping[str, Path]:
     """Render internal reports from existing analysis outputs only."""
 
     sns.set_theme(style="whitegrid", context="talk")
-    write_extended_m123_report(output_dir=detail_output_dir, md_path=detail_md_path, html_path=detail_html_path)
+    if render_extended:
+        write_extended_m123_report(
+            output_dir=detail_output_dir,
+            md_path=detail_md_path,
+            html_path=detail_html_path,
+        )
     data = load_zoo_data_from_outputs(output_dir)
     summary = read_csv_if_exists(output_dir / "model_zoo_summary.csv")
     coefs = read_csv_if_exists(output_dir / "model_zoo_coefficients.csv")
@@ -2871,6 +2946,8 @@ def render_suite_reports_from_outputs(
         fig_dir=fig_dir,
         md_path=zoo_md_path,
         html_path=zoo_html_path,
+        scorer_label=scorer_label,
+        report_title=report_title,
     )
     return {
         "extended_html": detail_html_path,
@@ -2897,6 +2974,17 @@ def main(argv: Sequence[str] | None = None) -> None:
     parser.add_argument("--input", type=Path, default=ROUTE1_INPUT)
     parser.add_argument("--chunksize", type=int, default=350_000)
     parser.add_argument("--max-rows", type=int, default=None, help="Optional row cap for smoke testing.")
+    parser.add_argument("--output-dir", type=Path, default=ZOO_OUTPUT_DIR)
+    parser.add_argument("--fig-dir", type=Path, default=ZOO_FIG_DIR)
+    parser.add_argument("--zoo-md", type=Path, default=ZOO_DOC_MD)
+    parser.add_argument("--zoo-html", type=Path, default=ZOO_DOC_HTML)
+    parser.add_argument("--scorer-label", default="Mistral")
+    parser.add_argument("--report-title", default="Expanded Internal Model Atlas")
+    parser.add_argument(
+        "--skip-extended",
+        action="store_true",
+        help="Do not render the legacy M1/M2/M3 report from its separate saved outputs.",
+    )
     parser.add_argument(
         "--stage",
         choices=["all", "analysis", "extract", "model", "report"],
@@ -2909,21 +2997,36 @@ def main(argv: Sequence[str] | None = None) -> None:
     )
     args = parser.parse_args(argv)
     if args.stage in {"all", "analysis"}:
-        outputs = run_suite_analysis(input_csv=args.input, chunksize=args.chunksize, max_rows=args.max_rows)
+        outputs = run_suite_analysis(
+            input_csv=args.input,
+            output_dir=args.output_dir,
+            fig_dir=args.fig_dir,
+            chunksize=args.chunksize,
+            max_rows=args.max_rows,
+        )
         print(f"[OK] wrote/updated model zoo tables: {outputs['zoo_output_dir']}")
         print(f"[OK] wrote/updated model zoo figures: {outputs['zoo_fig_dir']}")
     if args.stage == "extract":
-        ZOO_OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
-        ZOO_FIG_DIR.mkdir(parents=True, exist_ok=True)
-        read_zoo_data(args.input, ZOO_OUTPUT_DIR, chunksize=args.chunksize, max_rows=args.max_rows)
-        print(f"[OK] wrote/updated bounded model zoo samples: {ZOO_OUTPUT_DIR}")
+        args.output_dir.mkdir(parents=True, exist_ok=True)
+        args.fig_dir.mkdir(parents=True, exist_ok=True)
+        read_zoo_data(args.input, args.output_dir, chunksize=args.chunksize, max_rows=args.max_rows)
+        print(f"[OK] wrote/updated bounded model zoo samples: {args.output_dir}")
     if args.stage == "model":
-        outputs = run_suite_modeling_from_outputs()
+        outputs = run_suite_modeling_from_outputs(output_dir=args.output_dir, fig_dir=args.fig_dir)
         print(f"[OK] refit model zoo tables from saved samples: {outputs['zoo_output_dir']}")
         print(f"[OK] replotted model zoo figures from saved samples: {outputs['zoo_fig_dir']}")
     if args.stage in {"all", "report"}:
-        outputs = render_suite_reports_from_outputs()
-        print(f"[OK] wrote extended report: {outputs['extended_html']}")
+        outputs = render_suite_reports_from_outputs(
+            output_dir=args.output_dir,
+            fig_dir=args.fig_dir,
+            zoo_md_path=args.zoo_md,
+            zoo_html_path=args.zoo_html,
+            scorer_label=args.scorer_label,
+            report_title=args.report_title,
+            render_extended=not args.skip_extended,
+        )
+        if not args.skip_extended:
+            print(f"[OK] wrote extended report: {outputs['extended_html']}")
         print(f"[OK] wrote model zoo report: {outputs['zoo_html']}")
 
 

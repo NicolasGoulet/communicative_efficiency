@@ -3,6 +3,66 @@
 Living project memory: discoveries, decisions, bugs, commands that worked, and
 current state. Prefer dated notes.
 
+## 2026-07-21 - TinyDialogues PBM and full-79 Mistral data-readiness audit
+
+- Confirmed the new TinyDialogues analysis link resolves to
+  `compute_surprisal_mila/mila_results/tinydialogues_pbm_production/20260717_201227/scored_csvs`.
+  Its relocation-aware audit is `PASS`: 504/504 outputs, 21 PBM children,
+  126 outputs in each of k0/k1/k2/k3, 84 outputs for each of real, random,
+  unigram, bigram, trigram, and caretaker, 11,605,772 scored target rows, zero
+  blank targets, zero truncated-context rows, and zero problems.
+- TinyDialogues provenance is frozen at model
+  `LaurensWink/SmolLM2-135M_variants`, checkpoint/tokenizer revision
+  `149fd0d6f069ef7b0a915474c86367c7d34c1591`, FP32, and scoring-code revision
+  `5abaf8df573b22b0365290fc9d198699c4be1206`. The local archive is
+  1,647,277,171 bytes and the handoff records SHA-256
+  `c2c0cb3a6f0e55cc97b2824ce3b418ead30ee4f41b3cf9987bec5a45012656ea`.
+- Confirmed the full-79 Mistral analysis link resolves to production run
+  `20260713_162955` and contains exactly 1,896 scored CSVs: 79 children, 474
+  files in each context, and 316 files for each of the six modes. The local
+  archive is 2,220,662,387 bytes. The sibling repository records that the
+  final 1,896-file Mila audit passed and that the archive/extracted tree are
+  the source of truth.
+- The compact full-79 final report/marker is not present beside the local
+  archive and should still be retrieved or regenerated for durable provenance.
+  This does not erase the verified file-level handoff, but it remains a
+  documentation/audit-packaging task.
+- The full-79 direct-score tree is sufficient for real-child direct-surprisal,
+  k0-versus-context context gain, n-gram candidate gaps, and many local effort
+  controls. It is not a complete full-79 predictor universe: context entropy,
+  word-level scores, LSTM, response-space, complexity, and corrected Bayes
+  products remain PBM-only or incomplete.
+- Recorded the known full-79 row-level gaps from the local predictor audit:
+  six empty generated targets create 24 blank score cells across k0-k3;
+  18,299 child rows and 2,722 caretaker rows lack preceding context; and 507
+  Providence/Naima caretaker rows need a provenance-preserving age repair to
+  36.0 months.
+- Ran the existing Route 1 builder as a strict TinyDialogues smoke over six
+  Brown/Adam k0 files (caretaker plus all five child target modes). It wrote
+  252,717 analysis rows and reported zero missing target columns, blank
+  targets, zero-word rows, missing/out-of-bin ages, nonnumeric line numbers,
+  missing scores, or matched-word-count failures. This verifies ingestion
+  compatibility but is not a scientific model result.
+- Added an exhaustive dependency-ordered roadmap to `TODO.md`: input/provenance
+  contracts, protocol freeze, model-specific tables, report-by-report
+  replication triage, TinyDialogues PBM models, paired scorer robustness,
+  individual trajectories for 21/79 children, non-PBM confirmation models,
+  testing, reporting, and completion gates.
+- Updated `AGENTS.md` so future work no longer treats the 79-child Mistral
+  scoring run as pending and does not mistake the 21-child TinyDialogues rerun
+  for an independent sample confirmation.
+
+Verification commands used for the local audit:
+
+```bash
+find -L results/external/compute_surprisal_mila/raw_surprisal_tinydialogues_pbm_21_children_all_6_conditions_k0_k1_k2_k3_fp32 -type f -name '*.csv' | wc -l
+find -L results/external/compute_surprisal_mila/raw_surprisal_cleaned_naturalistic_79_children_all_available_ages_fp16 -type f -name '*.csv' | wc -l
+.venv/bin/python src/build_route1_analysis_dataset.py --score-root tinydialogues_pbm=results/external/compute_surprisal_mila/raw_surprisal_tinydialogues_pbm_21_children_all_6_conditions_k0_k1_k2_k3_fp32 --output-csv /tmp/tinydialogues_route1_smoke.csv.gz --file-audit-csv /tmp/tinydialogues_route1_smoke_file_audit.csv --variant-audit-csv /tmp/tinydialogues_route1_smoke_variant_audit.csv --schema-json /tmp/tinydialogues_route1_smoke_schema.json --max-files 6
+```
+
+- No production report was regenerated and no scientific coefficient was fit
+  during this audit.
+
 ## 2026-07-13 - Project-state audit and agent-guidance refresh
 
 - Audited the current brain/reporting repository, the active supervisor and
@@ -6519,3 +6579,439 @@ figs/child_utterance_count_histogram/child_age_coverage_sorted_by_utterance_coun
 .venv/bin/python -m py_compile src/child_coverage_data.py src/child_coverage_plots.py src/child_coverage_report.py src/build_child_utterance_count_histogram.py
 MPLCONFIGDIR=/tmp/matplotlib .venv/bin/python src/build_child_utterance_count_histogram.py
 ```
+
+## 2026-07-13 - July formal mathematical definitions
+
+- Replaced the blank July definitions shell with a self-contained,
+  paper-oriented HTML methods page and a companion Markdown/LaTeX source:
+
+```text
+docs/july_meeting_definitions.html
+docs/july_meeting_formal_mathematical_definitions.md
+```
+
+- Traced the page's notation to the implemented computations before writing
+  it. The page now defines and keeps separate:
+  - target-only Mistral token surprisal, total utterance information, mean
+    bits per evaluated tokenizer token, and context gain;
+  - context-only next-token entropy and sampled complete-response entropy with
+    the valid-response Miller-Madow correction;
+  - exact Bayes' rule and the current unnormalized word-ngram prior-likelihood
+    decomposition, including the omitted context-evidence term;
+  - word, heuristic morpheme, syllable, and phoneme effort; information
+    density; generated expected effort; residual, z-score, and midrank
+    relative-effort summaries;
+  - additive age-bin random/ngram/LSTM generator probabilities and paired
+    baseline gaps;
+  - the current M1-M4 supervisor model sequence, fixed-effort developmental
+    estimand, response-space model, TTR, and word-based MLU.
+- Updated `src/build_july_meeting_index.py` so it promotes the formal page with
+  a description, writes the HTML and Markdown together, and no longer
+  overwrites manually developed July section pages with blank shells.
+- Added `tests/test_build_july_meeting_index.py` for scientific-content
+  boundaries, copyable LaTeX, report navigation, local-link integrity, and
+  preservation of existing section content.
+- Verification:
+
+```bash
+.venv/bin/python -m py_compile src/july_formal_definitions.py src/build_july_meeting_index.py tests/test_build_july_meeting_index.py
+.venv/bin/python src/build_july_meeting_index.py
+.venv/bin/python -m unittest tests.test_build_july_meeting_index
+.venv/bin/python -m unittest discover -s tests  # 375 tests passed in 248.317s
+```
+
+- Visual audit: rendered the complete HTML and a 1440-pixel-wide top-page
+  screenshot with headless Brave; equations, navigation, print styling, and
+  the two-column notation layout rendered cleanly.
+
+## 2026-07-13 - Scientific-design and Bayes implementation audit
+
+- Reconstructed the project questions from the original formulation, recent
+  email context, June supervisor meeting, current analysis reports, and the
+  implemented scoring/feature code. The primary distinction is now explicit:
+  the current fixed-effort result measures increasing target predictability or
+  conventionality, whereas a broad communicative-efficiency claim additionally
+  needs listener utility and effort adaptation.
+- Recorded the preferred measurement hierarchy:
+  - contextual target surprisal for predictability of the observed form;
+  - context gain `log2 p(u | c) - log2 p(u)` for contextual support;
+  - downstream caregiver-response predictive gain and validated
+    repair/clarification outcomes for listener-relevant utility;
+  - semantic response entropy, rather than exact-string entropy alone, for the
+    primary contextual-demand hypothesis;
+  - conditional effort models rather than an information/length ratio as the
+    sole efficiency outcome.
+- Recorded that the current Route 2 age by response-entropy interaction runs
+  against the simple predicted direction for the principal relative-effort
+  outcomes. This must remain visible as a contrary-direction result or
+  measurement diagnostic until replicated with a calibrated semantic-entropy
+  measure.
+- Audited the n-gram Bayes implementation and found that the algebra is valid
+  for same-context candidate ranking, but the production pilot is not suitable
+  for substantive inference:
+  - `p(c)` is absent, so scores are not normalized or comparable across
+    contexts as posterior surprisal;
+  - the full-79 training set includes the evaluated PBM real rows and pairs,
+    giving real candidates an in-sample advantage over generated candidates;
+  - with order 3 and a separator after the utterance, the candidate utterance
+    affects only the first context token through its last word;
+  - dividing the large prior-plus-context score by child utterance words mixes
+    incompatible sequence lengths and creates a severe denominator artifact;
+  - global full-79 training does not preserve age-conditioned developmental
+    exposure.
+- Scientific decision: keep the current Bayes output methods-only. A
+  publication candidate requires leave-child/corpus-out scoring,
+  age-conditioned training, explicit unknown-token handling, a
+  full-utterance-conditioned likelihood, and held-out
+  matched-versus-shuffled context validation. Context gain is the cleaner
+  immediate primary measure.
+- Confirmatory decision: retain Brown, Manchester, and Providence as the
+  21-child discovery sample. Freeze hypotheses and model choices before using
+  the remaining 58 children/10 corpora as the separate confirmation sample
+  after the full scoring run is complete and audited.
+- Updated `AGENTS.md` and `TODO.md` so future agents inherit these validity
+  constraints and priorities rather than promoting exploratory products by
+  default.
+
+## 2026-07-13 - Corrected cross-fitted PBM Bayes-derived scorer and report
+
+- Replaced the substantive use of the overlapping-training reverse-trigram
+  pilot with a corrected scorer in the sibling `bayes_efficiency_mila` repo.
+  The new path:
+  - holds out the complete evaluated PBM corpus;
+  - trains the word-trigram prior on the target age bin plus earlier bins;
+  - uses an explicit `<unk>` state;
+  - estimates context evidence from hashed whole-utterance/whole-context
+    matched-versus-shuffled features;
+  - assigns zero context evidence to empty contexts;
+  - normalizes prior-plus-evidence scores over each row's available five-way
+    candidate set.
+- Prepared and scored the local full PBM integration:
+
+```text
+training rows: 1,140,218
+candidate rows: 2,232,524
+candidate groups: 446,508
+candidate set: real, random, unigram, bigram, trigram
+```
+
+- Held-out context validation passed in every complete corpus fold:
+  - Brown: 62.2% matched-context accuracy; +0.281 mean evidence bits;
+  - Manchester: 58.8%; +0.271 bits;
+  - Providence: 58.4%; +0.327 bits.
+- Main corrected PBM findings:
+  - mean real-child candidate probability: 40.0%;
+  - real child ranked first: 43.7%, versus 20% five-way chance;
+  - prior-only real rank-first rate: 42.9%, showing that the context increment
+    is positive but modest;
+  - combined real win rates: 96.0% versus random, 73.0% versus unigram, 62.5%
+    versus bigram, and 51.5% versus trigram;
+  - context-only real win rates: 64.3%, 61.5%, 58.2%, and 55.4%, respectively;
+  - corrected-versus-Mistral paired-gap correlations: 0.628, 0.536, 0.374,
+    and 0.274 from random through trigram.
+- The 21-child bootstrap keeps mean combined log Bayes factors positive for all
+  baselines. The trigram interval for the row-win proportion crosses 50%, so
+  the supported trigram claim is positive average evidence rather than a
+  universal majority-win effect across children.
+- New supervisor-readable products:
+
+```text
+docs/corrected_pbm_bayes_report.md
+docs/corrected_pbm_bayes_report.html
+results/corrected_pbm_bayes_report/
+figs/corrected_pbm_bayes_report/
+```
+
+- The July formal-definitions source and landing page now distinguish the
+  archived unnormalized pilot from the corrected finite candidate-set score.
+- Verification commands:
+
+```bash
+cd /home/apaixonada/EvaPortelance/Projet_1/bayes_efficiency_mila
+PYTHONPYCACHEPREFIX=/tmp/bayes_efficiency_mila_pycache PYTHONPATH=src python3 -m unittest discover -s tests
+bash -n slurm/*.sbatch
+
+cd /home/apaixonada/EvaPortelance/Projet_1/communicative_efficiency
+MPLCONFIGDIR=/tmp/matplotlib .venv/bin/python -m unittest tests.test_corrected_pbm_bayes_report
+MPLCONFIGDIR=/tmp/matplotlib .venv/bin/python src/build_corrected_pbm_bayes_report.py
+.venv/bin/python src/build_july_meeting_index.py
+.venv/bin/python -m unittest discover -s tests  # 377 tests passed in 277.702s
+```
+- Clarified that raw child effort and effort relative to a sampled generator
+  are different outcomes. Generated expected effort can be part of the same
+  context-demand pathway, so the primary total-association model should be
+  reported separately from models that condition on or subtract this
+  model-based reference. Also recorded that next-token entropy does not replace
+  whole-response entropy.
+
+## 2026-07-14 - Full-79 LSTM selection and Slurm production contract
+
+- Audited the existing baseline artifacts and separated two states that older
+  notes had conflated. PBM LSTM generation and Mistral scoring are complete for
+  k3/k4/k5, whereas the full-79 production generation completed only the
+  random/unigram/bigram/trigram baselines. No full-79 LSTM checkpoints or
+  generated outputs were found.
+- Used the PBM real-versus-controls report to select one LSTM condition rather
+  than repeat all three context windows. Mean k3-scored surprisal was 33.06 bits
+  for LSTM k3, 33.09 for k4, and 33.08 for k5; the corresponding mean
+  source-minus-real gaps were 1.707, 1.798, and 1.799 bits. Fixed-effort models
+  do not identify one uniform winner. The production choice is therefore k3:
+  it is the simplest primary-context model, has the smallest aggregate gap, and
+  avoids selecting k5 from one favorable discovery-sample specification.
+- Retained eight models, one for each additive age bin. This is the minimum
+  scientifically matched design: each checkpoint trains on the target bin and
+  all earlier bins, then generates only the target-bin rows. Fewer checkpoints
+  would either leak future-age language into early bins or abandon the
+  developmental information constraint used by the n-gram controls.
+- Selected same-length generation only. Free-length generation remains
+  available in the implementation but changes the effort estimand and is not
+  part of this production comparison. The selection reduces the planned work
+  from 24 models (k3/k4/k5 times eight bins) to eight models.
+- Implemented the production contract in the sibling
+  `generate_baselines_mila` repository. It includes the word-level
+  encoder-decoder LSTM, child-only output vocabulary, epoch-boundary resume
+  state, atomic artifacts, real-bundle preparation, row/context audits, and a
+  Slurm DAG:
+  CPU preparation -> exact-wrapper GPU smoke -> wave 1 -> audit -> wave 2 ->
+  audit -> final audit. Production completion requires the final
+  `COMPLETE_AND_AUDITED` marker.
+- The real local CPU preparation audit passed against
+  `default_naturalistic_merged_006_023`: 79 children, 13 corpora, 1,140,218
+  rows, eight cells, zero duplicate row IDs, and zero k3 context-alignment
+  mismatches. Target-bin row counts were 82,720; 303,956; 276,219; 224,453;
+  84,052; 93,547; 49,783; and 25,488 from `006-023` through `060-065`.
+- Verification in `generate_baselines_mila`:
+
+```bash
+PYTHONPYCACHEPREFIX=/tmp/generate_baselines_mila_pycache PYTHONPATH=src python3 -m unittest discover -s tests
+PYTHONPYCACHEPREFIX=/tmp/generate_baselines_mila_torch_pycache PYTHONPATH=src /home/apaixonada/EvaPortelance/Projet_1/communicative_efficiency/.venv/bin/python -m unittest discover -s tests
+bash -n slurm/*.sbatch slurm/*.sh
+git diff --check
+```
+
+  Both test runs passed 13 tests. The system-Python run skipped one Torch test;
+  the Torch-enabled run exercised tiny seq2seq training and resume and skipped
+  two no-Torch-specific tests.
+- Mila SSH inspection stopped at keyboard-interactive authentication, so the
+  remote Python/CUDA environment and bundle path still need verification. No
+  Slurm job was submitted, no new LSTM was claimed as trained, and the sibling
+  repository changes remain uncommitted locally.
+
+## 2026-07-21 - TinyDialogues PBM and full-79 Mistral direct-surprisal analyses
+
+- Froze `docs/direct_surprisal_replication_protocol_2026-07-21.md` before
+  fitting the 58-child non-PBM estimates. The protocol separates PBM scorer
+  robustness, non-PBM sample confirmation, and pooled-79 description; defines
+  P1 contextual k3 surprisal, P2 unconditional k0 surprisal, and P3 context
+  gain `k0 - k3`; and fixes directions, eligibility, child clustering,
+  bootstrapping, nonlinear forms, and onset rules.
+- Added an atomic streaming wide-table builder with exact source/target/context
+  alignment and scorer provenance. The TinyDialogues run produced 446,508
+  child rows and 668,903 caretaker rows from all 504 expected files, with zero
+  blank targets, missing scores, zero-token scores, key mismatches, or target
+  mismatches. The Mistral run produced 1,140,695 child and 1,470,154 caretaker
+  rows from all 1,896 expected files across 79 children and 13 corpora, with
+  zero key/target mismatches.
+- The Mistral audit reproduced exactly 24 missing generated-baseline cells: six
+  blank bigram/trigram targets across k0-k3. No real-child score is missing.
+  Context-availability flags are retained, and filename-derived age provenance
+  recovers the known Providence/Naima caretaker age.
+- Added and ran a frozen direct-score suite with child-fixed exact/top-coded
+  word-effort models, child-clustered covariance, quadratic age, frozen age-bin
+  contrasts, Mundlak and GEE sensitivities, 200 child-bootstrap replicates,
+  leave-one-child/corpus influence estimates, candidate-gap models, prediction
+  grids, and individual trajectories.
+- TinyDialogues PBM P1 was negative: -0.2218 bits/month, clustered 95% CI
+  [-0.3115, -0.1322]. P2 was -0.2538 [-0.3393, -0.1682]. P3 context gain was
+  -0.0322 [-0.0504, -0.0139], contrary to the frozen positive prediction. All
+  20 attempted Tiny fits passed, and all 21 child profiles were produced.
+- Mistral non-PBM P1 was -0.0622 [-0.1318, 0.0073]. Its direction matches the
+  prediction, but the frozen primary clustered interval includes zero, so the
+  primary confirmation rule is not met. The prespecified child-bootstrap
+  interval was [-0.1520, -0.0142]; both results are retained rather than
+  choosing after inspection. Non-PBM P2 was -0.0892 [-0.1445, -0.0339], and
+  P3 was -0.0278 [-0.0453, -0.0102], again contrary to the positive P3
+  prediction. All 60 Mistral fit attempts passed.
+- The all-79 Mistral estimate, labeled descriptive, was P1 -0.0797 [-0.1344,
+  -0.0249], P2 -0.1075 [-0.1560, -0.0590], and P3 -0.0287 [-0.0410,
+  -0.0164]. The analysis wrote 79 all-child profiles, 58 separate non-PBM
+  profiles, and 21 PBM profiles.
+- Exact cross-scorer joining found 446,508 paired PBM rows with zero unexplained
+  source/target/context mismatches. The 477 right-only Mistral rows are all the
+  documented later Providence/Naima source patch, absent from the earlier
+  TinyDialogues run. Paired k3 Spearman agreement was 0.811 (within-child
+  0.803). Tiny P1 was 0.089 bits/month more negative than Mistral, with paired
+  child-bootstrap interval [-0.152, -0.028]. The P3 slope difference interval
+  included zero. Twenty-one paired child overlay profiles were written from
+  981 exact shared child-age-session cells; the one Mistral-only Naima session
+  cell is explicitly audited.
+- Main landing page:
+  `docs/direct_surprisal_replication_index.html`. Detailed reports are
+  `docs/tinydialogues_pbm_direct_surprisal_replication.html`,
+  `docs/mistral_full79_direct_surprisal_replication.html`,
+  `docs/paired_tinydialogues_mistral_pbm_report.html`, and
+  `docs/paired_tinydialogues_mistral_child_trajectories.html`.
+- Built the complete standalone TinyDialogues Route-1 long table from all 504
+  files at
+  `results/direct_surprisal_replication/tinydialogues_pbm/route1_scored_utterance_effort_long.csv.gz`.
+  It contains 11,605,772 rows and includes exact-target word, morpheme,
+  syllable, and phoneme effort. All source-file audit error columns sum to zero.
+- Refit the applicable legacy Route-1/model-atlas families from bounded saved
+  samples and published `docs/tinydialogues_pbm_route1_model_atlas.html`.
+  Forty-one of 56 direct model-zoo subvariants and all 45 explicit comparison
+  models fit. The 15 Z3/Z4/Z10 entropy/certainty subvariants are recorded as
+  `empty data`, because no TinyDialogues-specific next-token entropy/top-k
+  handoff exists. Fixed a report-pipeline bug that had previously standardized
+  an entirely absent predictor to zero and could therefore display false
+  zero-coefficient “fits”; absent columns now remain missing, direct context
+  models Z5/Z6 remain usable, and unavailable figures are labeled rather than
+  embedded from stale files. The final Markdown links 29 existing images, has
+  zero missing image links, and contains no false zero entropy coefficients.
+
+## 2026-07-21 - Modular direct-score coverage and plot-led reports
+
+- Added `src/build_direct_surprisal_modular_analysis.py` with four independent
+  stages: `datasets`, `models`, `plots`, and `report`. Every stage consumes only
+  the immediately upstream saved artifacts and writes a chained JSON manifest.
+  Plot or prose changes therefore do not reread the 415 MB/1.06 GB child-wide
+  inputs or refit models.
+- The TinyDialogues dataset stage prepared 14 child/caretaker design-cell
+  files from 446,508 child and 668,903 caretaker rows. The Mistral stage
+  prepared 42 files for PBM, non-PBM, and pooled descriptive scopes from
+  1,140,695 child and 1,470,154 caretaker rows.
+- Extended the applicable direct-score ladder with top-coded linear-effort and
+  0.5% tail-trim sensitivities, random-intercept and random-age-slope mixed
+  models, 200 corpus bootstraps, 200 within-child age permutations, child
+  bootstrap for every n-gram candidate gap, full leave-one-child/corpus
+  influence, and separate caretaker-input k3/k0/context-gain models.
+- TinyDialogues wrote 34 model rows: 31 ordinary passes, 3 singular/boundary
+  mixed sensitivities, 0 nonconverged fits, and 0 failures. Mistral wrote 102:
+  93 ordinary passes, 8 singular/boundary mixed sensitivities, 1 nonconverged
+  mixed sensitivity, and 0 failures. Mixed models use unweighted exact design
+  cells and remain sensitivity estimands; all warning text is retained.
+- Added short plot-led reports at `docs/tinydialogues_pbm_visual_summary.html`
+  and `docs/mistral_full79_visual_summary.html`. Each has one compact headline
+  table and visual sections for raw trajectories, primary estimates, estimator
+  robustness, age bins, resampling, influence, candidate gaps, child
+  heterogeneity, caretaker input, data coverage, and model-family coverage.
+  Individual profiles are moved to separate scorer-specific galleries.
+- Plot audits pass with zero missing files: 32 Tiny figures including 21 child
+  profiles, and 171 Mistral figures including 158 scope-specific profiles (21
+  PBM, 58 non-PBM, and 79 pooled descriptive).
+- Documented rerun contracts and commands in
+  `docs/direct_surprisal_modular_pipeline.md` and added a model-family coverage
+  CSV/plot distinguishing complete, warning-bearing, partial, pending, and
+  unavailable families.
+- Focused verification performed during implementation:
+
+```bash
+MPLCONFIGDIR=/tmp/matplotlib .venv/bin/python -m unittest \
+  tests.test_build_direct_surprisal_model_suite \
+  tests.test_build_paired_direct_surprisal_comparison \
+  tests.test_build_direct_surprisal_wide_table
+MPLCONFIGDIR=/tmp/matplotlib .venv/bin/python -m unittest \
+  tests.test_build_paired_child_trajectory_overlays
+MPLCONFIGDIR=/tmp/matplotlib .venv/bin/python -m unittest \
+  tests.test_build_route1_model_report_suite.Route1ModelReportSuiteTests.test_read_zoo_data_allows_absent_scorer_specific_entropy
+```
+
+  The first command passed five tests, the overlay command passed two tests,
+  and the final focused Route-1 suite passed **10 tests in 53.185 seconds**.
+  The full repository suite was then run with `CUDA_VISIBLE_DEVICES=''` and
+  passed **386 tests in 322.418 seconds**. Expected small-fixture Statsmodels convergence,
+  perfect-separation, singular-fit, and numerical warnings occurred; there
+  were no test failures. An immediately preceding attempt aborted during a
+  transient PyTorch `ApproximateClock` CUDA-library initialization assertion;
+  importing Torch and the complete CUDA-disabled rerun both then succeeded.
+
+## 2026-07-21 - Expanded paired-scorer visual analysis
+
+- Added `src/build_paired_direct_surprisal_visual_analysis.py` with independent
+  `models`, `plots`, and `report` stages above the immutable exact paired PBM
+  table. The model stage does not create figures; plot and report reruns do not
+  reread or refit the 446,508-row paired table.
+- Fit 11 paired developmental outcomes: real k0/k1/k2/k3 target score, k1/k2/k3
+  context gain, and random/unigram/bigram/trigram minus-real gaps. Every outcome
+  has a paired 200-child-bootstrap slope-difference interval. P1/P2/P3 also
+  have frozen age-bin contrasts, and P1/P3 plus all four gaps have supported
+  child-specific slope comparisons.
+- TinyDialogues minus Mistral P1 was -0.0890 bits/month with paired interval
+  [-0.1515, -0.0276]. The P3 slope difference was -0.0027 with interval
+  [-0.0442, 0.0266]. Eighteen of 21 supported P1 child slopes had the same sign
+  across scorers.
+- Published `docs/paired_tinydialogues_mistral_visual_summary.html` with seven
+  plot-led sections and one compact three-row table. Its plot audit records
+  7/7 figures present. Visual inspection led to replacing overlapping point
+  labels with an external legend and correcting the token diagnostic wording:
+  the recorded evaluated-token-count median ratio is 1.0, while the shared
+  lexical-word-normalized score scales still differ substantially.
+- Added an end-to-end staged test in
+  `tests/test_build_paired_direct_surprisal_visual_analysis.py`; its initial
+  focused run passed one test in 1.081 seconds after fixture-derived
+  bits-per-word fallback and interval-plot fixes.
+- Added paired quadratic-age coefficient bootstraps for P1/P2/P3 and explicit
+  candidate age-bin rankings/source-by-age interactions. Trigram, bigram,
+  unigram, and random candidates retain the same closest-to-farthest ordering
+  under both scorers in every age bin. The source interaction formula allows
+  candidate-specific age, child, and word-count effects, so each reference
+  slope reproduces its separately fitted candidate-gap model.
+- Final verification command:
+
+```bash
+CUDA_VISIBLE_DEVICES='' MPLCONFIGDIR=/tmp/mpl-cache \
+  .venv/bin/python -m unittest discover -s tests
+```
+
+  It passed **388 tests in 301.226 seconds**. Expected small-fixture
+  Statsmodels convergence, boundary, perfect-separation, rank, and numerical
+  warnings occurred; there were no failures. The final report-link audit found
+  zero missing images across 11 Tiny visual-summary figures, 13 Mistral
+  visual-summary figures, 7 paired figures, 21 Tiny child profiles, and 158
+  Mistral scope-specific child profiles.
+
+## 2026-07-22 - Usable direct-score results explorer
+
+- Replaced the report-first consultation path with
+  `docs/direct_surprisal_results_explorer.html`, generated from saved artifacts
+  by `src/build_direct_surprisal_results_explorer.py`. Rebuilding the explorer
+  does not rebuild datasets, refit models, or redraw plots.
+- The explorer exposes all 136 fitted model-summary records. It defaults to 12
+  primary records and supports scorer, sample, family, status, and text
+  filters. Every model card includes the scientific question, plain-language
+  result, coefficient/interval visual, model ID, exact formula, estimator,
+  controls, utterance/design-cell/child/corpus counts, protocol reading, key
+  age terms, and retained warnings.
+- Added a 31-figure click-to-enlarge plot browser, a searchable browser over
+  179 scorer/scope child profiles that shows one child at a readable size, 30
+  model-family coverage records, paired-scorer summaries, and a statistical
+  glossary. The HTML contains zero result tables.
+- Audited a 1440-pixel rendered page in headless Brave, including the model,
+  plot, child, coverage, and glossary sections. Embedded JavaScript syntax
+  passed; the embedded-data audit found 136 models, 12 default primary cards,
+  31 plots, 179 profiles, 30 coverage rows, and zero missing assets.
+- Added `tests/test_build_direct_surprisal_results_explorer.py`; the focused
+  test passed in 0.025 seconds.
+- Final repository verification passed **390 tests in 305.235 seconds** with
+  `CUDA_VISIBLE_DEVICES='' MPLCONFIGDIR=/tmp/mpl-cache`. Expected
+  small-fixture convergence, perfect-separation, rank, boundary, and numerical
+  warnings occurred; there were no failures.
+
+## 2026-07-22 - Preservation and roadmap reconciliation
+
+- Reconciled the authoritative `TODO.md` current-focus section against the
+  completed July 21/22 modular direct-score work. The dated lower sections are
+  retained as audit history, but stale unchecked duplicates no longer define
+  the active project state.
+- Created branch `agent/project-status-closeout` to preserve the previously
+  uncommitted July analysis/report implementation before further scientific
+  changes.
+- Fresh full-suite verification command:
+
+```bash
+CUDA_VISIBLE_DEVICES='' MPLCONFIGDIR=/tmp/mpl-cache \
+  .venv/bin/python -m unittest discover -s tests
+```
+
+  The clean-cache run passed **390 tests in 1767.508 seconds**. Expected
+  Statsmodels convergence, perfect-separation, singular/rank, plotting, and
+  small-fixture numerical warnings occurred; there were no failures.

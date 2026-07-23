@@ -1,0 +1,269 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TinyDialogues PBM: Child Trajectories</title>
+<style>
+:root {
+  color-scheme: light;
+  --ink: #1e2528;
+  --muted: #5e686d;
+  --line: #d9e0df;
+  --paper: #ffffff;
+  --soft: #f5f7f6;
+  --accent: #2f6f73;
+  --accent2: #c76f2c;
+}
+body {
+  margin: 0;
+  background: #eef2f1;
+  color: var(--ink);
+  font: 16px/1.58 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+main {
+  max-width: 980px;
+  margin: 34px auto 56px;
+  padding: 48px 58px;
+  background: var(--paper);
+  box-shadow: 0 18px 50px rgba(31, 45, 48, 0.12);
+}
+h1, h2, h3, h4 {
+  line-height: 1.18;
+  margin: 1.6em 0 0.55em;
+}
+h1 {
+  margin-top: 0;
+  font-size: 2.25rem;
+  border-bottom: 3px solid var(--accent);
+  padding-bottom: 0.45em;
+}
+h2 {
+  font-size: 1.55rem;
+  color: var(--accent);
+}
+h3 {
+  font-size: 1.18rem;
+}
+p {
+  margin: 0.75em 0;
+}
+a {
+  color: var(--accent);
+}
+blockquote {
+  border-left: 4px solid var(--accent2);
+  margin: 1.1em 0;
+  padding: 0.05em 1.1em;
+  color: var(--muted);
+  background: #fff8f2;
+}
+code {
+  background: var(--soft);
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  padding: 0.08em 0.3em;
+  font-family: "SFMono-Regular", Consolas, monospace;
+  font-size: 0.92em;
+}
+pre {
+  background: #f5f7f6;
+  color: var(--ink);
+  border: 1px solid var(--line);
+  padding: 1em;
+  overflow-x: auto;
+  border-radius: 7px;
+}
+pre code {
+  background: transparent;
+  border: 0;
+  padding: 0;
+  color: inherit;
+}
+table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 1.15em 0 1.45em;
+  font-size: 0.95em;
+}
+.plot-layout {
+  table-layout: fixed;
+  margin: 1.1em auto 1.45em;
+}
+.plot-layout,
+.plot-layout tr,
+.plot-layout td {
+  border: 0;
+  background: transparent;
+}
+.plot-layout td {
+  padding: 0.35em 0.55em 0.95em;
+  text-align: center;
+  vertical-align: top;
+}
+.plot-layout img {
+  width: 100%;
+  max-width: 100%;
+  margin: 0 auto 0.35em;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: white;
+}
+.plot-layout .centered-cell img {
+  width: 54%;
+}
+.plot-caption {
+  color: var(--muted);
+  font-size: 0.85em;
+  line-height: 1.35;
+}
+th, td {
+  border: 1px solid var(--line);
+  padding: 0.54em 0.68em;
+  vertical-align: top;
+}
+th {
+  background: #e7efed;
+  text-align: left;
+}
+tr:nth-child(even) td {
+  background: #fafbfb;
+}
+.plot-layout tr:nth-child(even) td {
+  background: transparent;
+}
+img {
+  max-width: 100%;
+  display: block;
+  margin: 1.1em auto 0.45em;
+}
+.figure-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.05rem 1.25rem;
+  align-items: start;
+  margin: 1.1em 0 1.45em;
+}
+.figure-grid.two-one {
+  max-width: 900px;
+  margin-left: auto;
+  margin-right: auto;
+}
+.figure-grid.five-panel {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+.figure-grid figure {
+  margin: 0;
+}
+.figure-grid img {
+  width: 100%;
+  max-width: 100%;
+  margin: 0;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: white;
+}
+.figure-grid figcaption {
+  color: var(--muted);
+  font-size: 0.85em;
+  line-height: 1.35;
+  text-align: center;
+  margin-top: 0.35em;
+}
+.figure-grid .centered {
+  grid-column: 1 / -1;
+  justify-self: center;
+  max-width: 58%;
+}
+.figure-grid.two-one .centered {
+  max-width: 54%;
+}
+.figure-grid.five-panel .centered {
+  max-width: 52%;
+}
+ul, ol {
+  padding-left: 1.4em;
+}
+.caption {
+  color: var(--muted);
+  font-size: 0.92em;
+  margin-top: -0.15em;
+}
+@media print {
+  body {
+    background: white;
+  }
+  main {
+    box-shadow: none;
+    margin: 0;
+    max-width: none;
+    padding: 28px;
+  }
+}
+@media screen and (max-width: 540px) {
+  .figure-grid {
+    grid-template-columns: 1fr;
+  }
+  .figure-grid .centered,
+  .figure-grid.five-panel .centered {
+    grid-column: auto;
+    max-width: 100%;
+  }
+}
+</style>
+</head>
+<body>
+<main>
+<h1>TinyDialogues PBM: Individual Child Trajectories</h1>
+<p>Each point is a child-session-age mean. Point size reflects utterance count. Straight lines are shown only for children meeting the prespecified support rule. These child fits are descriptive and are not individually multiplicity-adjusted.</p>
+<h2>pbm_discovery</h2>
+<h3>Brown</h3>
+<h4>Brown/Adam</h4>
+<img src="../figs/direct_surprisal_replication/tinydialogues_pbm/modular_visual/pbm_discovery/children/brown_adam.png" alt="Brown/Adam">
+<h4>Brown/Eve</h4>
+<img src="../figs/direct_surprisal_replication/tinydialogues_pbm/modular_visual/pbm_discovery/children/brown_eve.png" alt="Brown/Eve">
+<h4>Brown/Sarah</h4>
+<img src="../figs/direct_surprisal_replication/tinydialogues_pbm/modular_visual/pbm_discovery/children/brown_sarah.png" alt="Brown/Sarah">
+<h3>Manchester</h3>
+<h4>Manchester/Anne</h4>
+<img src="../figs/direct_surprisal_replication/tinydialogues_pbm/modular_visual/pbm_discovery/children/manchester_anne.png" alt="Manchester/Anne">
+<h4>Manchester/Aran</h4>
+<img src="../figs/direct_surprisal_replication/tinydialogues_pbm/modular_visual/pbm_discovery/children/manchester_aran.png" alt="Manchester/Aran">
+<h4>Manchester/Becky</h4>
+<img src="../figs/direct_surprisal_replication/tinydialogues_pbm/modular_visual/pbm_discovery/children/manchester_becky.png" alt="Manchester/Becky">
+<h4>Manchester/Carl</h4>
+<img src="../figs/direct_surprisal_replication/tinydialogues_pbm/modular_visual/pbm_discovery/children/manchester_carl.png" alt="Manchester/Carl">
+<h4>Manchester/Dominic</h4>
+<img src="../figs/direct_surprisal_replication/tinydialogues_pbm/modular_visual/pbm_discovery/children/manchester_dominic.png" alt="Manchester/Dominic">
+<h4>Manchester/Gail</h4>
+<img src="../figs/direct_surprisal_replication/tinydialogues_pbm/modular_visual/pbm_discovery/children/manchester_gail.png" alt="Manchester/Gail">
+<h4>Manchester/Joel</h4>
+<img src="../figs/direct_surprisal_replication/tinydialogues_pbm/modular_visual/pbm_discovery/children/manchester_joel.png" alt="Manchester/Joel">
+<h4>Manchester/John</h4>
+<img src="../figs/direct_surprisal_replication/tinydialogues_pbm/modular_visual/pbm_discovery/children/manchester_john.png" alt="Manchester/John">
+<h4>Manchester/Liz</h4>
+<img src="../figs/direct_surprisal_replication/tinydialogues_pbm/modular_visual/pbm_discovery/children/manchester_liz.png" alt="Manchester/Liz">
+<h4>Manchester/Nicole</h4>
+<img src="../figs/direct_surprisal_replication/tinydialogues_pbm/modular_visual/pbm_discovery/children/manchester_nicole.png" alt="Manchester/Nicole">
+<h4>Manchester/Ruth</h4>
+<img src="../figs/direct_surprisal_replication/tinydialogues_pbm/modular_visual/pbm_discovery/children/manchester_ruth.png" alt="Manchester/Ruth">
+<h4>Manchester/Warren</h4>
+<img src="../figs/direct_surprisal_replication/tinydialogues_pbm/modular_visual/pbm_discovery/children/manchester_warren.png" alt="Manchester/Warren">
+<h3>Providence</h3>
+<h4>Providence/Alex</h4>
+<img src="../figs/direct_surprisal_replication/tinydialogues_pbm/modular_visual/pbm_discovery/children/providence_alex.png" alt="Providence/Alex">
+<h4>Providence/Ethan</h4>
+<img src="../figs/direct_surprisal_replication/tinydialogues_pbm/modular_visual/pbm_discovery/children/providence_ethan.png" alt="Providence/Ethan">
+<h4>Providence/Lily</h4>
+<img src="../figs/direct_surprisal_replication/tinydialogues_pbm/modular_visual/pbm_discovery/children/providence_lily.png" alt="Providence/Lily">
+<h4>Providence/Naima</h4>
+<img src="../figs/direct_surprisal_replication/tinydialogues_pbm/modular_visual/pbm_discovery/children/providence_naima.png" alt="Providence/Naima">
+<h4>Providence/Violet</h4>
+<img src="../figs/direct_surprisal_replication/tinydialogues_pbm/modular_visual/pbm_discovery/children/providence_violet.png" alt="Providence/Violet">
+<h4>Providence/William</h4>
+<img src="../figs/direct_surprisal_replication/tinydialogues_pbm/modular_visual/pbm_discovery/children/providence_william.png" alt="Providence/William">
+</main>
+</body>
+</html>
