@@ -3,6 +3,60 @@
 Living project memory: discoveries, decisions, bugs, commands that worked, and
 current state. Prefer dated notes.
 
+## 2026-07-22 - Supervisor synthesis, artifact freeze, and Mila handoff
+
+- Replaced the stale June supervisor report with a current July synthesis in
+  `docs/predicting_utterance_level_information_report.md` and regenerated its
+  ordinary and embedded HTML. The report now separates PBM discovery,
+  non-PBM confirmation, and pooled description; keeps contextual,
+  unconditional, and context-gain outcomes distinct; reports that the frozen
+  non-PBM primary interval crosses zero; and retains the contrary-direction
+  context-gain and Route 2 findings.
+- Promoted the completed PBM additive LSTM, corrected cross-fitted Bayes, and
+  paired TinyDialogues/Mistral results without broadening them beyond their
+  actual samples or treating raw bits across tokenizers as interchangeable.
+- Verified all six promoted figure paths and all five consultation links in
+  the supervisor Markdown. Re-rendered both HTML forms.
+- Recorded SHA-256 checksums for the local compressed score archives:
+  `ff0bf42754fc6ccb8278db7a588cef1083ca18a944032b9ce9e1179341448a81`
+  for Mistral full-79 run `20260713_162955`, and
+  `c2c0cb3a6f0e55cc97b2824ce3b418ead30ee4f41b3cf9987bec5a45012656ea`
+  for TinyDialogues PBM run `20260717_201227`. The freeze record is
+  `docs/direct_surprisal_artifact_freeze_2026-07-22.md`.
+- Wrote `docs/mila_handoff_commands_2026-07-22.md`, separating commands that
+  must run on the laptop from those that must run on Mila. It includes the
+  missing Mistral compact-report/marker retrieval, input-bundle rsync and hash
+  verification, CUDA/partition preflight, exact full-79 LSTM DAG submission,
+  monitoring, full retrieval, and checksum dry-run. It deliberately stops
+  before Mistral scoring because that full-79 scoring wrapper is not yet
+  implemented or audited.
+- Audited and preserved the sibling `generate_baselines_mila` full-79 LSTM
+  implementation. Added explicit `--ntasks=1` requests to all three batch
+  wrappers and all seven `sbatch` calls, plus a fake-submitter regression
+  assertion. Committed as `134f4df4eb3bc60df93fe1dfee72811012b08ea2`,
+  pushed `agent/full79-lstm-production`, and opened draft PR
+  <https://github.com/NicolasGoulet/generate_baselines_mila/pull/1>. No Mila
+  login, rsync, allocation, or job submission was performed after the user
+  reserved remote interaction for themselves.
+
+Verification performed locally:
+
+```bash
+CUDA_VISIBLE_DEVICES='' MPLCONFIGDIR=/tmp/mpl-cache .venv/bin/python -m unittest discover -s tests
+.venv/bin/python -m unittest tests.test_build_route1_report_assets tests.test_build_direct_surprisal_results_explorer tests.test_build_direct_surprisal_modular_analysis tests.test_build_paired_direct_surprisal_visual_analysis
+PYTHONPYCACHEPREFIX=/tmp/generate_baselines_mila_pycache PYTHONPATH=/home/apaixonada/EvaPortelance/Projet_1/generate_baselines_mila/src .venv/bin/python -m unittest discover -s /home/apaixonada/EvaPortelance/Projet_1/generate_baselines_mila/tests
+bash -n /home/apaixonada/EvaPortelance/Projet_1/generate_baselines_mila/slurm/*.sbatch /home/apaixonada/EvaPortelance/Projet_1/generate_baselines_mila/slurm/*.sh
+git diff --check
+```
+
+- Main suite: 390 tests passed in 1767.508 seconds with expected model-fit
+  warnings and no failures.
+- Focused report/direct-score suite: 10 tests passed in 76.838 seconds with
+  expected small-fixture Statsmodels warnings.
+- Sibling LSTM suite after single-task hardening: 13 tests passed in 13.163
+  seconds; two environment-dependent tests were skipped. Shell syntax and
+  whitespace audits passed.
+
 ## 2026-07-21 - TinyDialogues PBM and full-79 Mistral data-readiness audit
 
 - Confirmed the new TinyDialogues analysis link resolves to

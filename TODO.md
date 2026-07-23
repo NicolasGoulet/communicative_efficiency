@@ -38,21 +38,27 @@ items were superseded or completed by the later modular direct-score workflow.
 
 ### Immediate preservation and reporting
 
-- [ ] Retrieve or regenerate the compact full-79 final report and
-      `COMPLETE_AND_AUDITED` marker beside the local Mistral archive; record a
-      checksum and link it from the analysis manifest.
-- [ ] Freeze an immutable input manifest for each scorer with model/tokenizer
-      revision, dtype, scoring revision, source/archive checksum, file and row
-      counts, and audit status.
-- [ ] Reconcile `docs/predicting_utterance_level_information_report.md` and its
+- [x] Freeze the two local scored-archive checksums plus compact analysis-audit
+      hashes in `docs/direct_surprisal_artifact_freeze_2026-07-22.md`. The
+      Mistral archive SHA-256 is now recorded even though its compact remote
+      report/marker is not yet local.
+- [ ] Retrieve the compact full-79 final report and `COMPLETE_AND_AUDITED`
+      marker beside the local Mistral archive. Use the exact laptop commands in
+      `docs/mila_handoff_commands_2026-07-22.md`; recover the exact Mistral
+      model/tokenizer and scoring-code revisions from that report if present.
+- [x] Reconcile `docs/predicting_utterance_level_information_report.md` and its
       HTML with the July direct-score replication, corrected Bayes result,
       completed PBM LSTM work, Route 2 contrary-direction result, and current
       interpretation limits.
-- [ ] Audit all promoted Markdown/HTML pages for missing images, stale scope or
+- [x] Audit the reconciled supervisor report's six promoted figures and five
+      consultation links; render both ordinary and embedded HTML and run the
+      focused report/direct-score tests.
+- [ ] Audit all other promoted Markdown/HTML pages for missing images, stale scope or
       scorer language, raw-tokenizer scale comparisons, and unsupported claims
       about information, efficiency, onset, or confirmation.
-- [ ] Keep source/tests/lightweight reports in Git, keep large data/results out
-      of Git, and publish the reviewed 2026-07-21/22 implementation changes.
+- [x] Keep source/tests/lightweight reports in Git, keep large data/results out
+      of Git, and publish the reviewed 2026-07-21/22 implementation changes on
+      `agent/project-status-closeout` with a draft pull request.
 
 ### Primary scientific work still open
 
@@ -77,10 +83,16 @@ items were superseded or completed by the later modular direct-score workflow.
 
 ### Compute extensions that do not block the core direct-score result
 
+- [x] Preserve the implemented full-79 LSTM generation workflow in
+      `generate_baselines_mila` commit
+      `134f4df4eb3bc60df93fe1dfee72811012b08ea2`, add explicit single-task
+      Slurm requests, pass its local tests/shell audit, push the branch, and
+      open draft PR #1. No Mila job was submitted.
 - [ ] Run the smoke-gated full-79 k3 same-length LSTM DAG in
       `generate_baselines_mila`, retrieve its compact reports and final marker,
       then score and analyze the generated targets under a model-specific
-      handoff contract.
+      handoff contract. Follow `docs/mila_handoff_commands_2026-07-22.md` only
+      through the explicit generation/retrieval stop point.
 - [ ] Decide after scientific review whether full-79 TinyDialogues scoring,
       full-79 context entropy/word-level surprisal, or a scored generated
       response cloud is worth the additional compute.
