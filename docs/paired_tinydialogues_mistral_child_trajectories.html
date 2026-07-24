@@ -1,0 +1,478 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Paired PBM Child Trajectories</title>
+<style>
+:root {
+  color-scheme: light;
+  --ink: #1e2528;
+  --muted: #5e686d;
+  --line: #d9e0df;
+  --paper: #ffffff;
+  --soft: #f5f7f6;
+  --accent: #2f6f73;
+  --accent2: #c76f2c;
+}
+body {
+  margin: 0;
+  background: #eef2f1;
+  color: var(--ink);
+  font: 16px/1.58 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+main {
+  max-width: 980px;
+  margin: 34px auto 56px;
+  padding: 48px 58px;
+  background: var(--paper);
+  box-shadow: 0 18px 50px rgba(31, 45, 48, 0.12);
+}
+h1, h2, h3, h4 {
+  line-height: 1.18;
+  margin: 1.6em 0 0.55em;
+}
+h1 {
+  margin-top: 0;
+  font-size: 2.25rem;
+  border-bottom: 3px solid var(--accent);
+  padding-bottom: 0.45em;
+}
+h2 {
+  font-size: 1.55rem;
+  color: var(--accent);
+}
+h3 {
+  font-size: 1.18rem;
+}
+p {
+  margin: 0.75em 0;
+}
+a {
+  color: var(--accent);
+}
+blockquote {
+  border-left: 4px solid var(--accent2);
+  margin: 1.1em 0;
+  padding: 0.05em 1.1em;
+  color: var(--muted);
+  background: #fff8f2;
+}
+code {
+  background: var(--soft);
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  padding: 0.08em 0.3em;
+  font-family: "SFMono-Regular", Consolas, monospace;
+  font-size: 0.92em;
+}
+pre {
+  background: #f5f7f6;
+  color: var(--ink);
+  border: 1px solid var(--line);
+  padding: 1em;
+  overflow-x: auto;
+  border-radius: 7px;
+}
+pre code {
+  background: transparent;
+  border: 0;
+  padding: 0;
+  color: inherit;
+}
+table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 1.15em 0 1.45em;
+  font-size: 0.95em;
+}
+.plot-layout {
+  table-layout: fixed;
+  margin: 1.1em auto 1.45em;
+}
+.plot-layout,
+.plot-layout tr,
+.plot-layout td {
+  border: 0;
+  background: transparent;
+}
+.plot-layout td {
+  padding: 0.35em 0.55em 0.95em;
+  text-align: center;
+  vertical-align: top;
+}
+.plot-layout img {
+  width: 100%;
+  max-width: 100%;
+  margin: 0 auto 0.35em;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: white;
+}
+.plot-layout .centered-cell img {
+  width: 54%;
+}
+.plot-caption {
+  color: var(--muted);
+  font-size: 0.85em;
+  line-height: 1.35;
+}
+th, td {
+  border: 1px solid var(--line);
+  padding: 0.54em 0.68em;
+  vertical-align: top;
+}
+th {
+  background: #e7efed;
+  text-align: left;
+}
+tr:nth-child(even) td {
+  background: #fafbfb;
+}
+.plot-layout tr:nth-child(even) td {
+  background: transparent;
+}
+img {
+  max-width: 100%;
+  display: block;
+  margin: 1.1em auto 0.45em;
+}
+.figure-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.05rem 1.25rem;
+  align-items: start;
+  margin: 1.1em 0 1.45em;
+}
+.figure-grid.two-one {
+  max-width: 900px;
+  margin-left: auto;
+  margin-right: auto;
+}
+.figure-grid.five-panel {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+.figure-grid figure {
+  margin: 0;
+}
+.figure-grid img {
+  width: 100%;
+  max-width: 100%;
+  margin: 0;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: white;
+}
+.figure-grid figcaption {
+  color: var(--muted);
+  font-size: 0.85em;
+  line-height: 1.35;
+  text-align: center;
+  margin-top: 0.35em;
+}
+.figure-grid .centered {
+  grid-column: 1 / -1;
+  justify-self: center;
+  max-width: 58%;
+}
+.figure-grid.two-one .centered {
+  max-width: 54%;
+}
+.figure-grid.five-panel .centered {
+  max-width: 52%;
+}
+ul, ol {
+  padding-left: 1.4em;
+}
+.caption {
+  color: var(--muted);
+  font-size: 0.92em;
+  margin-top: -0.15em;
+}
+@media print {
+  body {
+    background: white;
+  }
+  main {
+    box-shadow: none;
+    margin: 0;
+    max-width: none;
+    padding: 28px;
+  }
+}
+@media screen and (max-width: 540px) {
+  .figure-grid {
+    grid-template-columns: 1fr;
+  }
+  .figure-grid .centered,
+  .figure-grid.five-panel .centered {
+    grid-column: auto;
+    max-width: 100%;
+  }
+}
+</style>
+</head>
+<body>
+<main>
+<h1>Paired TinyDialogues–Mistral PBM Child Trajectories</h1>
+<p>These overlays use exactly matched child/session/age trajectory cells. Scores are standardized separately within each scorer because the models have different tokenizers and calibration scales. Points are observed cells; straight lines are descriptive weighted slopes, not interpolation through missing ages.</p>
+<h2>Audit</h2>
+<table>
+<thead><tr>
+<th>left_rows</th>
+<th>right_rows</th>
+<th>paired_rows</th>
+<th>left_only_rows</th>
+<th>right_only_rows</th>
+<th>left_children</th>
+<th>right_children</th>
+<th>explained_right_only_rows</th>
+<th>unexplained_mismatch_rows</th>
+<th>join_status</th>
+<th>child_profiles</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>981.000</td>
+<td>982.000</td>
+<td>981.000</td>
+<td>0.000</td>
+<td>1.000</td>
+<td>21.000</td>
+<td>21.000</td>
+<td>1.000</td>
+<td>0.000</td>
+<td>PASS</td>
+<td>21.000</td>
+</tr>
+</tbody></table>
+<h2>Child Profiles</h2>
+<table>
+<thead><tr>
+<th>dataset</th>
+<th>child_id</th>
+<th>child_key</th>
+<th>paired_trajectory_rows</th>
+<th>age_min</th>
+<th>age_max</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>Brown</td>
+<td>Adam</td>
+<td>Brown/Adam</td>
+<td>55.000</td>
+<td>27.133</td>
+<td>62.400</td>
+</tr>
+<tr>
+<td>Brown</td>
+<td>Eve</td>
+<td>Brown/Eve</td>
+<td>20.000</td>
+<td>18.000</td>
+<td>27.000</td>
+</tr>
+<tr>
+<td>Brown</td>
+<td>Sarah</td>
+<td>Brown/Sarah</td>
+<td>139.000</td>
+<td>27.167</td>
+<td>61.200</td>
+</tr>
+<tr>
+<td>Manchester</td>
+<td>Anne</td>
+<td>Manchester/Anne</td>
+<td>35.000</td>
+<td>22.233</td>
+<td>33.333</td>
+</tr>
+<tr>
+<td>Manchester</td>
+<td>Aran</td>
+<td>Manchester/Aran</td>
+<td>33.000</td>
+<td>23.400</td>
+<td>34.933</td>
+</tr>
+<tr>
+<td>Manchester</td>
+<td>Becky</td>
+<td>Manchester/Becky</td>
+<td>34.000</td>
+<td>24.233</td>
+<td>35.500</td>
+</tr>
+<tr>
+<td>Manchester</td>
+<td>Carl</td>
+<td>Manchester/Carl</td>
+<td>33.000</td>
+<td>20.733</td>
+<td>32.500</td>
+</tr>
+<tr>
+<td>Manchester</td>
+<td>Dominic</td>
+<td>Manchester/Dominic</td>
+<td>35.000</td>
+<td>22.833</td>
+<td>34.533</td>
+</tr>
+<tr>
+<td>Manchester</td>
+<td>Gail</td>
+<td>Manchester/Gail</td>
+<td>34.000</td>
+<td>23.900</td>
+<td>35.400</td>
+</tr>
+<tr>
+<td>Manchester</td>
+<td>Joel</td>
+<td>Manchester/Joel</td>
+<td>35.000</td>
+<td>23.033</td>
+<td>34.367</td>
+</tr>
+<tr>
+<td>Manchester</td>
+<td>John</td>
+<td>Manchester/John</td>
+<td>32.000</td>
+<td>23.500</td>
+<td>34.800</td>
+</tr>
+<tr>
+<td>Manchester</td>
+<td>Liz</td>
+<td>Manchester/Liz</td>
+<td>34.000</td>
+<td>23.300</td>
+<td>34.600</td>
+</tr>
+<tr>
+<td>Manchester</td>
+<td>Nicole</td>
+<td>Manchester/Nicole</td>
+<td>33.000</td>
+<td>24.833</td>
+<td>36.333</td>
+</tr>
+<tr>
+<td>Manchester</td>
+<td>Ruth</td>
+<td>Manchester/Ruth</td>
+<td>33.000</td>
+<td>23.500</td>
+<td>35.700</td>
+</tr>
+<tr>
+<td>Manchester</td>
+<td>Warren</td>
+<td>Manchester/Warren</td>
+<td>36.000</td>
+<td>22.200</td>
+<td>33.667</td>
+</tr>
+<tr>
+<td>Providence</td>
+<td>Alex</td>
+<td>Providence/Alex</td>
+<td>51.000</td>
+<td>16.900</td>
+<td>41.533</td>
+</tr>
+<tr>
+<td>Providence</td>
+<td>Ethan</td>
+<td>Providence/Ethan</td>
+<td>50.000</td>
+<td>11.133</td>
+<td>35.033</td>
+</tr>
+<tr>
+<td>Providence</td>
+<td>Lily</td>
+<td>Providence/Lily</td>
+<td>79.000</td>
+<td>13.067</td>
+<td>48.067</td>
+</tr>
+<tr>
+<td>Providence</td>
+<td>Naima</td>
+<td>Providence/Naima</td>
+<td>87.000</td>
+<td>11.867</td>
+<td>46.333</td>
+</tr>
+<tr>
+<td>Providence</td>
+<td>Violet</td>
+<td>Providence/Violet</td>
+<td>49.000</td>
+<td>14.000</td>
+<td>47.800</td>
+</tr>
+<tr>
+<td>Providence</td>
+<td>William</td>
+<td>Providence/William</td>
+<td>44.000</td>
+<td>16.400</td>
+<td>40.600</td>
+</tr>
+</tbody></table>
+<h2>Brown</h2>
+<h3>Brown/Adam</h3>
+<img src="../figs/direct_surprisal_replication/paired_tiny_mistral_pbm/children/brown_adam.png" alt="Brown/Adam paired trajectories">
+<h3>Brown/Eve</h3>
+<img src="../figs/direct_surprisal_replication/paired_tiny_mistral_pbm/children/brown_eve.png" alt="Brown/Eve paired trajectories">
+<h3>Brown/Sarah</h3>
+<img src="../figs/direct_surprisal_replication/paired_tiny_mistral_pbm/children/brown_sarah.png" alt="Brown/Sarah paired trajectories">
+<h2>Manchester</h2>
+<h3>Manchester/Anne</h3>
+<img src="../figs/direct_surprisal_replication/paired_tiny_mistral_pbm/children/manchester_anne.png" alt="Manchester/Anne paired trajectories">
+<h3>Manchester/Aran</h3>
+<img src="../figs/direct_surprisal_replication/paired_tiny_mistral_pbm/children/manchester_aran.png" alt="Manchester/Aran paired trajectories">
+<h3>Manchester/Becky</h3>
+<img src="../figs/direct_surprisal_replication/paired_tiny_mistral_pbm/children/manchester_becky.png" alt="Manchester/Becky paired trajectories">
+<h3>Manchester/Carl</h3>
+<img src="../figs/direct_surprisal_replication/paired_tiny_mistral_pbm/children/manchester_carl.png" alt="Manchester/Carl paired trajectories">
+<h3>Manchester/Dominic</h3>
+<img src="../figs/direct_surprisal_replication/paired_tiny_mistral_pbm/children/manchester_dominic.png" alt="Manchester/Dominic paired trajectories">
+<h3>Manchester/Gail</h3>
+<img src="../figs/direct_surprisal_replication/paired_tiny_mistral_pbm/children/manchester_gail.png" alt="Manchester/Gail paired trajectories">
+<h3>Manchester/Joel</h3>
+<img src="../figs/direct_surprisal_replication/paired_tiny_mistral_pbm/children/manchester_joel.png" alt="Manchester/Joel paired trajectories">
+<h3>Manchester/John</h3>
+<img src="../figs/direct_surprisal_replication/paired_tiny_mistral_pbm/children/manchester_john.png" alt="Manchester/John paired trajectories">
+<h3>Manchester/Liz</h3>
+<img src="../figs/direct_surprisal_replication/paired_tiny_mistral_pbm/children/manchester_liz.png" alt="Manchester/Liz paired trajectories">
+<h3>Manchester/Nicole</h3>
+<img src="../figs/direct_surprisal_replication/paired_tiny_mistral_pbm/children/manchester_nicole.png" alt="Manchester/Nicole paired trajectories">
+<h3>Manchester/Ruth</h3>
+<img src="../figs/direct_surprisal_replication/paired_tiny_mistral_pbm/children/manchester_ruth.png" alt="Manchester/Ruth paired trajectories">
+<h3>Manchester/Warren</h3>
+<img src="../figs/direct_surprisal_replication/paired_tiny_mistral_pbm/children/manchester_warren.png" alt="Manchester/Warren paired trajectories">
+<h2>Providence</h2>
+<h3>Providence/Alex</h3>
+<img src="../figs/direct_surprisal_replication/paired_tiny_mistral_pbm/children/providence_alex.png" alt="Providence/Alex paired trajectories">
+<h3>Providence/Ethan</h3>
+<img src="../figs/direct_surprisal_replication/paired_tiny_mistral_pbm/children/providence_ethan.png" alt="Providence/Ethan paired trajectories">
+<h3>Providence/Lily</h3>
+<img src="../figs/direct_surprisal_replication/paired_tiny_mistral_pbm/children/providence_lily.png" alt="Providence/Lily paired trajectories">
+<h3>Providence/Naima</h3>
+<img src="../figs/direct_surprisal_replication/paired_tiny_mistral_pbm/children/providence_naima.png" alt="Providence/Naima paired trajectories">
+<h3>Providence/Violet</h3>
+<img src="../figs/direct_surprisal_replication/paired_tiny_mistral_pbm/children/providence_violet.png" alt="Providence/Violet paired trajectories">
+<h3>Providence/William</h3>
+<img src="../figs/direct_surprisal_replication/paired_tiny_mistral_pbm/children/providence_william.png" alt="Providence/William paired trajectories">
+</main>
+</body>
+</html>

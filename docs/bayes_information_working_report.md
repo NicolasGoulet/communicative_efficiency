@@ -1,5 +1,7 @@
 # Bayes-Decomposed Informativeness Working Report
 
+> **Superseded methods pilot (2026-07-13).** This report uses the original overlapping-training reverse-trigram score and must not support substantive claims. See the [corrected cross-fitted PBM Bayes report](corrected_pbm_bayes_report.html), which holds out each evaluated corpus, trains additively by age, validates whole-utterance context evidence, and normalizes within matched candidate sets.
+
 This is a working report for the new Bayes-style information family. It is intentionally separate from the supervisor-facing July pages for now. The goal is to check whether the decomposition score behaves sensibly before we decide which results deserve promotion.
 
 ## What Was Scored

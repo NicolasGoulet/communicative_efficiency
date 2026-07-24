@@ -14,40 +14,476 @@ When a task is completed, move any useful result or decision into
 - Add commands that verify the task.
 - Link to files when the task concerns a specific script or output.
 
-## Current Focus
+## Current Focus — Reconciled 2026-07-22
 
-- [x] 2026-06-03: Rebuild the PBM Route 1 analysis from audited Mistral
-      scores with recomputed effort measures and child-aware models.
-- [x] 2026-06-04: Score the PBM additive same-length LSTM k3/k4/k5
-      conditions and keep them as separate generated-baseline sources.
-- [x] 2026-06-25: Build the initial supervisor-facing utterance-information
-      Markdown/HTML report.
-- [ ] Run and audit the benchmark-gated full 79-child Mistral expansion in
-      `compute_surprisal_mila`. Do not mark complete until the retrieved run
-      report has the final `COMPLETE_AND_AUDITED` marker.
-- [ ] Reconcile `docs/predicting_utterance_level_information_report.md` with
-      the completed LSTM scoring, response-space run, Bayes pilot, complexity
-      products, and July onset work. Keep it PBM-scoped until the 79-child
-      scoring and analysis are complete.
-- [ ] Add child-level bootstrap intervals to the developmental-onset report
-      and repeat onset timing with word, morpheme, syllable, and phoneme effort
-      controls before promoting an onset claim.
-- [ ] Decide whether the direct row-count effort and `n_eval_tokens` tail
-      diagnostics belong in a supervisor-facing appendix or only in technical
-      working materials.
-- [ ] Decide whether supervisor-report captions should explicitly say shaded
-      bands are 95% fitted-mean CIs and that some bands are nearly invisible
-      because the fitted-mean interval is extremely narrow.
-- [x] Keep `compute_surprisal_mila` as the direct scoring/HPC/audit repo and
-      this repository as the local brain/analysis/reporting repo.
-- [x] 2026-07-05: Scaffold the July Meeting HTML index and empty supervisor-facing section pages so the reports can be filled one page at a time.
-- [x] 2026-07-09: Build a working developmental-onset report that asks when the communicative-efficiency signal becomes detectable rather than only whether a downward trend exists.
-- [x] 2026-07-09: Build a multi-page New Efforts Working Report that gathers CE onset, Bayes-decomposed surprisal, complexity metrics, and a promotion plan for the July supervisor pages.
-- [x] 2026-07-09: Extend the child utterance-count report with age coverage, per-child mini metadata profiles, online source-backed metadata patches, and SES/race/sex/nationality availability summaries.
+This section is the authoritative active checklist. The longer dated sections
+below are retained as implementation/audit history; some of their unchecked
+items were superseded or completed by the later modular direct-score workflow.
+
+### Completed milestone
+
+- [x] Complete and audit the full 79-child direct-Mistral score tree: 1,896
+      files covering 79 children, six target modes, and k0-k3.
+- [x] Freeze the PBM-discovery/non-PBM-confirmation protocol before fitting the
+      58-child confirmation estimates.
+- [x] Build TinyDialogues PBM, Mistral PBM/non-PBM/all-79, and exact paired
+      scorer analyses with child-level uncertainty, influence checks,
+      candidate comparisons, and individual trajectories.
+- [x] Publish the static interactive direct-score explorer over 136 model
+      records, 31 summary plots, and 179 child profiles.
+- [x] Complete the corrected cross-fitted PBM Bayes-derived candidate-set
+      analysis and its held-out matched-versus-shuffled context validation.
+- [x] Complete the PBM additive LSTM scoring, Route 2 response-space/relative
+      effort analyses, and the first audited complexity-product joins.
+
+### Immediate preservation and reporting
+
+- [x] Freeze the two local scored-archive checksums plus compact analysis-audit
+      hashes in `docs/direct_surprisal_artifact_freeze_2026-07-22.md`. The
+      Mistral archive SHA-256 is now recorded even though its compact remote
+      report/marker is not yet local.
+- [ ] Retrieve the compact full-79 final report and `COMPLETE_AND_AUDITED`
+      marker beside the local Mistral archive. Use the exact laptop commands in
+      `docs/mila_handoff_commands_2026-07-22.md`; recover the exact Mistral
+      model/tokenizer and scoring-code revisions from that report if present.
+- [x] Reconcile `docs/predicting_utterance_level_information_report.md` and its
+      HTML with the July direct-score replication, corrected Bayes result,
+      completed PBM LSTM work, Route 2 contrary-direction result, and current
+      interpretation limits.
+- [x] Audit the reconciled supervisor report's six promoted figures and five
+      consultation links; render both ordinary and embedded HTML and run the
+      focused report/direct-score tests.
+- [ ] Audit all other promoted Markdown/HTML pages for missing images, stale scope or
+      scorer language, raw-tokenizer scale comparisons, and unsupported claims
+      about information, efficiency, onset, or confirmation.
+- [x] Keep source/tests/lightweight reports in Git, keep large data/results out
+      of Git, and publish the reviewed 2026-07-21/22 implementation changes on
+      `agent/project-status-closeout` with a draft pull request.
+
+### Primary scientific work still open
+
+- [ ] Build and manually audit the primary responsive-turn sample. Preserve
+      adjacency/turn-distance, child-initiated, imitation, routine/reading,
+      backchannel, question-type, and repair flags.
+- [ ] Complete sustained-onset inference with child bootstrap/simultaneous
+      uncertainty in the non-PBM sample and repeat it with validated word,
+      morpheme, syllable, and phoneme effort controls.
+- [ ] Prototype downstream caregiver-response predictive gain and validated
+      repair/clarification/contingent-response outcomes as listener-utility
+      measures. Keep these separate from target self-information.
+- [ ] Calibrate Route 2 response uncertainty on a deeply sampled stratified
+      subset: exact-string versus semantic-cluster entropy, coverage/rarefaction,
+      seeds, prompts, temperatures, and a decoupled-generator sensitivity.
+- [ ] After entropy calibration, refit raw-effort and generated-relative effort
+      models as distinct estimands; do not use generated expected effort as an
+      automatic ordinary confound.
+- [ ] Audit morphology, syllable/phoneme, lexical-diversity/rarity, and
+      dependency-feasibility coverage before using them as primary controls;
+      then run the corresponding direct-score sensitivities.
+
+### Compute extensions that do not block the core direct-score result
+
+- [x] Preserve the implemented full-79 LSTM generation workflow in
+      `generate_baselines_mila` commit
+      `134f4df4eb3bc60df93fe1dfee72811012b08ea2`, add explicit single-task
+      Slurm requests, pass its local tests/shell audit, push the branch, and
+      open draft PR #1. No Mila job was submitted.
+- [ ] Run the smoke-gated full-79 k3 same-length LSTM DAG in
+      `generate_baselines_mila`, retrieve its compact reports and final marker,
+      then score and analyze the generated targets under a model-specific
+      handoff contract. Follow `docs/mila_handoff_commands_2026-07-22.md` only
+      through the explicit generation/retrieval stop point.
+- [ ] Decide after scientific review whether full-79 TinyDialogues scoring,
+      full-79 context entropy/word-level surprisal, or a scored generated
+      response cloud is worth the additional compute.
 - [ ] If SES, race/ethnicity, parental education, sex/gender, or nationality
-      become model predictors, run a new documented coding pass that separates
-      child-specific values from corpus-level, predominant-community, and
-      unavailable fields.
+      become predictors, perform a new provenance-aware metadata coding pass;
+      current coverage is not sufficient for general covariate use.
+
+## 2026-07-21 Priority: TinyDialogues PBM Replication And Full-79 Mistral Analysis
+
+This is the active analysis roadmap. It separates two scientifically different
+uses of the newly available scores:
+
+1. TinyDialogues is a **same-21-child PBM scorer-robustness replication**. It
+   is not an independent developmental confirmation sample.
+2. The remaining 58 non-PBM children in the completed 79-child Mistral tree
+   are the preferred confirmation sample, provided the protocol is frozen
+   before their main estimates are inspected.
+
+The instruction to repeat “all reports and fitted models” means: inventory
+every existing analysis, repeat every scientifically applicable current
+analysis in a model-specific output namespace, explicitly record why an
+analysis is not applicable, and do not revive superseded model-zoo artifacts
+merely to increase the number of fits.
+
+### A. Verified Data Contract And Remaining Provenance Work
+
+- [x] Confirm the TinyDialogues PBM handoff is local and audit-complete:
+      `results/external/compute_surprisal_mila/raw_surprisal_tinydialogues_pbm_21_children_all_6_conditions_k0_k1_k2_k3_fp32`
+      resolves to run `20260717_201227`; the local audit passes 504/504 files,
+      21 children, 126 files per context, 84 files per mode, 11,605,772 scored
+      target rows, zero blank targets, zero truncated-context rows, and zero
+      recorded problems.
+- [x] Confirm the completed full-79 Mistral handoff is local:
+      `results/external/compute_surprisal_mila/raw_surprisal_cleaned_naturalistic_79_children_all_available_ages_fp16`
+      resolves to run `20260713_162955` and contains 1,896 CSVs, 79 children,
+      474 files per context, and 316 files per mode.
+- [x] Run a strict TinyDialogues Route 1 ingestion smoke across caretaker plus
+      real/random/unigram/bigram/trigram files. The 2026-07-21 six-file smoke
+      wrote 252,717 rows and found zero missing target columns, blank targets,
+      zero-word rows, missing/out-of-bin ages, missing scores, or matched-word
+      length failures.
+- [ ] Copy or regenerate a compact, relocation-safe full-79 audit report in
+      `compute_surprisal_mila`, record its checksum, and link it from this
+      repository's analysis manifest. Do not copy the 13 GB scored tree into
+      Git.
+- [ ] Freeze an analysis-input manifest for each scorer with model ID,
+      immutable revision, tokenizer revision, precision, scoring-code
+      revision, archive checksum, source root, file count, per-context/per-mode
+      counts, row counts, and audit status.
+- [x] Audit PBM row identity across TinyDialogues and Mistral using corpus,
+      child, file, line number, utterance ID, role, candidate condition,
+      context, exact target text, and exact context text. Use the TinyDialogues
+      source hashes when present; never accept row position as the join key.
+- [x] Produce a mismatch table for missing/extra/duplicate rows, target-text
+      disagreement, context-text disagreement, age disagreement, and
+      condition disagreement. Require zero unexplained mismatches before the
+      paired cross-scorer analyses run.
+- [x] Record that the six scored conditions are five child targets
+      (`real`, `random`, `unigram`, `bigram`, `trigram`) plus a separate
+      caretaker target; do not treat caretaker rows as a sixth matched child
+      candidate.
+- [x] Patch or explicitly exclude and flag the six empty full-79 generated
+      targets (24 score cells across k0-k3): Forrester/Ella bigram IDs 1453 and
+      1590; MPI-EVA-Manchester/Fraser bigram IDs 83669 and 12314 and trigram
+      IDs 108945 and 38427. Regenerate and rescore them before calling the
+      baseline matrix literally row-complete.
+- [x] Preserve explicit context-availability flags for the 18,299 child rows
+      and 2,722 caretaker rows without preceding k1/k2/k3 context; do not
+      interpret them as ordinary context-bearing observations.
+- [x] Recover Providence/Naima age 36.0 months for the 507 caretaker rows from
+      `Naima/030000.cha`, preserve the original missing value, and record the
+      repair source in the joined-table audit.
+
+### B. Freeze The Analysis Protocol Before Looking At Non-PBM Effects
+
+- [x] Write and date a PBM-discovery/non-PBM-confirmation protocol before
+      fitting or plotting the remaining 58 children's main effects. Store the
+      frozen formulas, outcomes, directions, exclusions, context choice,
+      effort choice, onset rule, and multiplicity plan in a versioned Markdown
+      document.
+- [x] Make real-child k3 contextual target surprisal at fixed lexical word
+      effort the primary direct-score outcome unless the frozen protocol states
+      otherwise. Report k0 unconditional surprisal and k3-minus-k0 context gain
+      as separate estimands rather than substituting one for another.
+- [x] Predeclare the sign convention for context gain and all plotted labels:
+      `gain_k = sum_bits_k0 - sum_bits_kk = log2 p(u | c_k) - log2 p(u)`;
+      positive values mean the preceding context makes the observed target
+      more probable under that scorer.
+- [x] Predeclare primary child-turn eligibility and exclusions: same-session
+      preceding caregiver turn, context availability, empty/punctuation-only
+      targets, child-initiated turns, imitation, routines/reading,
+      backchannels, question type, and repair sequences. Preserve every flag
+      even when it is not part of the primary exclusion rule.
+- [x] Predeclare the primary uncertainty method at the child level and the
+      corpus-level sensitivity method. Do not use row-level IID intervals as
+      the only uncertainty estimate for repeated utterances.
+- [x] Predeclare the sustained-onset rule and simultaneous confidence-band
+      procedure. Do not select the first significant age bin after inspecting
+      the confirmation estimates.
+- [x] State explicitly that TinyDialogues and Mistral have different
+      tokenizers and scales. Primary cross-scorer conclusions compare
+      within-model slopes, contrasts, context gains, rankings, and word- or
+      character-normalized quantities—not raw bits per model token.
+- [x] State explicitly that the TinyDialogues PBM rerun tests scorer robustness
+      on the discovery data, whereas only the non-PBM 58-child Mistral analysis
+      can serve as the planned sample replication.
+
+### C. Build Model-Specific And Paired Analysis Tables
+
+- [ ] Parameterize the Route 1 table/report pipeline around an immutable
+      `scorer_id`/`scorer_family` rather than relying on Mistral-specific
+      defaults. Keep model revision, tokenizer revision, dtype, scoring-code
+      revision, source hashes, and input-manifest checksum in the schema and
+      audits.
+- [x] Give every generated table, fitted model, plot, and report a
+      scorer-specific output directory. A TinyDialogues run must never
+      overwrite the existing PBM Mistral products.
+- [ ] Add tests covering the richer TinyDialogues provenance schema and the
+      older Mistral schema, including explicit behavior when provenance fields
+      are absent from a legacy score file.
+- [x] Build the complete standalone TinyDialogues PBM long table from all 504
+      files with recomputed word, character, morpheme, syllable, and phoneme
+      effort from the exact scored target text. Publish source-file,
+      variant-context, missingness, duplicate-key, and schema audits.
+- [ ] Build a full-79 Mistral long table from all 1,896 files using streaming
+      or partitioned outputs; retain all 28,694,516 possible target/context
+      cells and flag, rather than silently discard, the 24 blank generated
+      cells.
+- [x] Add context-gain columns by exact within-scorer, within-target pairing of
+      k1/k2/k3 against k0. Audit that target text is identical within every
+      pair and keep k1, k2, and k3 gains separate.
+- [ ] Rebuild parent-context effort, question type, context availability,
+      session order, target frequency, lexical rarity, and the validated local
+      complexity predictors against each new table. Do not blindly join PBM
+      products to the new full-79 source.
+- [x] Build a wide paired PBM table containing TinyDialogues and Mistral score
+      columns on the same source rows, plus model-specific token counts,
+      word/character-normalized scores, context gains, candidate gaps, and all
+      join-status fields.
+- [ ] Build sample-flow tables for every model: source rows, eligible rows,
+      context-bearing rows, analysis rows, excluded rows by reason, children,
+      sessions, corpora, age range, and age-bin coverage.
+- [ ] Confirm whether TinyDialogues token offsets support the existing
+      token-to-word alignment logic. If they do, generate a separate audited
+      TinyDialogues word-level product; if they do not, mark word-level reports
+      unavailable rather than reusing Mistral alignments.
+
+### D. Inventory Every Existing Analysis And Decide Its Replication Status
+
+- [ ] Generate a machine-readable CSV plus a readable Markdown matrix with one
+      row for every analysis/report builder and current report. Required fields:
+      scientific question, input columns, scorer dependence, PBM/full-79
+      scope, current/superseded status, TinyDialogues action, full-79 Mistral
+      action, missing prerequisite, output namespace, and verification command.
+- [ ] Mark the following current direct-target families as mandatory
+      TinyDialogues PBM repeats: core Route 1 descriptives; fixed-effort
+      child-controlled models; child-length-controlled estimator suite;
+      context-window and context-gain comparisons; real-versus-n-gram
+      controls; caretaker/input trajectories; age-scrambling and leave-out
+      robustness; developmental-onset analysis; and the selective
+      candidate-evidence synthesis.
+- [ ] Repeat the direct-score comparison portion of the corrected PBM Bayes
+      report with TinyDialogues, while leaving the already cross-fitted
+      Bayes-derived candidate-set probabilities unchanged. Label this as a new
+      direct-scorer agreement analysis, not a new Bayes fit.
+- [x] Classify context-entropy-dependent M4/Z3/Z4/Z10/F-family models as
+      **not exact TinyDialogues replications** until TinyDialogues-specific
+      next-token entropy/top-k features exist. A Mistral entropy predictor may
+      be shown only as a clearly labeled cross-model sensitivity.
+- [x] Classify LSTM-target comparisons as unavailable for TinyDialogues unless
+      the PBM LSTM candidates are separately scored with TinyDialogues. Do not
+      infer TinyDialogues LSTM performance from the Mistral-scored LSTM files.
+- [ ] Classify heldout-child prediction as a separate Mistral generalization
+      analysis unless corresponding TinyDialogues heldout scores are produced.
+- [x] Classify Route 2 sampled-response entropy/relative-effort reports as a
+      different data product, not something already repeated by the 504 Tiny
+      target-score files. Repeating them with TinyDialogues would require a
+      frozen response-sample contract and TinyDialogues scoring of those
+      sampled responses.
+- [ ] For each legacy M1-M15/model-zoo/atlas report, choose one of: regenerate
+      because it supports a current estimand; retain as an archival Mistral
+      artifact; or supersede with a focused model card. Record the decision so
+      “exhaustive” means complete coverage, not indiscriminate fitting.
+- [x] Regenerate the scientifically applicable legacy Route-1/model-atlas
+      families from the complete TinyDialogues PBM long table in a dedicated
+      namespace. The corrected atlas has 41/56 direct model-zoo subvariants
+      and 45/45 explicit comparison models fitted; its 15 entropy/certainty
+      subvariants are explicitly unavailable because TinyDialogues-specific
+      next-token entropy/top-k predictors do not exist.
+- [x] Add a top-level browser/report index that links the Mistral PBM,
+      TinyDialogues PBM, paired cross-scorer, full-79 Mistral descriptive, and
+      non-PBM confirmatory reports without mixing their claims.
+
+### E. TinyDialogues PBM Models And Diagnostics To Fit
+
+- [ ] Reproduce source/context/age/corpus/child coverage, score and effort
+      distributions, extreme-tail audits, score-versus-length plots, token
+      normalization diagnostics, and representative-row checks.
+- [x] Fit the primary real-child fixed-effort model with age, lexical word
+      effort, child identity, and the frozen context controls. Save formulas,
+      coefficients, covariance method, fit warnings, prediction grids, and
+      fixed-effort lines.
+- [x] Fit repeated-measures estimator sensitivities that answer the same
+      estimand: child-fixed-effects OLS with child-clustered covariance,
+      within/between (Mundlak) model, child-clustered GEE, random-intercept and
+      justified random-age-slope mixed models, and child-level bootstrap.
+      Treat nonconvergence/singular fits as audit results, not silent omissions.
+      Completed in the 2026-07-21 modular run for P1/P3 in TinyDialogues PBM
+      and all three Mistral scopes; mixed fits are unweighted design-cell
+      sensitivities, not replacements for the frozen primary model.
+- [x] Fit continuous linear age, the predeclared nonlinear age form, and frozen
+      age-bin contrasts. Do not select the displayed age form using the same
+      significance criterion later used for inference.
+- [x] Fit k0, k1, k2, and k3 target-surprisal models and direct k1/k2/k3
+      context-gain models. Separate unconditional conventionality from
+      context-supported predictability.
+- [x] Fit real-versus-random/unigram/bigram/trigram paired gap models and
+      source-by-age interactions. Report within-row candidate gaps and
+      child-level uncertainty; do not call the candidates meaning-preserving.
+      Completed with 200-child bootstrap intervals and leave-one-child/corpus
+      influence; candidates remain explicitly non-meaning-preserving.
+- [x] Fit caretaker/input trajectories separately from child-target models,
+      with child age interpreted as caregiver input adaptation rather than an
+      adult developmental endpoint. The modular run adds separate caretaker
+      k3, k0, and context-gain models and age-bin trajectories for Tiny PBM and
+      Mistral PBM/non-PBM/all79.
+- [ ] Run exact/top-coded word-count strata, alternative effort denominators,
+      context-availability, question/response eligibility, corpus leave-out,
+      child leave-out, influential-child, age scrambling, and tail-trimming
+      sensitivities.
+- [ ] Repeat the developmental-onset workflow with TinyDialogues only after
+      implementing child bootstrap/small-cluster uncertainty and the frozen
+      sustained-onset rule. Do not promote a TinyDialogues onset from a
+      data-selected breakpoint.
+- [ ] Produce compact model cards for every promoted fit: estimand, formula,
+      row/child/session/corpus counts, exclusions, coefficient direction and
+      interval, covariance/cluster unit, convergence warnings, prediction
+      range, and interpretation boundary.
+
+### F. Paired TinyDialogues-Versus-Mistral Scorer Robustness
+
+- [x] Compare paired real-target k0/k1/k2/k3 scores using word- and
+      character-normalized scales, rank correlations, within-child centered
+      correlations, and age/length/corpus calibration plots. Keep raw
+      bits-per-token comparisons diagnostic only.
+- [x] Compare each scorer's fixed-effort age coefficient, interval, predicted
+      line, nonlinear shape, and age-bin contrasts. Bootstrap the difference
+      in coefficients by child rather than declaring agreement from two
+      separate p-values. The linear P1/P2/P3 slope differences and paired
+      child overlays, frozen P1/P2/P3 age-bin contrasts, and paired
+      quadratic-coefficient child bootstraps are complete.
+- [x] Compare k1/k2/k3 context-gain magnitudes and developmental slopes across
+      scorers on exactly paired utterances.
+- [x] Compare real-minus-baseline gaps, candidate rankings, baseline ordering,
+      source-by-age interactions, and child-level gap trajectories across
+      scorers. The paired run includes all four gap slopes/bootstrap
+      differences, supported child-specific slopes, age-bin rankings, and
+      candidate-specific age interactions with source-specific child and word
+      effects.
+- [x] Quantify sign concordance and effect-size heterogeneity across the 21
+      child-specific slopes. Identify influential reversals transparently; do
+      not hide them behind only the pooled coefficient. The paired visual run
+      records supported slopes for P1, P3, and all four candidate gaps; P1
+      signs agree for 18/21 children.
+- [ ] Diagnose disagreement by scorer tokenization, word/character length,
+      age, corpus, child, target frequency, OOV/special-form flags, context
+      length, and source condition. Recorded evaluated-token ratios and
+      word-normalized age/corpus scale differences are complete; lexical
+      frequency, OOV/special-form, context-length, and source-condition
+      diagnostics remain.
+- [x] Build a paired-scorer synthesis report that distinguishes robust
+      agreement, scale-sensitive agreement, null results, and reversals. A
+      TinyDialogues match strengthens scorer robustness but is not an
+      independent sample replication.
+
+### G. Individual Child Trajectories
+
+- [ ] Create one canonical child-age-session trajectory table for all 79
+      children, with utterance/session counts, age coverage, raw mean target
+      surprisal, fixed-effort adjusted prediction, k0/k3 values, k3 context
+      gain, effort, and missingness/eligibility counts.
+- [x] Produce a 79-child Mistral trajectory index and one profile page/panel per
+      child. The primary panel should show real-child k3 fixed-effort
+      predictability across age; secondary panels should show k0, context gain,
+      effort, and real-minus-baseline gaps.
+- [x] Produce corresponding 21-child TinyDialogues profiles and paired
+      TinyDialogues-versus-Mistral overlays on identical axes/ranges where
+      meaningful.
+- [ ] Show raw session/bin summaries and model-adjusted trajectories together,
+      with utterance counts and age gaps visible. Do not draw a smooth line
+      through unsupported age intervals without marking it as interpolation.
+- [x] Define minimum support for child-specific slopes (distinct sessions,
+      distinct ages, age span, and utterance count). Report insufficient-data
+      children descriptively instead of forcing unstable regressions.
+- [ ] Fit child-specific exploratory slopes/curves where support permits and a
+      hierarchical partial-pooling trajectory model for population and child
+      heterogeneity. Keep individual fits descriptive unless multiplicity and
+      shrinkage are handled.
+- [ ] Save child-level coefficient/interval tables, trajectory grids,
+      influential-child diagnostics, and machine-readable plot audits so every
+      child shown in the index has a traceable source.
+- [ ] Add corpus-level small multiples, all-child spaghetti/heatmap summaries,
+      and a distribution of child slopes, while retaining the individual pages
+      requested above.
+
+### H. Full-79 Mistral Discovery/Confirmation Models
+
+- [x] Build a descriptive full-79 report without calling the pooled 79-child
+      coefficient confirmatory. Show coverage, sample flow, distributions,
+      corpora, contexts, effort, and individual trajectories first.
+- [x] Fit the frozen primary formulas separately in PBM discovery (21
+      children) and non-PBM confirmation (58 children/10 corpora). Never pool
+      PBM into the confirmation estimate.
+- [x] Report the non-PBM fixed-effort real-child k3 age effect, k0 age effect,
+      and k3 context-gain age effect with child-level uncertainty and the
+      predeclared direction/decision rule.
+- [x] Fit the same repeated-measures estimator ladder in the confirmation
+      sample: child FE/clustered OLS, within/between model, GEE, justified mixed
+      effects, and child bootstrap. Add corpus leave-one-out and a small-number
+      of-corpora uncertainty sensitivity. The completed modular run includes
+      200 child bootstraps, 200 corpus bootstraps, GEE, Mundlak, mixed
+      intercept/slope sensitivities, and corpus/child leave-out; boundary and
+      convergence warnings remain in the manifest.
+- [ ] Fit predeclared nonlinear/age-bin models and sustained-onset inference in
+      the non-PBM sample. Present onset as replicated only if the frozen rule
+      and simultaneous band are satisfied.
+- [x] Repeat real-versus-random/unigram/bigram/trigram paired candidate-gap
+      models in PBM and non-PBM samples, keeping same-length effort checks and
+      candidate-set interpretation limits visible. The modular run repeats all
+      four in PBM, non-PBM, and pooled descriptive scopes with child bootstrap
+      and influence diagnostics.
+- [x] Estimate corpus and child heterogeneity rather than reporting only a
+      grand mean: forest plots, random-slope variance where identifiable,
+      leave-one-corpus-out estimates, and influence diagnostics. The modular
+      run adds supported child-slope distributions, random-age-slope fits, and
+      leave-one-child/corpus ranges; warning-bearing fits are visibly flagged.
+- [ ] Run local CPU-derived effort/complexity sensitivities (words,
+      characters, validated morphology, syllables, phonemes, lexical rarity,
+      vocabulary trajectory) after missingness and quality are audited by
+      child/corpus/age.
+- [ ] Treat context entropy, word-level neural surprisal, full-79 LSTM,
+      response-space entropy, semantic entropy, and corrected Bayes scores as
+      separate missing/partial predictor projects. Do not let their PBM-only
+      availability block the primary direct-Mistral confirmation, and do not
+      pretend they are full-79 controls.
+- [ ] Decide whether full-79 TinyDialogues scoring is scientifically worth the
+      additional compute after the PBM cross-scorer report is reviewed. If
+      selected, create a new smoke/manifest/audit contract; the 504-file PBM
+      marker does not authorize that run.
+
+### I. Reporting, Testing, And Completion Gates
+
+- [ ] Write focused unit tests for multi-scorer ingestion, provenance
+      preservation, exact paired joins, context-gain signs, scorer-specific
+      namespaces, blank-target flags, Naima age repair, confirmation-sample
+      exclusion, child-profile support rules, and report image/link audits.
+- [ ] Add tiny integration fixtures with two scorers, multiple contexts,
+      matched baselines, one missing context, one blank candidate, and one
+      deliberate key mismatch; require the audit to fail on the mismatch.
+- [x] Add resumable/atomic stages for the 11 GB Tiny tree and 13 GB full-79
+      Mistral tree so a failed fit or plot does not require rebuilding the long
+      table or overwrite valid results.
+- [x] Save model summaries, coefficient-long tables, prediction grids,
+      bootstrap draws/seeds, convergence warnings, sample-flow tables, and
+      figure manifests before rendering reports.
+- [x] Run focused tests after each pipeline change and the full unit suite at
+      the end. Record the actual command, date, pass count, runtime, and
+      expected warnings; do not reuse the July 13 count.
+- [ ] Audit every Markdown/HTML report for missing images, stale Mistral-only
+      wording, accidental raw token-scale comparisons, PBM/full-79 scope
+      confusion, and unsupported claims of efficiency, information, onset, or
+      confirmation.
+- [x] Build short plot-led TinyDialogues and full-79 Mistral summaries with one
+      compact headline table, separate individual-child galleries, model-family
+      coverage plots, and machine-readable plot audits. Dataset, model, plot,
+      and report stages are independently rerunnable and write chained JSON
+      manifests.
+- [x] Build a separate short paired-scorer visual report with 11 slope
+      comparisons, 200 paired child bootstraps, P1/P2/P3 age-bin contrasts,
+      child sign concordance, scale diagnostics, and a 5/5 plot audit. Its
+      models, plots, and report are independently rerunnable from the immutable
+      exact paired table.
+- [ ] Update `AGENTS.md`, `docs/notes.md`, formal definitions, and the
+      supervisor-facing synthesis only after the relevant outputs exist and
+      their audits pass. Keep proposed, completed, null, contrary-direction,
+      and blocked analyses visually distinct.
+- [ ] Completion gate: every row in the analysis-replication matrix has a
+      verified scorer-specific output or an explicit non-applicability/data
+      blocker; all 21 TinyDialogues child profiles and all 79 Mistral child
+      profiles exist; primary PBM/non-PBM estimates have child-level
+      uncertainty; and no required audit reports unexplained mismatches.
 
 ## Recovered Initial Formulation: Bayes And Complexity TODOs
 
@@ -63,7 +499,7 @@ scope, not as an optional later extension.
 - [x] Keep the current Mistral contextual surprisal analyses as the direct
       `p(u | c)` family. Do not discard them: they are one legitimate
       operationalization of contextual informativeness.
-- [ ] Add a Bayes-decomposition design note for reports: for a fixed context
+- [x] Add a Bayes-decomposition design note for reports: for a fixed context
       `c`, compare candidate utterances by `log p(u) + log p(c | u)`, because
       `log p(c)` is a context-specific constant.
 - [ ] Build additive age-bin `p(u)` prior tables for real and generated child
@@ -73,10 +509,10 @@ scope, not as an optional later extension.
 - [ ] Prototype an LSTM-based `p(u)` prior only after the additive LSTM
       generation/scoring artifacts are stable. CPU smoke tests are fine; real
       training belongs on Mila GPUs.
-- [ ] Define at least two candidate `p(c | u)` likelihood approximations before
-      coding production runs:
-      reverse n-gram/discourse model, and neural scorer that evaluates
-      caretaker context compatibility with a candidate child utterance.
+- [ ] Define and benchmark at least two replacements for the current weak
+      order-3 `p(c | u)` proof of concept before any production rerun: a
+      cross-fitted reverse/discourse model and either a full-utterance neural
+      likelihood or a contrastive matched-versus-shuffled context scorer.
 - [ ] Add a tiny local CPU smoke test for the Bayes algebra using fake
       probabilities so sign conventions are verified before any Mila run.
 - [x] Build a compact Bayes pilot table on a small audited subset with columns:
@@ -86,9 +522,10 @@ scope, not as an optional later extension.
 - [x] Compare direct `p(u | c)` surprisal with Bayes-decomposed scores on real
       child utterances before using Bayes-derived results in supervisor-facing
       claims.
-- [ ] In all reports, label Bayes scores as decomposition-based or
+- [x] In all reports, label legacy Bayes scores as decomposition-based or
       posterior-style scores unless the normalizer `p(c)` has actually been
-      estimated.
+      estimated; label corrected v2 values as candidate-set probabilities or
+      candidate-set surprisal and name the finite candidate set.
 
 ### Complexity / Effort Predictors To Add
 
@@ -184,9 +621,16 @@ scope, not as an optional later extension.
 - [x] Add a GPU LSTM Slurm scaffold and manifest with an explicit
       not-implemented CLI guard so nobody can accidentally claim LSTM
       generation ran before the real port exists.
-- [ ] Port or wrap the real LSTM training/generation code into
-      `generate_baselines_mila`, add tests, and make the GPU Slurm command
-      execute real training artifacts.
+- [x] 2026-07-14: Port the real encoder-decoder LSTM training/generation path
+      into `generate_baselines_mila`, add resumable training and atomic
+      artifacts, and make the GPU Slurm command execute real training.
+- [x] 2026-07-14: Select the full-79 production scope from the PBM evidence:
+      k3 caretaker context and same-length generation only, with eight additive
+      age-bin models. Add CPU preparation, exact-wrapper GPU smoke, staged
+      arrays, audits, and final marker handling.
+- [ ] Execute the selected full-79 LSTM DAG on Mila and retrieve its compact
+      reports. The local real-data preparation audit passed, but no production
+      checkpoint or generated full-79 output exists yet.
 - [ ] Add checksums/manifests to every generated-baseline export so scorer
       repos can verify that row order, row ids, context windows, and utterance
       counts match expectations.
