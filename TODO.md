@@ -34,9 +34,9 @@ items were superseded or completed by the later modular direct-score workflow.
       keep the conversational audit at `REVIEW`, and complete the 325-row
       stratified manual validation sample before treating structural
       eligibility as a validated conversational analysis sample.
-- [ ] Reauthenticate the GitHub CLI, then push the reviewed closeout commit.
-      Local code, tests, reports, and commits can proceed while authentication
-      is unavailable; do not claim that a push or PR update succeeded.
+- [x] Reauthenticate the GitHub CLI and publish the reviewed closeout plus the
+      complete analysis controller. Draft PR #2 is open from
+      `agent/project-status-closeout`.
 - [ ] Keep all cluster-side retrieval, rsync, and Slurm actions manual. The
       ordered user command sheet remains
       `docs/mila_handoff_commands_2026-07-22.md` and intentionally stops before
@@ -61,9 +61,11 @@ items were superseded or completed by the later modular direct-score workflow.
       non-PBM children × real speech × k0-k3 = 232 same-pass word contracts.
       Commit `aa6555f` passed 68 focused tests, shell syntax, fake-DAG checks,
       and resolved Mistral GPU resource validation. No Mila job was submitted.
-- [ ] Retrieve the completed PBM Mistral and TinyDialogues same-pass archives
+- [x] Retrieve the completed PBM Mistral and TinyDialogues same-pass archives
       using `developmental_word_information/docs/mila_retrieval_commands_2026-08-05.md`,
       then checksum, extract, and run the 504-contract relocation-aware audit.
+      Both full audits passed with zero problems; both handoffs and all three
+      scorer-identical no-effect feature builds are active.
 - [x] Finish the Qwen local relocation-aware audit and create the immutable
       model/run-labelled analysis symlink only after
       `LOCAL_RETRIEVAL_AUDIT_PASSED`. The 504-contract audit and an exact
@@ -73,8 +75,11 @@ items were superseded or completed by the later modular direct-score workflow.
       multiplicity decisions before inspecting PBM word effects or any
       non-PBM confirmation coefficient. Protocol SHA-256:
       `705143ea70e4c3852fe852205010973fca7742d927c0a85993a917bf084d5989`.
-- [ ] Reauthenticate GitHub and publish the new local commits. Do not submit
-      the remaining-58 Mila smoke until its exact compute commit is on `main`.
+- [x] Reauthenticate GitHub and publish the new local commits. The word repo is
+      private at `NicolasGoulet/developmental_word_information`; the compute
+      lane is draft PR #17 and the brain controller is draft PR #2. Do not
+      submit the remaining-58 Mila smoke until PR #17 is merged and pulled on
+      Mila.
 
 ### Completed milestone
 

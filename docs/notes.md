@@ -3,6 +3,31 @@
 Living project memory: discoveries, decisions, bugs, commands that worked, and
 current state. Prefer dated notes.
 
+## 2026-08-05 - Three-scorer word handoffs activated
+
+- Independently verified and promoted the retrieved PBM Mistral and
+  TinyDialogues same-pass word trees. Each relocation-aware audit passed all
+  504 contracts, 11,605,772 utterance rows, and 35,450,900 word rows with zero
+  problems or temporary outputs.
+- Mistral contains 60,843,382 token rows and 49,203,516 token-to-word
+  allocation rows. All 11,562,917 canonical utterance comparisons passed the
+  frozen FP16 tolerance gate; maxima were 0.0390 mean bits and 0.3686 summed
+  bits against limits 0.15 and 0.5. TinyDialogues contains 55,357,148 token
+  rows and 43,721,905 allocation rows.
+- Both Brown/Adam real-child k0/k3 pair smokes passed with 162,589 exact pairs,
+  zero duplicate/metadata/nonfinite problems, and 2,813 context-unavailable
+  k0 rows retained in complete exclusion ledgers.
+- Mistral, Qwen3-14B, and TinyDialogues no-effect preparation now each passes
+  504 inventory contracts, 63 real-child k1/k2/k3 pair contracts, 3,539,148
+  paired rows, 1,179,716 k3 occurrence rows, and zero problems. Their primary
+  1,032-word / 1,032,963-row occurrence sets match exactly at SHA-256
+  `4b12305ba8ff6ec2fc96557b68aa6b921dd34bb6f0d05023fcf8451a93bcb437`.
+  Mistral and Tiny preparation reruns reused the exact feature bytes.
+- Published `developmental_word_information` privately at commit `727d08d`.
+  Pushed the remaining-58 compute lane at `aa6555f` to draft PR #17 and the
+  complete brain controller at `dba09d0` to draft PR #2. No Mila job was
+  submitted and no developmental word effect was inspected during activation.
+
 ## 2026-08-05 - Complete modular analysis controller
 
 - Added `src/build_complete_analysis_machine.py` and a machine-readable

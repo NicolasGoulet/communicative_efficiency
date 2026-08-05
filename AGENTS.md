@@ -178,6 +178,16 @@ rows, 44,008,510 token-to-word allocation rows, and zero audit problems. The
 model/run-labelled symlink lives in `developmental_word_information`, which
 owns the word-level analysis; do not duplicate this 15 GB tree here.
 
+The PBM Mistral and TinyDialogues same-pass word archives are also local and
+analysis-ready. Their 2026-08-05 relocation-aware audits passed all 504
+contracts with 11,605,772 utterance rows, 35,450,900 word rows, and zero
+problems. Mistral has 60,843,382 token rows and 49,203,516 allocation rows;
+its 11,562,917 canonical utterance comparisons stayed inside the frozen FP16
+cross-hardware tolerances, including the documented Naima patch. TinyDialogues
+has 55,357,148 token rows and 43,721,905 allocation rows. Both quarantines were
+promoted and linked into `developmental_word_information` under immutable
+model/run labels.
+
 The legacy Route 1/Route 2 products remain PBM-scoped (Brown, Manchester, and
 Providence: 21 children):
 
@@ -270,15 +280,20 @@ as a replicated onset.
 Important current facts:
 
 - the PBM same-pass Mistral, Qwen3-14B, and TinyDialogues word productions are
-  complete upstream at 504 contracts each. Qwen's archive is local and its
-  compact, checksum, extraction, full relational, immutable-handoff, and first
-  exact-pairing gates passed. Mistral and TinyDialogues are `RETRIEVE_FIRST`;
+  local and passed their 504-contract relocation audits, immutable handoff,
+  exact-pairing, and no-effect feature gates. Each scorer has the exact same
+  1,032,963-row primary occurrence set (SHA-256
+  `4b12305ba8ff6ec2fc96557b68aa6b921dd34bb6f0d05023fcf8451a93bcb437`)
+  over 1,032 word types; effects must still be fit separately;
 - the remaining-58 real-child Mistral same-pass word DAG is implemented and
   locally audited at compute commit `aa6555f`. It targets 232 contracts and
   requires a fresh exact-wrapper smoke before production; no Mila job ran;
-- `developmental_word_information` commit `41b0b29` owns the versioned study
-  design, input audits, exact word pairing, and future modeling. Cross-scorer
-  effects must be fit separately; raw score magnitudes must not be pooled;
+- `developmental_word_information` commit `727d08d` owns the frozen protocol,
+  input audits, exact word pairing, registered 27-model engine, bootstrap,
+  plots, reports, and final audit. The protocol SHA-256 is
+  `705143ea70e4c3852fe852205010973fca7742d927c0a85993a917bf084d5989`;
+  cross-scorer effects must be fit separately and raw score magnitudes must not
+  be pooled;
 - the full-79 direct-Mistral score tree is available, but full-79 context
   entropy, word-level surprisal, LSTM targets/scores, response-space products,
   complexity products, and corrected Bayes scores are not all available;
