@@ -3,6 +3,33 @@
 Living project memory: discoveries, decisions, bugs, commands that worked, and
 current state. Prefer dated notes.
 
+## 2026-08-05 - Complete modular analysis controller
+
+- Added `src/build_complete_analysis_machine.py` and a machine-readable
+  component registry spanning direct TinyDialogues/Mistral analyses, paired
+  direct robustness, Route 1, both Route 2 estimands, corrected PBM Bayes,
+  sustained onset, three separately fit PBM word scorers, and cross-scorer
+  word synthesis. The absent non-PBM58 word handoff remains an explicit
+  blocker rather than being substituted with full-79 utterance scores.
+- Commands run sequentially without a shell through prepare, fit, plots, and
+  reports. Resume requires matching global/config/component/command hashes and
+  current output artifact hashes; downstream stages require PASS upstream
+  manifests. Same-phase readiness refresh permits the cross-scorer component
+  to unlock only after all three word pipelines publish audited markers.
+- Added a cross-scorer word report that refuses partial analyses, differing
+  registry hashes, or differing supported occurrence-set hashes. It compares
+  coefficient direction, within-scorer uncertainty, coverage, and child-slope
+  sign agreement without pooling raw bits across tokenizers.
+- The complete repository suite passed 404 tests in 476.444 seconds with
+  `CUDA_VISIBLE_DEVICES=''`. Expected small-fixture Statsmodels convergence,
+  perfect-separation, rank, and plotting numerical warnings were emitted; no
+  test failed. The focused controller/direct/paired integration set passed
+  11 tests in 22.323 seconds.
+- No Mila submission was made. The exact remaining-58 compute lane at
+  `compute_surprisal_mila@aa6555f` was revalidated locally: 68 tests, all seven
+  shell files, both resolved typed-L40S argument vectors, and `git diff
+  --check` passed.
+
 ## 2026-08-05 - Qwen PBM word handoff passed its full local gate
 
 - Independently rehashed the 15,774,773,220-byte Qwen3-14B PBM same-pass word

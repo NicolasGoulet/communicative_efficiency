@@ -50,6 +50,13 @@ items were superseded or completed by the later modular direct-score workflow.
 - [x] Implement the first analysis stages in `developmental_word_information`:
       compact archive provenance/coverage audit and exact disk-backed k0/k3
       pairing on `word_occurrence_id`, with atomic PASS markers and tests.
+- [x] Implement the complete modular word pipeline: all-child k1/k2/k3 exact
+      pairing, versioned no-effect features, registered exhaustive fits,
+      1,000-draw child bootstrap, influence checks, audited plots/reports, and
+      cross-scorer synthesis.
+- [x] Implement the project-level complete analysis controller over direct,
+      Route 1, Route 2, Bayes, onset, and word families with hash-verified
+      resume and upstream-failure gates.
 - [x] Review, validate, and locally commit the compute DAG for exactly 58
       non-PBM children × real speech × k0-k3 = 232 same-pass word contracts.
       Commit `aa6555f` passed 68 focused tests, shell syntax, fake-DAG checks,
@@ -61,10 +68,11 @@ items were superseded or completed by the later modular direct-score workflow.
       model/run-labelled analysis symlink only after
       `LOCAL_RETRIEVAL_AUDIT_PASSED`. The 504-contract audit and an exact
       Brown/Adam k0/k3 pairing smoke passed with zero pairing problems.
-- [ ] Freeze and checksum all coverage-based lexical eligibility, cost,
+- [x] Freeze and checksum all coverage-based lexical eligibility, cost,
       cross-fitted rarity, support, nonlinear-age, model, bootstrap, and
       multiplicity decisions before inspecting PBM word effects or any
-      non-PBM confirmation coefficient.
+      non-PBM confirmation coefficient. Protocol SHA-256:
+      `705143ea70e4c3852fe852205010973fca7742d927c0a85993a917bf084d5989`.
 - [ ] Reauthenticate GitHub and publish the new local commits. Do not submit
       the remaining-58 Mila smoke until its exact compute commit is on `main`.
 
