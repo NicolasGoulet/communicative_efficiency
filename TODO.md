@@ -42,6 +42,30 @@ items were superseded or completed by the later modular direct-score workflow.
       `docs/mila_handoff_commands_2026-07-22.md` and intentionally stops before
       full-79 LSTM scoring because that scoring wrapper is not audited.
 
+### New word-information program — 2026-08-05
+
+- [x] Freeze the high-level paper design: PBM21 Mistral primary plus separate
+      Qwen/TinyDialogues scorer robustness; the other 58 children are a
+      Mistral-only confirmation sample. Keep PBM and non-PBM estimates separate.
+- [x] Implement the first analysis stages in `developmental_word_information`:
+      compact archive provenance/coverage audit and exact disk-backed k0/k3
+      pairing on `word_occurrence_id`, with atomic PASS markers and tests.
+- [x] Review, validate, and locally commit the compute DAG for exactly 58
+      non-PBM children × real speech × k0-k3 = 232 same-pass word contracts.
+      Commit `aa6555f` passed 68 focused tests, shell syntax, fake-DAG checks,
+      and resolved Mistral GPU resource validation. No Mila job was submitted.
+- [ ] Retrieve the completed PBM Mistral and TinyDialogues same-pass archives
+      using `developmental_word_information/docs/mila_retrieval_commands_2026-08-05.md`,
+      then checksum, extract, and run the 504-contract relocation-aware audit.
+- [ ] Finish the Qwen local relocation-aware audit and create a symlink only
+      after `LOCAL_RETRIEVAL_AUDIT_PASSED` exists.
+- [ ] Freeze and checksum all coverage-based lexical eligibility, cost,
+      cross-fitted rarity, support, nonlinear-age, model, bootstrap, and
+      multiplicity decisions before inspecting PBM word effects or any
+      non-PBM confirmation coefficient.
+- [ ] Reauthenticate GitHub and publish the new local commits. Do not submit
+      the remaining-58 Mila smoke until its exact compute commit is on `main`.
+
 ### Completed milestone
 
 - [x] Complete and audit the full 79-child direct-Mistral score tree: 1,896

@@ -3,6 +3,28 @@
 Living project memory: discoveries, decisions, bugs, commands that worked, and
 current state. Prefer dated notes.
 
+## 2026-08-05 - New three-scorer word program and 58-child compute lane
+
+- Froze the high-level design without inspecting word effects: PBM21 uses
+  Mistral as the primary scorer and Qwen/TinyDialogues as separate robustness
+  analyses; the other 58 children form a Mistral-only confirmation sample.
+- Started the dedicated `developmental_word_information` implementation and
+  committed it locally as `41b0b29`. Its compact archive audit and exact
+  SQLite-backed k0/k3 occurrence pairer pass all 4 synthetic tests. The Qwen
+  archive compact audit passed 504 contracts, 21 children, all six modes and
+  k0-k3, with no problems and without reading score effects.
+- Reviewed the compute repository's modular selection work, added a
+  multi-corpus smoke preference and exact 232-contract remaining-58 test, and
+  committed the production-safe lane locally as `aa6555f`. The 68-test focused
+  suite, all referenced shell syntax checks, fake dependency DAGs, and both
+  resolved Mistral GPU argument validations passed. No Mila job was submitted.
+- Prepared local destinations and exact user-run `rsync -avhP` commands for the
+  missing completed PBM Mistral and TinyDialogues same-pass archives. Analysis
+  symlinks remain forbidden until checksum, extraction, and relocation-aware
+  audits pass.
+- GitHub publication is still blocked by the invalid saved `gh` credential;
+  all new commits remain local.
+
 ## 2026-08-05 - Reviewed onset and conversational closeout
 
 - Reviewed the previously uncommitted sustained-onset and conversational-

@@ -260,6 +260,16 @@ as a replicated onset.
 
 Important current facts:
 
+- the PBM same-pass Mistral, Qwen3-14B, and TinyDialogues word productions are
+  complete upstream at 504 contracts each. Only Qwen's archive is currently
+  local; its compact non-outcome audit passed and its full extracted relational
+  audit is pending. Mistral and TinyDialogues are `RETRIEVE_FIRST`;
+- the remaining-58 real-child Mistral same-pass word DAG is implemented and
+  locally audited at compute commit `aa6555f`. It targets 232 contracts and
+  requires a fresh exact-wrapper smoke before production; no Mila job ran;
+- `developmental_word_information` commit `41b0b29` owns the versioned study
+  design, input audits, exact word pairing, and future modeling. Cross-scorer
+  effects must be fit separately; raw score magnitudes must not be pooled;
 - the full-79 direct-Mistral score tree is available, but full-79 context
   entropy, word-level surprisal, LSTM targets/scores, response-space products,
   complexity products, and corrected Bayes scores are not all available;
