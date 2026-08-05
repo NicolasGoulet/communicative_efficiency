@@ -20,6 +20,28 @@ This section is the authoritative active checklist. The longer dated sections
 below are retained as implementation/audit history; some of their unchecked
 items were superseded or completed by the later modular direct-score workflow.
 
+### Reviewed local closeout — 2026-08-05
+
+- [x] Review and retain the sustained-onset implementation, tests, and report.
+      Its saved audit is `PASS`, reproduces the frozen point estimates within
+      `2.007e-13`, completes 1,000/1,000 child bootstraps per scope, and finds
+      no sustained onset in either PBM or non-PBM under simultaneous bands.
+- [x] Review and retain the conversational-eligibility builder, test, and
+      completed full-79 structural output. The 2026-07-23 run aligned all
+      1,140,218 source rows with zero unresolved files or text mismatches and
+      selected 629,334 structurally eligible child turns.
+- [ ] Resolve or adjudicate the 18,172 eligible `context_k1` mismatches that
+      keep the conversational audit at `REVIEW`, and complete the 325-row
+      stratified manual validation sample before treating structural
+      eligibility as a validated conversational analysis sample.
+- [ ] Reauthenticate the GitHub CLI, then push the reviewed closeout commit.
+      Local code, tests, reports, and commits can proceed while authentication
+      is unavailable; do not claim that a push or PR update succeeded.
+- [ ] Keep all cluster-side retrieval, rsync, and Slurm actions manual. The
+      ordered user command sheet remains
+      `docs/mila_handoff_commands_2026-07-22.md` and intentionally stops before
+      full-79 LSTM scoring because that scoring wrapper is not audited.
+
 ### Completed milestone
 
 - [x] Complete and audit the full 79-child direct-Mistral score tree: 1,896
@@ -62,12 +84,15 @@ items were superseded or completed by the later modular direct-score workflow.
 
 ### Primary scientific work still open
 
-- [ ] Build and manually audit the primary responsive-turn sample. Preserve
+- [ ] Finish manual validation of the completed structural responsive-turn
+      sample and adjudicate its `context_k1` mismatches. Preserve
       adjacency/turn-distance, child-initiated, imitation, routine/reading,
       backchannel, question-type, and repair flags.
-- [ ] Complete sustained-onset inference with child bootstrap/simultaneous
-      uncertainty in the non-PBM sample and repeat it with validated word,
-      morpheme, syllable, and phoneme effort controls.
+- [x] Complete lexical-word sustained-onset inference with child
+      bootstrap/simultaneous uncertainty in PBM and non-PBM. The reviewed
+      2026-07-22 run found no sustained onset in either scope.
+- [ ] Repeat sustained-onset inference with validated morpheme, syllable, and
+      phoneme effort controls.
 - [ ] Prototype downstream caregiver-response predictive gain and validated
       repair/clarification/contingent-response outcomes as listener-utility
       measures. Keep these separate from target self-information.

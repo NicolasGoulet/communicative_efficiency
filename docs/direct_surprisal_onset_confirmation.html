@@ -1,0 +1,388 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Direct-Surprisal Sustained-Onset Confirmation</title>
+<style>
+:root {
+  color-scheme: light;
+  --ink: #1e2528;
+  --muted: #5e686d;
+  --line: #d9e0df;
+  --paper: #ffffff;
+  --soft: #f5f7f6;
+  --accent: #2f6f73;
+  --accent2: #c76f2c;
+}
+body {
+  margin: 0;
+  background: #eef2f1;
+  color: var(--ink);
+  font: 16px/1.58 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+main {
+  max-width: 980px;
+  margin: 34px auto 56px;
+  padding: 48px 58px;
+  background: var(--paper);
+  box-shadow: 0 18px 50px rgba(31, 45, 48, 0.12);
+}
+h1, h2, h3, h4 {
+  line-height: 1.18;
+  margin: 1.6em 0 0.55em;
+}
+h1 {
+  margin-top: 0;
+  font-size: 2.25rem;
+  border-bottom: 3px solid var(--accent);
+  padding-bottom: 0.45em;
+}
+h2 {
+  font-size: 1.55rem;
+  color: var(--accent);
+}
+h3 {
+  font-size: 1.18rem;
+}
+p {
+  margin: 0.75em 0;
+}
+a {
+  color: var(--accent);
+}
+blockquote {
+  border-left: 4px solid var(--accent2);
+  margin: 1.1em 0;
+  padding: 0.05em 1.1em;
+  color: var(--muted);
+  background: #fff8f2;
+}
+code {
+  background: var(--soft);
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  padding: 0.08em 0.3em;
+  font-family: "SFMono-Regular", Consolas, monospace;
+  font-size: 0.92em;
+}
+pre {
+  background: #f5f7f6;
+  color: var(--ink);
+  border: 1px solid var(--line);
+  padding: 1em;
+  overflow-x: auto;
+  border-radius: 7px;
+}
+pre code {
+  background: transparent;
+  border: 0;
+  padding: 0;
+  color: inherit;
+}
+table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 1.15em 0 1.45em;
+  font-size: 0.95em;
+}
+.plot-layout {
+  table-layout: fixed;
+  margin: 1.1em auto 1.45em;
+}
+.plot-layout,
+.plot-layout tr,
+.plot-layout td {
+  border: 0;
+  background: transparent;
+}
+.plot-layout td {
+  padding: 0.35em 0.55em 0.95em;
+  text-align: center;
+  vertical-align: top;
+}
+.plot-layout img {
+  width: 100%;
+  max-width: 100%;
+  margin: 0 auto 0.35em;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: white;
+}
+.plot-layout .centered-cell img {
+  width: 54%;
+}
+.plot-caption {
+  color: var(--muted);
+  font-size: 0.85em;
+  line-height: 1.35;
+}
+th, td {
+  border: 1px solid var(--line);
+  padding: 0.54em 0.68em;
+  vertical-align: top;
+}
+th {
+  background: #e7efed;
+  text-align: left;
+}
+tr:nth-child(even) td {
+  background: #fafbfb;
+}
+.plot-layout tr:nth-child(even) td {
+  background: transparent;
+}
+img {
+  max-width: 100%;
+  display: block;
+  margin: 1.1em auto 0.45em;
+}
+.figure-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.05rem 1.25rem;
+  align-items: start;
+  margin: 1.1em 0 1.45em;
+}
+.figure-grid.two-one {
+  max-width: 900px;
+  margin-left: auto;
+  margin-right: auto;
+}
+.figure-grid.five-panel {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+.figure-grid figure {
+  margin: 0;
+}
+.figure-grid img {
+  width: 100%;
+  max-width: 100%;
+  margin: 0;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: white;
+}
+.figure-grid figcaption {
+  color: var(--muted);
+  font-size: 0.85em;
+  line-height: 1.35;
+  text-align: center;
+  margin-top: 0.35em;
+}
+.figure-grid .centered {
+  grid-column: 1 / -1;
+  justify-self: center;
+  max-width: 58%;
+}
+.figure-grid.two-one .centered {
+  max-width: 54%;
+}
+.figure-grid.five-panel .centered {
+  max-width: 52%;
+}
+ul, ol {
+  padding-left: 1.4em;
+}
+.caption {
+  color: var(--muted);
+  font-size: 0.92em;
+  margin-top: -0.15em;
+}
+@media print {
+  body {
+    background: white;
+  }
+  main {
+    box-shadow: none;
+    margin: 0;
+    max-width: none;
+    padding: 28px;
+  }
+}
+@media screen and (max-width: 540px) {
+  .figure-grid {
+    grid-template-columns: 1fr;
+  }
+  .figure-grid .centered,
+  .figure-grid.five-panel .centered {
+    grid-column: auto;
+    max-width: 100%;
+  }
+}
+</style>
+</head>
+<body>
+<main>
+<h1>Direct-Surprisal Sustained-Onset Confirmation</h1>
+<p>This report applies the onset rule frozen on 21 July 2026 to the real-child Mistral k3 exact/top-coded word-effort design cells. The reference category is <code>006-023</code>. Uncertainty is produced by resampling children and using a simultaneous 95% max-absolute-studentized-deviation band across the seven post-reference contrasts.</p>
+<h2>Result</h2>
+<ul>
+<li>PBM discovery sustained onset: <code>not_established</code>.</li>
+<li>Non-PBM confirmation sustained onset: <code>not_established</code>.</li>
+<li>Confirmation bootstrap fits: <code>1000</code> / <code>1000</code>.</li>
+<li>A confirmation bin is eligible for the rule only with at least five children</li>
+<p>and three corpora.</p>
+</ul>
+<img src="../figs/direct_surprisal_onset_confirmation/age_bin_simultaneous_bands.png" alt="Simultaneous child-bootstrap onset bands">
+<table>
+<thead><tr>
+<th>scope</th>
+<th>age_bin</th>
+<th>estimate_vs_006_023</th>
+<th>simultaneous_ci_low</th>
+<th>simultaneous_ci_high</th>
+<th>children</th>
+<th>corpora</th>
+<th>adequately_supported</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>pbm_discovery</td>
+<td>024-029</td>
+<td>-0.897</td>
+<td>-1.806</td>
+<td>0.012</td>
+<td>21.000</td>
+<td>3.000</td>
+<td>1.000</td>
+</tr>
+<tr>
+<td>pbm_discovery</td>
+<td>030-035</td>
+<td>-2.031</td>
+<td>-3.180</td>
+<td>-0.882</td>
+<td>20.000</td>
+<td>3.000</td>
+<td>1.000</td>
+</tr>
+<tr>
+<td>pbm_discovery</td>
+<td>036-041</td>
+<td>-1.934</td>
+<td>-4.315</td>
+<td>0.446</td>
+<td>8.000</td>
+<td>3.000</td>
+<td>1.000</td>
+</tr>
+<tr>
+<td>pbm_discovery</td>
+<td>042-047</td>
+<td>-4.215</td>
+<td>-8.413</td>
+<td>-0.017</td>
+<td>5.000</td>
+<td>2.000</td>
+<td>0.000</td>
+</tr>
+<tr>
+<td>pbm_discovery</td>
+<td>048-053</td>
+<td>-2.647</td>
+<td>-5.187</td>
+<td>-0.108</td>
+<td>3.000</td>
+<td>2.000</td>
+<td>0.000</td>
+</tr>
+<tr>
+<td>pbm_discovery</td>
+<td>054-059</td>
+<td>-3.275</td>
+<td>-6.551</td>
+<td>0.000</td>
+<td>2.000</td>
+<td>1.000</td>
+<td>0.000</td>
+</tr>
+<tr>
+<td>pbm_discovery</td>
+<td>060-065</td>
+<td>-5.378</td>
+<td>-11.218</td>
+<td>0.462</td>
+<td>2.000</td>
+<td>1.000</td>
+<td>0.000</td>
+</tr>
+<tr>
+<td>non_pbm_confirmation</td>
+<td>024-029</td>
+<td>0.413</td>
+<td>-1.216</td>
+<td>2.043</td>
+<td>50.000</td>
+<td>10.000</td>
+<td>1.000</td>
+</tr>
+<tr>
+<td>non_pbm_confirmation</td>
+<td>030-035</td>
+<td>-1.158</td>
+<td>-2.977</td>
+<td>0.662</td>
+<td>50.000</td>
+<td>10.000</td>
+<td>1.000</td>
+</tr>
+<tr>
+<td>non_pbm_confirmation</td>
+<td>036-041</td>
+<td>-1.603</td>
+<td>-3.203</td>
+<td>-0.003</td>
+<td>53.000</td>
+<td>9.000</td>
+<td>1.000</td>
+</tr>
+<tr>
+<td>non_pbm_confirmation</td>
+<td>042-047</td>
+<td>-1.639</td>
+<td>-3.350</td>
+<td>0.071</td>
+<td>35.000</td>
+<td>8.000</td>
+<td>1.000</td>
+</tr>
+<tr>
+<td>non_pbm_confirmation</td>
+<td>048-053</td>
+<td>-1.398</td>
+<td>-3.062</td>
+<td>0.267</td>
+<td>12.000</td>
+<td>4.000</td>
+<td>1.000</td>
+</tr>
+<tr>
+<td>non_pbm_confirmation</td>
+<td>054-059</td>
+<td>-1.308</td>
+<td>-3.127</td>
+<td>0.511</td>
+<td>18.000</td>
+<td>6.000</td>
+<td>1.000</td>
+</tr>
+<tr>
+<td>non_pbm_confirmation</td>
+<td>060-065</td>
+<td>-2.418</td>
+<td>-4.947</td>
+<td>0.111</td>
+<td>7.000</td>
+<td>5.000</td>
+<td>1.000</td>
+</tr>
+</tbody></table>
+<h2>Interpretation</h2>
+<p>An onset is not the first nominally significant coefficient. It is the first adequately supported post-reference bin whose upper simultaneous band is below zero and for which every later adequately supported bin also remains below zero. If the confirmation result is <code>not_established</code>, the prior PBM statement that the first row-level decrease appears by 24–29 months remains exploratory and must not be promoted as a replicated developmental onset.</p>
+<p>These bands use the frozen lexical-word effort definition. Full-79 validated morpheme, syllable, and phoneme controls are not yet available, so this report does not satisfy that separate alternative-effort validation requirement.</p>
+</main>
+</body>
+</html>

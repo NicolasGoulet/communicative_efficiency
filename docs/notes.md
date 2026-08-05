@@ -3,6 +3,44 @@
 Living project memory: discoveries, decisions, bugs, commands that worked, and
 current state. Prefer dated notes.
 
+## 2026-08-05 - Reviewed onset and conversational closeout
+
+- Reviewed the previously uncommitted sustained-onset and conversational-
+  eligibility implementations, tests, reports, and saved audits. The focused
+  test command
+  `.venv/bin/python -m unittest tests.test_build_conversational_eligibility_sample tests.test_build_direct_surprisal_onset_confirmation`
+  passed all 5 tests.
+- The sustained-onset audit is `PASS`: saved point estimates are reproduced
+  within `2.007e-13`, both scopes completed 1,000/1,000 child bootstraps, and
+  neither PBM nor non-PBM establishes a sustained onset under the simultaneous
+  band rule.
+- The full conversational structural build completed on 2026-07-23. It covers
+  1,140,218 rows from 2,752 raw files with zero unresolved files, alignment
+  failures, or text mismatches; 629,334 rows meet the structural primary rule
+  and 614,908 have an immediate next caregiver response. Its audit remains
+  `REVIEW` because 18,172 structurally eligible rows disagree with saved
+  `context_k1`; the 325-row manual sample is generated but not yet labeled.
+- GitHub publication is temporarily blocked because the saved `gh` credential
+  is invalid. Local review, testing, and commits may continue, but no push or
+  PR update should be reported until `gh auth login -h github.com` succeeds.
+
+## 2026-07-22 - Work paused for review
+
+- Stopped the long full-79 conversational-eligibility build at the user's
+  request. It exited via Ctrl-C with code 130. No final CSV, audit JSON, manual
+  sample, or report was produced, so there is no conversational result to
+  interpret. One ignored 49 MB atomic temporary file remains and is named
+  explicitly in `TODO.md`.
+- Preserved but did not commit the new conversational-turn builder/test and
+  the completed lexical-word onset implementation/test/report. The onset run
+  passed its internal reconstruction audit and found no sustained onset under
+  simultaneous child-bootstrap bands in either PBM or non-PBM, but all of
+  these uncommitted changes require human review before publication.
+- No Mila login, rsync, Slurm submission, additional Git commit, or push was
+  performed after the stop request. Resume from the short handoff at the top
+  of `TODO.md`; do not treat partially generated or uncommitted work as a
+  finished deliverable.
+
 ## 2026-07-22 - Supervisor synthesis, artifact freeze, and Mila handoff
 
 - Replaced the stale June supervisor report with a current July synthesis in
