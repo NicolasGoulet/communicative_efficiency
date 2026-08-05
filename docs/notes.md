@@ -3,6 +3,21 @@
 Living project memory: discoveries, decisions, bugs, commands that worked, and
 current state. Prefer dated notes.
 
+## 2026-08-05 - Qwen PBM word handoff passed its full local gate
+
+- Independently rehashed the 15,774,773,220-byte Qwen3-14B PBM same-pass word
+  archive; its SHA-256 matched
+  `b1ad15e6b26b6445e19c8bb2cbad06d24843e421d062472bd972ca44c9af7dfa`.
+- The relocation-aware audit passed 504/504 contracts with 11,605,772
+  utterance rows, 35,450,900 word rows, 55,528,922 token rows, 44,008,510
+  allocation rows, zero problems, and zero temporary output paths.
+- Promoted the quarantined extraction to its immutable name and linked it into
+  `developmental_word_information` under a scorer/sample/date/revision label.
+- The Brown/Adam real-child k0/k3 pairing smoke passed with 162,589 exact
+  pairs, zero pairing problems, and all 2,813 k0-only context-unavailable
+  occurrences retained in the complete exclusion ledger.
+- No word context-gain distribution or developmental effect was inspected.
+
 ## 2026-08-05 - New three-scorer word program and 58-child compute lane
 
 - Froze the high-level design without inspecting word effects: PBM21 uses

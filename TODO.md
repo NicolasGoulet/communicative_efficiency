@@ -57,8 +57,10 @@ items were superseded or completed by the later modular direct-score workflow.
 - [ ] Retrieve the completed PBM Mistral and TinyDialogues same-pass archives
       using `developmental_word_information/docs/mila_retrieval_commands_2026-08-05.md`,
       then checksum, extract, and run the 504-contract relocation-aware audit.
-- [ ] Finish the Qwen local relocation-aware audit and create a symlink only
-      after `LOCAL_RETRIEVAL_AUDIT_PASSED` exists.
+- [x] Finish the Qwen local relocation-aware audit and create the immutable
+      model/run-labelled analysis symlink only after
+      `LOCAL_RETRIEVAL_AUDIT_PASSED`. The 504-contract audit and an exact
+      Brown/Adam k0/k3 pairing smoke passed with zero pairing problems.
 - [ ] Freeze and checksum all coverage-based lexical eligibility, cost,
       cross-fitted rarity, support, nonlinear-age, model, bootstrap, and
       multiplicity decisions before inspecting PBM word effects or any

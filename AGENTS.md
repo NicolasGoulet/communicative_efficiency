@@ -169,6 +169,15 @@ zero truncated-context rows, and zero problems. TinyDialogues uses
 Mistral scores in separate model-specific columns and output namespaces; do
 not compare raw bits per model token as though their tokenizers were the same.
 
+The Qwen3-14B PBM same-pass word production
+`20260803_qwen3_14b_pbm21_batch16_persistent_production_c82d219_v1` is local
+and analysis-ready. Its independently rehashed 15,774,773,220-byte archive and
+relocation-aware audit passed all 504 contracts: 21 children, six modes, four
+contexts, 11,605,772 utterance rows, 35,450,900 word rows, 55,528,922 token
+rows, 44,008,510 token-to-word allocation rows, and zero audit problems. The
+model/run-labelled symlink lives in `developmental_word_information`, which
+owns the word-level analysis; do not duplicate this 15 GB tree here.
+
 The legacy Route 1/Route 2 products remain PBM-scoped (Brown, Manchester, and
 Providence: 21 children):
 
@@ -261,9 +270,9 @@ as a replicated onset.
 Important current facts:
 
 - the PBM same-pass Mistral, Qwen3-14B, and TinyDialogues word productions are
-  complete upstream at 504 contracts each. Only Qwen's archive is currently
-  local; its compact non-outcome audit passed and its full extracted relational
-  audit is pending. Mistral and TinyDialogues are `RETRIEVE_FIRST`;
+  complete upstream at 504 contracts each. Qwen's archive is local and its
+  compact, checksum, extraction, full relational, immutable-handoff, and first
+  exact-pairing gates passed. Mistral and TinyDialogues are `RETRIEVE_FIRST`;
 - the remaining-58 real-child Mistral same-pass word DAG is implemented and
   locally audited at compute commit `aa6555f`. It targets 232 contracts and
   requires a fresh exact-wrapper smoke before production; no Mila job ran;
