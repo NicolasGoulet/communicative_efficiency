@@ -1,0 +1,274 @@
+<!doctype html><html><head><meta charset='utf-8'><title>Current Scientific Answer</title><style>body{font:15px/1.55 system-ui;max-width:1150px;margin:35px auto;padding:0 24px;color:#172b2b}h1,h2{color:#276c72}table{border-collapse:collapse;width:100%;margin:1em 0 2em}th,td{border:1px solid #ccd5d3;padding:.45em;vertical-align:top}th{background:#e5efed}img{max-width:100%}.headline{background:#eef6f5;border-left:6px solid #2d777d;padding:1em 1.2em}.warning{background:#fff3cd;border-left:6px solid #b58900;padding:1em 1.2em}</style></head><body><h1>Current Scientific Answer Across Route 1, Route 2, and Word Information</h1><div class='headline'><b>607 fitted variants/outcome fits are synthesized here.</b> The clearest result is increasing predictability/conventionality of form with age; increasing use of contextual support is not robust.</div><h2>Bottom line</h2><ol><li>Mistral PBM and TinyDialogues PBM show negative fixed-effort contextual-surprisal age slopes. The non-PBM58 Mistral slope is negative but its frozen clustered interval crosses zero.</li><li>Non-PBM58 unconditional surprisal decreases, while context gain decreases contrary to the registered positive direction.</li><li>All three word scorers show negative same-word k0 and k3 age slopes. Longer word types receive more context support; developmental change in context gain is scorer-dependent.</li><li>Route 2 children move toward the generated length reference with age, but catch-up is weaker in higher exact-string-entropy contexts.</li><li>Sustained onset is not established in either sample.</li></ol><img src='../figs/current_scientific_synthesis/evidence_map.png'><h2>Route 1 direct estimates</h2><table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th>sample</th>
+      <th>scorer</th>
+      <th>question</th>
+      <th>estimate</th>
+      <th>ci_low</th>
+      <th>ci_high</th>
+      <th>evidence_status</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>PBM21 scorer robustness</td>
+      <td>TinyDialogues</td>
+      <td>Contextual utterance surprisal at fixed word effort</td>
+      <td>-0.222</td>
+      <td>-0.311</td>
+      <td>-0.132</td>
+      <td>supported_association</td>
+    </tr>
+    <tr>
+      <td>PBM21 scorer robustness</td>
+      <td>TinyDialogues</td>
+      <td>Unconditional utterance surprisal at fixed word effort</td>
+      <td>-0.254</td>
+      <td>-0.339</td>
+      <td>-0.168</td>
+      <td>supported_association</td>
+    </tr>
+    <tr>
+      <td>PBM21 scorer robustness</td>
+      <td>TinyDialogues</td>
+      <td>Utterance context gain (k0 − k3)</td>
+      <td>-0.032</td>
+      <td>-0.050</td>
+      <td>-0.014</td>
+      <td>contrary_to_registered_direction</td>
+    </tr>
+    <tr>
+      <td>PBM21 discovery</td>
+      <td>Mistral</td>
+      <td>Contextual utterance surprisal at fixed word effort</td>
+      <td>-0.131</td>
+      <td>-0.179</td>
+      <td>-0.083</td>
+      <td>supported_association</td>
+    </tr>
+    <tr>
+      <td>PBM21 discovery</td>
+      <td>Mistral</td>
+      <td>Unconditional utterance surprisal at fixed word effort</td>
+      <td>-0.162</td>
+      <td>-0.211</td>
+      <td>-0.112</td>
+      <td>supported_association</td>
+    </tr>
+    <tr>
+      <td>PBM21 discovery</td>
+      <td>Mistral</td>
+      <td>Utterance context gain (k0 − k3)</td>
+      <td>-0.030</td>
+      <td>-0.050</td>
+      <td>-0.011</td>
+      <td>contrary_to_registered_direction</td>
+    </tr>
+    <tr>
+      <td>non-PBM58 confirmation</td>
+      <td>Mistral</td>
+      <td>Contextual utterance surprisal at fixed word effort</td>
+      <td>-0.062</td>
+      <td>-0.132</td>
+      <td>0.007</td>
+      <td>direction_consistent_not_confirmed</td>
+    </tr>
+    <tr>
+      <td>non-PBM58 confirmation</td>
+      <td>Mistral</td>
+      <td>Unconditional utterance surprisal at fixed word effort</td>
+      <td>-0.089</td>
+      <td>-0.145</td>
+      <td>-0.034</td>
+      <td>supported_association</td>
+    </tr>
+    <tr>
+      <td>non-PBM58 confirmation</td>
+      <td>Mistral</td>
+      <td>Utterance context gain (k0 − k3)</td>
+      <td>-0.028</td>
+      <td>-0.045</td>
+      <td>-0.010</td>
+      <td>contrary_to_registered_direction</td>
+    </tr>
+  </tbody>
+</table><h2>Route 2 final relative-effort estimates</h2><table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th>outcome</th>
+      <th>term</th>
+      <th>estimate</th>
+      <th>conf_low</th>
+      <th>conf_high</th>
+      <th>evidence_status</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>child_words_minus_generated_mean</td>
+      <td>age_months_c</td>
+      <td>0.0895</td>
+      <td>0.0777</td>
+      <td>0.1013</td>
+      <td>measurement_limited_association</td>
+    </tr>
+    <tr>
+      <td>child_words_minus_generated_mean</td>
+      <td>age_months_c:response_entropy_bits_c</td>
+      <td>-0.0248</td>
+      <td>-0.0384</td>
+      <td>-0.0112</td>
+      <td>measurement_limited_association</td>
+    </tr>
+    <tr>
+      <td>child_words_percentile_in_generated_distribution</td>
+      <td>age_months_c</td>
+      <td>0.0108</td>
+      <td>0.0090</td>
+      <td>0.0125</td>
+      <td>measurement_limited_association</td>
+    </tr>
+    <tr>
+      <td>child_words_percentile_in_generated_distribution</td>
+      <td>age_months_c:response_entropy_bits_c</td>
+      <td>-0.0034</td>
+      <td>-0.0047</td>
+      <td>-0.0022</td>
+      <td>measurement_limited_association</td>
+    </tr>
+  </tbody>
+</table><div class='warning'>Route 2 entropy is model-, prompt-, temperature-, and exact-string-dependent; generated responses are not same-meaning paraphrases.</div><h2>Word-information questions</h2><table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th>question</th>
+      <th>common_direction</th>
+      <th>cluster_supported_scorers</th>
+      <th>bootstrap_supported_scorers</th>
+      <th>replication_status</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Does unconditional surprisal for the same word decrease with age?</td>
+      <td>negative</td>
+      <td>3</td>
+      <td>3</td>
+      <td>direction_and_interval_robust</td>
+    </tr>
+    <tr>
+      <td>Does contextual surprisal for the same word decrease with age?</td>
+      <td>negative</td>
+      <td>3</td>
+      <td>3</td>
+      <td>direction_and_interval_robust</td>
+    </tr>
+    <tr>
+      <td>Does word-level context gain change with age?</td>
+      <td>mixed</td>
+      <td>1</td>
+      <td>1</td>
+      <td>scorer_dependent</td>
+    </tr>
+    <tr>
+      <td>At the centered age, do longer word types receive more contextual support?</td>
+      <td>positive</td>
+      <td>3</td>
+      <td>3</td>
+      <td>direction_and_interval_robust</td>
+    </tr>
+    <tr>
+      <td>Does the longer-word context-support association change with age?</td>
+      <td>negative</td>
+      <td>2</td>
+      <td>2</td>
+      <td>direction_robust_partial_uncertainty</td>
+    </tr>
+    <tr>
+      <td>Does the rarity-context-support association change with age?</td>
+      <td>mixed</td>
+      <td>2</td>
+      <td>2</td>
+      <td>scorer_dependent</td>
+    </tr>
+    <tr>
+      <td>Within word type, does the age trend in context gain vary by word length?</td>
+      <td>negative</td>
+      <td>2</td>
+      <td>3</td>
+      <td>direction_robust_partial_uncertainty</td>
+    </tr>
+    <tr>
+      <td>Does the within-utterance k3 information-position gradient change with age?</td>
+      <td>positive</td>
+      <td>1</td>
+      <td>0</td>
+      <td>direction_robust_partial_uncertainty</td>
+    </tr>
+  </tbody>
+</table><h2>Fit inventory</h2><table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th>family</th>
+      <th>fitted_variants</th>
+      <th>status</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Direct TinyDialogues PBM</td>
+      <td>34</td>
+      <td>PASS_WITH_RECORDED_SENSITIVITIES</td>
+    </tr>
+    <tr>
+      <td>Direct Mistral full-79</td>
+      <td>102</td>
+      <td>PASS_WITH_RECORDED_SENSITIVITIES</td>
+    </tr>
+    <tr>
+      <td>Paired TinyDialogues–Mistral</td>
+      <td>11</td>
+      <td>PASS</td>
+    </tr>
+    <tr>
+      <td>Route 1 model zoo</td>
+      <td>56</td>
+      <td>PASS</td>
+    </tr>
+    <tr>
+      <td>Route 1 explicit comparisons</td>
+      <td>45</td>
+      <td>PASS</td>
+    </tr>
+    <tr>
+      <td>Route 2 response space</td>
+      <td>48</td>
+      <td>PASS</td>
+    </tr>
+    <tr>
+      <td>Route 2 relative effort</td>
+      <td>144</td>
+      <td>PASS</td>
+    </tr>
+    <tr>
+      <td>PBM word Mistral</td>
+      <td>55</td>
+      <td>PASS</td>
+    </tr>
+    <tr>
+      <td>PBM word Qwen3-14B</td>
+      <td>55</td>
+      <td>PASS</td>
+    </tr>
+    <tr>
+      <td>PBM word TinyDialogues</td>
+      <td>55</td>
+      <td>PASS</td>
+    </tr>
+    <tr>
+      <td>Frozen sustained-onset tests</td>
+      <td>2</td>
+      <td>PASS</td>
+    </tr>
+  </tbody>
+</table><h2>Next tests</h2><ol><li>Complete Qwen-response/Mistral-scoring calibration and then the gated production run.</li><li>Run the remaining-58 same-pass Mistral word DAG under the frozen protocol.</li><li>Add downstream caregiver-response utility or validated repair/clarification outcomes.</li></ol></body></html>

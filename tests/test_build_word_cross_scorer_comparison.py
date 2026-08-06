@@ -25,9 +25,28 @@ class WordCrossScorerComparisonTests(unittest.TestCase):
                 analysis = root / label
                 (analysis / "models").mkdir(parents=True)
                 (analysis / "features").mkdir()
-                pd.DataFrame([
-                    {"model_id": "same_word_k3_primary", "term": "age_c", "estimate": -.1 - index * .01, "ci_low": -.2, "ci_high": -.01}
-                ]).to_csv(analysis / "models" / "coefficients.csv", index=False)
+                pd.DataFrame(
+                    [
+                        {
+                            "model_id": "same_word_k3_primary",
+                            "term": "age_c",
+                            "estimate": -.1 - index * .01,
+                            "ci_low": -.2,
+                            "ci_high": -.01,
+                            "bootstrap_ci_low": -.22,
+                            "bootstrap_ci_high": -.02,
+                        },
+                        {
+                            "model_id": "context_gain_k3_primary",
+                            "term": "age_c",
+                            "estimate": -.03 if index == 0 else .01,
+                            "ci_low": -.05 if index == 0 else -.02,
+                            "ci_high": -.01 if index == 0 else .04,
+                            "bootstrap_ci_low": -.06 if index == 0 else -.03,
+                            "bootstrap_ci_high": -.01 if index == 0 else .05,
+                        },
+                    ]
+                ).to_csv(analysis / "models" / "coefficients.csv", index=False)
                 pd.DataFrame([
                     {"level": "child", "unit": "Brown/Adam", "outcome": "word_sum_bits_k3", "age_slope": -.1},
                     {"level": "child", "unit": "Brown/Eve", "outcome": "word_sum_bits_k3", "age_slope": .1 if index else -.1},
@@ -43,7 +62,22 @@ class WordCrossScorerComparisonTests(unittest.TestCase):
             report = compare(scorers, root / "out", root / "figs", root / "report.md", root / "report.html")
             self.assertEqual(report["status"], "PASS")
             self.assertTrue((root / "out" / "child_slope_sign_concordance.csv").is_file())
+            question_summary = pd.read_csv(
+                root / "out" / "scientific_question_summary.csv"
+            ).set_index("question_id")
+            self.assertEqual(
+                question_summary.loc["same_word_k3_age", "replication_status"],
+                "direction_and_interval_robust",
+            )
+            self.assertEqual(
+                question_summary.loc["context_gain_age", "replication_status"],
+                "scorer_dependent",
+            )
             self.assertTrue((root / "report.html").is_file())
+            self.assertIn(
+                "Question-by-question evidence",
+                (root / "report.md").read_text(encoding="utf-8"),
+            )
             self.assertEqual(report["registry_sha256"], "same-registry")
 
     def test_mismatched_registry_hash_is_rejected(self) -> None:

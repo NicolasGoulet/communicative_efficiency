@@ -20,6 +20,29 @@ This section is the authoritative active checklist. The longer dated sections
 below are retained as implementation/audit history; some of their unchecked
 items were superseded or completed by the later modular direct-score workflow.
 
+### Complete local modeling and scientific synthesis — 2026-08-06
+
+- [x] Run every locally eligible component of the complete analysis machine.
+      Prepare/fit/plot/report stages recorded zero failures; the only blocked
+      component is the deliberately separate remaining-58 Mistral word
+      confirmation, whose 232 Mila scoring contracts do not yet exist.
+- [x] Fit and audit the frozen PBM word protocol separately under Mistral,
+      Qwen3-14B, and TinyDialogues. Each scorer completed 55 fitted variants
+      with zero failures and the registered 1,000-child-bootstrap models.
+- [x] Replace the crude all-coefficient cross-scorer direction count with an
+      eight-question synthesis that reports clustered and bootstrap support
+      separately. Same-word k0/k3 age slopes and longer-word contextual
+      support are robust across all three scorers; context-gain development
+      and rarity-by-age are scorer-dependent.
+- [x] Publish `docs/current_scientific_synthesis.html` from audited saved
+      outputs. It inventories 607 fitted variants/outcome fits, separates PBM
+      discovery from non-PBM confirmation, preserves the contrary Route 2 and
+      P3 results, and records that sustained onset is not established.
+- [ ] After the current Qwen-response/Mistral-scoring Mila smoke and audit
+      pass, submit production through its explicit approval command, retrieve
+      the compact report/products, and add the decoupled response calibration
+      as a new Route 2 sensitivity. Do not bypass the smoke gate.
+
 ### Reviewed local closeout — 2026-08-05
 
 - [x] Review and retain the sustained-onset implementation, tests, and report.

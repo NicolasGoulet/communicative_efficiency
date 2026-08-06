@@ -19,7 +19,7 @@ class CompleteAnalysisMachineTests(unittest.TestCase):
         root = Path(__file__).parents[1]
         config = load_config(root / "configs" / "complete_analysis_machine_v1.json")
         ids = {item["component_id"] for item in config["components"]}
-        self.assertTrue({"route1_model_atlas", "route2_response_space", "route2_relative_effort", "corrected_pbm_bayes", "direct_sustained_onset", "word_mistral_pbm", "word_qwen_pbm", "word_tinydialogues_pbm", "word_cross_scorer_pbm", "word_mistral_nonpbm58"}.issubset(ids))
+        self.assertTrue({"route1_model_atlas", "route2_response_space", "route2_relative_effort", "corrected_pbm_bayes", "direct_sustained_onset", "word_mistral_pbm", "word_qwen_pbm", "word_tinydialogues_pbm", "word_cross_scorer_pbm", "scientific_answer_synthesis", "word_mistral_nonpbm58"}.issubset(ids))
         blocked = next(item for item in config["components"] if item["component_id"] == "word_mistral_nonpbm58")
         self.assertIn("unrun", blocked["blocked_reason"])
 

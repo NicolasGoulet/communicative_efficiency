@@ -18,6 +18,8 @@ The machine-readable registry is
 - corrected cross-fitted PBM Bayes decomposition;
 - the frozen sustained-onset analysis;
 - separate Mistral, Qwen3-14B, and TinyDialogues PBM word pipelines;
+- a saved-artifact scientific synthesis across Route 1, Route 2, onset, and
+  word information;
 - the explicitly blocked non-PBM58 Mistral word confirmation.
 
 PBM discovery, non-PBM confirmation, and scorer robustness remain separate.
@@ -71,6 +73,11 @@ The intentionally blocked non-PBM58 word component remains visible in the
 preflight and synthesis reports until its same-pass Mistral production exists.
 This is an audit result, not a reason to pool the full-79 utterance tree into a
 word-level confirmation.
+
+The final report-stage component writes
+`docs/current_scientific_synthesis.html`. It converts the registered outputs
+into question-level answers and a fit inventory; it never chooses or refits a
+model after seeing outcomes.
 
 ## Legacy monolithic components
 

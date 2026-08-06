@@ -3,6 +3,61 @@
 Living project memory: discoveries, decisions, bugs, commands that worked, and
 current state. Prefer dated notes.
 
+## 2026-08-06 - Complete local fitting and paper-level scientific synthesis
+
+- Ran the complete modular analysis machine over all locally eligible Route 1,
+  Route 2, direct, paired, onset, corrected-Bayes, and PBM word components.
+  The recorded run has zero failed commands. Its only blocker is the frozen
+  non-PBM58 word confirmation because the 232 same-pass Mistral contracts have
+  not yet been scored on Mila.
+- The Mistral, Qwen3-14B, and TinyDialogues PBM word pipelines each completed
+  55 fitted variants with zero failures. Registered bootstrap models completed
+  1,000 child draws per scorer on the exact same 1,032,963-occurrence primary
+  set (identity SHA-256
+  `4b12305ba8ff6ec2fc96557b68aa6b921dd34bb6f0d05023fcf8451a93bcb437`).
+- Rebuilt the cross-scorer word report around eight registered scientific
+  questions. Same-word k0 and k3 age slopes are negative with clustered and
+  bootstrap intervals excluding zero for all three scorers. Longer word types
+  receive more context support at the centered age under all three scorers.
+  The longer-word support association weakens with age in all three point
+  estimates but has full interval support in only two; overall context-gain
+  development and rarity-by-age are scorer-dependent.
+- Added `src/build_scientific_answer_synthesis.py`, its focused test, evidence
+  map, machine-readable tables, and Markdown/HTML reports. The synthesis reads
+  saved artifacts without refitting and inventories 607 fitted variants or
+  registered outcome fits: 34 Tiny direct, 102 Mistral direct, 11 paired
+  outcomes, 101 Route 1 atlas/comparison fits, 192 Route 2 fits, 165 word fits,
+  and two onset scopes.
+- Current integrated answer: developmental change is clearest for
+  predictability/conventionality of form. The non-PBM58 contextual fixed-effort
+  slope is negative but its frozen clustered interval crosses zero;
+  unconditional surprisal decreases; utterance context gain decreases against
+  the registered positive direction; Route 2 catch-up toward the generated
+  length reference is weaker in higher exact-string-entropy contexts; and no
+  sustained onset is established.
+- The report-stage controller now includes this saved-artifact synthesis as a
+  reusable component. The next compute-dependent additions remain the gated
+  Qwen-response/Mistral-scoring calibration and the separate remaining-58 word
+  production.
+- Added `scripts/run_complete_analysis_unattended.sh`. It gates every eligible
+  production analysis behind the complete local unit suite, excludes only the
+  explicitly unavailable `word_mistral_nonpbm58` component, then runs all
+  prepare/fit/plot/report stages and `git diff --check`. Its focused 11-test
+  suite and `bash -n` audit passed before launch. The detached local unit is
+  `communicative-efficiency-analysis-20260806.service`; combined output is in
+  `/tmp/communicative-efficiency-analysis-20260806.log`.
+
+Focused TDD verification completed during implementation:
+
+```bash
+MPLCONFIGDIR=/tmp/mpl-focused .venv/bin/python -m unittest \
+  tests.test_complete_analysis_machine \
+  tests.test_build_word_cross_scorer_comparison \
+  tests.test_build_scientific_answer_synthesis
+```
+
+- 10 tests passed in 6.456 seconds with no failures.
+
 ## 2026-08-05 - Three-scorer word handoffs activated
 
 - Independently verified and promoted the retrieved PBM Mistral and

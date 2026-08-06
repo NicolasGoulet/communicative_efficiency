@@ -158,6 +158,18 @@
       "report_paths": ["docs/word_cross_scorer_comparison.html"]
     },
     {
+      "component_id": "scientific_answer_synthesis",
+      "family": "cross_route_scientific_synthesis",
+      "sample": "PBM21 discovery / non-PBM58 confirmation",
+      "scorer": "separate Mistral / TinyDialogues / Qwen results",
+      "scientific_role": "current paper-level answers and next-test priorities",
+      "guardrail": "Reads audited saved outputs only; it does not refit, pool scorer magnitudes, or promote exploratory results to confirmation.",
+      "required_paths": ["results/word_cross_scorer_comparison/scientific_question_summary.csv","results/direct_surprisal_replication/tinydialogues_pbm/modular/models/coefficients_long.csv","results/direct_surprisal_replication/mistral_full79/modular/models/coefficients_long.csv","results/route2_relative_effort_model_suite/route2_relative_effort_model_coefficients.csv","results/direct_surprisal_onset_confirmation/audit.json"],
+      "commands": {"reports":[[".venv/bin/python","src/build_scientific_answer_synthesis.py"]]},
+      "expected_artifacts": {"reports":["results/current_scientific_synthesis/manifest.json","docs/current_scientific_synthesis.html"]},
+      "report_paths": ["docs/current_scientific_synthesis.html","docs/word_cross_scorer_comparison.html"]
+    },
+    {
       "component_id": "corrected_pbm_bayes",
       "family": "bayes_derived_candidate_set",
       "sample": "PBM21 discovery",
