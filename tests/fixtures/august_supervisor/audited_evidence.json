@@ -1,0 +1,26 @@
+{
+  "DIRECT_NONPBM_MISTRAL_CONTEXTUAL_PRIMARY": {
+    "estimate": -0.062246,
+    "interval": [-0.131794, 0.007303],
+    "status": "QUALIFIED"
+  },
+  "DIRECT_PBM_MISTRAL_CONTEXTUAL": {
+    "estimate": -0.131274,
+    "interval": [-0.179152, -0.083396],
+    "status": "SUPPORTED"
+  },
+  "HALL_RACE_CLASS_INTERACTION": {
+    "estimate": -3.515975,
+    "interval": [-5.730271, -1.301679],
+    "status": "DESCRIPTIVE"
+  },
+  "ROUTE2_AGE_ENTROPY_INTERACTION": {
+    "estimate": -0.024775,
+    "interval": [-0.038379, -0.011171],
+    "status": "CONTRARY"
+  },
+  "WORD_CROSS_SCORER_PREDICTABILITY": {
+    "estimate": null,
+    "status": "SUPPORTED"
+  }
+}
