@@ -1,0 +1,672 @@
+{
+  "schema_version": "1.0.0",
+  "frozen_at": "2026-08-17",
+  "source_commit": "ced13d9d81de7469a35080ed78daac2bd5d24cb6",
+  "purpose": "Frozen evidence and page contract for the August supervisor report; downstream stages may summarize only these registered readings and audited artifacts.",
+  "allowed_evidence_statuses": [
+    "SUPPORTED",
+    "QUALIFIED",
+    "CONTRARY",
+    "DESCRIPTIVE",
+    "PENDING"
+  ],
+  "allowed_claim_roles": [
+    "PROMOTED",
+    "SUPPORTING",
+    "EXCLUDED",
+    "PENDING"
+  ],
+  "allowed_figure_eligibility": [
+    "PRIMARY",
+    "SUPPORTING",
+    "NONE"
+  ],
+  "tokenizer_comparability_policy": "Fit and report Mistral, TinyDialogues, and Qwen3-14B in separate scorer namespaces. Compare effect directions and interval support on the exact paired occurrence set where registered. Never pool or directly compare raw bits, intercepts, or coefficient magnitudes across tokenizers.",
+  "page_contract": {
+    "outputs": [
+      "docs/august_supervisor_index.html",
+      "docs/august_supervisor_report.md",
+      "docs/august_supervisor_report.html"
+    ],
+    "section_order": [
+      "Executive scientific answer",
+      "Utterance predictability at fixed effort",
+      "Word-level cross-scorer robustness",
+      "Response-space effort adaptation",
+      "Corrected candidate-set Bayes evidence",
+      "Developmental onset",
+      "Hall historical snapshot",
+      "Pending evidence and blockers",
+      "Interpretation guardrails",
+      "Audited technical resources"
+    ],
+    "required_links": {
+      "direct_results_explorer": "docs/direct_surprisal_results_explorer.html",
+      "word_cross_scorer_comparison": "docs/word_cross_scorer_comparison.html",
+      "hall_snapshot": "docs/hall_snapshot_mistral_analysis.html",
+      "corrected_bayes": "docs/corrected_pbm_bayes_report.html",
+      "sustained_onset": "docs/direct_surprisal_onset_confirmation.html",
+      "child_trajectories": "docs/paired_tinydialogues_mistral_child_trajectories.html",
+      "formal_definitions": "docs/july_meeting_definitions.html",
+      "technical_analysis_inventory": "docs/complete_analysis_machine_index.html"
+    },
+    "render_from_frozen_artifacts_only": true,
+    "allow_model_fitting": false,
+    "allow_plot_generation": false,
+    "figure_policy": "Only already-audited figures whose associated claim has PRIMARY or SUPPORTING eligibility may be embedded. PENDING and EXCLUDED claims receive no inferential figure. Rendering must not fit models or generate plots."
+  },
+  "locked_readings": [
+    {
+      "reading_id": "NONPBM_CONTEXTUAL_QUALIFIED",
+      "text": "The non-PBM contextual Mistral age slope is negative and therefore direction-consistent, but its frozen child-clustered primary 95% interval crosses zero, so confirmation was not achieved.",
+      "claim_ids": [
+        "DIRECT_NONPBM_MISTRAL_CONTEXTUAL_PRIMARY"
+      ]
+    },
+    {
+      "reading_id": "NONPBM_BOOTSTRAP_SENSITIVITY",
+      "text": "The 1,000-replicate child bootstrap is sensitivity evidence and must be displayed beside, never substituted for, the frozen child-clustered primary interval.",
+      "claim_ids": [
+        "DIRECT_NONPBM_MISTRAL_CONTEXTUAL_BOOTSTRAP"
+      ]
+    },
+    {
+      "reading_id": "CONTEXT_GAIN_CONTRARY",
+      "text": "Development of utterance context gain is negative in TinyDialogues PBM, Mistral PBM, and Mistral non-PBM, contrary to the registered positive direction.",
+      "claim_ids": [
+        "DIRECT_PBM_MISTRAL_CONTEXT_GAIN",
+        "DIRECT_PBM_TINY_CONTEXT_GAIN",
+        "DIRECT_NONPBM_MISTRAL_CONTEXT_GAIN"
+      ]
+    },
+    {
+      "reading_id": "PBM_CROSS_SCORER_ROBUSTNESS",
+      "text": "TinyDialogues, Qwen3-14B, and repeated Mistral results on the same 21 PBM children are scorer robustness analyses, not independent-sample confirmation.",
+      "claim_ids": [
+        "DIRECT_PBM_TINY_CONTEXTUAL",
+        "DIRECT_PAIRED_CONTEXTUAL_SCORER_DIFFERENCE",
+        "WORD_CROSS_SCORER_PREDICTABILITY"
+      ]
+    },
+    {
+      "reading_id": "TOKENIZER_MAGNITUDES_NOT_POOLED",
+      "text": "Raw score magnitudes are not pooled or directly compared across Mistral, TinyDialogues, and Qwen tokenizers.",
+      "claim_ids": [
+        "CROSS_TOKENIZER_MAGNITUDE_POOLING"
+      ]
+    },
+    {
+      "reading_id": "SUSTAINED_ONSET_NOT_ESTABLISHED",
+      "text": "The frozen simultaneous-band rule establishes no sustained onset in either PBM discovery or non-PBM confirmation.",
+      "claim_ids": [
+        "ONSET_PBM_SUSTAINED",
+        "ONSET_NONPBM_SUSTAINED"
+      ]
+    },
+    {
+      "reading_id": "EXACT_STRING_ENTROPY_LIMIT",
+      "text": "Exact-string response entropy is model-, prompt-, temperature-, seed-, and surface-form-dependent; it is not semantic response uncertainty.",
+      "claim_ids": [
+        "RESPONSE_ENTROPY_SEMANTIC_CLAIM"
+      ]
+    },
+    {
+      "reading_id": "GENERATED_CANDIDATES_MEANING_LIMIT",
+      "text": "Random, n-gram, LSTM, and unconstrained LLM candidates do not preserve the observed child's intended meaning, so they cannot support meaning-preserving choice or Pareto-optimality claims.",
+      "claim_ids": [
+        "GENERATED_CANDIDATE_MEANING_PRESERVATION"
+      ]
+    },
+    {
+      "reading_id": "BAYES_FINITE_CANDIDATE_SET",
+      "text": "Corrected Bayes candidate_set_probability is normalized only over each row's available finite real/random/unigram/bigram/trigram set, not over all possible utterances.",
+      "claim_ids": [
+        "BAYES_REAL_CANDIDATE_SET_PROBABILITY",
+        "BAYES_HELDOUT_CONTEXT_VALIDATION"
+      ]
+    },
+    {
+      "reading_id": "HALL_SEPARATE_DESCRIPTIVE",
+      "text": "Hall is a separate historical cross-sectional sociolinguistic snapshot. Its contrasts are descriptive, non-causal, and non-deficit; they are not a 14th longitudinal corpus or an 80th child.",
+      "claim_ids": [
+        "HALL_RACE_CLASS_INTERACTION",
+        "HALL_ADULT_CONTEXT_INTERACTION",
+        "HALL_LOCKED_DOMAIN_SHIFT"
+      ]
+    },
+    {
+      "reading_id": "WORD_NONPBM58_PENDING",
+      "text": "The remaining-58 same-pass word confirmation is pending because the registered Mistral production has not run.",
+      "claim_ids": [
+        "WORD_NONPBM58_CONFIRMATION"
+      ]
+    },
+    {
+      "reading_id": "LISTENER_UTILITY_PENDING",
+      "text": "A validated downstream listener-utility outcome remains pending and is required before broad communicative-success claims.",
+      "claim_ids": [
+        "LISTENER_UTILITY_OUTCOME"
+      ]
+    },
+    {
+      "reading_id": "CONVERSATIONAL_VALIDATION_PENDING",
+      "text": "Manual validation of the conversational-eligibility flags remains pending; the current structural audit is REVIEW, not PASS.",
+      "claim_ids": [
+        "CONVERSATIONAL_MANUAL_VALIDATION"
+      ]
+    },
+    {
+      "reading_id": "DECOUPLED_RESPONSE_CALIBRATION_PENDING",
+      "text": "Semantic clustering, rarefaction, seed and prompt calibration, and a decoupled response generator remain pending.",
+      "claim_ids": [
+        "DECOUPLED_RESPONSE_CALIBRATION"
+      ]
+    },
+    {
+      "reading_id": "ALTERNATIVE_EFFORT_ONSET_PENDING",
+      "text": "Sustained-onset confirmation with validated morpheme, syllable, and phoneme effort controls remains pending.",
+      "claim_ids": [
+        "ALTERNATIVE_EFFORT_ONSET"
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "claim_id": "DIRECT_PBM_MISTRAL_CONTEXTUAL",
+      "claim_role": "PROMOTED",
+      "scientific_question": "Does contextual utterance surprisal decrease with age at fixed observed word effort in the PBM discovery sample?",
+      "sample": {"role": "PBM discovery", "scope": "Brown, Manchester, and Providence children with real-target k3 scores and exact/top-coded word-effort cells", "rows": 444325, "children": 21, "sessions": null, "corpora": 3},
+      "scorer": {"model": "mistralai/Mistral-7B-v0.3", "tokenizer": "Mistral-7B-v0.3 tokenizer", "comparability_rule": "Mistral-native bits only; do not pool with TinyDialogues or Qwen."},
+      "estimand": {"name": "P1 contextual fixed-effort age slope", "outcome": "real_k3_sum_bits = -log2 p_Mistral(u|c_k3)", "formula_or_contrast": "outcome_mean ~ age_c + C(word_count_exact_top12) + C(child_key)", "controls": ["exact/top-coded cleaned word count", "child fixed effects"], "direction_convention": "Negative means older children's observed utterances are more predictable to the scorer at the same measured word effort."},
+      "numerical_result": {"estimate": -0.131274, "unit": "bits per month", "interval": {"level": 0.95, "low": -0.179152, "high": -0.083396, "type": "child-clustered confidence interval"}, "uncertainty_method": "WLS on child-age-effort cells with covariance clustered by child"},
+      "evidence_status": "SUPPORTED",
+      "source": {"canonical_artifact": "results/current_scientific_synthesis/direct_primary_estimates.csv", "source_sha256": "241758ddaa7bebb7b359dd220b8dda64748330dc29c2a21dc10c0407a0a868e1", "required_marker": {"path": "results/direct_surprisal_replication/mistral_full79/modular/models/model_manifest.json", "expectation": "status=COMPLETE_WITH_RECORDED_FIT_STATUS and failed=0", "observed": "COMPLETE_WITH_RECORDED_FIT_STATUS; failed=0", "satisfied": true}},
+      "required_interpretation": "Report as increasing Mistral predictability or conventionality of form at fixed measured effort in the discovery sample.",
+      "required_limitation": "This is model-based self-information, not listener utility, Shannon information conveyed, causal optimization, or a normative efficiency optimum.",
+      "destination_section": "Utterance predictability at fixed effort",
+      "figure_eligibility": "PRIMARY"
+    },
+    {
+      "claim_id": "DIRECT_PBM_TINY_CONTEXTUAL",
+      "claim_role": "SUPPORTING",
+      "scientific_question": "Does the PBM fixed-effort contextual age direction repeat under TinyDialogues?",
+      "sample": {"role": "PBM scorer robustness", "scope": "Exact TinyDialogues PBM real-target k3 rows in Brown, Manchester, and Providence", "rows": 443848, "children": 21, "sessions": null, "corpora": 3},
+      "scorer": {"model": "LaurensWink/SmolLM2-135M_variants@149fd0d6f069ef7b0a915474c86367c7d34c1591 (TinyDialogues variant, FP32)", "tokenizer": "SmolLM2/TinyDialogues tokenizer", "comparability_rule": "Use sign and within-scorer interval only; raw bits are not comparable to Mistral."},
+      "estimand": {"name": "P1 contextual fixed-effort age slope", "outcome": "real_k3_sum_bits = -log2 p_Tiny(u|c_k3)", "formula_or_contrast": "outcome_mean ~ age_c + C(word_count_exact_top12) + C(child_key)", "controls": ["exact/top-coded cleaned word count", "child fixed effects"], "direction_convention": "Negative means greater TinyDialogues predictability with age at fixed word effort."},
+      "numerical_result": {"estimate": -0.221807, "unit": "bits per month", "interval": {"level": 0.95, "low": -0.311463, "high": -0.132152, "type": "child-clustered confidence interval"}, "uncertainty_method": "WLS on child-age-effort cells with covariance clustered by child"},
+      "evidence_status": "SUPPORTED",
+      "source": {"canonical_artifact": "results/current_scientific_synthesis/direct_primary_estimates.csv", "source_sha256": "241758ddaa7bebb7b359dd220b8dda64748330dc29c2a21dc10c0407a0a868e1", "required_marker": {"path": "results/direct_surprisal_replication/tinydialogues_pbm/modular/models/model_manifest.json", "expectation": "status=COMPLETE_WITH_RECORDED_FIT_STATUS and failed=0", "observed": "COMPLETE_WITH_RECORDED_FIT_STATUS; failed=0", "satisfied": true}},
+      "required_interpretation": "Use as scorer-direction robustness for the PBM association.",
+      "required_limitation": "The same 21 children are reused, so this is not independent confirmation; tokenizer-specific magnitudes are not pooled.",
+      "destination_section": "Utterance predictability at fixed effort",
+      "figure_eligibility": "SUPPORTING"
+    },
+    {
+      "claim_id": "DIRECT_PAIRED_CONTEXTUAL_SCORER_DIFFERENCE",
+      "claim_role": "SUPPORTING",
+      "scientific_question": "On the exact paired PBM rows, do TinyDialogues and Mistral yield the same contextual age-slope magnitude?",
+      "sample": {"role": "PBM paired scorer robustness", "scope": "Exact real-target k3 intersection scored by both TinyDialogues and Mistral", "rows": 443848, "children": 21, "sessions": null, "corpora": 3},
+      "scorer": {"model": "TinyDialogues versus Mistral-7B-v0.3", "tokenizer": "Separate TinyDialogues and Mistral tokenizers", "comparability_rule": "The paired coefficient contrast is reported as calibration sensitivity; it does not make raw token-level bits commensurate."},
+      "estimand": {"name": "paired P1 slope difference", "outcome": "TinyDialogues P1 age slope minus Mistral P1 age slope", "formula_or_contrast": "beta_age,Tiny - beta_age,Mistral on the exact paired occurrence set", "controls": ["same rows", "exact/top-coded word effort", "child fixed effects"], "direction_convention": "Negative means the TinyDialogues age slope is more negative than the Mistral slope."},
+      "numerical_result": {"estimate": -0.088965, "unit": "bits per month on scorer-native utterance sums", "interval": {"level": 0.95, "low": -0.151529, "high": -0.028241, "type": "paired child-bootstrap interval"}, "uncertainty_method": "1,000 paired child-resampling bootstrap replicates"},
+      "evidence_status": "QUALIFIED",
+      "source": {"canonical_artifact": "results/direct_surprisal_replication/paired_tiny_mistral_pbm/modular/paired_all_outcome_slopes.csv", "source_sha256": "4324943afd5f0b4e73fb8e89d8fde6f0a220812b59ccd257a7d95e09cfdc2d77", "required_marker": {"path": "results/direct_surprisal_replication/paired_tiny_mistral_pbm/modular/model_manifest.json", "expectation": "status=COMPLETE", "observed": "COMPLETE", "satisfied": true}},
+      "required_interpretation": "The negative direction repeats but coefficient magnitude is scorer-calibration dependent.",
+      "required_limitation": "Do not interpret the numeric cross-tokenizer difference as a universal information-scale difference or independent replication.",
+      "destination_section": "Utterance predictability at fixed effort",
+      "figure_eligibility": "SUPPORTING"
+    },
+    {
+      "claim_id": "DIRECT_NONPBM_MISTRAL_CONTEXTUAL_PRIMARY",
+      "claim_role": "PROMOTED",
+      "scientific_question": "Does the registered PBM contextual fixed-effort direction confirm in the remaining 58 children?",
+      "sample": {"role": "non-PBM confirmation", "scope": "58 children from the 10 strict-naturalistic corpora outside Brown, Manchester, and Providence with real-target k3 design cells", "rows": 678071, "children": 58, "sessions": null, "corpora": 10},
+      "scorer": {"model": "mistralai/Mistral-7B-v0.3", "tokenizer": "Mistral-7B-v0.3 tokenizer", "comparability_rule": "Directly comparable within the same Mistral scorer; sample role remains separate from PBM discovery."},
+      "estimand": {"name": "P1 contextual fixed-effort age slope", "outcome": "real_k3_sum_bits = -log2 p_Mistral(u|c_k3)", "formula_or_contrast": "outcome_mean ~ age_c + C(word_count_exact_top12) + C(child_key)", "controls": ["exact/top-coded cleaned word count", "child fixed effects"], "direction_convention": "Registered direction is negative; confirmation additionally requires the frozen clustered 95% interval to exclude zero."},
+      "numerical_result": {"estimate": -0.062246, "unit": "bits per month", "interval": {"level": 0.95, "low": -0.131794, "high": 0.007303, "type": "child-clustered primary confidence interval"}, "uncertainty_method": "Frozen WLS primary model with covariance clustered by child"},
+      "evidence_status": "QUALIFIED",
+      "source": {"canonical_artifact": "results/current_scientific_synthesis/direct_primary_estimates.csv", "source_sha256": "241758ddaa7bebb7b359dd220b8dda64748330dc29c2a21dc10c0407a0a868e1", "required_marker": {"path": "results/direct_surprisal_replication/mistral_full79/modular/models/model_manifest.json", "expectation": "status=COMPLETE_WITH_RECORDED_FIT_STATUS and failed=0", "observed": "COMPLETE_WITH_RECORDED_FIT_STATUS; failed=0", "satisfied": true}},
+      "required_interpretation": "Direction-consistent but not confirmed under the frozen primary clustered interval.",
+      "required_limitation": "The primary interval crosses zero; no sensitivity analysis may be substituted to declare confirmation.",
+      "destination_section": "Utterance predictability at fixed effort",
+      "figure_eligibility": "PRIMARY"
+    },
+    {
+      "claim_id": "DIRECT_NONPBM_MISTRAL_CONTEXTUAL_BOOTSTRAP",
+      "claim_role": "SUPPORTING",
+      "scientific_question": "How does child-resampling uncertainty behave for the non-PBM contextual Mistral age slope?",
+      "sample": {"role": "non-PBM confirmation sensitivity", "scope": "Same non-PBM P1 child-age-effort design cells, resampled by child", "rows": 678071, "children": 58, "sessions": null, "corpora": 10},
+      "scorer": {"model": "mistralai/Mistral-7B-v0.3", "tokenizer": "Mistral-7B-v0.3 tokenizer", "comparability_rule": "Same-scorer sensitivity; it supplements but does not replace the registered clustered interval."},
+      "estimand": {"name": "P1 child-bootstrap sensitivity", "outcome": "bootstrap distribution of the P1 age coefficient", "formula_or_contrast": "refit frozen P1 after resampling children with replacement", "controls": ["exact/top-coded cleaned word count", "child fixed effects"], "direction_convention": "Negative remains direction-consistent; evidential priority stays with the clustered primary interval."},
+      "numerical_result": {"estimate": -0.065876, "unit": "bootstrap mean bits per month", "interval": {"level": 0.95, "low": -0.15738, "high": -0.011488, "type": "percentile child-bootstrap interval"}, "uncertainty_method": "1,000 successful child-resampling bootstrap replicates"},
+      "evidence_status": "QUALIFIED",
+      "source": {"canonical_artifact": "results/direct_surprisal_replication/mistral_full79/modular/models/child_bootstrap_summary.csv", "source_sha256": "a5e22728cd04465b354c5f7d842f3685c80a5321438c6819351431fb0f15e6c9", "required_marker": {"path": "results/direct_surprisal_replication/mistral_full79/modular/models/model_manifest.json", "expectation": "status=COMPLETE_WITH_RECORDED_FIT_STATUS and bootstrap_reps=1000", "observed": "COMPLETE_WITH_RECORDED_FIT_STATUS; bootstrap_reps=1000", "satisfied": true}},
+      "required_interpretation": "Present explicitly as sensitivity evidence beside the direction-consistent primary result.",
+      "required_limitation": "This interval must not replace the frozen child-clustered primary interval or convert the result into confirmed evidence.",
+      "destination_section": "Utterance predictability at fixed effort",
+      "figure_eligibility": "SUPPORTING"
+    },
+    {
+      "claim_id": "DIRECT_PBM_MISTRAL_UNCONDITIONAL",
+      "claim_role": "SUPPORTING",
+      "scientific_question": "Does unconditional utterance surprisal decrease with age at fixed effort in PBM discovery?",
+      "sample": {"role": "PBM discovery", "scope": "PBM real-target k0 design cells", "rows": 446985, "children": 21, "sessions": null, "corpora": 3},
+      "scorer": {"model": "mistralai/Mistral-7B-v0.3", "tokenizer": "Mistral-7B-v0.3 tokenizer", "comparability_rule": "Mistral-native bits only."},
+      "estimand": {"name": "P2 unconditional fixed-effort age slope", "outcome": "real_k0_sum_bits = -log2 p_Mistral(u)", "formula_or_contrast": "outcome_mean ~ age_c + C(word_count_exact_top12) + C(child_key)", "controls": ["exact/top-coded cleaned word count", "child fixed effects"], "direction_convention": "Negative means more probable utterance forms with age at the same word effort."},
+      "numerical_result": {"estimate": -0.161659, "unit": "bits per month", "interval": {"level": 0.95, "low": -0.211346, "high": -0.111973, "type": "child-clustered confidence interval"}, "uncertainty_method": "Frozen WLS with child-clustered covariance"},
+      "evidence_status": "SUPPORTED",
+      "source": {"canonical_artifact": "results/current_scientific_synthesis/direct_primary_estimates.csv", "source_sha256": "241758ddaa7bebb7b359dd220b8dda64748330dc29c2a21dc10c0407a0a868e1", "required_marker": {"path": "results/direct_surprisal_replication/mistral_full79/modular/models/model_manifest.json", "expectation": "status=COMPLETE_WITH_RECORDED_FIT_STATUS", "observed": "COMPLETE_WITH_RECORDED_FIT_STATUS", "satisfied": true}},
+      "required_interpretation": "Keep unconditional form predictability separate from contextual support.",
+      "required_limitation": "A lower value is greater scorer predictability, not greater Shannon information communicated.",
+      "destination_section": "Utterance predictability at fixed effort",
+      "figure_eligibility": "SUPPORTING"
+    },
+    {
+      "claim_id": "DIRECT_PBM_TINY_UNCONDITIONAL",
+      "claim_role": "SUPPORTING",
+      "scientific_question": "Does the PBM unconditional fixed-effort direction repeat in TinyDialogues?",
+      "sample": {"role": "PBM scorer robustness", "scope": "TinyDialogues PBM real-target k0 design cells", "rows": 446508, "children": 21, "sessions": null, "corpora": 3},
+      "scorer": {"model": "TinyDialogues variant of LaurensWink/SmolLM2-135M_variants", "tokenizer": "SmolLM2/TinyDialogues tokenizer", "comparability_rule": "Direction only across scorers; no raw magnitude pooling."},
+      "estimand": {"name": "P2 unconditional fixed-effort age slope", "outcome": "real_k0_sum_bits = -log2 p_Tiny(u)", "formula_or_contrast": "outcome_mean ~ age_c + C(word_count_exact_top12) + C(child_key)", "controls": ["exact/top-coded cleaned word count", "child fixed effects"], "direction_convention": "Negative means greater scorer probability with age at fixed effort."},
+      "numerical_result": {"estimate": -0.253755, "unit": "bits per month", "interval": {"level": 0.95, "low": -0.339259, "high": -0.16825, "type": "child-clustered confidence interval"}, "uncertainty_method": "Frozen WLS with child-clustered covariance"},
+      "evidence_status": "SUPPORTED",
+      "source": {"canonical_artifact": "results/current_scientific_synthesis/direct_primary_estimates.csv", "source_sha256": "241758ddaa7bebb7b359dd220b8dda64748330dc29c2a21dc10c0407a0a868e1", "required_marker": {"path": "results/direct_surprisal_replication/tinydialogues_pbm/modular/models/model_manifest.json", "expectation": "status=COMPLETE_WITH_RECORDED_FIT_STATUS", "observed": "COMPLETE_WITH_RECORDED_FIT_STATUS", "satisfied": true}},
+      "required_interpretation": "Use as within-PBM scorer robustness for declining unconditional surprisal.",
+      "required_limitation": "Not independent-sample confirmation; no direct coefficient-magnitude comparison across tokenizers.",
+      "destination_section": "Utterance predictability at fixed effort",
+      "figure_eligibility": "SUPPORTING"
+    },
+    {
+      "claim_id": "DIRECT_NONPBM_MISTRAL_UNCONDITIONAL",
+      "claim_role": "SUPPORTING",
+      "scientific_question": "Does unconditional Mistral surprisal decrease with age at fixed effort in the remaining 58 children?",
+      "sample": {"role": "non-PBM confirmation", "scope": "Non-PBM real-target k0 design cells", "rows": 693710, "children": 58, "sessions": null, "corpora": 10},
+      "scorer": {"model": "mistralai/Mistral-7B-v0.3", "tokenizer": "Mistral-7B-v0.3 tokenizer", "comparability_rule": "Same Mistral scale; keep sample separate from PBM."},
+      "estimand": {"name": "P2 unconditional fixed-effort age slope", "outcome": "real_k0_sum_bits", "formula_or_contrast": "outcome_mean ~ age_c + C(word_count_exact_top12) + C(child_key)", "controls": ["exact/top-coded cleaned word count", "child fixed effects"], "direction_convention": "Negative means greater unconditional scorer probability with age at fixed effort."},
+      "numerical_result": {"estimate": -0.089182, "unit": "bits per month", "interval": {"level": 0.95, "low": -0.144508, "high": -0.033856, "type": "child-clustered confidence interval"}, "uncertainty_method": "Frozen WLS with child-clustered covariance"},
+      "evidence_status": "SUPPORTED",
+      "source": {"canonical_artifact": "results/current_scientific_synthesis/direct_primary_estimates.csv", "source_sha256": "241758ddaa7bebb7b359dd220b8dda64748330dc29c2a21dc10c0407a0a868e1", "required_marker": {"path": "results/direct_surprisal_replication/mistral_full79/modular/models/model_manifest.json", "expectation": "status=COMPLETE_WITH_RECORDED_FIT_STATUS", "observed": "COMPLETE_WITH_RECORDED_FIT_STATUS", "satisfied": true}},
+      "required_interpretation": "The non-PBM unconditional association is supported and distinct from contextual support.",
+      "required_limitation": "This is not the registered P1 confirmation criterion and cannot rescue its interval crossing zero.",
+      "destination_section": "Utterance predictability at fixed effort",
+      "figure_eligibility": "SUPPORTING"
+    },
+    {
+      "claim_id": "DIRECT_PBM_MISTRAL_CONTEXT_GAIN",
+      "claim_role": "PROMOTED",
+      "scientific_question": "Does k3 context support for the observed utterance increase with age in PBM discovery?",
+      "sample": {"role": "PBM discovery", "scope": "PBM rows with paired real-target k0 and k3 Mistral scores", "rows": 444325, "children": 21, "sessions": null, "corpora": 3},
+      "scorer": {"model": "mistralai/Mistral-7B-v0.3", "tokenizer": "Mistral-7B-v0.3 tokenizer", "comparability_rule": "Within-row same-scorer contrast."},
+      "estimand": {"name": "P3 context-gain age slope", "outcome": "real_context_gain_k3 = k0 sum bits - k3 sum bits", "formula_or_contrast": "context_gain_mean ~ age_c + C(word_count_exact_top12) + C(child_key)", "controls": ["exact/top-coded cleaned word count", "child fixed effects"], "direction_convention": "Positive was registered as increasing contextual support; negative is contrary."},
+      "numerical_result": {"estimate": -0.030478, "unit": "context-gain bits per month", "interval": {"level": 0.95, "low": -0.050293, "high": -0.010663, "type": "child-clustered confidence interval"}, "uncertainty_method": "Frozen WLS with child-clustered covariance"},
+      "evidence_status": "CONTRARY",
+      "source": {"canonical_artifact": "results/current_scientific_synthesis/direct_primary_estimates.csv", "source_sha256": "241758ddaa7bebb7b359dd220b8dda64748330dc29c2a21dc10c0407a0a868e1", "required_marker": {"path": "results/direct_surprisal_replication/mistral_full79/modular/models/model_manifest.json", "expectation": "status=COMPLETE_WITH_RECORDED_FIT_STATUS", "observed": "COMPLETE_WITH_RECORDED_FIT_STATUS", "satisfied": true}},
+      "required_interpretation": "Report the negative slope as contrary to the registered positive developmental direction.",
+      "required_limitation": "Do not relabel the sign to make it confirmatory; context gain remains distinct from contextual surprisal.",
+      "destination_section": "Utterance predictability at fixed effort",
+      "figure_eligibility": "PRIMARY"
+    },
+    {
+      "claim_id": "DIRECT_PBM_TINY_CONTEXT_GAIN",
+      "claim_role": "SUPPORTING",
+      "scientific_question": "Does the contrary PBM context-gain direction repeat in TinyDialogues?",
+      "sample": {"role": "PBM scorer robustness", "scope": "TinyDialogues PBM rows with paired real-target k0 and k3 scores", "rows": 443848, "children": 21, "sessions": null, "corpora": 3},
+      "scorer": {"model": "TinyDialogues variant of LaurensWink/SmolLM2-135M_variants", "tokenizer": "SmolLM2/TinyDialogues tokenizer", "comparability_rule": "Compare sign and interval support, not raw magnitude."},
+      "estimand": {"name": "P3 context-gain age slope", "outcome": "k0 sum bits - k3 sum bits", "formula_or_contrast": "context_gain_mean ~ age_c + C(word_count_exact_top12) + C(child_key)", "controls": ["exact/top-coded cleaned word count", "child fixed effects"], "direction_convention": "Positive registered; negative contrary."},
+      "numerical_result": {"estimate": -0.032186, "unit": "context-gain bits per month", "interval": {"level": 0.95, "low": -0.050427, "high": -0.013946, "type": "child-clustered confidence interval"}, "uncertainty_method": "Frozen WLS with child-clustered covariance"},
+      "evidence_status": "CONTRARY",
+      "source": {"canonical_artifact": "results/current_scientific_synthesis/direct_primary_estimates.csv", "source_sha256": "241758ddaa7bebb7b359dd220b8dda64748330dc29c2a21dc10c0407a0a868e1", "required_marker": {"path": "results/direct_surprisal_replication/tinydialogues_pbm/modular/models/model_manifest.json", "expectation": "status=COMPLETE_WITH_RECORDED_FIT_STATUS", "observed": "COMPLETE_WITH_RECORDED_FIT_STATUS", "satisfied": true}},
+      "required_interpretation": "Use as scorer robustness for the contrary direction.",
+      "required_limitation": "Same-child robustness is not independent confirmation and does not make token scales commensurate.",
+      "destination_section": "Utterance predictability at fixed effort",
+      "figure_eligibility": "SUPPORTING"
+    },
+    {
+      "claim_id": "DIRECT_NONPBM_MISTRAL_CONTEXT_GAIN",
+      "claim_role": "PROMOTED",
+      "scientific_question": "Does the registered positive context-gain direction confirm in the non-PBM sample?",
+      "sample": {"role": "non-PBM confirmation", "scope": "Non-PBM rows with paired real-target k0 and k3 Mistral scores", "rows": 678071, "children": 58, "sessions": null, "corpora": 10},
+      "scorer": {"model": "mistralai/Mistral-7B-v0.3", "tokenizer": "Mistral-7B-v0.3 tokenizer", "comparability_rule": "Same-scorer confirmation sample kept separate from PBM."},
+      "estimand": {"name": "P3 context-gain age slope", "outcome": "k0 sum bits - k3 sum bits", "formula_or_contrast": "context_gain_mean ~ age_c + C(word_count_exact_top12) + C(child_key)", "controls": ["exact/top-coded cleaned word count", "child fixed effects"], "direction_convention": "Positive registered; negative contrary."},
+      "numerical_result": {"estimate": -0.027761, "unit": "context-gain bits per month", "interval": {"level": 0.95, "low": -0.045286, "high": -0.010237, "type": "child-clustered confidence interval"}, "uncertainty_method": "Frozen WLS with child-clustered covariance"},
+      "evidence_status": "CONTRARY",
+      "source": {"canonical_artifact": "results/current_scientific_synthesis/direct_primary_estimates.csv", "source_sha256": "241758ddaa7bebb7b359dd220b8dda64748330dc29c2a21dc10c0407a0a868e1", "required_marker": {"path": "results/direct_surprisal_replication/mistral_full79/modular/models/model_manifest.json", "expectation": "status=COMPLETE_WITH_RECORDED_FIT_STATUS", "observed": "COMPLETE_WITH_RECORDED_FIT_STATUS", "satisfied": true}},
+      "required_interpretation": "The confirmation sample supports a negative direction, explicitly contrary to the registered positive prediction.",
+      "required_limitation": "Do not reinterpret a replicated opposite sign as confirmation of the original directional hypothesis.",
+      "destination_section": "Utterance predictability at fixed effort",
+      "figure_eligibility": "PRIMARY"
+    },
+    {
+      "claim_id": "WORD_CROSS_SCORER_PREDICTABILITY",
+      "claim_role": "SUPPORTING",
+      "scientific_question": "For the same lexical occurrences, do unconditional and contextual word surprisal decrease with age across three scorers?",
+      "sample": {"role": "PBM word-level scorer robustness", "scope": "Exact shared primary occurrence set for Mistral, Qwen3-14B, and TinyDialogues", "rows": 1032963, "children": 21, "sessions": null, "corpora": 3},
+      "scorer": {"model": "Mistral-7B-v0.3, Qwen3-14B, and TinyDialogues fitted separately", "tokenizer": "Three separate tokenizer namespaces", "comparability_rule": "Only registered direction and within-scorer interval concordance; raw scores and coefficients are never pooled."},
+      "estimand": {"name": "same-word k0 and k3 age effects", "outcome": "word surprisal at k0 and k3", "formula_or_contrast": "registered within-scorer word models on identical occurrence identities", "controls": ["word identity/registered lexical structure", "child and corpus structure per frozen protocol"], "direction_convention": "Negative means the same words become more predictable with age within each scorer."},
+      "numerical_result": null,
+      "evidence_status": "SUPPORTED",
+      "source": {"canonical_artifact": "results/word_cross_scorer_comparison/scientific_question_summary.csv", "source_sha256": "e749781ef0b242414110f4be56083a070ba1e6d4703702e7535a9c7a1503a153", "required_marker": {"path": "results/word_cross_scorer_comparison/manifest.json", "expectation": "status=PASS and three scorer reports COMPLETE_AND_AUDITED", "observed": "PASS; all three scorer markers present", "satisfied": true}},
+      "required_interpretation": "Both same-word k0 and k3 questions are direction-and-interval robust across all three scorer-specific fits.",
+      "required_limitation": "This is same-sample robustness on PBM children, not confirmation in the remaining 58 children and not cross-tokenizer magnitude agreement.",
+      "destination_section": "Word-level cross-scorer robustness",
+      "figure_eligibility": "PRIMARY"
+    },
+    {
+      "claim_id": "WORD_LONGER_TYPES_CONTEXT_SUPPORT",
+      "claim_role": "SUPPORTING",
+      "scientific_question": "At centered age, do longer word types receive more contextual support across scorers?",
+      "sample": {"role": "PBM word-level registered primary", "scope": "Exact shared primary word-occurrence set across three separately fit scorers", "rows": 1032963, "children": 21, "sessions": null, "corpora": 3},
+      "scorer": {"model": "Mistral-7B-v0.3, Qwen3-14B, and TinyDialogues fitted separately", "tokenizer": "Three separate tokenizer namespaces", "comparability_rule": "Direction and within-scorer interval concordance only."},
+      "estimand": {"name": "longer-word context-support association", "outcome": "word-level k0 minus k3 context support", "formula_or_contrast": "registered centered-age word-length term", "controls": ["frozen word-analysis protocol", "scorer-specific fixed and random structure"], "direction_convention": "Positive means longer word types receive more context support at centered age."},
+      "numerical_result": null,
+      "evidence_status": "SUPPORTED",
+      "source": {"canonical_artifact": "results/word_cross_scorer_comparison/scientific_question_summary.csv", "source_sha256": "e749781ef0b242414110f4be56083a070ba1e6d4703702e7535a9c7a1503a153", "required_marker": {"path": "results/word_cross_scorer_comparison/manifest.json", "expectation": "status=PASS", "observed": "PASS", "satisfied": true}},
+      "required_interpretation": "The registered primary association is direction-and-interval robust in all three separate scorer fits.",
+      "required_limitation": "The result is lexical/scorer-indexed and does not demonstrate listener utility or meaning-preserving optimization.",
+      "destination_section": "Word-level cross-scorer robustness",
+      "figure_eligibility": "SUPPORTING"
+    },
+    {
+      "claim_id": "WORD_CONTEXT_GAIN_SCORER_DEPENDENT",
+      "claim_role": "SUPPORTING",
+      "scientific_question": "Does word-level context gain change with age consistently across scorers?",
+      "sample": {"role": "PBM word-level two-sided supporting", "scope": "Exact shared primary word-occurrence set across Mistral, Qwen3-14B, and TinyDialogues", "rows": 1032963, "children": 21, "sessions": null, "corpora": 3},
+      "scorer": {"model": "Mistral-7B-v0.3, Qwen3-14B, and TinyDialogues fitted separately", "tokenizer": "Three separate tokenizer namespaces", "comparability_rule": "No pooled coefficient; classify concordance from scorer-specific signs and intervals."},
+      "estimand": {"name": "word-level context-gain age effect", "outcome": "word k0 minus k3 context support", "formula_or_contrast": "registered age term in each scorer-specific word model", "controls": ["frozen word-analysis protocol"], "direction_convention": "Two-sided; mixed signs imply scorer dependence."},
+      "numerical_result": null,
+      "evidence_status": "QUALIFIED",
+      "source": {"canonical_artifact": "results/word_cross_scorer_comparison/scientific_question_summary.csv", "source_sha256": "e749781ef0b242414110f4be56083a070ba1e6d4703702e7535a9c7a1503a153", "required_marker": {"path": "results/word_cross_scorer_comparison/manifest.json", "expectation": "status=PASS", "observed": "PASS", "satisfied": true}},
+      "required_interpretation": "Classify word-level context-gain development as scorer-dependent: signs are mixed and only one scorer's clustered and bootstrap intervals support an effect.",
+      "required_limitation": "Do not collapse this mixed word-level result into the utterance-level P3 result or select a favored scorer after inspection.",
+      "destination_section": "Word-level cross-scorer robustness",
+      "figure_eligibility": "SUPPORTING"
+    },
+    {
+      "claim_id": "ROUTE2_RELATIVE_EFFORT_AGE",
+      "claim_role": "SUPPORTING",
+      "scientific_question": "Does child word effort relative to generated expected effort change with age?",
+      "sample": {"role": "PBM response-space exploratory", "scope": "Child-session aggregates from 21 PBM children with response-space predictors", "rows": 976, "children": 21, "sessions": 976, "corpora": 3},
+      "scorer": {"model": "Mistral-generated exact-string response space with Mistral-derived predictors", "tokenizer": "Mistral response-generation/scoring namespace", "comparability_rule": "No cross-model generalization; retain self-reference and prompt dependence as limitations."},
+      "estimand": {"name": "age association in relative word effort", "outcome": "child_words_minus_generated_mean", "formula_or_contrast": "age_months_c + response_entropy_bits_c + age_months_c:response_entropy_bits_c + generated_expected_words_c + context word count + context entropy", "controls": ["response entropy", "generated expected words", "context word count", "next-token context entropy"], "direction_convention": "Positive means observed child word effort moves upward relative to the generated reference with age."},
+      "numerical_result": {"estimate": 0.089488, "unit": "relative words per month", "interval": {"level": 0.95, "low": 0.077719, "high": 0.101257, "type": "GEE confidence interval"}, "uncertainty_method": "Session-level exchangeable GEE"},
+      "evidence_status": "QUALIFIED",
+      "source": {"canonical_artifact": "results/current_scientific_synthesis/route2_final_estimates.csv", "source_sha256": "b0b7502f1e8391f831480718b1cc0de78b23eb5e05eae74a3a4b6dcb8d5b458b", "required_marker": {"path": "results/current_scientific_synthesis/manifest.json", "expectation": "status=PASS", "observed": "PASS", "satisfied": true}},
+      "required_interpretation": "Treat as a measurement-limited association relative to a model-generated reference distribution.",
+      "required_limitation": "Generated expected effort may mediate contextual demand; exact-string response spaces are not semantic uncertainty and the generator/scorer are coupled.",
+      "destination_section": "Response-space effort adaptation",
+      "figure_eligibility": "SUPPORTING"
+    },
+    {
+      "claim_id": "ROUTE2_AGE_ENTROPY_INTERACTION",
+      "claim_role": "PROMOTED",
+      "scientific_question": "Do older children increasingly lengthen relative to generated responses as sampled response entropy rises?",
+      "sample": {"role": "PBM response-space exploratory", "scope": "Same 976 child-session aggregates in the final relative-effort model", "rows": 976, "children": 21, "sessions": 976, "corpora": 3},
+      "scorer": {"model": "Mistral-generated exact-string response space", "tokenizer": "Mistral response-generation/scoring namespace", "comparability_rule": "Model/prompt/temperature-specific construct only."},
+      "estimand": {"name": "age by response-entropy interaction", "outcome": "child_words_minus_generated_mean", "formula_or_contrast": "age_months_c:response_entropy_bits_c in the registered R2-M5 session GEE", "controls": ["age and entropy main effects", "generated expected words", "context word count", "next-token context entropy"], "direction_convention": "Positive was the simple prediction; negative is contrary."},
+      "numerical_result": {"estimate": -0.024775, "unit": "relative words per month per entropy bit", "interval": {"level": 0.95, "low": -0.038379, "high": -0.011171, "type": "GEE confidence interval"}, "uncertainty_method": "Session-level exchangeable GEE"},
+      "evidence_status": "CONTRARY",
+      "source": {"canonical_artifact": "results/current_scientific_synthesis/route2_final_estimates.csv", "source_sha256": "b0b7502f1e8391f831480718b1cc0de78b23eb5e05eae74a3a4b6dcb8d5b458b", "required_marker": {"path": "results/current_scientific_synthesis/manifest.json", "expectation": "status=PASS", "observed": "PASS", "satisfied": true}},
+      "required_interpretation": "Report the principal interaction in the opposite direction from the simple lengthening prediction.",
+      "required_limitation": "Treat as a result or measurement diagnostic pending semantic-entropy and decoupled-generator calibration; do not spin it as confirmation.",
+      "destination_section": "Response-space effort adaptation",
+      "figure_eligibility": "PRIMARY"
+    },
+    {
+      "claim_id": "BAYES_REAL_CANDIDATE_SET_PROBABILITY",
+      "claim_role": "SUPPORTING",
+      "scientific_question": "Within each corrected five-source candidate set, how often does the observed real utterance rank first after combining prior and context evidence?",
+      "sample": {"role": "PBM corrected Bayes robustness", "scope": "Real rows in Brown, Manchester, and Providence with leave-corpus-out candidate-set scores", "rows": 446508, "children": 21, "sessions": null, "corpora": 3},
+      "scorer": {"model": "leave-corpus-out additive prior plus whole-utterance contrastive context evidence", "tokenizer": "word-vocabulary candidate model, not an LLM tokenizer scale", "comparability_rule": "Candidate-set probabilities are interpreted only within each available matched candidate set and are not substituted for direct Mistral surprisal."},
+      "estimand": {"name": "real combined rank-1 rate", "outcome": "indicator that the real candidate has the largest candidate_set_probability", "formula_or_contrast": "normalize prior plus contrastive context evidence across available real/random/unigram/bigram/trigram candidates", "controls": ["leave-corpus-out cross-fitting", "additive age-bin training", "explicit unknown-token handling"], "direction_convention": "Higher means the real candidate more often ranks first inside the supplied finite set."},
+      "numerical_result": {"estimate": 0.436671, "unit": "proportion of real rows ranked first", "interval": null, "uncertainty_method": "Descriptive aggregate; child-bootstrap uncertainty is available in the audited report but no interval is promoted for this rate."},
+      "evidence_status": "SUPPORTED",
+      "source": {"canonical_artifact": "results/corrected_pbm_bayes_report/real_overall.csv", "source_sha256": "66e4ba23ec59921cc32a4e682bf4afeaa41107098a61801bcbb26da8c03a2a3e", "required_marker": {"path": "results/corrected_pbm_bayes_v2/scores/pbm_crossfit_bayes_scores.audit.json", "expectation": "all_context_validation_pass=true and normalization_scope=candidate_set_within_row", "observed": "all three context validations PASS; normalization_scope=candidate_set_within_row", "satisfied": true}},
+      "required_interpretation": "The observed utterance ranks first on 43.7% of real rows within the supplied matched candidate set; its mean candidate-set probability is 0.400.",
+      "required_limitation": "This is not a posterior over every possible utterance, and generated candidates do not preserve the child's intended meaning.",
+      "destination_section": "Corrected candidate-set Bayes evidence",
+      "figure_eligibility": "SUPPORTING"
+    },
+    {
+      "claim_id": "BAYES_HELDOUT_CONTEXT_VALIDATION",
+      "claim_role": "SUPPORTING",
+      "scientific_question": "Does the corrected context-evidence component distinguish matched from shuffled context in held-out corpora?",
+      "sample": {"role": "PBM held-out validation", "scope": "Held-out matched-versus-shuffled context rows for Brown, Manchester, and Providence", "rows": 269631, "children": null, "sessions": null, "corpora": 3},
+      "scorer": {"model": "leave-corpus-out whole-utterance contrastive context model", "tokenizer": "word-vocabulary candidate model", "comparability_rule": "Validation concerns the corrected candidate evidence only, not direct LLM surprisal."},
+      "estimand": {"name": "matched-context discrimination", "outcome": "matched_accuracy and mean evidence gap", "formula_or_contrast": "matched context evidence versus shuffled context evidence within each held-out corpus", "controls": ["corpus held out from training", "age-additive training", "explicit unknown handling"], "direction_convention": "Accuracy above 0.5 and positive evidence gaps must hold in every corpus."},
+      "numerical_result": {"estimate": 3, "unit": "corpora passing of 3", "interval": null, "uncertainty_method": "Predefined per-corpus validation gates"},
+      "evidence_status": "SUPPORTED",
+      "source": {"canonical_artifact": "results/corrected_pbm_bayes_report/context_validation.csv", "source_sha256": "631c279b600cf5573e5f8bf2ebe2fac0d6415a9c19c887f7d8f8d2339d9303f4", "required_marker": {"path": "results/corrected_pbm_bayes_v2/scores/pbm_crossfit_bayes_scores.audit.json", "expectation": "all three held-out context validation gates PASS", "observed": "Brown, Manchester, and Providence PASS", "satisfied": true}},
+      "required_interpretation": "The corrected context evidence passes matched-versus-shuffled validation in all three held-out corpora.",
+      "required_limitation": "Validation supports the decomposition mechanics, not a normalized posterior over all utterances or a meaning-preserving efficiency choice.",
+      "destination_section": "Corrected candidate-set Bayes evidence",
+      "figure_eligibility": "SUPPORTING"
+    },
+    {
+      "claim_id": "ONSET_PBM_SUSTAINED",
+      "claim_role": "PROMOTED",
+      "scientific_question": "Is a sustained developmental onset established for the PBM fixed-word-effort contextual Mistral effect?",
+      "sample": {"role": "PBM discovery onset", "scope": "Frozen PBM P1 exact/top-coded word-effort design cells", "rows": 444325, "children": 21, "sessions": null, "corpora": 3},
+      "scorer": {"model": "mistralai/Mistral-7B-v0.3", "tokenizer": "Mistral-7B-v0.3 tokenizer", "comparability_rule": "Within-scorer age-bin contrasts only."},
+      "estimand": {"name": "sustained-onset rule", "outcome": "age-bin contrasts in P1 contextual surprisal", "formula_or_contrast": "first bin whose decrease and all later registered decreases satisfy simultaneous bands", "controls": ["exact/top-coded word effort", "child structure"], "direction_convention": "An onset exists only if the frozen sustained rule passes; nominal single-bin intervals are insufficient."},
+      "numerical_result": {"estimate": null, "unit": "onset age bin", "interval": null, "uncertainty_method": "1,000 child-resampling bootstraps with max-absolute-studentized simultaneous bands"},
+      "evidence_status": "QUALIFIED",
+      "source": {"canonical_artifact": "results/direct_surprisal_onset_confirmation/audit.json", "source_sha256": "2120f3a8230d002ccf1b125929383823271558a1998dca23ad3b6605bdc20388", "required_marker": {"path": "results/direct_surprisal_onset_confirmation/audit.json", "expectation": "status=PASS and sustained_onset=not_established", "observed": "PASS; not_established", "satisfied": true}},
+      "required_interpretation": "Sustained onset is not established in PBM discovery.",
+      "required_limitation": "Do not promote the earlier nominal 24-29-month contrast as an onset.",
+      "destination_section": "Developmental onset",
+      "figure_eligibility": "PRIMARY"
+    },
+    {
+      "claim_id": "ONSET_NONPBM_SUSTAINED",
+      "claim_role": "PROMOTED",
+      "scientific_question": "Is the frozen sustained onset established in the non-PBM confirmation sample?",
+      "sample": {"role": "non-PBM confirmation onset", "scope": "Frozen non-PBM P1 exact/top-coded word-effort design cells", "rows": 678071, "children": 58, "sessions": null, "corpora": 10},
+      "scorer": {"model": "mistralai/Mistral-7B-v0.3", "tokenizer": "Mistral-7B-v0.3 tokenizer", "comparability_rule": "Within-scorer age-bin contrasts; confirmation kept separate from PBM."},
+      "estimand": {"name": "sustained-onset rule", "outcome": "age-bin contrasts in P1 contextual surprisal", "formula_or_contrast": "first bin whose decrease and all later registered decreases satisfy simultaneous bands", "controls": ["exact/top-coded word effort", "child structure"], "direction_convention": "An onset exists only if the frozen sustained rule passes."},
+      "numerical_result": {"estimate": null, "unit": "onset age bin", "interval": null, "uncertainty_method": "1,000 child-resampling bootstraps with max-absolute-studentized simultaneous bands"},
+      "evidence_status": "QUALIFIED",
+      "source": {"canonical_artifact": "results/direct_surprisal_onset_confirmation/audit.json", "source_sha256": "2120f3a8230d002ccf1b125929383823271558a1998dca23ad3b6605bdc20388", "required_marker": {"path": "results/direct_surprisal_onset_confirmation/audit.json", "expectation": "status=PASS and sustained_onset=not_established", "observed": "PASS; not_established", "satisfied": true}},
+      "required_interpretation": "Sustained onset is not established in the 58-child confirmation sample.",
+      "required_limitation": "No exploratory pointwise bin may replace the simultaneous sustained rule.",
+      "destination_section": "Developmental onset",
+      "figure_eligibility": "PRIMARY"
+    },
+    {
+      "claim_id": "HALL_RACE_CLASS_INTERACTION",
+      "claim_role": "SUPPORTING",
+      "scientific_question": "Within the historical Hall snapshot near age four, what is the scorer-indexed race-by-class interaction in unconditional utterance surprisal at fixed word count and setting?",
+      "sample": {"role": "separate Hall primary descriptive snapshot", "scope": "Frozen Hall primary sample with explicit demographic metadata and scorable k0 targets", "rows": 70510, "children": 36, "sessions": null, "corpora": 1},
+      "scorer": {"model": "mistralai/Mistral-7B-v0.3@caa1feb0e54d415e2df31207e5f4e273e33509b1", "tokenizer": "Mistral-7B-v0.3 tokenizer", "comparability_rule": "Within-Hall descriptive contrast; do not merge with longitudinal children."},
+      "estimand": {"name": "H1 k0 race-by-class difference in differences", "outcome": "k0_sum_bits", "formula_or_contrast": "(Black minus White within UC) minus (Black minus White within WC)", "controls": ["cleaned word count", "setting"], "direction_convention": "Negative is the registered algebraic interaction; it has no deficit or causal sign meaning."},
+      "numerical_result": {"estimate": -3.515975, "unit": "Mistral bits", "interval": {"level": 0.95, "low": -5.730271, "high": -1.301679, "type": "child-clustered confidence interval"}, "uncertainty_method": "Primary model covariance clustered by child; 1,000 child bootstraps retained as sensitivity"},
+      "evidence_status": "DESCRIPTIVE",
+      "source": {"canonical_artifact": "results/hall_snapshot_analysis/models/registered_contrasts.csv", "source_sha256": "e550ec23739df69a2645527dd2912db86c5304822af67a0ccd4018d589257f13", "required_marker": {"path": "results/hall_snapshot_analysis/final/final_audit.json", "expectation": "status=PASS and problem_count=0", "observed": "PASS; problem_count=0", "satisfied": true, "completion_marker_path": "results/hall_snapshot_analysis/final/ANALYSIS_COMPLETE_AND_AUDITED"}},
+      "required_interpretation": "A scorer-indexed, within-Hall historical descriptive interaction at fixed cleaned word count and setting.",
+      "required_limitation": "Not a causal SES effect, linguistic deficit, inherent group efficiency, or longitudinal developmental estimate; dialect, era, geography, transcription, setting, and LM representation remain plausible sources.",
+      "destination_section": "Hall historical snapshot",
+      "figure_eligibility": "PRIMARY"
+    },
+    {
+      "claim_id": "HALL_ADULT_CONTEXT_INTERACTION",
+      "claim_role": "SUPPORTING",
+      "scientific_question": "Within Hall adult-adjacent turns, is there a race-by-class interaction in k3 context support?",
+      "sample": {"role": "separate Hall secondary descriptive snapshot", "scope": "Adult-adjacent Hall rows with paired k0 and k3 scores", "rows": 32181, "children": 36, "sessions": null, "corpora": 1},
+      "scorer": {"model": "mistralai/Mistral-7B-v0.3@caa1feb0e54d415e2df31207e5f4e273e33509b1", "tokenizer": "Mistral-7B-v0.3 tokenizer", "comparability_rule": "Within-Hall descriptive contrast only."},
+      "estimand": {"name": "H9 adult-adjacent k3 context-support interaction", "outcome": "context_gain_k3 = k0 - k3", "formula_or_contrast": "race-by-class difference in differences", "controls": ["cleaned word count", "setting"], "direction_convention": "Zero means no scorer-indexed interaction under the registered contrast."},
+      "numerical_result": {"estimate": -0.212805, "unit": "Mistral context-support bits", "interval": {"level": 0.95, "low": -1.105063, "high": 0.679453, "type": "child-clustered confidence interval"}, "uncertainty_method": "Covariance clustered by child"},
+      "evidence_status": "DESCRIPTIVE",
+      "source": {"canonical_artifact": "results/hall_snapshot_analysis/models/registered_contrasts.csv", "source_sha256": "e550ec23739df69a2645527dd2912db86c5304822af67a0ccd4018d589257f13", "required_marker": {"path": "results/hall_snapshot_analysis/final/final_audit.json", "expectation": "status=PASS and problem_count=0", "observed": "PASS; problem_count=0", "satisfied": true, "completion_marker_path": "results/hall_snapshot_analysis/final/ANALYSIS_COMPLETE_AND_AUDITED"}},
+      "required_interpretation": "The registered interval crosses zero; describe it as no clear Hall context-support interaction under this scorer and specification.",
+      "required_limitation": "Historical, non-causal, non-deficit, scorer-indexed, and separate from longitudinal development.",
+      "destination_section": "Hall historical snapshot",
+      "figure_eligibility": "SUPPORTING"
+    },
+    {
+      "claim_id": "HALL_LOCKED_DOMAIN_SHIFT",
+      "claim_role": "SUPPORTING",
+      "scientific_question": "How does Hall k0 scorer output differ from a locked current-naturalistic snapshot near the same age?",
+      "sample": {"role": "guarded Hall external descriptive comparison", "scope": "The 36-child Hall primary sample versus one outcome-blind session nearest 57 months for 20 currently scored Mistral children", "rows": 77654, "children": 56, "sessions": null, "corpora": 8},
+      "scorer": {"model": "mistralai/Mistral-7B-v0.3", "tokenizer": "Mistral-7B-v0.3 tokenizer", "comparability_rule": "Same model family but guarded domain comparison; never treat as causal cohort effect."},
+      "estimand": {"name": "E1 Hall-minus-current k0 contrast", "outcome": "k0_sum_bits", "formula_or_contrast": "Hall minus locked current naturalistic snapshot", "controls": ["cleaned word count", "locked selection near 57 months"], "direction_convention": "Positive means higher Mistral k0 surprisal in Hall under the locked comparison."},
+      "numerical_result": {"estimate": 3.036553, "unit": "Mistral bits", "interval": {"level": 0.95, "low": 2.041468, "high": 4.031638, "type": "clustered confidence interval"}, "uncertainty_method": "Registered guarded external comparison with clustered uncertainty"},
+      "evidence_status": "DESCRIPTIVE",
+      "source": {"canonical_artifact": "results/hall_snapshot_analysis/models/registered_contrasts.csv", "source_sha256": "e550ec23739df69a2645527dd2912db86c5304822af67a0ccd4018d589257f13", "required_marker": {"path": "results/hall_snapshot_analysis/final/final_audit.json", "expectation": "status=PASS and problem_count=0", "observed": "PASS; problem_count=0", "satisfied": true, "completion_marker_path": "results/hall_snapshot_analysis/final/ANALYSIS_COMPLETE_AND_AUDITED"}},
+      "required_interpretation": "Use only as evidence of domain, era, dialect, transcription, and representation sensitivity.",
+      "required_limitation": "Not a causal cohort, race, class, developmental, or deficit comparison.",
+      "destination_section": "Hall historical snapshot",
+      "figure_eligibility": "SUPPORTING"
+    },
+    {
+      "claim_id": "CROSS_TOKENIZER_MAGNITUDE_POOLING",
+      "claim_role": "EXCLUDED",
+      "scientific_question": "May raw bits or coefficient magnitudes be pooled across Mistral, Qwen3-14B, and TinyDialogues?",
+      "sample": {"role": "excluded interpretation", "scope": "PBM cross-scorer utterance and word products", "rows": 1032963, "children": 21, "sessions": null, "corpora": 3},
+      "scorer": {"model": "Mistral-7B-v0.3, Qwen3-14B, and TinyDialogues", "tokenizer": "Different tokenizers", "comparability_rule": "Pooling raw magnitudes is prohibited; only registered sign and interval concordance is admissible."},
+      "estimand": {"name": "cross-tokenizer raw magnitude", "outcome": "raw bits or pooled coefficient", "formula_or_contrast": "prohibited", "controls": [], "direction_convention": "No scientific direction is defined on a pooled raw scale."},
+      "numerical_result": null,
+      "evidence_status": "QUALIFIED",
+      "source": {"canonical_artifact": "results/word_cross_scorer_comparison/manifest.json", "source_sha256": "13e7113f7604fc989bc0aa1eb68505b0e4cf92b0c074f8c474024e77dd70e820", "required_marker": {"path": "results/word_cross_scorer_comparison/manifest.json", "expectation": "status=PASS", "observed": "PASS", "satisfied": true}},
+      "required_interpretation": "Compare robustness through scorer-specific directions and uncertainty only.",
+      "required_limitation": "Tokenization and calibration differ, so a pooled raw-bit scale has no registered interpretation.",
+      "destination_section": "Interpretation guardrails",
+      "figure_eligibility": "NONE"
+    },
+    {
+      "claim_id": "RESPONSE_ENTROPY_SEMANTIC_CLAIM",
+      "claim_role": "EXCLUDED",
+      "scientific_question": "Can exact-string response entropy be interpreted as semantic response uncertainty?",
+      "sample": {"role": "excluded interpretation", "scope": "PBM generated response-space product", "rows": 268712, "children": 21, "sessions": null, "corpora": 3},
+      "scorer": {"model": "Mistral response generator under frozen sampling settings", "tokenizer": "Mistral generation surface strings", "comparability_rule": "Construct remains tied to model, prompt, temperature, seed, sampling, and exact surface forms."},
+      "estimand": {"name": "exact-string response entropy", "outcome": "entropy of sampled exact response strings", "formula_or_contrast": "H_exact over 100 selected samples per context", "controls": ["frozen prompt and sampling configuration"], "direction_convention": "Higher means more exact-string diversity under this generator, not more semantic uncertainty."},
+      "numerical_result": null,
+      "evidence_status": "QUALIFIED",
+      "source": {"canonical_artifact": "docs/current_scientific_synthesis.md", "source_sha256": "3b2ae42f37c03762c311a857f6384fdcce1600a85fec7016214167d3981b9b6a", "required_marker": {"path": "results/current_scientific_synthesis/manifest.json", "expectation": "status=PASS", "observed": "PASS", "satisfied": true}},
+      "required_interpretation": "Call it exact-string response entropy and preserve all generator-setting qualifiers.",
+      "required_limitation": "It is not semantic uncertainty and is not calibrated across generators, prompts, temperatures, or seeds.",
+      "destination_section": "Interpretation guardrails",
+      "figure_eligibility": "NONE"
+    },
+    {
+      "claim_id": "GENERATED_CANDIDATE_MEANING_PRESERVATION",
+      "claim_role": "EXCLUDED",
+      "scientific_question": "Do random, n-gram, LSTM, or unconstrained LLM alternatives preserve the observed child's intended meaning?",
+      "sample": {"role": "excluded interpretation", "scope": "Generated baseline and response-space candidate products", "rows": null, "children": 21, "sessions": null, "corpora": 3},
+      "scorer": {"model": "random, n-gram, additive LSTM, and unconstrained LLM generators", "tokenizer": "generator-specific", "comparability_rule": "Candidate comparisons may diagnose model response spaces but cannot represent meaning-preserving alternatives."},
+      "estimand": {"name": "meaning-preserving choice", "outcome": "unvalidated", "formula_or_contrast": "not estimable from current candidates", "controls": [], "direction_convention": "No efficiency-frontier direction is licensed."},
+      "numerical_result": null,
+      "evidence_status": "QUALIFIED",
+      "source": {"canonical_artifact": "docs/current_scientific_synthesis.md", "source_sha256": "3b2ae42f37c03762c311a857f6384fdcce1600a85fec7016214167d3981b9b6a", "required_marker": {"path": "results/current_scientific_synthesis/manifest.json", "expectation": "status=PASS", "observed": "PASS", "satisfied": true}},
+      "required_interpretation": "Use generated candidates as model-based references or diagnostics only.",
+      "required_limitation": "Do not make Pareto-optimality, intended-meaning, rational-choice, or meaning-preserving efficiency claims.",
+      "destination_section": "Interpretation guardrails",
+      "figure_eligibility": "NONE"
+    },
+    {
+      "claim_id": "WORD_NONPBM58_CONFIRMATION",
+      "claim_role": "PENDING",
+      "scientific_question": "Do the registered word-level results confirm in the remaining 58 children with same-pass Mistral word scores?",
+      "sample": {"role": "planned non-PBM word confirmation", "scope": "Remaining 58 children across 10 strict-naturalistic corpora", "rows": null, "children": 58, "sessions": null, "corpora": 10},
+      "scorer": {"model": "planned Mistral-7B-v0.3 same-pass word scoring", "tokenizer": "Mistral-7B-v0.3 tokenizer", "comparability_rule": "Fit the frozen protocol separately after an audited production handoff."},
+      "estimand": {"name": "registered remaining-58 word confirmation", "outcome": "frozen word-level outcomes", "formula_or_contrast": "frozen 27-model protocol", "controls": ["frozen protocol SHA-256 705143ea70e4c3852fe852205010973fca7742d927c0a85993a917bf084d5989"], "direction_convention": "Must be evaluated without changing registered directions after outcome inspection."},
+      "numerical_result": null,
+      "evidence_status": "PENDING",
+      "source": {"canonical_artifact": "results/complete_analysis_machine_v1/preflight.json", "source_sha256": "43f3a98b64e51fe878491eb6600f167f3a9405735ce1a57a6ea9eaaafb6042ad", "required_marker": {"path": "results/complete_analysis_machine_v1/preflight.json", "expectation": "word_mistral_nonpbm58 PASS/COMPLETE", "observed": "BLOCKED: same-pass scores not produced; DAG implemented but unrun", "satisfied": false}},
+      "required_interpretation": "No remaining-58 word estimate exists for promotion.",
+      "required_limitation": "Do not infer this result from PBM three-scorer robustness or inspect unregistered substitutes.",
+      "destination_section": "Pending evidence and blockers",
+      "figure_eligibility": "NONE"
+    },
+    {
+      "claim_id": "LISTENER_UTILITY_OUTCOME",
+      "claim_role": "PENDING",
+      "scientific_question": "Does the child utterance improve prediction of a downstream caregiver response or reduce validated repair burden?",
+      "sample": {"role": "planned listener-utility analysis", "scope": "Eligible child-to-caregiver conversational turns with validated downstream outcomes", "rows": null, "children": null, "sessions": null, "corpora": null},
+      "scorer": {"model": "not registered", "tokenizer": "not applicable", "comparability_rule": "Utility must be defined by a downstream outcome and kept separate from target surprisal."},
+      "estimand": {"name": "listener-relevant utility", "outcome": "caregiver-response predictive gain or validated repair/clarification/contingency label", "formula_or_contrast": "not yet frozen", "controls": [], "direction_convention": "Must be preregistered with the outcome before estimation."},
+      "numerical_result": null,
+      "evidence_status": "PENDING",
+      "source": {"canonical_artifact": "docs/current_scientific_synthesis.md", "source_sha256": "3b2ae42f37c03762c311a857f6384fdcce1600a85fec7016214167d3981b9b6a", "required_marker": {"path": null, "expectation": "registered listener-utility analysis with PASS/COMPLETE marker", "observed": "MISSING: no validated outcome, analysis artifact, or marker", "satisfied": false}},
+      "required_interpretation": "Broad communicative-success claims remain pending.",
+      "required_limitation": "Target surprisal or context gain alone is not listener utility.",
+      "destination_section": "Pending evidence and blockers",
+      "figure_eligibility": "NONE"
+    },
+    {
+      "claim_id": "CONVERSATIONAL_MANUAL_VALIDATION",
+      "claim_role": "PENDING",
+      "scientific_question": "Are structurally eligible child turns valid genuine responses to caregivers under manual review?",
+      "sample": {"role": "planned eligibility validation", "scope": "Full-79 structural flag table and 325-row stratified manual-validation sample", "rows": 1140218, "children": 79, "sessions": null, "corpora": 13},
+      "scorer": {"model": "not applicable", "tokenizer": "not applicable", "comparability_rule": "Eligibility is a transcript/turn construct independent of scorer calibration."},
+      "estimand": {"name": "manual conversational-eligibility validity", "outcome": "validated response, initiation, imitation, routine, backchannel, and repair flags", "formula_or_contrast": "stratified manual validation against structural flags", "controls": ["turn distance", "speaker adjacency", "session identity"], "direction_convention": "Acceptance thresholds must be frozen before labels are used as primary exclusions."},
+      "numerical_result": null,
+      "evidence_status": "PENDING",
+      "source": {"canonical_artifact": "results/conversational_eligibility/full79_child_conversational_flags.audit.json", "source_sha256": "5d3896f50b90306feac116c6e83cb87d503b4794a9651bd4ec7d6c1e232af0fd", "required_marker": {"path": "results/conversational_eligibility/full79_child_conversational_flags.audit.json", "expectation": "status=PASS after manual validation", "observed": "REVIEW; 18,172 eligible context-k1 mismatches and manual sample not validated", "satisfied": false}},
+      "required_interpretation": "Current structural flags are review-stage preparation, not a validated primary conversational sample.",
+      "required_limitation": "Do not apply unvalidated flags as outcome-driven exclusions or describe the structural sample as manually confirmed.",
+      "destination_section": "Pending evidence and blockers",
+      "figure_eligibility": "NONE"
+    },
+    {
+      "claim_id": "DECOUPLED_RESPONSE_CALIBRATION",
+      "claim_role": "PENDING",
+      "scientific_question": "Do response-space effort results survive semantic clustering, rarefaction, sampling settings, and a decoupled generator?",
+      "sample": {"role": "planned response-space calibration", "scope": "PBM caregiver contexts and sampled responses under registered calibration conditions", "rows": 268712, "children": 21, "sessions": null, "corpora": 3},
+      "scorer": {"model": "at least one decoupled generator plus registered scorer", "tokenizer": "generator- and scorer-specific", "comparability_rule": "Report each generator/scorer condition separately and calibrate semantic clusters rather than pooling raw exact strings."},
+      "estimand": {"name": "calibrated response uncertainty sensitivity", "outcome": "semantic-cluster entropy and rarefied response-space effort summaries", "formula_or_contrast": "not yet frozen", "controls": ["sample size", "seed", "prompt", "temperature", "generator identity"], "direction_convention": "Must be frozen before comparison."},
+      "numerical_result": null,
+      "evidence_status": "PENDING",
+      "source": {"canonical_artifact": "docs/current_scientific_synthesis.md", "source_sha256": "3b2ae42f37c03762c311a857f6384fdcce1600a85fec7016214167d3981b9b6a", "required_marker": {"path": null, "expectation": "registered decoupled calibration analysis with PASS/COMPLETE marker", "observed": "MISSING: semantic calibration and decoupled generator products do not exist", "satisfied": false}},
+      "required_interpretation": "Response-space conclusions remain measurement-limited until calibration is complete.",
+      "required_limitation": "Do not treat current exact-string entropy as semantic or generator-independent.",
+      "destination_section": "Pending evidence and blockers",
+      "figure_eligibility": "NONE"
+    },
+    {
+      "claim_id": "ALTERNATIVE_EFFORT_ONSET",
+      "claim_role": "PENDING",
+      "scientific_question": "Is sustained onset established after replacing word count with validated morpheme, syllable, or phoneme effort controls?",
+      "sample": {"role": "planned alternative-effort onset sensitivity", "scope": "PBM discovery and non-PBM confirmation after full-79 feature validation", "rows": null, "children": 79, "sessions": null, "corpora": 13},
+      "scorer": {"model": "mistralai/Mistral-7B-v0.3", "tokenizer": "Mistral-7B-v0.3 tokenizer", "comparability_rule": "Reuse the frozen onset rule separately for each validated effort measure."},
+      "estimand": {"name": "alternative-effort sustained onset", "outcome": "contextual surprisal at fixed validated morpheme, syllable, or phoneme effort", "formula_or_contrast": "same simultaneous sustained-onset rule as the frozen word-effort analysis", "controls": ["validated alternative effort", "child structure"], "direction_convention": "No onset unless the full simultaneous rule passes."},
+      "numerical_result": null,
+      "evidence_status": "PENDING",
+      "source": {"canonical_artifact": "docs/direct_surprisal_onset_confirmation.md", "source_sha256": "c0f447f26e01520bf384921c3d4fa70f6d537335d5600f9a0464c20783e8924e", "required_marker": {"path": null, "expectation": "validated full-79 alternative-effort onset analysis with PASS/COMPLETE marker", "observed": "MISSING: current PASS audit covers word effort only", "satisfied": false}},
+      "required_interpretation": "Alternative-effort onset is unestimated and pending validation.",
+      "required_limitation": "Do not extrapolate the word-effort no-onset result to morphemes, syllables, or phonemes, and do not promote unvalidated proxy models.",
+      "destination_section": "Pending evidence and blockers",
+      "figure_eligibility": "NONE"
+    }
+  ],
+  "blockers": [
+    {
+      "claim_id": "WORD_NONPBM58_CONFIRMATION",
+      "status": "BLOCKED",
+      "reason": "The remaining-58 same-pass Mistral word production is implemented but has not run; no audited score handoff or model result exists.",
+      "required_resolution": "Run the registered production and audits, retrieve a complete handoff, then fit the already frozen word protocol without inspecting unregistered outcomes."
+    },
+    {
+      "claim_id": "LISTENER_UTILITY_OUTCOME",
+      "status": "BLOCKED",
+      "reason": "No validated downstream caregiver-response, repair, clarification, acknowledgement, or contingency outcome has been registered.",
+      "required_resolution": "Define and validate the listener outcome, freeze its sample and model, and require a PASS/COMPLETE analysis marker."
+    },
+    {
+      "claim_id": "CONVERSATIONAL_MANUAL_VALIDATION",
+      "status": "BLOCKED",
+      "reason": "The structural audit remains REVIEW and the 325-row stratified sample has not been manually validated.",
+      "required_resolution": "Complete blinded manual coding, freeze acceptance gates, resolve or characterize the 18,172 context-k1 mismatches, and obtain status PASS."
+    },
+    {
+      "claim_id": "DECOUPLED_RESPONSE_CALIBRATION",
+      "status": "BLOCKED",
+      "reason": "Semantic clusters, rarefaction, seed/prompt/temperature sensitivities, and a decoupled generator product are absent.",
+      "required_resolution": "Freeze the calibration design, generate and audit the required products, then report generator/scorer conditions separately."
+    },
+    {
+      "claim_id": "ALTERNATIVE_EFFORT_ONSET",
+      "status": "BLOCKED",
+      "reason": "The completed simultaneous-band onset analysis uses word effort only; validated full-79 alternative effort controls are unavailable.",
+      "required_resolution": "Validate morpheme, syllable, and phoneme features, freeze each model, and rerun the identical sustained-onset rule with audited markers."
+    }
+  ]
+}
