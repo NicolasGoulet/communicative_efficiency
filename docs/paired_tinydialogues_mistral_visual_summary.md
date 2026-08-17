@@ -20,8 +20,8 @@ TinyDialogues and Mistral have different tokenizers and calibrations.
 | question | Tiny slope | Mistral slope | Tiny − Mistral | bootstrap interval |
 | --- | ---: | ---: | ---: | ---: |
 | Contextual target (k3) | -0.222 | -0.133 | -0.089 | [-0.152, -0.028] |
-| Unconditional target (k0) | -0.254 | -0.162 | -0.092 | [-0.157, -0.045] |
-| Context support (k3) | -0.032 | -0.030 | -0.003 | [-0.044, 0.027] |
+| Unconditional target (k0) | -0.254 | -0.162 | -0.092 | [-0.168, -0.047] |
+| Context support (k3) | -0.032 | -0.030 | -0.003 | [-0.052, 0.023] |
 
 ## Where The Scorers Differ
 

@@ -4,6 +4,10 @@ This is an internal modeling report, not the supervisor-facing document. Its job
 is to make the central communicative-efficiency comparisons explicit before we
 decide which results deserve promotion.
 
+Direct target scores in this run come from **Mistral**. Any missing
+scorer-specific predictor family is recorded as unavailable rather than being
+silently borrowed from another scorer.
+
 ## Workflow Separation
 
 The analysis and report generation are deliberately decoupled.
@@ -135,16 +139,13 @@ Context entropy status:
 
 Response-level entropy features present: `False`.
 
-If response-level entropy is absent, this report uses next-token context entropy
-as a provisional context-predictability measure. This is not the same thing as
-sampling full possible responses from the model, so final context-efficiency
-claims should wait for the response-level entropy audit.
+Response-level entropy is absent, but this scorer run includes next-token context entropy as a provisional context-predictability measure. This is not entropy over complete possible responses.
 
 ## Derived Predictors
 
 | predictor | meaning |
 | --- | --- |
-| context_entropy_bits | Mistral next-token entropy after the preceding caretaker context. |
+| context_entropy_bits | Scorer-specific next-token entropy after the preceding caretaker context. |
 | context_next_top1_prob | Probability assigned to the single most likely next token after the caretaker context. |
 | context_word_count | Surface word count of the preceding caretaker context window. |
 | context_question_type | Rule-based classification of the caretaker context as wh-question, yes/no question, other question, or not question. |
@@ -189,16 +190,16 @@ diagnostic views, not subvariants.
 | Z4 | Context Entropy Predicting Information | effort: Syllables: CMU/pkg | Z4 Information from context entropy | effort=Syllables: CMU/pkg | Is total child information related to context entropy after syllables: cmu/pkg is controlled? | sum_bits ~ age_months_z * context_entropy_bits_z + nb_syllables_cmu_or_pkg_z + log_context_words_plus1 + C(context_k) | gee_gamma_log | fit | 15342 | 21 | 0.2055 |
 | Z4 | Context Entropy Predicting Information | effort: Syllables: pkg | Z4 Information from context entropy | effort=Syllables: pkg | Is total child information related to context entropy after syllables: pkg is controlled? | sum_bits ~ age_months_z * context_entropy_bits_z + nb_syllables_pkg_z + log_context_words_plus1 + C(context_k) | gee_gamma_log | fit | 15342 | 21 | 0.2184 |
 | Z4 | Context Entropy Predicting Information | effort: Phonemes | Z4 Information from context entropy | effort=Phonemes | Is total child information related to context entropy after phonemes is controlled? | sum_bits ~ age_months_z * context_entropy_bits_z + nb_phonemes_z + log_context_words_plus1 + C(context_k) | gee_gamma_log | fit | 15342 | 21 | 0.1679 |
-| Z5 | Scoring Context Window Sensitivity | unit: Words | Z5 Context window sensitivity | unit=Words | Does the age trajectory of information per words change across k1/k2/k3 scoring windows? | bits_per_word ~ age_months_z * C(context_k) + log_nb_words + context_entropy_bits_z | gee_gaussian | fit | 15342 | 21 | 0.3392 |
-| Z5 | Scoring Context Window Sensitivity | unit: Morphemes | Z5 Context window sensitivity | unit=Morphemes | Does the age trajectory of information per morphemes change across k1/k2/k3 scoring windows? | bits_per_morpheme ~ age_months_z * C(context_k) + log_nb_morphemes + context_entropy_bits_z | gee_gaussian | fit | 15342 | 21 | 0.3909 |
-| Z5 | Scoring Context Window Sensitivity | unit: Syllables: CMU/pkg | Z5 Context window sensitivity | unit=Syllables: CMU/pkg | Does the age trajectory of information per syllables: cmu/pkg change across k1/k2/k3 scoring windows? | bits_per_syllable_cmu_or_pkg ~ age_months_z * C(context_k) + log_nb_syllables + context_entropy_bits_z | gee_gaussian | fit | 15342 | 21 | 0.407 |
-| Z5 | Scoring Context Window Sensitivity | unit: Syllables: pkg | Z5 Context window sensitivity | unit=Syllables: pkg | Does the age trajectory of information per syllables: pkg change across k1/k2/k3 scoring windows? | bits_per_syllable_pkg ~ age_months_z * C(context_k) + log_nb_syllables + context_entropy_bits_z | gee_gaussian | fit | 15342 | 21 | 0.3596 |
-| Z5 | Scoring Context Window Sensitivity | unit: Phonemes | Z5 Context window sensitivity | unit=Phonemes | Does the age trajectory of information per phonemes change across k1/k2/k3 scoring windows? | bits_per_phoneme ~ age_months_z * C(context_k) + log_nb_phonemes + context_entropy_bits_z | gee_gaussian | fit | 15342 | 21 | 0.4756 |
-| Z6 | Question Type Predicting Effort | effort: Words | Z6 Question-type effort | effort=Words | Does caretaker question type modulate child words, and does that modulation change with age? | nb_words ~ age_months_z * C(context_question_type) + context_entropy_bits_z + log_context_words_plus1 | gee_poisson | fit | 15342 | 21 | 0.1019 |
-| Z6 | Question Type Predicting Effort | effort: Morphemes | Z6 Question-type effort | effort=Morphemes | Does caretaker question type modulate child morphemes, and does that modulation change with age? | nb_morphemes ~ age_months_z * C(context_question_type) + context_entropy_bits_z + log_context_words_plus1 | gee_poisson | fit | 15342 | 21 | 0.1023 |
-| Z6 | Question Type Predicting Effort | effort: Syllables: CMU/pkg | Z6 Question-type effort | effort=Syllables: CMU/pkg | Does caretaker question type modulate child syllables: cmu/pkg, and does that modulation change with age? | nb_syllables_cmu_or_pkg ~ age_months_z * C(context_question_type) + context_entropy_bits_z + log_context_words_plus1 | gee_poisson | fit | 15342 | 21 | 0.08707 |
-| Z6 | Question Type Predicting Effort | effort: Syllables: pkg | Z6 Question-type effort | effort=Syllables: pkg | Does caretaker question type modulate child syllables: pkg, and does that modulation change with age? | nb_syllables_pkg ~ age_months_z * C(context_question_type) + context_entropy_bits_z + log_context_words_plus1 | gee_poisson | fit | 15342 | 21 | 0.08191 |
-| Z6 | Question Type Predicting Effort | effort: Phonemes | Z6 Question-type effort | effort=Phonemes | Does caretaker question type modulate child phonemes, and does that modulation change with age? | nb_phonemes ~ age_months_z * C(context_question_type) + context_entropy_bits_z + log_context_words_plus1 | gee_poisson | fit | 15342 | 21 | 0.08055 |
+| Z5 | Scoring Context Window Sensitivity | unit: Words | Z5 Context window sensitivity | unit=Words | Does the age trajectory of information per words change across k1/k2/k3 scoring windows? | bits_per_word ~ age_months_z * C(context_k) + log_nb_words | gee_gaussian | fit | 15342 | 21 | 0.3385 |
+| Z5 | Scoring Context Window Sensitivity | unit: Morphemes | Z5 Context window sensitivity | unit=Morphemes | Does the age trajectory of information per morphemes change across k1/k2/k3 scoring windows? | bits_per_morpheme ~ age_months_z * C(context_k) + log_nb_morphemes | gee_gaussian | fit | 15342 | 21 | 0.3902 |
+| Z5 | Scoring Context Window Sensitivity | unit: Syllables: CMU/pkg | Z5 Context window sensitivity | unit=Syllables: CMU/pkg | Does the age trajectory of information per syllables: cmu/pkg change across k1/k2/k3 scoring windows? | bits_per_syllable_cmu_or_pkg ~ age_months_z * C(context_k) + log_nb_syllables | gee_gaussian | fit | 15342 | 21 | 0.4064 |
+| Z5 | Scoring Context Window Sensitivity | unit: Syllables: pkg | Z5 Context window sensitivity | unit=Syllables: pkg | Does the age trajectory of information per syllables: pkg change across k1/k2/k3 scoring windows? | bits_per_syllable_pkg ~ age_months_z * C(context_k) + log_nb_syllables | gee_gaussian | fit | 15342 | 21 | 0.3587 |
+| Z5 | Scoring Context Window Sensitivity | unit: Phonemes | Z5 Context window sensitivity | unit=Phonemes | Does the age trajectory of information per phonemes change across k1/k2/k3 scoring windows? | bits_per_phoneme ~ age_months_z * C(context_k) + log_nb_phonemes | gee_gaussian | fit | 15342 | 21 | 0.4753 |
+| Z6 | Question Type Predicting Effort | effort: Words | Z6 Question-type effort | effort=Words | Does caretaker question type modulate child words, and does that modulation change with age? | nb_words ~ age_months_z * C(context_question_type) + log_context_words_plus1 | gee_poisson | fit | 15342 | 21 | 0.1018 |
+| Z6 | Question Type Predicting Effort | effort: Morphemes | Z6 Question-type effort | effort=Morphemes | Does caretaker question type modulate child morphemes, and does that modulation change with age? | nb_morphemes ~ age_months_z * C(context_question_type) + log_context_words_plus1 | gee_poisson | fit | 15342 | 21 | 0.1022 |
+| Z6 | Question Type Predicting Effort | effort: Syllables: CMU/pkg | Z6 Question-type effort | effort=Syllables: CMU/pkg | Does caretaker question type modulate child syllables: cmu/pkg, and does that modulation change with age? | nb_syllables_cmu_or_pkg ~ age_months_z * C(context_question_type) + log_context_words_plus1 | gee_poisson | fit | 15342 | 21 | 0.08694 |
+| Z6 | Question Type Predicting Effort | effort: Syllables: pkg | Z6 Question-type effort | effort=Syllables: pkg | Does caretaker question type modulate child syllables: pkg, and does that modulation change with age? | nb_syllables_pkg ~ age_months_z * C(context_question_type) + log_context_words_plus1 | gee_poisson | fit | 15342 | 21 | 0.08178 |
+| Z6 | Question Type Predicting Effort | effort: Phonemes | Z6 Question-type effort | effort=Phonemes | Does caretaker question type modulate child phonemes, and does that modulation change with age? | nb_phonemes ~ age_months_z * C(context_question_type) + log_context_words_plus1 | gee_poisson | fit | 15342 | 21 | 0.08042 |
 | Z7 | Real Children Versus All Matched Baselines | effort: Words | Z7 Baseline comparison | effort=Words | Do real child utterances differ from random/ngram baselines after controlling words? | sum_bits ~ age_months_z * C(target_variant) + nb_words_z | gee_gamma_log | fit | 18225 | 21 | 0.04299 |
 | Z7 | Real Children Versus All Matched Baselines | effort: Morphemes | Z7 Baseline comparison | effort=Morphemes | Do real child utterances differ from random/ngram baselines after controlling morphemes? | sum_bits ~ age_months_z * C(target_variant) + nb_morphemes_z | gee_gamma_log | fit | 18225 | 21 | 0.03944 |
 | Z7 | Real Children Versus All Matched Baselines | effort: Syllables: CMU/pkg | Z7 Baseline comparison | effort=Syllables: CMU/pkg | Do real child utterances differ from random/ngram baselines after controlling syllables: cmu/pkg? | sum_bits ~ age_months_z * C(target_variant) + nb_syllables_cmu_or_pkg_z | gee_gamma_log | fit | 18225 | 21 | 0.04555 |
@@ -868,11 +869,11 @@ Context-model rows:
 | Z4 Information from context entropy | effort=Syllables: CMU/pkg | gee_gamma_log | fit | 15342 | 21 | 0.2055 | Is total child information related to context entropy after syllables: cmu/pkg is controlled? |
 | Z4 Information from context entropy | effort=Syllables: pkg | gee_gamma_log | fit | 15342 | 21 | 0.2184 | Is total child information related to context entropy after syllables: pkg is controlled? |
 | Z4 Information from context entropy | effort=Words | gee_gamma_log | fit | 15342 | 21 | 0.161 | Is total child information related to context entropy after words is controlled? |
-| Z5 Context window sensitivity | unit=Morphemes | gee_gaussian | fit | 15342 | 21 | 0.3909 | Does the age trajectory of information per morphemes change across k1/k2/k3 scoring windows? |
-| Z5 Context window sensitivity | unit=Phonemes | gee_gaussian | fit | 15342 | 21 | 0.4756 | Does the age trajectory of information per phonemes change across k1/k2/k3 scoring windows? |
-| Z5 Context window sensitivity | unit=Syllables: CMU/pkg | gee_gaussian | fit | 15342 | 21 | 0.407 | Does the age trajectory of information per syllables: cmu/pkg change across k1/k2/k3 scoring windows? |
-| Z5 Context window sensitivity | unit=Syllables: pkg | gee_gaussian | fit | 15342 | 21 | 0.3596 | Does the age trajectory of information per syllables: pkg change across k1/k2/k3 scoring windows? |
-| Z5 Context window sensitivity | unit=Words | gee_gaussian | fit | 15342 | 21 | 0.3392 | Does the age trajectory of information per words change across k1/k2/k3 scoring windows? |
+| Z5 Context window sensitivity | unit=Morphemes | gee_gaussian | fit | 15342 | 21 | 0.3902 | Does the age trajectory of information per morphemes change across k1/k2/k3 scoring windows? |
+| Z5 Context window sensitivity | unit=Phonemes | gee_gaussian | fit | 15342 | 21 | 0.4753 | Does the age trajectory of information per phonemes change across k1/k2/k3 scoring windows? |
+| Z5 Context window sensitivity | unit=Syllables: CMU/pkg | gee_gaussian | fit | 15342 | 21 | 0.4064 | Does the age trajectory of information per syllables: cmu/pkg change across k1/k2/k3 scoring windows? |
+| Z5 Context window sensitivity | unit=Syllables: pkg | gee_gaussian | fit | 15342 | 21 | 0.3587 | Does the age trajectory of information per syllables: pkg change across k1/k2/k3 scoring windows? |
+| Z5 Context window sensitivity | unit=Words | gee_gaussian | fit | 15342 | 21 | 0.3385 | Does the age trajectory of information per words change across k1/k2/k3 scoring windows? |
 
 Context-model key coefficients:
 
@@ -909,35 +910,35 @@ Context-model key coefficients:
 | Z4 Information from context entropy | effort=Phonemes | age_months_z | -0.02553 | 0.01153 | 0.027 |
 | Z4 Information from context entropy | effort=Phonemes | context_entropy_bits_z | -0.006698 | 0.004023 | 0.096 |
 | Z4 Information from context entropy | effort=Phonemes | age_months_z:context_entropy_bits_z | 0.009372 | 0.002538 | <.001 |
-| Z5 Context window sensitivity | unit=Words | age_months_z | -0.7007 | 0.1229 | <.001 |
-| Z5 Context window sensitivity | unit=Words | age_months_z:C(context_k)[T.k2] | 0.3276 | 0.0767 | <.001 |
-| Z5 Context window sensitivity | unit=Words | age_months_z:C(context_k)[T.k3] | 0.4525 | 0.07682 | <.001 |
-| Z5 Context window sensitivity | unit=Words | log_nb_words | -4.753 | 0.2066 | <.001 |
-| Z5 Context window sensitivity | unit=Words | context_entropy_bits_z | -0.1535 | 0.04556 | <.001 |
-| Z5 Context window sensitivity | unit=Morphemes | age_months_z | -0.6745 | 0.1119 | <.001 |
-| Z5 Context window sensitivity | unit=Morphemes | age_months_z:C(context_k)[T.k2] | 0.3085 | 0.07931 | <.001 |
-| Z5 Context window sensitivity | unit=Morphemes | age_months_z:C(context_k)[T.k3] | 0.4495 | 0.07247 | <.001 |
-| Z5 Context window sensitivity | unit=Morphemes | context_entropy_bits_z | -0.1557 | 0.04198 | <.001 |
-| Z5 Context window sensitivity | unit=Syllables: CMU/pkg | age_months_z | -0.362 | 0.08012 | <.001 |
-| Z5 Context window sensitivity | unit=Syllables: CMU/pkg | age_months_z:C(context_k)[T.k2] | 0.2568 | 0.07016 | <.001 |
-| Z5 Context window sensitivity | unit=Syllables: CMU/pkg | age_months_z:C(context_k)[T.k3] | 0.3601 | 0.07389 | <.001 |
-| Z5 Context window sensitivity | unit=Syllables: CMU/pkg | context_entropy_bits_z | -0.1157 | 0.03456 | <.001 |
-| Z5 Context window sensitivity | unit=Syllables: pkg | age_months_z | -0.3229 | 0.09699 | <.001 |
-| Z5 Context window sensitivity | unit=Syllables: pkg | age_months_z:C(context_k)[T.k2] | 0.2229 | 0.06537 | <.001 |
-| Z5 Context window sensitivity | unit=Syllables: pkg | age_months_z:C(context_k)[T.k3] | 0.3389 | 0.07494 | <.001 |
-| Z5 Context window sensitivity | unit=Syllables: pkg | context_entropy_bits_z | -0.1486 | 0.03652 | <.001 |
-| Z5 Context window sensitivity | unit=Phonemes | age_months_z | -0.01825 | 0.04007 | 0.649 |
-| Z5 Context window sensitivity | unit=Phonemes | age_months_z:C(context_k)[T.k2] | 0.1098 | 0.03493 | 0.002 |
-| Z5 Context window sensitivity | unit=Phonemes | age_months_z:C(context_k)[T.k3] | 0.1972 | 0.03438 | <.001 |
-| Z5 Context window sensitivity | unit=Phonemes | context_entropy_bits_z | -0.04582 | 0.01823 | 0.012 |
-| Z6 Question-type effort | effort=Words | age_months_z | 0.2212 | 0.02564 | <.001 |
-| Z6 Question-type effort | effort=Words | age_months_z:C(context_question_type)[T.other question] | 0.03017 | 0.01011 | 0.003 |
-| Z6 Question-type effort | effort=Words | age_months_z:C(context_question_type)[T.wh-question] | 0.03792 | 0.016 | 0.018 |
-| Z6 Question-type effort | effort=Words | age_months_z:C(context_question_type)[T.yes/no question] | 0.001418 | 0.02482 | 0.954 |
-| Z6 Question-type effort | effort=Words | context_entropy_bits_z | 0.008167 | 0.008695 | 0.348 |
-| Z6 Question-type effort | effort=Morphemes | age_months_z | 0.2306 | 0.02617 | <.001 |
-| Z6 Question-type effort | effort=Morphemes | age_months_z:C(context_question_type)[T.other question] | 0.03427 | 0.009822 | <.001 |
-| Z6 Question-type effort | effort=Morphemes | age_months_z:C(context_question_type)[T.wh-question] | 0.04604 | 0.01608 | 0.004 |
+| Z5 Context window sensitivity | unit=Words | age_months_z | -0.7024 | 0.1211 | <.001 |
+| Z5 Context window sensitivity | unit=Words | age_months_z:C(context_k)[T.k2] | 0.3251 | 0.07897 | <.001 |
+| Z5 Context window sensitivity | unit=Words | age_months_z:C(context_k)[T.k3] | 0.4541 | 0.07391 | <.001 |
+| Z5 Context window sensitivity | unit=Words | log_nb_words | -4.759 | 0.2063 | <.001 |
+| Z5 Context window sensitivity | unit=Morphemes | age_months_z | -0.6761 | 0.1099 | <.001 |
+| Z5 Context window sensitivity | unit=Morphemes | age_months_z:C(context_k)[T.k2] | 0.3061 | 0.08208 | <.001 |
+| Z5 Context window sensitivity | unit=Morphemes | age_months_z:C(context_k)[T.k3] | 0.4511 | 0.07041 | <.001 |
+| Z5 Context window sensitivity | unit=Syllables: CMU/pkg | age_months_z | -0.3634 | 0.0791 | <.001 |
+| Z5 Context window sensitivity | unit=Syllables: CMU/pkg | age_months_z:C(context_k)[T.k2] | 0.2549 | 0.07061 | <.001 |
+| Z5 Context window sensitivity | unit=Syllables: CMU/pkg | age_months_z:C(context_k)[T.k3] | 0.3612 | 0.07187 | <.001 |
+| Z5 Context window sensitivity | unit=Syllables: pkg | age_months_z | -0.3247 | 0.09531 | <.001 |
+| Z5 Context window sensitivity | unit=Syllables: pkg | age_months_z:C(context_k)[T.k2] | 0.2205 | 0.06706 | 0.001 |
+| Z5 Context window sensitivity | unit=Syllables: pkg | age_months_z:C(context_k)[T.k3] | 0.3404 | 0.07184 | <.001 |
+| Z5 Context window sensitivity | unit=Phonemes | age_months_z | -0.01887 | 0.03974 | 0.635 |
+| Z5 Context window sensitivity | unit=Phonemes | age_months_z:C(context_k)[T.k2] | 0.1091 | 0.03525 | 0.002 |
+| Z5 Context window sensitivity | unit=Phonemes | age_months_z:C(context_k)[T.k3] | 0.1976 | 0.03411 | <.001 |
+| Z6 Question-type effort | effort=Words | age_months_z | 0.2211 | 0.02566 | <.001 |
+| Z6 Question-type effort | effort=Words | age_months_z:C(context_question_type)[T.other question] | 0.03033 | 0.01022 | 0.003 |
+| Z6 Question-type effort | effort=Words | age_months_z:C(context_question_type)[T.wh-question] | 0.03774 | 0.01602 | 0.018 |
+| Z6 Question-type effort | effort=Words | age_months_z:C(context_question_type)[T.yes/no question] | 0.001659 | 0.02465 | 0.946 |
+| Z6 Question-type effort | effort=Morphemes | age_months_z | 0.2304 | 0.0262 | <.001 |
+| Z6 Question-type effort | effort=Morphemes | age_months_z:C(context_question_type)[T.other question] | 0.03442 | 0.009922 | <.001 |
+| Z6 Question-type effort | effort=Morphemes | age_months_z:C(context_question_type)[T.wh-question] | 0.04586 | 0.01622 | 0.005 |
+| Z6 Question-type effort | effort=Morphemes | age_months_z:C(context_question_type)[T.yes/no question] | 0.009962 | 0.02565 | 0.698 |
+| Z6 Question-type effort | effort=Syllables: CMU/pkg | age_months_z | 0.198 | 0.02498 | <.001 |
+| Z6 Question-type effort | effort=Syllables: CMU/pkg | age_months_z:C(context_question_type)[T.other question] | 0.03582 | 0.01069 | <.001 |
+| Z6 Question-type effort | effort=Syllables: CMU/pkg | age_months_z:C(context_question_type)[T.wh-question] | 0.04145 | 0.01788 | 0.020 |
+| Z6 Question-type effort | effort=Syllables: CMU/pkg | age_months_z:C(context_question_type)[T.yes/no question] | 0.005949 | 0.02542 | 0.815 |
+| Z6 Question-type effort | effort=Syllables: pkg | age_months_z | 0.1971 | 0.02418 | <.001 |
 
 Question-type counts:
 
@@ -1680,41 +1681,41 @@ Subvariants in this family:
 
 | family_id | subvariant | estimator | status | n_obs | n_children | r2_or_observed_fitted_r2 |
 | --- | --- | --- | --- | --- | --- | --- |
-| Z5 | unit: Words | gee_gaussian | fit | 15342 | 21 | 0.3392 |
-| Z5 | unit: Morphemes | gee_gaussian | fit | 15342 | 21 | 0.3909 |
-| Z5 | unit: Syllables: CMU/pkg | gee_gaussian | fit | 15342 | 21 | 0.407 |
-| Z5 | unit: Syllables: pkg | gee_gaussian | fit | 15342 | 21 | 0.3596 |
-| Z5 | unit: Phonemes | gee_gaussian | fit | 15342 | 21 | 0.4756 |
+| Z5 | unit: Words | gee_gaussian | fit | 15342 | 21 | 0.3385 |
+| Z5 | unit: Morphemes | gee_gaussian | fit | 15342 | 21 | 0.3902 |
+| Z5 | unit: Syllables: CMU/pkg | gee_gaussian | fit | 15342 | 21 | 0.4064 |
+| Z5 | unit: Syllables: pkg | gee_gaussian | fit | 15342 | 21 | 0.3587 |
+| Z5 | unit: Phonemes | gee_gaussian | fit | 15342 | 21 | 0.4753 |
 
 Family key coefficients:
 
 | model | term | estimate | std_error | p_value |
 | --- | --- | --- | --- | --- |
-| Z5 Context window sensitivity | unit=Words | C(context_k)[T.k2] | -1.457 | 0.1036 | <.001 |
-| Z5 Context window sensitivity | unit=Words | C(context_k)[T.k3] | -2.226 | 0.1198 | <.001 |
-| Z5 Context window sensitivity | unit=Words | age_months_z | -0.7007 | 0.1229 | <.001 |
-| Z5 Context window sensitivity | unit=Words | age_months_z:C(context_k)[T.k2] | 0.3276 | 0.0767 | <.001 |
-| Z5 Context window sensitivity | unit=Words | age_months_z:C(context_k)[T.k3] | 0.4525 | 0.07682 | <.001 |
-| Z5 Context window sensitivity | unit=Words | log_nb_words | -4.753 | 0.2066 | <.001 |
-| Z5 Context window sensitivity | unit=Words | context_entropy_bits_z | -0.1535 | 0.04556 | <.001 |
-| Z5 Context window sensitivity | unit=Morphemes | C(context_k)[T.k2] | -1.368 | 0.1018 | <.001 |
-| Z5 Context window sensitivity | unit=Morphemes | C(context_k)[T.k3] | -2.086 | 0.1189 | <.001 |
-| Z5 Context window sensitivity | unit=Morphemes | age_months_z | -0.6745 | 0.1119 | <.001 |
-| Z5 Context window sensitivity | unit=Morphemes | age_months_z:C(context_k)[T.k2] | 0.3085 | 0.07931 | <.001 |
-| Z5 Context window sensitivity | unit=Morphemes | age_months_z:C(context_k)[T.k3] | 0.4495 | 0.07247 | <.001 |
-| Z5 Context window sensitivity | unit=Morphemes | log_nb_morphemes | -4.867 | 0.1929 | <.001 |
-| Z5 Context window sensitivity | unit=Morphemes | context_entropy_bits_z | -0.1557 | 0.04198 | <.001 |
-| Z5 Context window sensitivity | unit=Syllables: CMU/pkg | C(context_k)[T.k2] | -1.256 | 0.08858 | <.001 |
-| Z5 Context window sensitivity | unit=Syllables: CMU/pkg | C(context_k)[T.k3] | -1.877 | 0.1068 | <.001 |
-| Z5 Context window sensitivity | unit=Syllables: CMU/pkg | age_months_z | -0.362 | 0.08012 | <.001 |
-| Z5 Context window sensitivity | unit=Syllables: CMU/pkg | age_months_z:C(context_k)[T.k2] | 0.2568 | 0.07016 | <.001 |
-| Z5 Context window sensitivity | unit=Syllables: CMU/pkg | age_months_z:C(context_k)[T.k3] | 0.3601 | 0.07389 | <.001 |
-| Z5 Context window sensitivity | unit=Syllables: CMU/pkg | log_nb_syllables | -4.258 | 0.1801 | <.001 |
-| Z5 Context window sensitivity | unit=Syllables: CMU/pkg | context_entropy_bits_z | -0.1157 | 0.03456 | <.001 |
-| Z5 Context window sensitivity | unit=Syllables: pkg | C(context_k)[T.k2] | -1.166 | 0.07312 | <.001 |
-| Z5 Context window sensitivity | unit=Syllables: pkg | C(context_k)[T.k3] | -1.779 | 0.09352 | <.001 |
-| Z5 Context window sensitivity | unit=Syllables: pkg | age_months_z | -0.3229 | 0.09699 | <.001 |
-| Z5 Context window sensitivity | unit=Syllables: pkg | age_months_z:C(context_k)[T.k2] | 0.2229 | 0.06537 | <.001 |
+| Z5 Context window sensitivity | unit=Words | C(context_k)[T.k2] | -1.491 | 0.1016 | <.001 |
+| Z5 Context window sensitivity | unit=Words | C(context_k)[T.k3] | -2.307 | 0.1233 | <.001 |
+| Z5 Context window sensitivity | unit=Words | age_months_z | -0.7024 | 0.1211 | <.001 |
+| Z5 Context window sensitivity | unit=Words | age_months_z:C(context_k)[T.k2] | 0.3251 | 0.07897 | <.001 |
+| Z5 Context window sensitivity | unit=Words | age_months_z:C(context_k)[T.k3] | 0.4541 | 0.07391 | <.001 |
+| Z5 Context window sensitivity | unit=Words | log_nb_words | -4.759 | 0.2063 | <.001 |
+| Z5 Context window sensitivity | unit=Morphemes | C(context_k)[T.k2] | -1.402 | 0.1013 | <.001 |
+| Z5 Context window sensitivity | unit=Morphemes | C(context_k)[T.k3] | -2.169 | 0.1229 | <.001 |
+| Z5 Context window sensitivity | unit=Morphemes | age_months_z | -0.6761 | 0.1099 | <.001 |
+| Z5 Context window sensitivity | unit=Morphemes | age_months_z:C(context_k)[T.k2] | 0.3061 | 0.08208 | <.001 |
+| Z5 Context window sensitivity | unit=Morphemes | age_months_z:C(context_k)[T.k3] | 0.4511 | 0.07041 | <.001 |
+| Z5 Context window sensitivity | unit=Morphemes | log_nb_morphemes | -4.874 | 0.1927 | <.001 |
+| Z5 Context window sensitivity | unit=Syllables: CMU/pkg | C(context_k)[T.k2] | -1.282 | 0.08727 | <.001 |
+| Z5 Context window sensitivity | unit=Syllables: CMU/pkg | C(context_k)[T.k3] | -1.938 | 0.1073 | <.001 |
+| Z5 Context window sensitivity | unit=Syllables: CMU/pkg | age_months_z | -0.3634 | 0.0791 | <.001 |
+| Z5 Context window sensitivity | unit=Syllables: CMU/pkg | age_months_z:C(context_k)[T.k2] | 0.2549 | 0.07061 | <.001 |
+| Z5 Context window sensitivity | unit=Syllables: CMU/pkg | age_months_z:C(context_k)[T.k3] | 0.3612 | 0.07187 | <.001 |
+| Z5 Context window sensitivity | unit=Syllables: CMU/pkg | log_nb_syllables | -4.263 | 0.181 | <.001 |
+| Z5 Context window sensitivity | unit=Syllables: pkg | C(context_k)[T.k2] | -1.2 | 0.07072 | <.001 |
+| Z5 Context window sensitivity | unit=Syllables: pkg | C(context_k)[T.k3] | -1.858 | 0.09426 | <.001 |
+| Z5 Context window sensitivity | unit=Syllables: pkg | age_months_z | -0.3247 | 0.09531 | <.001 |
+| Z5 Context window sensitivity | unit=Syllables: pkg | age_months_z:C(context_k)[T.k2] | 0.2205 | 0.06706 | 0.001 |
+| Z5 Context window sensitivity | unit=Syllables: pkg | age_months_z:C(context_k)[T.k3] | 0.3404 | 0.07184 | <.001 |
+| Z5 Context window sensitivity | unit=Syllables: pkg | log_nb_syllables | -4.092 | 0.1651 | <.001 |
+| Z5 Context window sensitivity | unit=Phonemes | C(context_k)[T.k2] | -0.553 | 0.04324 | <.001 |
 
 
 **How to read this coefficient plot.** Each point is a key coefficient from one
@@ -1729,7 +1730,7 @@ term points the same way across subvariants, that pattern is more stable.
 
 **Question asked by this subvariant.** Does the age trajectory of information per words change across k1/k2/k3 scoring windows?
 
-**Formula.** `bits_per_word ~ age_months_z * C(context_k) + log_nb_words + context_entropy_bits_z`
+**Formula.** `bits_per_word ~ age_months_z * C(context_k) + log_nb_words`
 
 **Estimator.** `gee_gaussian`. For `ols_cluster`, the fitted line is the same as OLS, but standard errors and p-values are clustered by child. For GEE models, rows are grouped by child to account for repeated utterances.
 
@@ -1737,24 +1738,23 @@ Subvariant fit:
 
 | model | family | status | n_obs | n_children | r2_or_observed_fitted_r2 | question |
 | --- | --- | --- | --- | --- | --- | --- |
-| Z5 Context window sensitivity | unit=Words | gee_gaussian | fit | 15342 | 21 | 0.3392 | Does the age trajectory of information per words change across k1/k2/k3 scoring windows? |
+| Z5 Context window sensitivity | unit=Words | gee_gaussian | fit | 15342 | 21 | 0.3385 | Does the age trajectory of information per words change across k1/k2/k3 scoring windows? |
 
 Key coefficients:
 
 | model | term | estimate | std_error | p_value |
 | --- | --- | --- | --- | --- |
-| Z5 Context window sensitivity | unit=Words | C(context_k)[T.k2] | -1.457 | 0.1036 | <.001 |
-| Z5 Context window sensitivity | unit=Words | C(context_k)[T.k3] | -2.226 | 0.1198 | <.001 |
-| Z5 Context window sensitivity | unit=Words | age_months_z | -0.7007 | 0.1229 | <.001 |
-| Z5 Context window sensitivity | unit=Words | age_months_z:C(context_k)[T.k2] | 0.3276 | 0.0767 | <.001 |
-| Z5 Context window sensitivity | unit=Words | age_months_z:C(context_k)[T.k3] | 0.4525 | 0.07682 | <.001 |
-| Z5 Context window sensitivity | unit=Words | log_nb_words | -4.753 | 0.2066 | <.001 |
-| Z5 Context window sensitivity | unit=Words | context_entropy_bits_z | -0.1535 | 0.04556 | <.001 |
+| Z5 Context window sensitivity | unit=Words | C(context_k)[T.k2] | -1.491 | 0.1016 | <.001 |
+| Z5 Context window sensitivity | unit=Words | C(context_k)[T.k3] | -2.307 | 0.1233 | <.001 |
+| Z5 Context window sensitivity | unit=Words | age_months_z | -0.7024 | 0.1211 | <.001 |
+| Z5 Context window sensitivity | unit=Words | age_months_z:C(context_k)[T.k2] | 0.3251 | 0.07897 | <.001 |
+| Z5 Context window sensitivity | unit=Words | age_months_z:C(context_k)[T.k3] | 0.4541 | 0.07391 | <.001 |
+| Z5 Context window sensitivity | unit=Words | log_nb_words | -4.759 | 0.2063 | <.001 |
 ### Z5.2: unit: Morphemes
 
 **Question asked by this subvariant.** Does the age trajectory of information per morphemes change across k1/k2/k3 scoring windows?
 
-**Formula.** `bits_per_morpheme ~ age_months_z * C(context_k) + log_nb_morphemes + context_entropy_bits_z`
+**Formula.** `bits_per_morpheme ~ age_months_z * C(context_k) + log_nb_morphemes`
 
 **Estimator.** `gee_gaussian`. For `ols_cluster`, the fitted line is the same as OLS, but standard errors and p-values are clustered by child. For GEE models, rows are grouped by child to account for repeated utterances.
 
@@ -1762,24 +1762,23 @@ Subvariant fit:
 
 | model | family | status | n_obs | n_children | r2_or_observed_fitted_r2 | question |
 | --- | --- | --- | --- | --- | --- | --- |
-| Z5 Context window sensitivity | unit=Morphemes | gee_gaussian | fit | 15342 | 21 | 0.3909 | Does the age trajectory of information per morphemes change across k1/k2/k3 scoring windows? |
+| Z5 Context window sensitivity | unit=Morphemes | gee_gaussian | fit | 15342 | 21 | 0.3902 | Does the age trajectory of information per morphemes change across k1/k2/k3 scoring windows? |
 
 Key coefficients:
 
 | model | term | estimate | std_error | p_value |
 | --- | --- | --- | --- | --- |
-| Z5 Context window sensitivity | unit=Morphemes | C(context_k)[T.k2] | -1.368 | 0.1018 | <.001 |
-| Z5 Context window sensitivity | unit=Morphemes | C(context_k)[T.k3] | -2.086 | 0.1189 | <.001 |
-| Z5 Context window sensitivity | unit=Morphemes | age_months_z | -0.6745 | 0.1119 | <.001 |
-| Z5 Context window sensitivity | unit=Morphemes | age_months_z:C(context_k)[T.k2] | 0.3085 | 0.07931 | <.001 |
-| Z5 Context window sensitivity | unit=Morphemes | age_months_z:C(context_k)[T.k3] | 0.4495 | 0.07247 | <.001 |
-| Z5 Context window sensitivity | unit=Morphemes | log_nb_morphemes | -4.867 | 0.1929 | <.001 |
-| Z5 Context window sensitivity | unit=Morphemes | context_entropy_bits_z | -0.1557 | 0.04198 | <.001 |
+| Z5 Context window sensitivity | unit=Morphemes | C(context_k)[T.k2] | -1.402 | 0.1013 | <.001 |
+| Z5 Context window sensitivity | unit=Morphemes | C(context_k)[T.k3] | -2.169 | 0.1229 | <.001 |
+| Z5 Context window sensitivity | unit=Morphemes | age_months_z | -0.6761 | 0.1099 | <.001 |
+| Z5 Context window sensitivity | unit=Morphemes | age_months_z:C(context_k)[T.k2] | 0.3061 | 0.08208 | <.001 |
+| Z5 Context window sensitivity | unit=Morphemes | age_months_z:C(context_k)[T.k3] | 0.4511 | 0.07041 | <.001 |
+| Z5 Context window sensitivity | unit=Morphemes | log_nb_morphemes | -4.874 | 0.1927 | <.001 |
 ### Z5.3: unit: Syllables: CMU/pkg
 
 **Question asked by this subvariant.** Does the age trajectory of information per syllables: cmu/pkg change across k1/k2/k3 scoring windows?
 
-**Formula.** `bits_per_syllable_cmu_or_pkg ~ age_months_z * C(context_k) + log_nb_syllables + context_entropy_bits_z`
+**Formula.** `bits_per_syllable_cmu_or_pkg ~ age_months_z * C(context_k) + log_nb_syllables`
 
 **Estimator.** `gee_gaussian`. For `ols_cluster`, the fitted line is the same as OLS, but standard errors and p-values are clustered by child. For GEE models, rows are grouped by child to account for repeated utterances.
 
@@ -1787,24 +1786,23 @@ Subvariant fit:
 
 | model | family | status | n_obs | n_children | r2_or_observed_fitted_r2 | question |
 | --- | --- | --- | --- | --- | --- | --- |
-| Z5 Context window sensitivity | unit=Syllables: CMU/pkg | gee_gaussian | fit | 15342 | 21 | 0.407 | Does the age trajectory of information per syllables: cmu/pkg change across k1/k2/k3 scoring windows? |
+| Z5 Context window sensitivity | unit=Syllables: CMU/pkg | gee_gaussian | fit | 15342 | 21 | 0.4064 | Does the age trajectory of information per syllables: cmu/pkg change across k1/k2/k3 scoring windows? |
 
 Key coefficients:
 
 | model | term | estimate | std_error | p_value |
 | --- | --- | --- | --- | --- |
-| Z5 Context window sensitivity | unit=Syllables: CMU/pkg | C(context_k)[T.k2] | -1.256 | 0.08858 | <.001 |
-| Z5 Context window sensitivity | unit=Syllables: CMU/pkg | C(context_k)[T.k3] | -1.877 | 0.1068 | <.001 |
-| Z5 Context window sensitivity | unit=Syllables: CMU/pkg | age_months_z | -0.362 | 0.08012 | <.001 |
-| Z5 Context window sensitivity | unit=Syllables: CMU/pkg | age_months_z:C(context_k)[T.k2] | 0.2568 | 0.07016 | <.001 |
-| Z5 Context window sensitivity | unit=Syllables: CMU/pkg | age_months_z:C(context_k)[T.k3] | 0.3601 | 0.07389 | <.001 |
-| Z5 Context window sensitivity | unit=Syllables: CMU/pkg | log_nb_syllables | -4.258 | 0.1801 | <.001 |
-| Z5 Context window sensitivity | unit=Syllables: CMU/pkg | context_entropy_bits_z | -0.1157 | 0.03456 | <.001 |
+| Z5 Context window sensitivity | unit=Syllables: CMU/pkg | C(context_k)[T.k2] | -1.282 | 0.08727 | <.001 |
+| Z5 Context window sensitivity | unit=Syllables: CMU/pkg | C(context_k)[T.k3] | -1.938 | 0.1073 | <.001 |
+| Z5 Context window sensitivity | unit=Syllables: CMU/pkg | age_months_z | -0.3634 | 0.0791 | <.001 |
+| Z5 Context window sensitivity | unit=Syllables: CMU/pkg | age_months_z:C(context_k)[T.k2] | 0.2549 | 0.07061 | <.001 |
+| Z5 Context window sensitivity | unit=Syllables: CMU/pkg | age_months_z:C(context_k)[T.k3] | 0.3612 | 0.07187 | <.001 |
+| Z5 Context window sensitivity | unit=Syllables: CMU/pkg | log_nb_syllables | -4.263 | 0.181 | <.001 |
 ### Z5.4: unit: Syllables: pkg
 
 **Question asked by this subvariant.** Does the age trajectory of information per syllables: pkg change across k1/k2/k3 scoring windows?
 
-**Formula.** `bits_per_syllable_pkg ~ age_months_z * C(context_k) + log_nb_syllables + context_entropy_bits_z`
+**Formula.** `bits_per_syllable_pkg ~ age_months_z * C(context_k) + log_nb_syllables`
 
 **Estimator.** `gee_gaussian`. For `ols_cluster`, the fitted line is the same as OLS, but standard errors and p-values are clustered by child. For GEE models, rows are grouped by child to account for repeated utterances.
 
@@ -1812,24 +1810,23 @@ Subvariant fit:
 
 | model | family | status | n_obs | n_children | r2_or_observed_fitted_r2 | question |
 | --- | --- | --- | --- | --- | --- | --- |
-| Z5 Context window sensitivity | unit=Syllables: pkg | gee_gaussian | fit | 15342 | 21 | 0.3596 | Does the age trajectory of information per syllables: pkg change across k1/k2/k3 scoring windows? |
+| Z5 Context window sensitivity | unit=Syllables: pkg | gee_gaussian | fit | 15342 | 21 | 0.3587 | Does the age trajectory of information per syllables: pkg change across k1/k2/k3 scoring windows? |
 
 Key coefficients:
 
 | model | term | estimate | std_error | p_value |
 | --- | --- | --- | --- | --- |
-| Z5 Context window sensitivity | unit=Syllables: pkg | C(context_k)[T.k2] | -1.166 | 0.07312 | <.001 |
-| Z5 Context window sensitivity | unit=Syllables: pkg | C(context_k)[T.k3] | -1.779 | 0.09352 | <.001 |
-| Z5 Context window sensitivity | unit=Syllables: pkg | age_months_z | -0.3229 | 0.09699 | <.001 |
-| Z5 Context window sensitivity | unit=Syllables: pkg | age_months_z:C(context_k)[T.k2] | 0.2229 | 0.06537 | <.001 |
-| Z5 Context window sensitivity | unit=Syllables: pkg | age_months_z:C(context_k)[T.k3] | 0.3389 | 0.07494 | <.001 |
-| Z5 Context window sensitivity | unit=Syllables: pkg | log_nb_syllables | -4.085 | 0.1646 | <.001 |
-| Z5 Context window sensitivity | unit=Syllables: pkg | context_entropy_bits_z | -0.1486 | 0.03652 | <.001 |
+| Z5 Context window sensitivity | unit=Syllables: pkg | C(context_k)[T.k2] | -1.2 | 0.07072 | <.001 |
+| Z5 Context window sensitivity | unit=Syllables: pkg | C(context_k)[T.k3] | -1.858 | 0.09426 | <.001 |
+| Z5 Context window sensitivity | unit=Syllables: pkg | age_months_z | -0.3247 | 0.09531 | <.001 |
+| Z5 Context window sensitivity | unit=Syllables: pkg | age_months_z:C(context_k)[T.k2] | 0.2205 | 0.06706 | 0.001 |
+| Z5 Context window sensitivity | unit=Syllables: pkg | age_months_z:C(context_k)[T.k3] | 0.3404 | 0.07184 | <.001 |
+| Z5 Context window sensitivity | unit=Syllables: pkg | log_nb_syllables | -4.092 | 0.1651 | <.001 |
 ### Z5.5: unit: Phonemes
 
 **Question asked by this subvariant.** Does the age trajectory of information per phonemes change across k1/k2/k3 scoring windows?
 
-**Formula.** `bits_per_phoneme ~ age_months_z * C(context_k) + log_nb_phonemes + context_entropy_bits_z`
+**Formula.** `bits_per_phoneme ~ age_months_z * C(context_k) + log_nb_phonemes`
 
 **Estimator.** `gee_gaussian`. For `ols_cluster`, the fitted line is the same as OLS, but standard errors and p-values are clustered by child. For GEE models, rows are grouped by child to account for repeated utterances.
 
@@ -1837,19 +1834,18 @@ Subvariant fit:
 
 | model | family | status | n_obs | n_children | r2_or_observed_fitted_r2 | question |
 | --- | --- | --- | --- | --- | --- | --- |
-| Z5 Context window sensitivity | unit=Phonemes | gee_gaussian | fit | 15342 | 21 | 0.4756 | Does the age trajectory of information per phonemes change across k1/k2/k3 scoring windows? |
+| Z5 Context window sensitivity | unit=Phonemes | gee_gaussian | fit | 15342 | 21 | 0.4753 | Does the age trajectory of information per phonemes change across k1/k2/k3 scoring windows? |
 
 Key coefficients:
 
 | model | term | estimate | std_error | p_value |
 | --- | --- | --- | --- | --- |
-| Z5 Context window sensitivity | unit=Phonemes | C(context_k)[T.k2] | -0.5427 | 0.04407 | <.001 |
-| Z5 Context window sensitivity | unit=Phonemes | C(context_k)[T.k3] | -0.7999 | 0.04927 | <.001 |
-| Z5 Context window sensitivity | unit=Phonemes | age_months_z | -0.01825 | 0.04007 | 0.649 |
-| Z5 Context window sensitivity | unit=Phonemes | age_months_z:C(context_k)[T.k2] | 0.1098 | 0.03493 | 0.002 |
-| Z5 Context window sensitivity | unit=Phonemes | age_months_z:C(context_k)[T.k3] | 0.1972 | 0.03438 | <.001 |
-| Z5 Context window sensitivity | unit=Phonemes | log_nb_phonemes | -2.281 | 0.124 | <.001 |
-| Z5 Context window sensitivity | unit=Phonemes | context_entropy_bits_z | -0.04582 | 0.01823 | 0.012 |
+| Z5 Context window sensitivity | unit=Phonemes | C(context_k)[T.k2] | -0.553 | 0.04324 | <.001 |
+| Z5 Context window sensitivity | unit=Phonemes | C(context_k)[T.k3] | -0.8243 | 0.0499 | <.001 |
+| Z5 Context window sensitivity | unit=Phonemes | age_months_z | -0.01887 | 0.03974 | 0.635 |
+| Z5 Context window sensitivity | unit=Phonemes | age_months_z:C(context_k)[T.k2] | 0.1091 | 0.03525 | 0.002 |
+| Z5 Context window sensitivity | unit=Phonemes | age_months_z:C(context_k)[T.k3] | 0.1976 | 0.03411 | <.001 |
+| Z5 Context window sensitivity | unit=Phonemes | log_nb_phonemes | -2.283 | 0.1242 | <.001 |
 
 
 ## Z6: Question Type Predicting Effort
@@ -1868,41 +1864,41 @@ Subvariants in this family:
 
 | family_id | subvariant | estimator | status | n_obs | n_children | r2_or_observed_fitted_r2 |
 | --- | --- | --- | --- | --- | --- | --- |
-| Z6 | effort: Words | gee_poisson | fit | 15342 | 21 | 0.1019 |
-| Z6 | effort: Morphemes | gee_poisson | fit | 15342 | 21 | 0.1023 |
-| Z6 | effort: Syllables: CMU/pkg | gee_poisson | fit | 15342 | 21 | 0.08707 |
-| Z6 | effort: Syllables: pkg | gee_poisson | fit | 15342 | 21 | 0.08191 |
-| Z6 | effort: Phonemes | gee_poisson | fit | 15342 | 21 | 0.08055 |
+| Z6 | effort: Words | gee_poisson | fit | 15342 | 21 | 0.1018 |
+| Z6 | effort: Morphemes | gee_poisson | fit | 15342 | 21 | 0.1022 |
+| Z6 | effort: Syllables: CMU/pkg | gee_poisson | fit | 15342 | 21 | 0.08694 |
+| Z6 | effort: Syllables: pkg | gee_poisson | fit | 15342 | 21 | 0.08178 |
+| Z6 | effort: Phonemes | gee_poisson | fit | 15342 | 21 | 0.08042 |
 
 Family key coefficients:
 
 | model | term | estimate | std_error | p_value |
 | --- | --- | --- | --- | --- |
-| Z6 Question-type effort | effort=Words | C(context_question_type)[T.other question] | -0.102 | 0.01998 | <.001 |
-| Z6 Question-type effort | effort=Words | C(context_question_type)[T.wh-question] | -0.07197 | 0.02825 | 0.011 |
-| Z6 Question-type effort | effort=Words | C(context_question_type)[T.yes/no question] | -0.1258 | 0.02303 | <.001 |
-| Z6 Question-type effort | effort=Words | age_months_z | 0.2212 | 0.02564 | <.001 |
-| Z6 Question-type effort | effort=Words | age_months_z:C(context_question_type)[T.other question] | 0.03017 | 0.01011 | 0.003 |
-| Z6 Question-type effort | effort=Words | age_months_z:C(context_question_type)[T.wh-question] | 0.03792 | 0.016 | 0.018 |
-| Z6 Question-type effort | effort=Words | age_months_z:C(context_question_type)[T.yes/no question] | 0.001418 | 0.02482 | 0.954 |
-| Z6 Question-type effort | effort=Words | context_entropy_bits_z | 0.008167 | 0.008695 | 0.348 |
-| Z6 Question-type effort | effort=Words | log_context_words_plus1 | 0.02369 | 0.009615 | 0.014 |
-| Z6 Question-type effort | effort=Morphemes | C(context_question_type)[T.other question] | -0.09947 | 0.01786 | <.001 |
-| Z6 Question-type effort | effort=Morphemes | C(context_question_type)[T.wh-question] | -0.07044 | 0.02862 | 0.014 |
-| Z6 Question-type effort | effort=Morphemes | C(context_question_type)[T.yes/no question] | -0.1223 | 0.02035 | <.001 |
-| Z6 Question-type effort | effort=Morphemes | age_months_z | 0.2306 | 0.02617 | <.001 |
-| Z6 Question-type effort | effort=Morphemes | age_months_z:C(context_question_type)[T.other question] | 0.03427 | 0.009822 | <.001 |
-| Z6 Question-type effort | effort=Morphemes | age_months_z:C(context_question_type)[T.wh-question] | 0.04604 | 0.01608 | 0.004 |
-| Z6 Question-type effort | effort=Morphemes | age_months_z:C(context_question_type)[T.yes/no question] | 0.009737 | 0.02583 | 0.706 |
-| Z6 Question-type effort | effort=Morphemes | context_entropy_bits_z | 0.007572 | 0.009018 | 0.401 |
-| Z6 Question-type effort | effort=Morphemes | log_context_words_plus1 | 0.02286 | 0.009994 | 0.022 |
-| Z6 Question-type effort | effort=Syllables: CMU/pkg | C(context_question_type)[T.other question] | -0.09617 | 0.01837 | <.001 |
-| Z6 Question-type effort | effort=Syllables: CMU/pkg | C(context_question_type)[T.wh-question] | -0.0784 | 0.02619 | 0.003 |
-| Z6 Question-type effort | effort=Syllables: CMU/pkg | C(context_question_type)[T.yes/no question] | -0.1291 | 0.02309 | <.001 |
-| Z6 Question-type effort | effort=Syllables: CMU/pkg | age_months_z | 0.1981 | 0.02496 | <.001 |
-| Z6 Question-type effort | effort=Syllables: CMU/pkg | age_months_z:C(context_question_type)[T.other question] | 0.03563 | 0.01054 | <.001 |
-| Z6 Question-type effort | effort=Syllables: CMU/pkg | age_months_z:C(context_question_type)[T.wh-question] | 0.04162 | 0.01772 | 0.019 |
-| Z6 Question-type effort | effort=Syllables: CMU/pkg | age_months_z:C(context_question_type)[T.yes/no question] | 0.005674 | 0.02562 | 0.825 |
+| Z6 Question-type effort | effort=Words | C(context_question_type)[T.other question] | -0.1042 | 0.02001 | <.001 |
+| Z6 Question-type effort | effort=Words | C(context_question_type)[T.wh-question] | -0.07694 | 0.02742 | 0.005 |
+| Z6 Question-type effort | effort=Words | C(context_question_type)[T.yes/no question] | -0.131 | 0.02404 | <.001 |
+| Z6 Question-type effort | effort=Words | age_months_z | 0.2211 | 0.02566 | <.001 |
+| Z6 Question-type effort | effort=Words | age_months_z:C(context_question_type)[T.other question] | 0.03033 | 0.01022 | 0.003 |
+| Z6 Question-type effort | effort=Words | age_months_z:C(context_question_type)[T.wh-question] | 0.03774 | 0.01602 | 0.018 |
+| Z6 Question-type effort | effort=Words | age_months_z:C(context_question_type)[T.yes/no question] | 0.001659 | 0.02465 | 0.946 |
+| Z6 Question-type effort | effort=Words | log_context_words_plus1 | 0.02435 | 0.009193 | 0.008 |
+| Z6 Question-type effort | effort=Morphemes | C(context_question_type)[T.other question] | -0.1016 | 0.01784 | <.001 |
+| Z6 Question-type effort | effort=Morphemes | C(context_question_type)[T.wh-question] | -0.07505 | 0.02756 | 0.006 |
+| Z6 Question-type effort | effort=Morphemes | C(context_question_type)[T.yes/no question] | -0.1271 | 0.02149 | <.001 |
+| Z6 Question-type effort | effort=Morphemes | age_months_z | 0.2304 | 0.0262 | <.001 |
+| Z6 Question-type effort | effort=Morphemes | age_months_z:C(context_question_type)[T.other question] | 0.03442 | 0.009922 | <.001 |
+| Z6 Question-type effort | effort=Morphemes | age_months_z:C(context_question_type)[T.wh-question] | 0.04586 | 0.01622 | 0.005 |
+| Z6 Question-type effort | effort=Morphemes | age_months_z:C(context_question_type)[T.yes/no question] | 0.009962 | 0.02565 | 0.698 |
+| Z6 Question-type effort | effort=Morphemes | log_context_words_plus1 | 0.02348 | 0.00965 | 0.015 |
+| Z6 Question-type effort | effort=Syllables: CMU/pkg | C(context_question_type)[T.other question] | -0.09869 | 0.01834 | <.001 |
+| Z6 Question-type effort | effort=Syllables: CMU/pkg | C(context_question_type)[T.wh-question] | -0.08399 | 0.02513 | <.001 |
+| Z6 Question-type effort | effort=Syllables: CMU/pkg | C(context_question_type)[T.yes/no question] | -0.1349 | 0.02377 | <.001 |
+| Z6 Question-type effort | effort=Syllables: CMU/pkg | age_months_z | 0.198 | 0.02498 | <.001 |
+| Z6 Question-type effort | effort=Syllables: CMU/pkg | age_months_z:C(context_question_type)[T.other question] | 0.03582 | 0.01069 | <.001 |
+| Z6 Question-type effort | effort=Syllables: CMU/pkg | age_months_z:C(context_question_type)[T.wh-question] | 0.04145 | 0.01788 | 0.020 |
+| Z6 Question-type effort | effort=Syllables: CMU/pkg | age_months_z:C(context_question_type)[T.yes/no question] | 0.005949 | 0.02542 | 0.815 |
+| Z6 Question-type effort | effort=Syllables: CMU/pkg | log_context_words_plus1 | 0.01373 | 0.008896 | 0.123 |
+| Z6 Question-type effort | effort=Syllables: pkg | C(context_question_type)[T.other question] | -0.105 | 0.01823 | <.001 |
 
 
 **How to read this coefficient plot.** Each point is a key coefficient from one
@@ -1917,7 +1913,7 @@ term points the same way across subvariants, that pattern is more stable.
 
 **Question asked by this subvariant.** Does caretaker question type modulate child words, and does that modulation change with age?
 
-**Formula.** `nb_words ~ age_months_z * C(context_question_type) + context_entropy_bits_z + log_context_words_plus1`
+**Formula.** `nb_words ~ age_months_z * C(context_question_type) + log_context_words_plus1`
 
 **Estimator.** `gee_poisson`. For `ols_cluster`, the fitted line is the same as OLS, but standard errors and p-values are clustered by child. For GEE models, rows are grouped by child to account for repeated utterances.
 
@@ -1925,26 +1921,25 @@ Subvariant fit:
 
 | model | family | status | n_obs | n_children | r2_or_observed_fitted_r2 | question |
 | --- | --- | --- | --- | --- | --- | --- |
-| Z6 Question-type effort | effort=Words | gee_poisson | fit | 15342 | 21 | 0.1019 | Does caretaker question type modulate child words, and does that modulation change with age? |
+| Z6 Question-type effort | effort=Words | gee_poisson | fit | 15342 | 21 | 0.1018 | Does caretaker question type modulate child words, and does that modulation change with age? |
 
 Key coefficients:
 
 | model | term | estimate | std_error | p_value |
 | --- | --- | --- | --- | --- |
-| Z6 Question-type effort | effort=Words | C(context_question_type)[T.other question] | -0.102 | 0.01998 | <.001 |
-| Z6 Question-type effort | effort=Words | C(context_question_type)[T.wh-question] | -0.07197 | 0.02825 | 0.011 |
-| Z6 Question-type effort | effort=Words | C(context_question_type)[T.yes/no question] | -0.1258 | 0.02303 | <.001 |
-| Z6 Question-type effort | effort=Words | age_months_z | 0.2212 | 0.02564 | <.001 |
-| Z6 Question-type effort | effort=Words | age_months_z:C(context_question_type)[T.other question] | 0.03017 | 0.01011 | 0.003 |
-| Z6 Question-type effort | effort=Words | age_months_z:C(context_question_type)[T.wh-question] | 0.03792 | 0.016 | 0.018 |
-| Z6 Question-type effort | effort=Words | age_months_z:C(context_question_type)[T.yes/no question] | 0.001418 | 0.02482 | 0.954 |
-| Z6 Question-type effort | effort=Words | context_entropy_bits_z | 0.008167 | 0.008695 | 0.348 |
-| Z6 Question-type effort | effort=Words | log_context_words_plus1 | 0.02369 | 0.009615 | 0.014 |
+| Z6 Question-type effort | effort=Words | C(context_question_type)[T.other question] | -0.1042 | 0.02001 | <.001 |
+| Z6 Question-type effort | effort=Words | C(context_question_type)[T.wh-question] | -0.07694 | 0.02742 | 0.005 |
+| Z6 Question-type effort | effort=Words | C(context_question_type)[T.yes/no question] | -0.131 | 0.02404 | <.001 |
+| Z6 Question-type effort | effort=Words | age_months_z | 0.2211 | 0.02566 | <.001 |
+| Z6 Question-type effort | effort=Words | age_months_z:C(context_question_type)[T.other question] | 0.03033 | 0.01022 | 0.003 |
+| Z6 Question-type effort | effort=Words | age_months_z:C(context_question_type)[T.wh-question] | 0.03774 | 0.01602 | 0.018 |
+| Z6 Question-type effort | effort=Words | age_months_z:C(context_question_type)[T.yes/no question] | 0.001659 | 0.02465 | 0.946 |
+| Z6 Question-type effort | effort=Words | log_context_words_plus1 | 0.02435 | 0.009193 | 0.008 |
 ### Z6.2: effort: Morphemes
 
 **Question asked by this subvariant.** Does caretaker question type modulate child morphemes, and does that modulation change with age?
 
-**Formula.** `nb_morphemes ~ age_months_z * C(context_question_type) + context_entropy_bits_z + log_context_words_plus1`
+**Formula.** `nb_morphemes ~ age_months_z * C(context_question_type) + log_context_words_plus1`
 
 **Estimator.** `gee_poisson`. For `ols_cluster`, the fitted line is the same as OLS, but standard errors and p-values are clustered by child. For GEE models, rows are grouped by child to account for repeated utterances.
 
@@ -1952,26 +1947,25 @@ Subvariant fit:
 
 | model | family | status | n_obs | n_children | r2_or_observed_fitted_r2 | question |
 | --- | --- | --- | --- | --- | --- | --- |
-| Z6 Question-type effort | effort=Morphemes | gee_poisson | fit | 15342 | 21 | 0.1023 | Does caretaker question type modulate child morphemes, and does that modulation change with age? |
+| Z6 Question-type effort | effort=Morphemes | gee_poisson | fit | 15342 | 21 | 0.1022 | Does caretaker question type modulate child morphemes, and does that modulation change with age? |
 
 Key coefficients:
 
 | model | term | estimate | std_error | p_value |
 | --- | --- | --- | --- | --- |
-| Z6 Question-type effort | effort=Morphemes | C(context_question_type)[T.other question] | -0.09947 | 0.01786 | <.001 |
-| Z6 Question-type effort | effort=Morphemes | C(context_question_type)[T.wh-question] | -0.07044 | 0.02862 | 0.014 |
-| Z6 Question-type effort | effort=Morphemes | C(context_question_type)[T.yes/no question] | -0.1223 | 0.02035 | <.001 |
-| Z6 Question-type effort | effort=Morphemes | age_months_z | 0.2306 | 0.02617 | <.001 |
-| Z6 Question-type effort | effort=Morphemes | age_months_z:C(context_question_type)[T.other question] | 0.03427 | 0.009822 | <.001 |
-| Z6 Question-type effort | effort=Morphemes | age_months_z:C(context_question_type)[T.wh-question] | 0.04604 | 0.01608 | 0.004 |
-| Z6 Question-type effort | effort=Morphemes | age_months_z:C(context_question_type)[T.yes/no question] | 0.009737 | 0.02583 | 0.706 |
-| Z6 Question-type effort | effort=Morphemes | context_entropy_bits_z | 0.007572 | 0.009018 | 0.401 |
-| Z6 Question-type effort | effort=Morphemes | log_context_words_plus1 | 0.02286 | 0.009994 | 0.022 |
+| Z6 Question-type effort | effort=Morphemes | C(context_question_type)[T.other question] | -0.1016 | 0.01784 | <.001 |
+| Z6 Question-type effort | effort=Morphemes | C(context_question_type)[T.wh-question] | -0.07505 | 0.02756 | 0.006 |
+| Z6 Question-type effort | effort=Morphemes | C(context_question_type)[T.yes/no question] | -0.1271 | 0.02149 | <.001 |
+| Z6 Question-type effort | effort=Morphemes | age_months_z | 0.2304 | 0.0262 | <.001 |
+| Z6 Question-type effort | effort=Morphemes | age_months_z:C(context_question_type)[T.other question] | 0.03442 | 0.009922 | <.001 |
+| Z6 Question-type effort | effort=Morphemes | age_months_z:C(context_question_type)[T.wh-question] | 0.04586 | 0.01622 | 0.005 |
+| Z6 Question-type effort | effort=Morphemes | age_months_z:C(context_question_type)[T.yes/no question] | 0.009962 | 0.02565 | 0.698 |
+| Z6 Question-type effort | effort=Morphemes | log_context_words_plus1 | 0.02348 | 0.00965 | 0.015 |
 ### Z6.3: effort: Syllables: CMU/pkg
 
 **Question asked by this subvariant.** Does caretaker question type modulate child syllables: cmu/pkg, and does that modulation change with age?
 
-**Formula.** `nb_syllables_cmu_or_pkg ~ age_months_z * C(context_question_type) + context_entropy_bits_z + log_context_words_plus1`
+**Formula.** `nb_syllables_cmu_or_pkg ~ age_months_z * C(context_question_type) + log_context_words_plus1`
 
 **Estimator.** `gee_poisson`. For `ols_cluster`, the fitted line is the same as OLS, but standard errors and p-values are clustered by child. For GEE models, rows are grouped by child to account for repeated utterances.
 
@@ -1979,26 +1973,25 @@ Subvariant fit:
 
 | model | family | status | n_obs | n_children | r2_or_observed_fitted_r2 | question |
 | --- | --- | --- | --- | --- | --- | --- |
-| Z6 Question-type effort | effort=Syllables: CMU/pkg | gee_poisson | fit | 15342 | 21 | 0.08707 | Does caretaker question type modulate child syllables: cmu/pkg, and does that modulation change with age? |
+| Z6 Question-type effort | effort=Syllables: CMU/pkg | gee_poisson | fit | 15342 | 21 | 0.08694 | Does caretaker question type modulate child syllables: cmu/pkg, and does that modulation change with age? |
 
 Key coefficients:
 
 | model | term | estimate | std_error | p_value |
 | --- | --- | --- | --- | --- |
-| Z6 Question-type effort | effort=Syllables: CMU/pkg | C(context_question_type)[T.other question] | -0.09617 | 0.01837 | <.001 |
-| Z6 Question-type effort | effort=Syllables: CMU/pkg | C(context_question_type)[T.wh-question] | -0.0784 | 0.02619 | 0.003 |
-| Z6 Question-type effort | effort=Syllables: CMU/pkg | C(context_question_type)[T.yes/no question] | -0.1291 | 0.02309 | <.001 |
-| Z6 Question-type effort | effort=Syllables: CMU/pkg | age_months_z | 0.1981 | 0.02496 | <.001 |
-| Z6 Question-type effort | effort=Syllables: CMU/pkg | age_months_z:C(context_question_type)[T.other question] | 0.03563 | 0.01054 | <.001 |
-| Z6 Question-type effort | effort=Syllables: CMU/pkg | age_months_z:C(context_question_type)[T.wh-question] | 0.04162 | 0.01772 | 0.019 |
-| Z6 Question-type effort | effort=Syllables: CMU/pkg | age_months_z:C(context_question_type)[T.yes/no question] | 0.005674 | 0.02562 | 0.825 |
-| Z6 Question-type effort | effort=Syllables: CMU/pkg | context_entropy_bits_z | 0.009119 | 0.009494 | 0.337 |
-| Z6 Question-type effort | effort=Syllables: CMU/pkg | log_context_words_plus1 | 0.01301 | 0.009296 | 0.162 |
+| Z6 Question-type effort | effort=Syllables: CMU/pkg | C(context_question_type)[T.other question] | -0.09869 | 0.01834 | <.001 |
+| Z6 Question-type effort | effort=Syllables: CMU/pkg | C(context_question_type)[T.wh-question] | -0.08399 | 0.02513 | <.001 |
+| Z6 Question-type effort | effort=Syllables: CMU/pkg | C(context_question_type)[T.yes/no question] | -0.1349 | 0.02377 | <.001 |
+| Z6 Question-type effort | effort=Syllables: CMU/pkg | age_months_z | 0.198 | 0.02498 | <.001 |
+| Z6 Question-type effort | effort=Syllables: CMU/pkg | age_months_z:C(context_question_type)[T.other question] | 0.03582 | 0.01069 | <.001 |
+| Z6 Question-type effort | effort=Syllables: CMU/pkg | age_months_z:C(context_question_type)[T.wh-question] | 0.04145 | 0.01788 | 0.020 |
+| Z6 Question-type effort | effort=Syllables: CMU/pkg | age_months_z:C(context_question_type)[T.yes/no question] | 0.005949 | 0.02542 | 0.815 |
+| Z6 Question-type effort | effort=Syllables: CMU/pkg | log_context_words_plus1 | 0.01373 | 0.008896 | 0.123 |
 ### Z6.4: effort: Syllables: pkg
 
 **Question asked by this subvariant.** Does caretaker question type modulate child syllables: pkg, and does that modulation change with age?
 
-**Formula.** `nb_syllables_pkg ~ age_months_z * C(context_question_type) + context_entropy_bits_z + log_context_words_plus1`
+**Formula.** `nb_syllables_pkg ~ age_months_z * C(context_question_type) + log_context_words_plus1`
 
 **Estimator.** `gee_poisson`. For `ols_cluster`, the fitted line is the same as OLS, but standard errors and p-values are clustered by child. For GEE models, rows are grouped by child to account for repeated utterances.
 
@@ -2006,26 +1999,25 @@ Subvariant fit:
 
 | model | family | status | n_obs | n_children | r2_or_observed_fitted_r2 | question |
 | --- | --- | --- | --- | --- | --- | --- |
-| Z6 Question-type effort | effort=Syllables: pkg | gee_poisson | fit | 15342 | 21 | 0.08191 | Does caretaker question type modulate child syllables: pkg, and does that modulation change with age? |
+| Z6 Question-type effort | effort=Syllables: pkg | gee_poisson | fit | 15342 | 21 | 0.08178 | Does caretaker question type modulate child syllables: pkg, and does that modulation change with age? |
 
 Key coefficients:
 
 | model | term | estimate | std_error | p_value |
 | --- | --- | --- | --- | --- |
-| Z6 Question-type effort | effort=Syllables: pkg | C(context_question_type)[T.other question] | -0.1023 | 0.01793 | <.001 |
-| Z6 Question-type effort | effort=Syllables: pkg | C(context_question_type)[T.wh-question] | -0.0807 | 0.02529 | 0.001 |
-| Z6 Question-type effort | effort=Syllables: pkg | C(context_question_type)[T.yes/no question] | -0.1366 | 0.02445 | <.001 |
-| Z6 Question-type effort | effort=Syllables: pkg | age_months_z | 0.1972 | 0.02416 | <.001 |
-| Z6 Question-type effort | effort=Syllables: pkg | age_months_z:C(context_question_type)[T.other question] | 0.03493 | 0.01044 | <.001 |
-| Z6 Question-type effort | effort=Syllables: pkg | age_months_z:C(context_question_type)[T.wh-question] | 0.03991 | 0.01649 | 0.016 |
-| Z6 Question-type effort | effort=Syllables: pkg | age_months_z:C(context_question_type)[T.yes/no question] | 0.01585 | 0.0273 | 0.562 |
-| Z6 Question-type effort | effort=Syllables: pkg | context_entropy_bits_z | 0.009741 | 0.009379 | 0.299 |
-| Z6 Question-type effort | effort=Syllables: pkg | log_context_words_plus1 | 0.01062 | 0.009456 | 0.261 |
+| Z6 Question-type effort | effort=Syllables: pkg | C(context_question_type)[T.other question] | -0.105 | 0.01823 | <.001 |
+| Z6 Question-type effort | effort=Syllables: pkg | C(context_question_type)[T.wh-question] | -0.08668 | 0.02488 | <.001 |
+| Z6 Question-type effort | effort=Syllables: pkg | C(context_question_type)[T.yes/no question] | -0.1429 | 0.025 | <.001 |
+| Z6 Question-type effort | effort=Syllables: pkg | age_months_z | 0.1971 | 0.02418 | <.001 |
+| Z6 Question-type effort | effort=Syllables: pkg | age_months_z:C(context_question_type)[T.other question] | 0.03513 | 0.0106 | <.001 |
+| Z6 Question-type effort | effort=Syllables: pkg | age_months_z:C(context_question_type)[T.wh-question] | 0.03973 | 0.01669 | 0.017 |
+| Z6 Question-type effort | effort=Syllables: pkg | age_months_z:C(context_question_type)[T.yes/no question] | 0.01614 | 0.02713 | 0.552 |
+| Z6 Question-type effort | effort=Syllables: pkg | log_context_words_plus1 | 0.01137 | 0.009067 | 0.210 |
 ### Z6.5: effort: Phonemes
 
 **Question asked by this subvariant.** Does caretaker question type modulate child phonemes, and does that modulation change with age?
 
-**Formula.** `nb_phonemes ~ age_months_z * C(context_question_type) + context_entropy_bits_z + log_context_words_plus1`
+**Formula.** `nb_phonemes ~ age_months_z * C(context_question_type) + log_context_words_plus1`
 
 **Estimator.** `gee_poisson`. For `ols_cluster`, the fitted line is the same as OLS, but standard errors and p-values are clustered by child. For GEE models, rows are grouped by child to account for repeated utterances.
 
@@ -2033,21 +2025,20 @@ Subvariant fit:
 
 | model | family | status | n_obs | n_children | r2_or_observed_fitted_r2 | question |
 | --- | --- | --- | --- | --- | --- | --- |
-| Z6 Question-type effort | effort=Phonemes | gee_poisson | fit | 15342 | 21 | 0.08055 | Does caretaker question type modulate child phonemes, and does that modulation change with age? |
+| Z6 Question-type effort | effort=Phonemes | gee_poisson | fit | 15342 | 21 | 0.08042 | Does caretaker question type modulate child phonemes, and does that modulation change with age? |
 
 Key coefficients:
 
 | model | term | estimate | std_error | p_value |
 | --- | --- | --- | --- | --- |
-| Z6 Question-type effort | effort=Phonemes | C(context_question_type)[T.other question] | -0.09749 | 0.01842 | <.001 |
-| Z6 Question-type effort | effort=Phonemes | C(context_question_type)[T.wh-question] | -0.06437 | 0.02809 | 0.022 |
-| Z6 Question-type effort | effort=Phonemes | C(context_question_type)[T.yes/no question] | -0.1282 | 0.02312 | <.001 |
-| Z6 Question-type effort | effort=Phonemes | age_months_z | 0.1984 | 0.02449 | <.001 |
-| Z6 Question-type effort | effort=Phonemes | age_months_z:C(context_question_type)[T.other question] | 0.03868 | 0.009936 | <.001 |
-| Z6 Question-type effort | effort=Phonemes | age_months_z:C(context_question_type)[T.wh-question] | 0.04221 | 0.01753 | 0.016 |
-| Z6 Question-type effort | effort=Phonemes | age_months_z:C(context_question_type)[T.yes/no question] | 0.01584 | 0.02546 | 0.534 |
-| Z6 Question-type effort | effort=Phonemes | context_entropy_bits_z | 0.01002 | 0.008544 | 0.241 |
-| Z6 Question-type effort | effort=Phonemes | log_context_words_plus1 | 0.006516 | 0.009128 | 0.475 |
+| Z6 Question-type effort | effort=Phonemes | C(context_question_type)[T.other question] | -0.1003 | 0.01849 | <.001 |
+| Z6 Question-type effort | effort=Phonemes | C(context_question_type)[T.wh-question] | -0.07053 | 0.02774 | 0.011 |
+| Z6 Question-type effort | effort=Phonemes | C(context_question_type)[T.yes/no question] | -0.1347 | 0.02346 | <.001 |
+| Z6 Question-type effort | effort=Phonemes | age_months_z | 0.1983 | 0.02454 | <.001 |
+| Z6 Question-type effort | effort=Phonemes | age_months_z:C(context_question_type)[T.other question] | 0.03889 | 0.01004 | <.001 |
+| Z6 Question-type effort | effort=Phonemes | age_months_z:C(context_question_type)[T.wh-question] | 0.04203 | 0.01768 | 0.017 |
+| Z6 Question-type effort | effort=Phonemes | age_months_z:C(context_question_type)[T.yes/no question] | 0.01613 | 0.02527 | 0.523 |
+| Z6 Question-type effort | effort=Phonemes | log_context_words_plus1 | 0.00729 | 0.008816 | 0.408 |
 
 
 ## Z7: Real Children Versus All Matched Baselines
@@ -3012,10 +3003,10 @@ Key coefficients:
 | Z4 Information from context entropy | effort=Syllables: CMU/pkg | gee_gamma_log | fit | 15342 | 21 | 0.2055 | Is total child information related to context entropy after syllables: cmu/pkg is controlled? |
 | Z4 Information from context entropy | effort=Syllables: pkg | gee_gamma_log | fit | 15342 | 21 | 0.2184 | Is total child information related to context entropy after syllables: pkg is controlled? |
 | Z4 Information from context entropy | effort=Words | gee_gamma_log | fit | 15342 | 21 | 0.161 | Is total child information related to context entropy after words is controlled? |
-| Z5 Context window sensitivity | unit=Morphemes | gee_gaussian | fit | 15342 | 21 | 0.3909 | Does the age trajectory of information per morphemes change across k1/k2/k3 scoring windows? |
-| Z5 Context window sensitivity | unit=Phonemes | gee_gaussian | fit | 15342 | 21 | 0.4756 | Does the age trajectory of information per phonemes change across k1/k2/k3 scoring windows? |
-| Z5 Context window sensitivity | unit=Syllables: CMU/pkg | gee_gaussian | fit | 15342 | 21 | 0.407 | Does the age trajectory of information per syllables: cmu/pkg change across k1/k2/k3 scoring windows? |
-| Z5 Context window sensitivity | unit=Syllables: pkg | gee_gaussian | fit | 15342 | 21 | 0.3596 | Does the age trajectory of information per syllables: pkg change across k1/k2/k3 scoring windows? |
+| Z5 Context window sensitivity | unit=Morphemes | gee_gaussian | fit | 15342 | 21 | 0.3902 | Does the age trajectory of information per morphemes change across k1/k2/k3 scoring windows? |
+| Z5 Context window sensitivity | unit=Phonemes | gee_gaussian | fit | 15342 | 21 | 0.4753 | Does the age trajectory of information per phonemes change across k1/k2/k3 scoring windows? |
+| Z5 Context window sensitivity | unit=Syllables: CMU/pkg | gee_gaussian | fit | 15342 | 21 | 0.4064 | Does the age trajectory of information per syllables: cmu/pkg change across k1/k2/k3 scoring windows? |
+| Z5 Context window sensitivity | unit=Syllables: pkg | gee_gaussian | fit | 15342 | 21 | 0.3587 | Does the age trajectory of information per syllables: pkg change across k1/k2/k3 scoring windows? |
 
 Selected coefficients:
 
@@ -3064,52 +3055,42 @@ Selected coefficients:
 | Z4 Information from context entropy | effort=Phonemes | age_months_z | -0.02553 | 0.01153 | 0.027 |
 | Z4 Information from context entropy | effort=Phonemes | context_entropy_bits_z | -0.006698 | 0.004023 | 0.096 |
 | Z4 Information from context entropy | effort=Phonemes | age_months_z:context_entropy_bits_z | 0.009372 | 0.002538 | <.001 |
-| Z5 Context window sensitivity | unit=Words | age_months_z | -0.7007 | 0.1229 | <.001 |
-| Z5 Context window sensitivity | unit=Words | age_months_z:C(context_k)[T.k2] | 0.3276 | 0.0767 | <.001 |
-| Z5 Context window sensitivity | unit=Words | age_months_z:C(context_k)[T.k3] | 0.4525 | 0.07682 | <.001 |
-| Z5 Context window sensitivity | unit=Words | log_nb_words | -4.753 | 0.2066 | <.001 |
-| Z5 Context window sensitivity | unit=Words | context_entropy_bits_z | -0.1535 | 0.04556 | <.001 |
-| Z5 Context window sensitivity | unit=Morphemes | age_months_z | -0.6745 | 0.1119 | <.001 |
-| Z5 Context window sensitivity | unit=Morphemes | age_months_z:C(context_k)[T.k2] | 0.3085 | 0.07931 | <.001 |
-| Z5 Context window sensitivity | unit=Morphemes | age_months_z:C(context_k)[T.k3] | 0.4495 | 0.07247 | <.001 |
-| Z5 Context window sensitivity | unit=Morphemes | context_entropy_bits_z | -0.1557 | 0.04198 | <.001 |
-| Z5 Context window sensitivity | unit=Syllables: CMU/pkg | age_months_z | -0.362 | 0.08012 | <.001 |
-| Z5 Context window sensitivity | unit=Syllables: CMU/pkg | age_months_z:C(context_k)[T.k2] | 0.2568 | 0.07016 | <.001 |
-| Z5 Context window sensitivity | unit=Syllables: CMU/pkg | age_months_z:C(context_k)[T.k3] | 0.3601 | 0.07389 | <.001 |
-| Z5 Context window sensitivity | unit=Syllables: CMU/pkg | context_entropy_bits_z | -0.1157 | 0.03456 | <.001 |
-| Z5 Context window sensitivity | unit=Syllables: pkg | age_months_z | -0.3229 | 0.09699 | <.001 |
-| Z5 Context window sensitivity | unit=Syllables: pkg | age_months_z:C(context_k)[T.k2] | 0.2229 | 0.06537 | <.001 |
-| Z5 Context window sensitivity | unit=Syllables: pkg | age_months_z:C(context_k)[T.k3] | 0.3389 | 0.07494 | <.001 |
-| Z5 Context window sensitivity | unit=Syllables: pkg | context_entropy_bits_z | -0.1486 | 0.03652 | <.001 |
-| Z5 Context window sensitivity | unit=Phonemes | age_months_z | -0.01825 | 0.04007 | 0.649 |
-| Z5 Context window sensitivity | unit=Phonemes | age_months_z:C(context_k)[T.k2] | 0.1098 | 0.03493 | 0.002 |
-| Z5 Context window sensitivity | unit=Phonemes | age_months_z:C(context_k)[T.k3] | 0.1972 | 0.03438 | <.001 |
-| Z5 Context window sensitivity | unit=Phonemes | context_entropy_bits_z | -0.04582 | 0.01823 | 0.012 |
-| Z6 Question-type effort | effort=Words | age_months_z | 0.2212 | 0.02564 | <.001 |
-| Z6 Question-type effort | effort=Words | age_months_z:C(context_question_type)[T.other question] | 0.03017 | 0.01011 | 0.003 |
-| Z6 Question-type effort | effort=Words | age_months_z:C(context_question_type)[T.wh-question] | 0.03792 | 0.016 | 0.018 |
-| Z6 Question-type effort | effort=Words | age_months_z:C(context_question_type)[T.yes/no question] | 0.001418 | 0.02482 | 0.954 |
-| Z6 Question-type effort | effort=Words | context_entropy_bits_z | 0.008167 | 0.008695 | 0.348 |
-| Z6 Question-type effort | effort=Morphemes | age_months_z | 0.2306 | 0.02617 | <.001 |
-| Z6 Question-type effort | effort=Morphemes | age_months_z:C(context_question_type)[T.other question] | 0.03427 | 0.009822 | <.001 |
-| Z6 Question-type effort | effort=Morphemes | age_months_z:C(context_question_type)[T.wh-question] | 0.04604 | 0.01608 | 0.004 |
-| Z6 Question-type effort | effort=Morphemes | age_months_z:C(context_question_type)[T.yes/no question] | 0.009737 | 0.02583 | 0.706 |
-| Z6 Question-type effort | effort=Morphemes | context_entropy_bits_z | 0.007572 | 0.009018 | 0.401 |
-| Z6 Question-type effort | effort=Syllables: CMU/pkg | age_months_z | 0.1981 | 0.02496 | <.001 |
-| Z6 Question-type effort | effort=Syllables: CMU/pkg | age_months_z:C(context_question_type)[T.other question] | 0.03563 | 0.01054 | <.001 |
-| Z6 Question-type effort | effort=Syllables: CMU/pkg | age_months_z:C(context_question_type)[T.wh-question] | 0.04162 | 0.01772 | 0.019 |
-| Z6 Question-type effort | effort=Syllables: CMU/pkg | age_months_z:C(context_question_type)[T.yes/no question] | 0.005674 | 0.02562 | 0.825 |
-| Z6 Question-type effort | effort=Syllables: CMU/pkg | context_entropy_bits_z | 0.009119 | 0.009494 | 0.337 |
-| Z6 Question-type effort | effort=Syllables: pkg | age_months_z | 0.1972 | 0.02416 | <.001 |
-| Z6 Question-type effort | effort=Syllables: pkg | age_months_z:C(context_question_type)[T.other question] | 0.03493 | 0.01044 | <.001 |
-| Z6 Question-type effort | effort=Syllables: pkg | age_months_z:C(context_question_type)[T.wh-question] | 0.03991 | 0.01649 | 0.016 |
-| Z6 Question-type effort | effort=Syllables: pkg | age_months_z:C(context_question_type)[T.yes/no question] | 0.01585 | 0.0273 | 0.562 |
-| Z6 Question-type effort | effort=Syllables: pkg | context_entropy_bits_z | 0.009741 | 0.009379 | 0.299 |
-| Z6 Question-type effort | effort=Phonemes | age_months_z | 0.1984 | 0.02449 | <.001 |
-| Z6 Question-type effort | effort=Phonemes | age_months_z:C(context_question_type)[T.other question] | 0.03868 | 0.009936 | <.001 |
-| Z6 Question-type effort | effort=Phonemes | age_months_z:C(context_question_type)[T.wh-question] | 0.04221 | 0.01753 | 0.016 |
-| Z6 Question-type effort | effort=Phonemes | age_months_z:C(context_question_type)[T.yes/no question] | 0.01584 | 0.02546 | 0.534 |
-| Z6 Question-type effort | effort=Phonemes | context_entropy_bits_z | 0.01002 | 0.008544 | 0.241 |
+| Z5 Context window sensitivity | unit=Words | age_months_z | -0.7024 | 0.1211 | <.001 |
+| Z5 Context window sensitivity | unit=Words | age_months_z:C(context_k)[T.k2] | 0.3251 | 0.07897 | <.001 |
+| Z5 Context window sensitivity | unit=Words | age_months_z:C(context_k)[T.k3] | 0.4541 | 0.07391 | <.001 |
+| Z5 Context window sensitivity | unit=Words | log_nb_words | -4.759 | 0.2063 | <.001 |
+| Z5 Context window sensitivity | unit=Morphemes | age_months_z | -0.6761 | 0.1099 | <.001 |
+| Z5 Context window sensitivity | unit=Morphemes | age_months_z:C(context_k)[T.k2] | 0.3061 | 0.08208 | <.001 |
+| Z5 Context window sensitivity | unit=Morphemes | age_months_z:C(context_k)[T.k3] | 0.4511 | 0.07041 | <.001 |
+| Z5 Context window sensitivity | unit=Syllables: CMU/pkg | age_months_z | -0.3634 | 0.0791 | <.001 |
+| Z5 Context window sensitivity | unit=Syllables: CMU/pkg | age_months_z:C(context_k)[T.k2] | 0.2549 | 0.07061 | <.001 |
+| Z5 Context window sensitivity | unit=Syllables: CMU/pkg | age_months_z:C(context_k)[T.k3] | 0.3612 | 0.07187 | <.001 |
+| Z5 Context window sensitivity | unit=Syllables: pkg | age_months_z | -0.3247 | 0.09531 | <.001 |
+| Z5 Context window sensitivity | unit=Syllables: pkg | age_months_z:C(context_k)[T.k2] | 0.2205 | 0.06706 | 0.001 |
+| Z5 Context window sensitivity | unit=Syllables: pkg | age_months_z:C(context_k)[T.k3] | 0.3404 | 0.07184 | <.001 |
+| Z5 Context window sensitivity | unit=Phonemes | age_months_z | -0.01887 | 0.03974 | 0.635 |
+| Z5 Context window sensitivity | unit=Phonemes | age_months_z:C(context_k)[T.k2] | 0.1091 | 0.03525 | 0.002 |
+| Z5 Context window sensitivity | unit=Phonemes | age_months_z:C(context_k)[T.k3] | 0.1976 | 0.03411 | <.001 |
+| Z6 Question-type effort | effort=Words | age_months_z | 0.2211 | 0.02566 | <.001 |
+| Z6 Question-type effort | effort=Words | age_months_z:C(context_question_type)[T.other question] | 0.03033 | 0.01022 | 0.003 |
+| Z6 Question-type effort | effort=Words | age_months_z:C(context_question_type)[T.wh-question] | 0.03774 | 0.01602 | 0.018 |
+| Z6 Question-type effort | effort=Words | age_months_z:C(context_question_type)[T.yes/no question] | 0.001659 | 0.02465 | 0.946 |
+| Z6 Question-type effort | effort=Morphemes | age_months_z | 0.2304 | 0.0262 | <.001 |
+| Z6 Question-type effort | effort=Morphemes | age_months_z:C(context_question_type)[T.other question] | 0.03442 | 0.009922 | <.001 |
+| Z6 Question-type effort | effort=Morphemes | age_months_z:C(context_question_type)[T.wh-question] | 0.04586 | 0.01622 | 0.005 |
+| Z6 Question-type effort | effort=Morphemes | age_months_z:C(context_question_type)[T.yes/no question] | 0.009962 | 0.02565 | 0.698 |
+| Z6 Question-type effort | effort=Syllables: CMU/pkg | age_months_z | 0.198 | 0.02498 | <.001 |
+| Z6 Question-type effort | effort=Syllables: CMU/pkg | age_months_z:C(context_question_type)[T.other question] | 0.03582 | 0.01069 | <.001 |
+| Z6 Question-type effort | effort=Syllables: CMU/pkg | age_months_z:C(context_question_type)[T.wh-question] | 0.04145 | 0.01788 | 0.020 |
+| Z6 Question-type effort | effort=Syllables: CMU/pkg | age_months_z:C(context_question_type)[T.yes/no question] | 0.005949 | 0.02542 | 0.815 |
+| Z6 Question-type effort | effort=Syllables: pkg | age_months_z | 0.1971 | 0.02418 | <.001 |
+| Z6 Question-type effort | effort=Syllables: pkg | age_months_z:C(context_question_type)[T.other question] | 0.03513 | 0.0106 | <.001 |
+| Z6 Question-type effort | effort=Syllables: pkg | age_months_z:C(context_question_type)[T.wh-question] | 0.03973 | 0.01669 | 0.017 |
+| Z6 Question-type effort | effort=Syllables: pkg | age_months_z:C(context_question_type)[T.yes/no question] | 0.01614 | 0.02713 | 0.552 |
+| Z6 Question-type effort | effort=Phonemes | age_months_z | 0.1983 | 0.02454 | <.001 |
+| Z6 Question-type effort | effort=Phonemes | age_months_z:C(context_question_type)[T.other question] | 0.03889 | 0.01004 | <.001 |
+| Z6 Question-type effort | effort=Phonemes | age_months_z:C(context_question_type)[T.wh-question] | 0.04203 | 0.01768 | 0.017 |
+| Z6 Question-type effort | effort=Phonemes | age_months_z:C(context_question_type)[T.yes/no question] | 0.01613 | 0.02527 | 0.523 |
 | Z7 Baseline comparison | effort=Words | C(target_variant)[T.random] | 0.4669 | 0.005083 | <.001 |
 | Z7 Baseline comparison | effort=Words | C(target_variant)[T.real] | -0.2734 | 0.01862 | <.001 |
 | Z7 Baseline comparison | effort=Words | C(target_variant)[T.trigram] | -0.08006 | 0.006758 | <.001 |
@@ -3121,6 +3102,16 @@ Selected coefficients:
 | Z7 Baseline comparison | effort=Words | age_months_z:C(target_variant)[T.unigram] | 0.01307 | 0.00668 | 0.050 |
 | Z7 Baseline comparison | effort=Words | nb_words_z | 0.53 | 0.01655 | <.001 |
 | Z7 Baseline comparison | effort=Morphemes | C(target_variant)[T.random] | 0.3596 | 0.004942 | <.001 |
+| Z7 Baseline comparison | effort=Morphemes | C(target_variant)[T.real] | -0.2756 | 0.01835 | <.001 |
+| Z7 Baseline comparison | effort=Morphemes | C(target_variant)[T.trigram] | -0.08069 | 0.006021 | <.001 |
+| Z7 Baseline comparison | effort=Morphemes | C(target_variant)[T.unigram] | 0.1163 | 0.006456 | <.001 |
+| Z7 Baseline comparison | effort=Morphemes | age_months_z | 0.01434 | 0.004918 | 0.004 |
+| Z7 Baseline comparison | effort=Morphemes | age_months_z:C(target_variant)[T.random] | 0.01397 | 0.007368 | 0.058 |
+| Z7 Baseline comparison | effort=Morphemes | age_months_z:C(target_variant)[T.real] | -0.03968 | 0.00953 | <.001 |
+| Z7 Baseline comparison | effort=Morphemes | age_months_z:C(target_variant)[T.trigram] | -0.01414 | 0.008065 | 0.080 |
+| Z7 Baseline comparison | effort=Morphemes | age_months_z:C(target_variant)[T.unigram] | 0.008227 | 0.007597 | 0.279 |
+| Z7 Baseline comparison | effort=Syllables: CMU/pkg | C(target_variant)[T.random] | 0.2142 | 0.007133 | <.001 |
+| Z7 Baseline comparison | effort=Syllables: CMU/pkg | C(target_variant)[T.real] | -0.277 | 0.01899 | <.001 |
 
 **How to read this plot.** Each point is a selected coefficient from one of the
 expanded atlas models. Positive values mean the coefficient increases the

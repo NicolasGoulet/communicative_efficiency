@@ -1,0 +1,210 @@
+{
+  "config_id": "complete_analysis_machine_v1",
+  "created_on": "2026-08-05",
+  "synthesis_markdown": "docs/complete_analysis_machine_index.md",
+  "synthesis_html": "docs/complete_analysis_machine_index.html",
+  "components": [
+    {
+      "component_id": "direct_tinydialogues_pbm",
+      "family": "direct_utterance_surprisal",
+      "sample": "PBM21 discovery",
+      "scorer": "TinyDialogues",
+      "scientific_role": "scorer robustness",
+      "guardrail": "Do not treat PBM scorer repetition as an independent sample confirmation.",
+      "required_paths": ["results/direct_surprisal_replication/tinydialogues_pbm/modular/prepared/dataset_manifest.json"],
+      "commands": {
+        "fit": [[".venv/bin/python","src/build_direct_surprisal_modular_analysis.py","--stage","models","--prepared-dir","results/direct_surprisal_replication/tinydialogues_pbm/modular/prepared","--model-dir","results/direct_surprisal_replication/tinydialogues_pbm/modular/models","--fig-dir","figs/direct_surprisal_replication/tinydialogues_pbm/modular_visual","--report-md","docs/tinydialogues_pbm_visual_summary.md","--report-html","docs/tinydialogues_pbm_visual_summary.html","--gallery-md","docs/tinydialogues_pbm_child_gallery.md","--gallery-html","docs/tinydialogues_pbm_child_gallery.html","--scorer-label","TinyDialogues PBM","--bootstrap-reps","1000","--permutation-reps","1000"]],
+        "plots": [[".venv/bin/python","src/build_direct_surprisal_modular_analysis.py","--stage","plots","--prepared-dir","results/direct_surprisal_replication/tinydialogues_pbm/modular/prepared","--model-dir","results/direct_surprisal_replication/tinydialogues_pbm/modular/models","--fig-dir","figs/direct_surprisal_replication/tinydialogues_pbm/modular_visual","--report-md","docs/tinydialogues_pbm_visual_summary.md","--report-html","docs/tinydialogues_pbm_visual_summary.html","--gallery-md","docs/tinydialogues_pbm_child_gallery.md","--gallery-html","docs/tinydialogues_pbm_child_gallery.html","--scorer-label","TinyDialogues PBM"]],
+        "reports": [[".venv/bin/python","src/build_direct_surprisal_modular_analysis.py","--stage","report","--prepared-dir","results/direct_surprisal_replication/tinydialogues_pbm/modular/prepared","--model-dir","results/direct_surprisal_replication/tinydialogues_pbm/modular/models","--fig-dir","figs/direct_surprisal_replication/tinydialogues_pbm/modular_visual","--report-md","docs/tinydialogues_pbm_visual_summary.md","--report-html","docs/tinydialogues_pbm_visual_summary.html","--gallery-md","docs/tinydialogues_pbm_child_gallery.md","--gallery-html","docs/tinydialogues_pbm_child_gallery.html","--scorer-label","TinyDialogues PBM"]]
+      },
+      "expected_artifacts": {"fit":["results/direct_surprisal_replication/tinydialogues_pbm/modular/models/model_manifest.json"],"plots":["results/direct_surprisal_replication/tinydialogues_pbm/modular/models/plot_manifest.json"],"reports":["docs/tinydialogues_pbm_visual_summary.html"]},
+      "report_paths": ["docs/tinydialogues_pbm_visual_summary.html","docs/tinydialogues_pbm_route1_model_atlas.html"]
+    },
+    {
+      "component_id": "direct_mistral_full79",
+      "family": "direct_utterance_surprisal",
+      "sample": "PBM21 discovery / non-PBM58 confirmation",
+      "scorer": "Mistral-7B-v0.3",
+      "scientific_role": "primary direct-score discovery and frozen confirmation",
+      "guardrail": "Report PBM and non-PBM estimates separately; the frozen non-PBM clustered interval crosses zero.",
+      "required_paths": ["results/direct_surprisal_replication/mistral_full79/modular/prepared/dataset_manifest.json"],
+      "commands": {
+        "fit": [[".venv/bin/python","src/build_direct_surprisal_modular_analysis.py","--stage","models","--prepared-dir","results/direct_surprisal_replication/mistral_full79/modular/prepared","--model-dir","results/direct_surprisal_replication/mistral_full79/modular/models","--fig-dir","figs/direct_surprisal_replication/mistral_full79/modular_visual","--report-md","docs/mistral_full79_visual_summary.md","--report-html","docs/mistral_full79_visual_summary.html","--gallery-md","docs/mistral_full79_child_gallery.md","--gallery-html","docs/mistral_full79_child_gallery.html","--scorer-label","Mistral full-79","--bootstrap-reps","1000","--permutation-reps","1000"]],
+        "plots": [[".venv/bin/python","src/build_direct_surprisal_modular_analysis.py","--stage","plots","--prepared-dir","results/direct_surprisal_replication/mistral_full79/modular/prepared","--model-dir","results/direct_surprisal_replication/mistral_full79/modular/models","--fig-dir","figs/direct_surprisal_replication/mistral_full79/modular_visual","--report-md","docs/mistral_full79_visual_summary.md","--report-html","docs/mistral_full79_visual_summary.html","--gallery-md","docs/mistral_full79_child_gallery.md","--gallery-html","docs/mistral_full79_child_gallery.html","--scorer-label","Mistral full-79"]],
+        "reports": [[".venv/bin/python","src/build_direct_surprisal_modular_analysis.py","--stage","report","--prepared-dir","results/direct_surprisal_replication/mistral_full79/modular/prepared","--model-dir","results/direct_surprisal_replication/mistral_full79/modular/models","--fig-dir","figs/direct_surprisal_replication/mistral_full79/modular_visual","--report-md","docs/mistral_full79_visual_summary.md","--report-html","docs/mistral_full79_visual_summary.html","--gallery-md","docs/mistral_full79_child_gallery.md","--gallery-html","docs/mistral_full79_child_gallery.html","--scorer-label","Mistral full-79"]]
+      },
+      "expected_artifacts": {"fit":["results/direct_surprisal_replication/mistral_full79/modular/models/model_manifest.json"],"plots":["results/direct_surprisal_replication/mistral_full79/modular/models/plot_manifest.json"],"reports":["docs/mistral_full79_visual_summary.html"]},
+      "report_paths": ["docs/mistral_full79_visual_summary.html","docs/mistral_full79_direct_surprisal_replication.html"]
+    },
+    {
+      "component_id": "paired_direct_tiny_mistral",
+      "family": "paired_direct_robustness",
+      "sample": "exact PBM21 intersection",
+      "scorer": "TinyDialogues versus Mistral",
+      "scientific_role": "paired scorer robustness",
+      "guardrail": "Compare effect directions and paired differences, never pooled raw score magnitudes.",
+      "required_paths": ["results/direct_surprisal_replication/paired_tiny_mistral_pbm/paired_direct_surprisal_wide.csv.gz"],
+      "commands": {
+        "fit": [[".venv/bin/python","src/build_paired_direct_surprisal_visual_analysis.py","--stage","models","--paired-wide","results/direct_surprisal_replication/paired_tiny_mistral_pbm/paired_direct_surprisal_wide.csv.gz","--output-dir","results/direct_surprisal_replication/paired_tiny_mistral_pbm/modular","--fig-dir","figs/direct_surprisal_replication/paired_tiny_mistral_pbm/modular_visual","--report-md","docs/paired_tinydialogues_mistral_visual_summary.md","--report-html","docs/paired_tinydialogues_mistral_visual_summary.html","--bootstrap-reps","1000"]],
+        "plots": [[".venv/bin/python","src/build_paired_direct_surprisal_visual_analysis.py","--stage","plots","--paired-wide","results/direct_surprisal_replication/paired_tiny_mistral_pbm/paired_direct_surprisal_wide.csv.gz","--output-dir","results/direct_surprisal_replication/paired_tiny_mistral_pbm/modular","--fig-dir","figs/direct_surprisal_replication/paired_tiny_mistral_pbm/modular_visual","--report-md","docs/paired_tinydialogues_mistral_visual_summary.md","--report-html","docs/paired_tinydialogues_mistral_visual_summary.html"]],
+        "reports": [[".venv/bin/python","src/build_paired_direct_surprisal_visual_analysis.py","--stage","report","--paired-wide","results/direct_surprisal_replication/paired_tiny_mistral_pbm/paired_direct_surprisal_wide.csv.gz","--output-dir","results/direct_surprisal_replication/paired_tiny_mistral_pbm/modular","--fig-dir","figs/direct_surprisal_replication/paired_tiny_mistral_pbm/modular_visual","--report-md","docs/paired_tinydialogues_mistral_visual_summary.md","--report-html","docs/paired_tinydialogues_mistral_visual_summary.html"]]
+      },
+      "expected_artifacts": {"fit":["results/direct_surprisal_replication/paired_tiny_mistral_pbm/modular/model_manifest.json"],"plots":["results/direct_surprisal_replication/paired_tiny_mistral_pbm/modular/plot_manifest.json"],"reports":["docs/paired_tinydialogues_mistral_visual_summary.html"]},
+      "report_paths": ["docs/paired_tinydialogues_mistral_visual_summary.html","docs/paired_tinydialogues_mistral_report.html"]
+    },
+    {
+      "component_id": "route1_model_atlas",
+      "family": "route1_information_at_fixed_effort",
+      "sample": "PBM21",
+      "scorer": "Mistral",
+      "scientific_role": "broad supporting model atlas",
+      "guardrail": "The model zoo is supporting/exploratory and does not replace frozen direct-score primary models.",
+      "required_paths": ["results/utterance_information_research_model_zoo/real_child_k3_sample.csv.gz"],
+      "commands": {"fit":[[".venv/bin/python","src/build_route1_model_report_suite.py","--stage","model"]],"reports":[[".venv/bin/python","src/build_route1_model_report_suite.py","--stage","report"]]},
+      "expected_artifacts": {"fit":["results/utterance_information_research_model_zoo/model_zoo_summary.csv"],"reports":["docs/utterance_information_research_model_zoo.html"]},
+      "report_paths": ["docs/utterance_information_research_model_zoo.html"]
+    },
+    {
+      "component_id": "route2_response_space",
+      "family": "route2_response_space",
+      "sample": "PBM21",
+      "scorer": "Mistral-generated response space",
+      "scientific_role": "context demand and raw effort",
+      "guardrail": "Exact-string entropy is generator/prompt dependent and generated responses are not same-meaning paraphrases.",
+      "required_paths": ["results/route2_response_space/route2_child_response_space_effort_table.csv.gz"],
+      "commands": {"fit":[[".venv/bin/python","src/build_response_space_analysis_suite.py"]]},
+      "expected_artifacts": {"fit":["results/route2_response_space_analysis/response_space_model_summary.csv","docs/response_space_route1_route2_analysis.html"]},
+      "report_paths": ["docs/response_space_route1_route2_analysis.html"]
+    },
+    {
+      "component_id": "route2_relative_effort",
+      "family": "route2_relative_effort",
+      "sample": "PBM21",
+      "scorer": "Mistral-generated response space",
+      "scientific_role": "child effort relative to generated reference",
+      "guardrail": "Keep raw-effort and generated-relative estimands separate; the principal age-by-entropy result is contrary to prediction.",
+      "required_paths": ["results/route2_response_space/route2_child_response_space_effort_table.csv.gz"],
+      "commands": {"fit":[[".venv/bin/python","src/build_route2_relative_effort_model_suite.py"]]},
+      "expected_artifacts": {"fit":["results/route2_relative_effort_model_suite/route2_relative_effort_model_summary.csv","docs/route2_relative_effort_model_suite.html"]},
+      "report_paths": ["docs/route2_relative_effort_model_suite.html"]
+    },
+    {
+      "component_id": "word_mistral_pbm",
+      "family": "developmental_word_information",
+      "sample": "PBM21 discovery",
+      "scorer": "Mistral-7B-v0.3",
+      "scientific_role": "primary word-level discovery",
+      "guardrail": "Effect stages require the checksummed pre-effect protocol; word identity and child dependence are explicit.",
+      "working_dir": "../developmental_word_information",
+      "environment": {"PYTHONPATH": "src"},
+      "required_paths": ["../developmental_word_information/data/external/compute_surprisal_mila/mistral_7b_v03_pbm21_word_20260731_e890ec1_v1"],
+      "commands": {
+        "prepare": [["../communicative_efficiency/.venv/bin/python","-m","developmental_word_information","run-study","--run-root","data/external/compute_surprisal_mila/mistral_7b_v03_pbm21_word_20260731_e890ec1_v1","--output-dir","results/modular_analysis/mistral_pbm21","--registry","configs/analysis_registry_v1.json","--scorer-label","Mistral PBM21","--stage","prepare"]],
+        "fit": [["../communicative_efficiency/.venv/bin/python","-m","developmental_word_information","run-study","--run-root","data/external/compute_surprisal_mila/mistral_7b_v03_pbm21_word_20260731_e890ec1_v1","--output-dir","results/modular_analysis/mistral_pbm21","--registry","configs/analysis_registry_v1.json","--scorer-label","Mistral PBM21","--stage","models"]],
+        "plots": [["../communicative_efficiency/.venv/bin/python","-m","developmental_word_information","run-study","--run-root","data/external/compute_surprisal_mila/mistral_7b_v03_pbm21_word_20260731_e890ec1_v1","--output-dir","results/modular_analysis/mistral_pbm21","--registry","configs/analysis_registry_v1.json","--scorer-label","Mistral PBM21","--stage","plots"]],
+        "reports": [["../communicative_efficiency/.venv/bin/python","-m","developmental_word_information","run-study","--run-root","data/external/compute_surprisal_mila/mistral_7b_v03_pbm21_word_20260731_e890ec1_v1","--output-dir","results/modular_analysis/mistral_pbm21","--registry","configs/analysis_registry_v1.json","--scorer-label","Mistral PBM21","--stage","report"],["../communicative_efficiency/.venv/bin/python","-m","developmental_word_information","run-study","--run-root","data/external/compute_surprisal_mila/mistral_7b_v03_pbm21_word_20260731_e890ec1_v1","--output-dir","results/modular_analysis/mistral_pbm21","--registry","configs/analysis_registry_v1.json","--scorer-label","Mistral PBM21","--stage","audit-all"]]
+      },
+      "expected_artifacts": {"prepare":["../developmental_word_information/results/modular_analysis/mistral_pbm21/features/feature_manifest.json"],"fit":["../developmental_word_information/results/modular_analysis/mistral_pbm21/models/model_manifest.json"],"plots":["../developmental_word_information/results/modular_analysis/mistral_pbm21/plots/plot_manifest.json"],"reports":["../developmental_word_information/results/modular_analysis/mistral_pbm21/report/word_information_supervisor_report.html","../developmental_word_information/results/modular_analysis/mistral_pbm21/audit_all.json","../developmental_word_information/results/modular_analysis/mistral_pbm21/COMPLETE_AND_AUDITED"]},
+      "report_paths": ["../developmental_word_information/results/modular_analysis/mistral_pbm21/report/word_information_supervisor_report.html"]
+    },
+    {
+      "component_id": "word_qwen_pbm",
+      "family": "developmental_word_information",
+      "sample": "PBM21 discovery",
+      "scorer": "Qwen3-14B",
+      "scientific_role": "word-level scorer robustness",
+      "guardrail": "Fit separately from Mistral; compare direction and uncertainty, not raw bits.",
+      "working_dir": "../developmental_word_information",
+      "environment": {"PYTHONPATH": "src"},
+      "required_paths": ["../developmental_word_information/data/external/compute_surprisal_mila/qwen3_14b_pbm21_word_20260803_c82d219_v1"],
+      "commands": {
+        "prepare": [["../communicative_efficiency/.venv/bin/python","-m","developmental_word_information","run-study","--run-root","data/external/compute_surprisal_mila/qwen3_14b_pbm21_word_20260803_c82d219_v1","--output-dir","results/modular_analysis/qwen_pbm21","--registry","configs/analysis_registry_v1.json","--scorer-label","Qwen3-14B PBM21","--stage","prepare"]],
+        "fit": [["../communicative_efficiency/.venv/bin/python","-m","developmental_word_information","run-study","--run-root","data/external/compute_surprisal_mila/qwen3_14b_pbm21_word_20260803_c82d219_v1","--output-dir","results/modular_analysis/qwen_pbm21","--registry","configs/analysis_registry_v1.json","--scorer-label","Qwen3-14B PBM21","--stage","models"]],
+        "plots": [["../communicative_efficiency/.venv/bin/python","-m","developmental_word_information","run-study","--run-root","data/external/compute_surprisal_mila/qwen3_14b_pbm21_word_20260803_c82d219_v1","--output-dir","results/modular_analysis/qwen_pbm21","--registry","configs/analysis_registry_v1.json","--scorer-label","Qwen3-14B PBM21","--stage","plots"]],
+        "reports": [["../communicative_efficiency/.venv/bin/python","-m","developmental_word_information","run-study","--run-root","data/external/compute_surprisal_mila/qwen3_14b_pbm21_word_20260803_c82d219_v1","--output-dir","results/modular_analysis/qwen_pbm21","--registry","configs/analysis_registry_v1.json","--scorer-label","Qwen3-14B PBM21","--stage","report"],["../communicative_efficiency/.venv/bin/python","-m","developmental_word_information","run-study","--run-root","data/external/compute_surprisal_mila/qwen3_14b_pbm21_word_20260803_c82d219_v1","--output-dir","results/modular_analysis/qwen_pbm21","--registry","configs/analysis_registry_v1.json","--scorer-label","Qwen3-14B PBM21","--stage","audit-all"]]
+      },
+      "expected_artifacts": {"prepare":["../developmental_word_information/results/modular_analysis/qwen_pbm21/features/feature_manifest.json"],"fit":["../developmental_word_information/results/modular_analysis/qwen_pbm21/models/model_manifest.json"],"plots":["../developmental_word_information/results/modular_analysis/qwen_pbm21/plots/plot_manifest.json"],"reports":["../developmental_word_information/results/modular_analysis/qwen_pbm21/report/word_information_supervisor_report.html","../developmental_word_information/results/modular_analysis/qwen_pbm21/audit_all.json","../developmental_word_information/results/modular_analysis/qwen_pbm21/COMPLETE_AND_AUDITED"]},
+      "report_paths": ["../developmental_word_information/results/modular_analysis/qwen_pbm21/report/word_information_supervisor_report.html"]
+    },
+    {
+      "component_id": "word_tinydialogues_pbm",
+      "family": "developmental_word_information",
+      "sample": "PBM21 discovery",
+      "scorer": "TinyDialogues",
+      "scientific_role": "word-level scorer robustness",
+      "guardrail": "Fit separately from larger scorers; it is not an independent sample confirmation.",
+      "working_dir": "../developmental_word_information",
+      "environment": {"PYTHONPATH": "src"},
+      "required_paths": ["../developmental_word_information/data/external/compute_surprisal_mila/tinydialogues_pbm21_word_20260730_e890ec1_v1"],
+      "commands": {
+        "prepare": [["../communicative_efficiency/.venv/bin/python","-m","developmental_word_information","run-study","--run-root","data/external/compute_surprisal_mila/tinydialogues_pbm21_word_20260730_e890ec1_v1","--output-dir","results/modular_analysis/tinydialogues_pbm21","--registry","configs/analysis_registry_v1.json","--scorer-label","TinyDialogues PBM21","--stage","prepare"]],
+        "fit": [["../communicative_efficiency/.venv/bin/python","-m","developmental_word_information","run-study","--run-root","data/external/compute_surprisal_mila/tinydialogues_pbm21_word_20260730_e890ec1_v1","--output-dir","results/modular_analysis/tinydialogues_pbm21","--registry","configs/analysis_registry_v1.json","--scorer-label","TinyDialogues PBM21","--stage","models"]],
+        "plots": [["../communicative_efficiency/.venv/bin/python","-m","developmental_word_information","run-study","--run-root","data/external/compute_surprisal_mila/tinydialogues_pbm21_word_20260730_e890ec1_v1","--output-dir","results/modular_analysis/tinydialogues_pbm21","--registry","configs/analysis_registry_v1.json","--scorer-label","TinyDialogues PBM21","--stage","plots"]],
+        "reports": [["../communicative_efficiency/.venv/bin/python","-m","developmental_word_information","run-study","--run-root","data/external/compute_surprisal_mila/tinydialogues_pbm21_word_20260730_e890ec1_v1","--output-dir","results/modular_analysis/tinydialogues_pbm21","--registry","configs/analysis_registry_v1.json","--scorer-label","TinyDialogues PBM21","--stage","report"],["../communicative_efficiency/.venv/bin/python","-m","developmental_word_information","run-study","--run-root","data/external/compute_surprisal_mila/tinydialogues_pbm21_word_20260730_e890ec1_v1","--output-dir","results/modular_analysis/tinydialogues_pbm21","--registry","configs/analysis_registry_v1.json","--scorer-label","TinyDialogues PBM21","--stage","audit-all"]]
+      },
+      "expected_artifacts": {"prepare":["../developmental_word_information/results/modular_analysis/tinydialogues_pbm21/features/feature_manifest.json"],"fit":["../developmental_word_information/results/modular_analysis/tinydialogues_pbm21/models/model_manifest.json"],"plots":["../developmental_word_information/results/modular_analysis/tinydialogues_pbm21/plots/plot_manifest.json"],"reports":["../developmental_word_information/results/modular_analysis/tinydialogues_pbm21/report/word_information_supervisor_report.html","../developmental_word_information/results/modular_analysis/tinydialogues_pbm21/audit_all.json","../developmental_word_information/results/modular_analysis/tinydialogues_pbm21/COMPLETE_AND_AUDITED"]},
+      "report_paths": ["../developmental_word_information/results/modular_analysis/tinydialogues_pbm21/report/word_information_supervisor_report.html"]
+    },
+    {
+      "component_id": "word_cross_scorer_pbm",
+      "family": "developmental_word_information",
+      "sample": "PBM21 exact registered estimands",
+      "scorer": "Mistral / Qwen3-14B / TinyDialogues",
+      "scientific_role": "separate-fit cross-scorer robustness",
+      "guardrail": "Compare direction, uncertainty, coverage, and child signs; never pool raw bit magnitudes.",
+      "required_paths": ["../developmental_word_information/results/modular_analysis/mistral_pbm21/COMPLETE_AND_AUDITED","../developmental_word_information/results/modular_analysis/qwen_pbm21/COMPLETE_AND_AUDITED","../developmental_word_information/results/modular_analysis/tinydialogues_pbm21/COMPLETE_AND_AUDITED"],
+      "commands": {"reports":[[".venv/bin/python","src/build_word_cross_scorer_comparison.py","--scorer","Mistral=../developmental_word_information/results/modular_analysis/mistral_pbm21","--scorer","Qwen3-14B=../developmental_word_information/results/modular_analysis/qwen_pbm21","--scorer","TinyDialogues=../developmental_word_information/results/modular_analysis/tinydialogues_pbm21"]]},
+      "expected_artifacts": {"reports":["results/word_cross_scorer_comparison/manifest.json","docs/word_cross_scorer_comparison.html"]},
+      "report_paths": ["docs/word_cross_scorer_comparison.html"]
+    },
+    {
+      "component_id": "scientific_answer_synthesis",
+      "family": "cross_route_scientific_synthesis",
+      "sample": "PBM21 discovery / non-PBM58 confirmation",
+      "scorer": "separate Mistral / TinyDialogues / Qwen results",
+      "scientific_role": "current paper-level answers and next-test priorities",
+      "guardrail": "Reads audited saved outputs only; it does not refit, pool scorer magnitudes, or promote exploratory results to confirmation.",
+      "required_paths": ["results/word_cross_scorer_comparison/scientific_question_summary.csv","results/direct_surprisal_replication/tinydialogues_pbm/modular/models/coefficients_long.csv","results/direct_surprisal_replication/mistral_full79/modular/models/coefficients_long.csv","results/route2_relative_effort_model_suite/route2_relative_effort_model_coefficients.csv","results/direct_surprisal_onset_confirmation/audit.json"],
+      "commands": {"reports":[[".venv/bin/python","src/build_scientific_answer_synthesis.py"]]},
+      "expected_artifacts": {"reports":["results/current_scientific_synthesis/manifest.json","docs/current_scientific_synthesis.html"]},
+      "report_paths": ["docs/current_scientific_synthesis.html","docs/word_cross_scorer_comparison.html"]
+    },
+    {
+      "component_id": "corrected_pbm_bayes",
+      "family": "bayes_derived_candidate_set",
+      "sample": "PBM21 discovery",
+      "scorer": "leave-corpus-out count decomposition",
+      "scientific_role": "decomposition and candidate-set robustness",
+      "guardrail": "This is probability within the supplied candidate set, not a posterior over all utterances or a meaning-preserving efficiency frontier.",
+      "required_paths": ["results/corrected_pbm_bayes_v2/scores/pbm_crossfit_bayes_scores.csv.gz"],
+      "commands": {"reports":[[".venv/bin/python","src/build_corrected_pbm_bayes_report.py"]]},
+      "expected_artifacts": {"reports":["docs/corrected_pbm_bayes_report.html"]},
+      "report_paths": ["docs/corrected_pbm_bayes_report.html"]
+    },
+    {
+      "component_id": "direct_sustained_onset",
+      "family": "developmental_onset",
+      "sample": "PBM21 discovery / non-PBM58 confirmation",
+      "scorer": "Mistral",
+      "scientific_role": "frozen sustained-onset sensitivity",
+      "guardrail": "Neither sample establishes sustained onset; nominal age-bin contrasts are not promoted as replicated onset.",
+      "required_paths": ["results/direct_surprisal_replication/mistral_full79/modular/prepared/design_cells"],
+      "commands": {"fit":[[".venv/bin/python","src/build_direct_surprisal_onset_confirmation.py","--bootstrap-reps","1000"]]},
+      "expected_artifacts": {"fit":["results/direct_surprisal_onset_confirmation/audit.json","docs/direct_surprisal_onset_confirmation.html"]},
+      "report_paths": ["docs/direct_surprisal_onset_confirmation.html"]
+    },
+    {
+      "component_id": "word_mistral_nonpbm58",
+      "family": "developmental_word_information",
+      "sample": "non-PBM58 confirmation",
+      "scorer": "Mistral-7B-v0.3",
+      "scientific_role": "frozen word-level confirmation",
+      "guardrail": "No effects may be inspected until the remaining-58 scores exist and the discovery protocol is frozen.",
+      "blocked_reason": "Same-pass non-PBM58 word scores have not been produced; the Mila DAG is implemented but unrun.",
+      "required_paths": [],
+      "commands": {},
+      "expected_artifacts": {},
+      "report_paths": []
+    }
+  ]
+}

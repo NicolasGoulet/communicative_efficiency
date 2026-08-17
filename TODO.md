@@ -20,6 +20,125 @@ This section is the authoritative active checklist. The longer dated sections
 below are retained as implementation/audit history; some of their unchecked
 items were superseded or completed by the later modular direct-score workflow.
 
+### Complete local modeling and scientific synthesis — 2026-08-06
+
+- [x] Run every locally eligible component of the complete analysis machine.
+      Prepare/fit/plot/report stages recorded zero failures; the only blocked
+      component is the deliberately separate remaining-58 Mistral word
+      confirmation, whose 232 Mila scoring contracts do not yet exist.
+- [x] Fit and audit the frozen PBM word protocol separately under Mistral,
+      Qwen3-14B, and TinyDialogues. Each scorer completed 55 fitted variants
+      with zero failures and the registered 1,000-child-bootstrap models.
+- [x] Replace the crude all-coefficient cross-scorer direction count with an
+      eight-question synthesis that reports clustered and bootstrap support
+      separately. Same-word k0/k3 age slopes and longer-word contextual
+      support are robust across all three scorers; context-gain development
+      and rarity-by-age are scorer-dependent.
+- [x] Publish `docs/current_scientific_synthesis.html` from audited saved
+      outputs. It inventories 607 fitted variants/outcome fits, separates PBM
+      discovery from non-PBM confirmation, preserves the contrary Route 2 and
+      P3 results, and records that sustained onset is not established.
+- [ ] After the current Qwen-response/Mistral-scoring Mila smoke and audit
+      pass, submit production through its explicit approval command, retrieve
+      the compact report/products, and add the decoupled response calibration
+      as a new Route 2 sensitivity. Do not bypass the smoke gate.
+
+### Hall cross-sectional snapshot — 2026-08-10 to 2026-08-17
+
+- [x] Implement and test a Hall-specific preprocessor that preserves all
+      speaker tiers, situation boundaries, broad speaker roles, demographic
+      provenance, and explicit transcript exclusions.
+- [x] Preprocess all 40 local Hall files. The audit passed with 238,249 main
+      tiers, 36 primary children/70,510 child targets, and a 37-child/71,830-
+      target sensitivity that adds one folder-inferred stratum.
+- [x] Freeze an outcome-blind current-corpus comparator: one Mistral session
+      per eligible child nearest the Hall primary median age of 57 months in
+      the 54–59 month window. The manifest contains 20 children (18 non-PBM,
+      2 PBM) and does not inspect outcomes for selection.
+- [x] Run the full repository suite after complete Hall scoring and analysis
+      integration with `CUDA_VISIBLE_DEVICES='' MPLCONFIGDIR=/tmp/mpl-cache`;
+      all 417 tests passed in 300.310 seconds with expected small-fixture statistical
+      warnings and no failures.
+- [x] Build the deterministic Mila handoff archive and verify its sidecar
+      checksum. The 2,520,424-byte archive contains four k0–k3 contracts over
+      71,830 inputs (287,320 expected scores), with SHA-256
+      `23ca951da9912ea3d46235821cd877c972e7397acd64054ae5dff7d6125544a0`.
+- [x] Write the test-driven compute-repository implementation prompt at
+      `docs/compute_surprisal_mila_hall_prompt_2026-08-10.md`, including CPU
+      preparation, exact-wrapper GPU smoke, resource validation, staged waves,
+      audited resume, and final retrieval contracts.
+- [x] Add a smoke-gated Hall Mistral scoring contract for the 71,830 real child
+      targets at k0–k3, using previous adult-interlocutor turns within the same
+      situation for contextual scores. The returned archive passed its local
+      relocation audit across 287,320 utterance rows and all word/token products.
+- [x] Fit the frozen Hall snapshot models only after scoring: within-Hall
+      race-by-class descriptive contrasts at fixed exact word effort and
+      setting, then guarded age-matched external comparisons. Treat historical
+      strata and scorer/dialect effects as descriptive, not causal or deficit
+      measures. All 20 models, 21,000 bootstrap contrast draws, 547 influence
+      fits, 9 plots, and the final artifact audit passed.
+
+### Reviewed local closeout — 2026-08-05
+
+- [x] Review and retain the sustained-onset implementation, tests, and report.
+      Its saved audit is `PASS`, reproduces the frozen point estimates within
+      `2.007e-13`, completes 1,000/1,000 child bootstraps per scope, and finds
+      no sustained onset in either PBM or non-PBM under simultaneous bands.
+- [x] Review and retain the conversational-eligibility builder, test, and
+      completed full-79 structural output. The 2026-07-23 run aligned all
+      1,140,218 source rows with zero unresolved files or text mismatches and
+      selected 629,334 structurally eligible child turns.
+- [ ] Resolve or adjudicate the 18,172 eligible `context_k1` mismatches that
+      keep the conversational audit at `REVIEW`, and complete the 325-row
+      stratified manual validation sample before treating structural
+      eligibility as a validated conversational analysis sample.
+- [x] Reauthenticate the GitHub CLI and publish the reviewed closeout plus the
+      complete analysis controller. Draft PR #2 is open from
+      `agent/project-status-closeout`.
+- [ ] Keep all cluster-side retrieval, rsync, and Slurm actions manual. The
+      ordered user command sheet remains
+      `docs/mila_handoff_commands_2026-07-22.md` and intentionally stops before
+      full-79 LSTM scoring because that scoring wrapper is not audited.
+
+### New word-information program — 2026-08-05
+
+- [x] Freeze the high-level paper design: PBM21 Mistral primary plus separate
+      Qwen/TinyDialogues scorer robustness; the other 58 children are a
+      Mistral-only confirmation sample. Keep PBM and non-PBM estimates separate.
+- [x] Implement the first analysis stages in `developmental_word_information`:
+      compact archive provenance/coverage audit and exact disk-backed k0/k3
+      pairing on `word_occurrence_id`, with atomic PASS markers and tests.
+- [x] Implement the complete modular word pipeline: all-child k1/k2/k3 exact
+      pairing, versioned no-effect features, registered exhaustive fits,
+      1,000-draw child bootstrap, influence checks, audited plots/reports, and
+      cross-scorer synthesis.
+- [x] Implement the project-level complete analysis controller over direct,
+      Route 1, Route 2, Bayes, onset, and word families with hash-verified
+      resume and upstream-failure gates.
+- [x] Review, validate, and locally commit the compute DAG for exactly 58
+      non-PBM children × real speech × k0-k3 = 232 same-pass word contracts.
+      Commit `aa6555f` passed 68 focused tests, shell syntax, fake-DAG checks,
+      and resolved Mistral GPU resource validation. No Mila job was submitted.
+- [x] Retrieve the completed PBM Mistral and TinyDialogues same-pass archives
+      using `developmental_word_information/docs/mila_retrieval_commands_2026-08-05.md`,
+      then checksum, extract, and run the 504-contract relocation-aware audit.
+      Both full audits passed with zero problems; both handoffs and all three
+      scorer-identical no-effect feature builds are active.
+- [x] Finish the Qwen local relocation-aware audit and create the immutable
+      model/run-labelled analysis symlink only after
+      `LOCAL_RETRIEVAL_AUDIT_PASSED`. The 504-contract audit and an exact
+      Brown/Adam k0/k3 pairing smoke passed with zero pairing problems.
+- [x] Freeze and checksum all coverage-based lexical eligibility, cost,
+      cross-fitted rarity, support, nonlinear-age, model, bootstrap, and
+      multiplicity decisions before inspecting PBM word effects or any
+      non-PBM confirmation coefficient. Protocol SHA-256:
+      `705143ea70e4c3852fe852205010973fca7742d927c0a85993a917bf084d5989`.
+- [x] Reauthenticate GitHub and publish the new local commits. The word repo is
+      private at `NicolasGoulet/developmental_word_information`; the compute
+      lane is draft PR #17 and the brain controller is draft PR #2. Do not
+      submit the remaining-58 Mila smoke until PR #17 is merged and pulled on
+      Mila.
+
 ### Completed milestone
 
 - [x] Complete and audit the full 79-child direct-Mistral score tree: 1,896
@@ -62,12 +181,15 @@ items were superseded or completed by the later modular direct-score workflow.
 
 ### Primary scientific work still open
 
-- [ ] Build and manually audit the primary responsive-turn sample. Preserve
+- [ ] Finish manual validation of the completed structural responsive-turn
+      sample and adjudicate its `context_k1` mismatches. Preserve
       adjacency/turn-distance, child-initiated, imitation, routine/reading,
       backchannel, question-type, and repair flags.
-- [ ] Complete sustained-onset inference with child bootstrap/simultaneous
-      uncertainty in the non-PBM sample and repeat it with validated word,
-      morpheme, syllable, and phoneme effort controls.
+- [x] Complete lexical-word sustained-onset inference with child
+      bootstrap/simultaneous uncertainty in PBM and non-PBM. The reviewed
+      2026-07-22 run found no sustained onset in either scope.
+- [ ] Repeat sustained-onset inference with validated morpheme, syllable, and
+      phoneme effort controls.
 - [ ] Prototype downstream caregiver-response predictive gain and validated
       repair/clarification/contingent-response outcomes as listener-utility
       measures. Keep these separate from target self-information.

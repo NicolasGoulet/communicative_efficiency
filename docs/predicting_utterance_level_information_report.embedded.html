@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Developmental Predictability and Production Effort in Child Language</title>
+<title>Predicting Utterance-Level Information</title>
 <style>
 :root {
   color-scheme: light;
@@ -313,8 +313,9 @@ ul, ol {
 <p><em>Lines are model predictions at selected response-entropy values. Any shaded bands are 95% fitted-mean intervals, not prediction intervals for individual utterances.</em></p>
 <p>This result may be substantive, but it may also reflect the current measure. Exact-string entropy depends on the model, prompt, temperature, number of samples, and surface-form variation. The generated responses are context-conditioned alternatives, not same-meaning paraphrases. Semantic clustering, rarefaction, prompt/seed/temperature stability, and a decoupled generator are required before strong interpretation.</p>
 <h2>Developmental Onset</h2>
-<p>The working PBM analysis places the first fixed-effort age-bin decrease by 24–29 months. This is not yet a confirmed onset. A child-age-cell sensitivity changes the weighting and can change the apparent pattern; the current onset table does not yet provide the required child-level simultaneous uncertainty.</p>
-<p>An onset claim will be promoted only if the frozen sustained-onset rule is satisfied in the non-discovery sample with a simultaneous confidence band, adequate child/corpus support, and sensitivity to validated word, morpheme, syllable, and phoneme effort controls. Until then, the linear developmental slope is the primary result.</p>
+<p>The earlier PBM row-level analysis placed the first nominal fixed-effort age-bin decrease by 24–29 months. The frozen sustained-onset analysis now adds 1,000 child-bootstrap replicates and a simultaneous max-|t| band over every post-reference contrast. It does not establish a sustained onset in either the PBM discovery or non-PBM confirmation sample.</p>
+<p>In PBM, the 24–29 simultaneous upper bound is just above zero and the 36–41 bound also crosses zero; later bins lack the required three-corpus support. In the non-PBM sample, 36–41 is the only age bin whose simultaneous upper bound is below zero, but later adequately supported bins cross zero. It therefore fails the rule that every later adequately supported bin must remain negative.</p>
+<p>The current evidence supports a linear developmental association, not a replicated exact onset. The simultaneous analysis uses lexical word effort; validated full-79 morpheme, syllable, and phoneme controls remain pending.</p>
 <h2>What the Evidence Supports</h2>
 <p>The current evidence supports the following statement:</p>
 <blockquote><p>In longitudinal naturalistic child speech, observed utterance forms become</p></blockquote>
@@ -327,10 +328,10 @@ ul, ol {
 <p>It does not yet support the claim that children optimize a single normative communicative-efficiency objective. That broader claim requires evidence that connects the child&#x27;s utterance to a listener-relevant outcome, such as improved prediction of the next caregiver response, contingent continuation, or reduced repair and clarification.</p>
 <h2>Remaining Validation Before a Stronger Claim</h2>
 <ul>
-<li>Construct and manually validate a primary sample of genuine child responses</li>
-<p>to immediately preceding caregiver turns, retaining flags for child-initiated speech, imitation, routines/reading, backchannels, questions, and repairs.</p>
-<li>Complete non-discovery sustained-onset inference with child-level</li>
-<p>simultaneous uncertainty and alternative validated effort measures.</p>
+<li>Manually validate the constructed structural sample of genuine child</li>
+<p>responses to immediately preceding caregiver turns and adjudicate the retained <code>context_k1</code> mismatches. Preserve flags for child-initiated speech, imitation, routines/reading, backchannels, questions, and repairs.</p>
+<li>Repeat the completed child-bootstrap sustained-onset analysis with validated</li>
+<p>full-79 morpheme, syllable, and phoneme effort measures.</p>
 <li>Prototype downstream caregiver-response predictive gain and validated</li>
 <p>repair, clarification, acknowledgement, and contingent-continuation labels.</p>
 <li>Calibrate sampled response uncertainty using semantic clusters, coverage and</li>
@@ -346,6 +347,7 @@ ul, ol {
 <li><a href="direct_surprisal_replication_protocol_2026-07-21.md">Frozen discovery/confirmation protocol</a></li>
 <li><a href="paired_tinydialogues_mistral_visual_summary.html">TinyDialogues–Mistral paired visual comparison</a></li>
 <li><a href="corrected_pbm_bayes_report.html">Corrected Bayes-derived candidate report</a></li>
+<li><a href="direct_surprisal_onset_confirmation.html">Sustained-onset confirmation</a></li>
 <li><a href="july_meeting_definitions.html">Formal mathematical definitions</a></li>
 </ul>
 </main>

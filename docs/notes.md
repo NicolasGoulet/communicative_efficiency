@@ -3,6 +3,188 @@
 Living project memory: discoveries, decisions, bugs, commands that worked, and
 current state. Prefer dated notes.
 
+## 2026-08-06 - Complete local fitting and paper-level scientific synthesis
+
+- Ran the complete modular analysis machine over all locally eligible Route 1,
+  Route 2, direct, paired, onset, corrected-Bayes, and PBM word components.
+  The recorded run has zero failed commands. Its only blocker is the frozen
+  non-PBM58 word confirmation because the 232 same-pass Mistral contracts have
+  not yet been scored on Mila.
+- The Mistral, Qwen3-14B, and TinyDialogues PBM word pipelines each completed
+  55 fitted variants with zero failures. Registered bootstrap models completed
+  1,000 child draws per scorer on the exact same 1,032,963-occurrence primary
+  set (identity SHA-256
+  `4b12305ba8ff6ec2fc96557b68aa6b921dd34bb6f0d05023fcf8451a93bcb437`).
+- Rebuilt the cross-scorer word report around eight registered scientific
+  questions. Same-word k0 and k3 age slopes are negative with clustered and
+  bootstrap intervals excluding zero for all three scorers. Longer word types
+  receive more context support at the centered age under all three scorers.
+  The longer-word support association weakens with age in all three point
+  estimates but has full interval support in only two; overall context-gain
+  development and rarity-by-age are scorer-dependent.
+- Added `src/build_scientific_answer_synthesis.py`, its focused test, evidence
+  map, machine-readable tables, and Markdown/HTML reports. The synthesis reads
+  saved artifacts without refitting and inventories 607 fitted variants or
+  registered outcome fits: 34 Tiny direct, 102 Mistral direct, 11 paired
+  outcomes, 101 Route 1 atlas/comparison fits, 192 Route 2 fits, 165 word fits,
+  and two onset scopes.
+- Current integrated answer: developmental change is clearest for
+  predictability/conventionality of form. The non-PBM58 contextual fixed-effort
+  slope is negative but its frozen clustered interval crosses zero;
+  unconditional surprisal decreases; utterance context gain decreases against
+  the registered positive direction; Route 2 catch-up toward the generated
+  length reference is weaker in higher exact-string-entropy contexts; and no
+  sustained onset is established.
+- The report-stage controller now includes this saved-artifact synthesis as a
+  reusable component. The next compute-dependent additions remain the gated
+  Qwen-response/Mistral-scoring calibration and the separate remaining-58 word
+  production.
+- Added `scripts/run_complete_analysis_unattended.sh`. It gates every eligible
+  production analysis behind the complete local unit suite, excludes only the
+  explicitly unavailable `word_mistral_nonpbm58` component, then runs all
+  prepare/fit/plot/report stages and `git diff --check`. Its focused 11-test
+  suite and `bash -n` audit passed before launch. The detached local unit is
+  `communicative-efficiency-analysis-20260806.service`; combined output is in
+  `/tmp/communicative-efficiency-analysis-20260806.log`.
+
+Focused TDD verification completed during implementation:
+
+```bash
+MPLCONFIGDIR=/tmp/mpl-focused .venv/bin/python -m unittest \
+  tests.test_complete_analysis_machine \
+  tests.test_build_word_cross_scorer_comparison \
+  tests.test_build_scientific_answer_synthesis
+```
+
+- 10 tests passed in 6.456 seconds with no failures.
+
+## 2026-08-05 - Three-scorer word handoffs activated
+
+- Independently verified and promoted the retrieved PBM Mistral and
+  TinyDialogues same-pass word trees. Each relocation-aware audit passed all
+  504 contracts, 11,605,772 utterance rows, and 35,450,900 word rows with zero
+  problems or temporary outputs.
+- Mistral contains 60,843,382 token rows and 49,203,516 token-to-word
+  allocation rows. All 11,562,917 canonical utterance comparisons passed the
+  frozen FP16 tolerance gate; maxima were 0.0390 mean bits and 0.3686 summed
+  bits against limits 0.15 and 0.5. TinyDialogues contains 55,357,148 token
+  rows and 43,721,905 allocation rows.
+- Both Brown/Adam real-child k0/k3 pair smokes passed with 162,589 exact pairs,
+  zero duplicate/metadata/nonfinite problems, and 2,813 context-unavailable
+  k0 rows retained in complete exclusion ledgers.
+- Mistral, Qwen3-14B, and TinyDialogues no-effect preparation now each passes
+  504 inventory contracts, 63 real-child k1/k2/k3 pair contracts, 3,539,148
+  paired rows, 1,179,716 k3 occurrence rows, and zero problems. Their primary
+  1,032-word / 1,032,963-row occurrence sets match exactly at SHA-256
+  `4b12305ba8ff6ec2fc96557b68aa6b921dd34bb6f0d05023fcf8451a93bcb437`.
+  Mistral and Tiny preparation reruns reused the exact feature bytes.
+- Published `developmental_word_information` privately at commit `727d08d`.
+  Pushed the remaining-58 compute lane at `aa6555f` to draft PR #17 and the
+  complete brain controller at `dba09d0` to draft PR #2. No Mila job was
+  submitted and no developmental word effect was inspected during activation.
+
+## 2026-08-05 - Complete modular analysis controller
+
+- Added `src/build_complete_analysis_machine.py` and a machine-readable
+  component registry spanning direct TinyDialogues/Mistral analyses, paired
+  direct robustness, Route 1, both Route 2 estimands, corrected PBM Bayes,
+  sustained onset, three separately fit PBM word scorers, and cross-scorer
+  word synthesis. The absent non-PBM58 word handoff remains an explicit
+  blocker rather than being substituted with full-79 utterance scores.
+- Commands run sequentially without a shell through prepare, fit, plots, and
+  reports. Resume requires matching global/config/component/command hashes and
+  current output artifact hashes; downstream stages require PASS upstream
+  manifests. Same-phase readiness refresh permits the cross-scorer component
+  to unlock only after all three word pipelines publish audited markers.
+- Added a cross-scorer word report that refuses partial analyses, differing
+  registry hashes, or differing supported occurrence-set hashes. It compares
+  coefficient direction, within-scorer uncertainty, coverage, and child-slope
+  sign agreement without pooling raw bits across tokenizers.
+- The complete repository suite passed 404 tests in 476.444 seconds with
+  `CUDA_VISIBLE_DEVICES=''`. Expected small-fixture Statsmodels convergence,
+  perfect-separation, rank, and plotting numerical warnings were emitted; no
+  test failed. The focused controller/direct/paired integration set passed
+  11 tests in 22.323 seconds.
+- No Mila submission was made. The exact remaining-58 compute lane at
+  `compute_surprisal_mila@aa6555f` was revalidated locally: 68 tests, all seven
+  shell files, both resolved typed-L40S argument vectors, and `git diff
+  --check` passed.
+
+## 2026-08-05 - Qwen PBM word handoff passed its full local gate
+
+- Independently rehashed the 15,774,773,220-byte Qwen3-14B PBM same-pass word
+  archive; its SHA-256 matched
+  `b1ad15e6b26b6445e19c8bb2cbad06d24843e421d062472bd972ca44c9af7dfa`.
+- The relocation-aware audit passed 504/504 contracts with 11,605,772
+  utterance rows, 35,450,900 word rows, 55,528,922 token rows, 44,008,510
+  allocation rows, zero problems, and zero temporary output paths.
+- Promoted the quarantined extraction to its immutable name and linked it into
+  `developmental_word_information` under a scorer/sample/date/revision label.
+- The Brown/Adam real-child k0/k3 pairing smoke passed with 162,589 exact
+  pairs, zero pairing problems, and all 2,813 k0-only context-unavailable
+  occurrences retained in the complete exclusion ledger.
+- No word context-gain distribution or developmental effect was inspected.
+
+## 2026-08-05 - New three-scorer word program and 58-child compute lane
+
+- Froze the high-level design without inspecting word effects: PBM21 uses
+  Mistral as the primary scorer and Qwen/TinyDialogues as separate robustness
+  analyses; the other 58 children form a Mistral-only confirmation sample.
+- Started the dedicated `developmental_word_information` implementation and
+  committed it locally as `41b0b29`. Its compact archive audit and exact
+  SQLite-backed k0/k3 occurrence pairer pass all 4 synthetic tests. The Qwen
+  archive compact audit passed 504 contracts, 21 children, all six modes and
+  k0-k3, with no problems and without reading score effects.
+- Reviewed the compute repository's modular selection work, added a
+  multi-corpus smoke preference and exact 232-contract remaining-58 test, and
+  committed the production-safe lane locally as `aa6555f`. The 68-test focused
+  suite, all referenced shell syntax checks, fake dependency DAGs, and both
+  resolved Mistral GPU argument validations passed. No Mila job was submitted.
+- Prepared local destinations and exact user-run `rsync -avhP` commands for the
+  missing completed PBM Mistral and TinyDialogues same-pass archives. Analysis
+  symlinks remain forbidden until checksum, extraction, and relocation-aware
+  audits pass.
+- GitHub publication is still blocked by the invalid saved `gh` credential;
+  all new commits remain local.
+
+## 2026-08-05 - Reviewed onset and conversational closeout
+
+- Reviewed the previously uncommitted sustained-onset and conversational-
+  eligibility implementations, tests, reports, and saved audits. The focused
+  test command
+  `.venv/bin/python -m unittest tests.test_build_conversational_eligibility_sample tests.test_build_direct_surprisal_onset_confirmation`
+  passed all 5 tests.
+- The sustained-onset audit is `PASS`: saved point estimates are reproduced
+  within `2.007e-13`, both scopes completed 1,000/1,000 child bootstraps, and
+  neither PBM nor non-PBM establishes a sustained onset under the simultaneous
+  band rule.
+- The full conversational structural build completed on 2026-07-23. It covers
+  1,140,218 rows from 2,752 raw files with zero unresolved files, alignment
+  failures, or text mismatches; 629,334 rows meet the structural primary rule
+  and 614,908 have an immediate next caregiver response. Its audit remains
+  `REVIEW` because 18,172 structurally eligible rows disagree with saved
+  `context_k1`; the 325-row manual sample is generated but not yet labeled.
+- GitHub publication is temporarily blocked because the saved `gh` credential
+  is invalid. Local review, testing, and commits may continue, but no push or
+  PR update should be reported until `gh auth login -h github.com` succeeds.
+
+## 2026-07-22 - Work paused for review
+
+- Stopped the long full-79 conversational-eligibility build at the user's
+  request. It exited via Ctrl-C with code 130. No final CSV, audit JSON, manual
+  sample, or report was produced, so there is no conversational result to
+  interpret. One ignored 49 MB atomic temporary file remains and is named
+  explicitly in `TODO.md`.
+- Preserved but did not commit the new conversational-turn builder/test and
+  the completed lexical-word onset implementation/test/report. The onset run
+  passed its internal reconstruction audit and found no sustained onset under
+  simultaneous child-bootstrap bands in either PBM or non-PBM, but all of
+  these uncommitted changes require human review before publication.
+- No Mila login, rsync, Slurm submission, additional Git commit, or push was
+  performed after the stop request. Resume from the short handoff at the top
+  of `TODO.md`; do not treat partially generated or uncommitted work as a
+  finished deliverable.
+
 ## 2026-07-22 - Supervisor synthesis, artifact freeze, and Mila handoff
 
 - Replaced the stale June supervisor report with a current July synthesis in
@@ -7069,3 +7251,88 @@ CUDA_VISIBLE_DEVICES='' MPLCONFIGDIR=/tmp/mpl-cache \
   The clean-cache run passed **390 tests in 1767.508 seconds**. Expected
   Statsmodels convergence, perfect-separation, singular/rank, plotting, and
   small-fixture numerical warnings occurred; there were no failures.
+
+## 2026-08-10 - Hall cross-sectional snapshot preparation
+
+- Added `src/prepare_hall_snapshot.py` and test-first coverage for Hall's
+  demographic provenance, multi-speaker role taxonomy, situation-aware setting
+  labels, previous-turn adjacency, missing-transcript placeholders, and
+  unrevised-ASR exclusion.
+- The real 40-file preprocessing audit passed: 238,249 main tiers, 36 primary
+  children with child-specific race/class and 70,510 scorable utterances, and
+  a 37-child/71,830-row sensitivity adding only `rog` via folder-level stratum
+  inference. `grc`, `lea`, and `brh` remain explicitly inventoried exclusions.
+- Preserved all speakers under `data/preprocessed_data/Hall/` and wrote the
+  compact real-target table and audits under
+  `results/hall_snapshot_preprocessing/`. The target table records 45,921 home,
+  20,155 school, 4,659 transition, and 1,095 other-setting utterances; 33,030
+  targets immediately follow an adult interlocutor.
+- Added `src/build_hall_snapshot_comparator.py`. Its outcome-blind audit passed
+  and selected one existing Mistral session nearest the Hall median of 57
+  months within ages 54–59 for 20 children (18 non-PBM and 2 PBM). Hall remains
+  separate from the 79-child longitudinal sample and has not yet been scored.
+- Frozen design and caveats are in
+  `docs/hall_snapshot_preprocessing_and_analysis_plan.md`.
+- Full verification after the deterministic handoff integration passed 412
+  tests in 625.030 seconds with
+  `CUDA_VISIBLE_DEVICES='' MPLCONFIGDIR=/tmp/mpl-cache`; warnings were the
+  expected small-fixture Statsmodels/plotting diagnostics and there were no
+  failures.
+- Added a deterministic Hall Mila handoff builder and archive regression test.
+  The real local handoff passed with four contracts, 71,830 input rows, 287,320
+  expected scored rows, zero blank targets, zero duplicate identities, and
+  SHA-256 `23ca951da9912ea3d46235821cd877c972e7397acd64054ae5dff7d6125544a0`.
+  The archive is 2,520,424 bytes under
+  `results/scoring_bundles/hall_snapshot_mistral_real_k0_k3_v1/`.
+- Wrote `docs/compute_surprisal_mila_hall_prompt_2026-08-10.md` so the sibling
+  compute implementation is test-first, CPU-prepared before GPU eligibility,
+  smoke-only by default, Slurm-resource validated, wave-audited, resumable only
+  after contract validation, and blocked from fitting scientific effects.
+
+## 2026-08-17 - Hall Mistral retrieval, modeling, and report
+
+- Linked the returned Hall production run from the sibling compute repository
+  without copying its 455 MB archive. Although the immutable run ID retains
+  the word `smoke`, the embedded report records the completed production DAG:
+  jobs 10390804–10390810, 4/4 production contracts, and zero problems.
+- Added `src/audit_hall_scored_archive.py` and malicious-tar/relocation tests.
+  The independent local audit recomputed archive and product hashes, checked
+  all gzip row counts, source/target/context identity, model and code
+  revisions, finite scores, context truncation, safe tar members, and the
+  Hall-specific target-only policy for contextless rows.
+- Local retrieval audit: PASS. Archive SHA-256
+  `c7c2422f19f87a0096136f73bf3a1fa664f5551ed095371920b3462db6d21202`;
+  287,320 utterance rows; 1,182,476 word rows; 1,769,650 token rows;
+  1,461,794 allocation rows; 1,812 contextless rows per k1–k3; zero problems.
+- Added the restartable `src/build_hall_snapshot_analysis.py` stages:
+  `datasets`, `models`, `plots`, `report`, `audit`, and `all`. The dataset
+  stage recovered all 71,830 Hall rows, the frozen 70,510-row/36-child primary
+  sample, 32,326 primary adult-adjacent turns, 35,744 Hall design cells, and
+  all 20 outcome-blind locked comparison children (18 non-PBM, 2 PBM).
+- All 20 registered child-clustered WLS models passed without fit warnings.
+  Five primary model families completed 1,000 stratified child resamples per
+  registered contrast (21,000 draw rows total); 547 leave-one-child/corpus
+  estimates were retained. The 72 registered contrasts were finite and unique.
+- Primary within-Hall k0 race-by-class interaction: -3.516 bits, clustered 95%
+  CI [-5.730, -1.302], bootstrap [-5.752, -1.264], and leave-one-child range
+  [-4.100, -2.902]. Black-minus-White is +3.077 bits within WC but -0.439 bits
+  within UC; this is an interaction, not a single race effect.
+- Adult-adjacent k3 interaction: -3.249 bits, CI [-5.710, -0.788]. The matched
+  k0-minus-k3 context-support interaction is -0.213 bits, CI
+  [-1.105, 0.679], so the group pattern is not clearly a difference in how
+  much preceding adult context supports the child utterance.
+- Locked Hall-minus-current k0 contrast: +3.037 bits, CI [2.041, 4.032],
+  bootstrap [2.096, 3.978], leave-one-current-corpus range [2.805, 3.190]. It
+  is reported as guarded domain/era/dialect/transcription sensitivity, never
+  as a causal cohort or SES effect.
+- Generated and visually inspected nine figures plus
+  `docs/hall_snapshot_mistral_analysis.md` and `.html`. The final audit passed
+  20/20 models, 72 contrasts, five complete bootstrap families, 9/9 figures,
+  and all required scientific guardrails; it wrote
+  `results/hall_snapshot_analysis/final/ANALYSIS_COMPLETE_AND_AUDITED`.
+- Verification commands included the complete `--stage all` pipeline, 11
+  focused Hall tests, Python compilation, `git diff --check`, and the full
+  repository suite with `CUDA_VISIBLE_DEVICES='' MPLCONFIGDIR=/tmp/mpl-cache`.
+  The full suite passed 417 tests in 300.310 seconds; the emitted convergence,
+  separation, rank, and small-fixture numerical warnings were expected and no
+  test failed.

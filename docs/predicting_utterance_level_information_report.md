@@ -242,16 +242,21 @@ generator are required before strong interpretation.
 
 ## Developmental Onset
 
-The working PBM analysis places the first fixed-effort age-bin decrease by
-24–29 months. This is not yet a confirmed onset. A child-age-cell sensitivity
-changes the weighting and can change the apparent pattern; the current onset
-table does not yet provide the required child-level simultaneous uncertainty.
+The earlier PBM row-level analysis placed the first nominal fixed-effort
+age-bin decrease by 24–29 months. The frozen sustained-onset analysis now adds
+1,000 child-bootstrap replicates and a simultaneous max-|t| band over every
+post-reference contrast. It does not establish a sustained onset in either the
+PBM discovery or non-PBM confirmation sample.
 
-An onset claim will be promoted only if the frozen sustained-onset rule is
-satisfied in the non-discovery sample with a simultaneous confidence band,
-adequate child/corpus support, and sensitivity to validated word, morpheme,
-syllable, and phoneme effort controls. Until then, the linear developmental
-slope is the primary result.
+In PBM, the 24–29 simultaneous upper bound is just above zero and the 36–41
+bound also crosses zero; later bins lack the required three-corpus support. In
+the non-PBM sample, 36–41 is the only age bin whose simultaneous upper bound is
+below zero, but later adequately supported bins cross zero. It therefore fails
+the rule that every later adequately supported bin must remain negative.
+
+The current evidence supports a linear developmental association, not a
+replicated exact onset. The simultaneous analysis uses lexical word effort;
+validated full-79 morpheme, syllable, and phoneme controls remain pending.
 
 ## What the Evidence Supports
 
@@ -273,11 +278,12 @@ repair and clarification.
 
 ## Remaining Validation Before a Stronger Claim
 
-- Construct and manually validate a primary sample of genuine child responses
-  to immediately preceding caregiver turns, retaining flags for child-initiated
-  speech, imitation, routines/reading, backchannels, questions, and repairs.
-- Complete non-discovery sustained-onset inference with child-level
-  simultaneous uncertainty and alternative validated effort measures.
+- Manually validate the constructed structural sample of genuine child
+  responses to immediately preceding caregiver turns and adjudicate the
+  retained `context_k1` mismatches. Preserve flags for child-initiated speech,
+  imitation, routines/reading, backchannels, questions, and repairs.
+- Repeat the completed child-bootstrap sustained-onset analysis with validated
+  full-79 morpheme, syllable, and phoneme effort measures.
 - Prototype downstream caregiver-response predictive gain and validated
   repair, clarification, acknowledgement, and contingent-continuation labels.
 - Calibrate sampled response uncertainty using semantic clusters, coverage and
@@ -295,4 +301,5 @@ repair and clarification.
 - [Frozen discovery/confirmation protocol](direct_surprisal_replication_protocol_2026-07-21.md)
 - [TinyDialogues–Mistral paired visual comparison](paired_tinydialogues_mistral_visual_summary.html)
 - [Corrected Bayes-derived candidate report](corrected_pbm_bayes_report.html)
+- [Sustained-onset confirmation](direct_surprisal_onset_confirmation.html)
 - [Formal mathematical definitions](july_meeting_definitions.html)

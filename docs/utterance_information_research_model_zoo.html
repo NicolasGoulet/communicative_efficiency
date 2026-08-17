@@ -86,6 +86,37 @@ table {
   margin: 1.15em 0 1.45em;
   font-size: 0.95em;
 }
+.plot-layout {
+  table-layout: fixed;
+  margin: 1.1em auto 1.45em;
+}
+.plot-layout,
+.plot-layout tr,
+.plot-layout td {
+  border: 0;
+  background: transparent;
+}
+.plot-layout td {
+  padding: 0.35em 0.55em 0.95em;
+  text-align: center;
+  vertical-align: top;
+}
+.plot-layout img {
+  width: 100%;
+  max-width: 100%;
+  margin: 0 auto 0.35em;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: white;
+}
+.plot-layout .centered-cell img {
+  width: 54%;
+}
+.plot-caption {
+  color: var(--muted);
+  font-size: 0.85em;
+  line-height: 1.35;
+}
 th, td {
   border: 1px solid var(--line);
   padding: 0.54em 0.68em;
@@ -98,10 +129,59 @@ th {
 tr:nth-child(even) td {
   background: #fafbfb;
 }
+.plot-layout tr:nth-child(even) td {
+  background: transparent;
+}
 img {
   max-width: 100%;
   display: block;
   margin: 1.1em auto 0.45em;
+}
+.figure-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.05rem 1.25rem;
+  align-items: start;
+  margin: 1.1em 0 1.45em;
+}
+.figure-grid.two-one {
+  max-width: 900px;
+  margin-left: auto;
+  margin-right: auto;
+}
+.figure-grid.five-panel {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+.figure-grid figure {
+  margin: 0;
+}
+.figure-grid img {
+  width: 100%;
+  max-width: 100%;
+  margin: 0;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: white;
+}
+.figure-grid figcaption {
+  color: var(--muted);
+  font-size: 0.85em;
+  line-height: 1.35;
+  text-align: center;
+  margin-top: 0.35em;
+}
+.figure-grid .centered {
+  grid-column: 1 / -1;
+  justify-self: center;
+  max-width: 58%;
+}
+.figure-grid.two-one .centered {
+  max-width: 54%;
+}
+.figure-grid.five-panel .centered {
+  max-width: 52%;
 }
 ul, ol {
   padding-left: 1.4em;
@@ -122,12 +202,23 @@ ul, ol {
     padding: 28px;
   }
 }
+@media screen and (max-width: 540px) {
+  .figure-grid {
+    grid-template-columns: 1fr;
+  }
+  .figure-grid .centered,
+  .figure-grid.five-panel .centered {
+    grid-column: auto;
+    max-width: 100%;
+  }
+}
 </style>
 </head>
 <body>
 <main>
 <h1>Expanded Internal Model Atlas</h1>
 <p>This is an internal modeling report, not the supervisor-facing document. Its job is to make the central communicative-efficiency comparisons explicit before we decide which results deserve promotion.</p>
+<p>Direct target scores in this run come from <strong>Mistral</strong>. Any missing scorer-specific predictor family is recorded as unavailable rather than being silently borrowed from another scorer.</p>
 <h2>Workflow Separation</h2>
 <p>The analysis and report generation are deliberately decoupled.</p>
 <table>
@@ -756,7 +847,7 @@ ul, ol {
 </tr>
 </tbody></table>
 <p>Response-level entropy features present: <code>False</code>.</p>
-<p>If response-level entropy is absent, this report uses next-token context entropy as a provisional context-predictability measure. This is not the same thing as sampling full possible responses from the model, so final context-efficiency claims should wait for the response-level entropy audit.</p>
+<p>Response-level entropy is absent, but this scorer run includes next-token context entropy as a provisional context-predictability measure. This is not entropy over complete possible responses.</p>
 <h2>Derived Predictors</h2>
 <table>
 <thead><tr>
@@ -766,7 +857,7 @@ ul, ol {
 <tbody>
 <tr>
 <td>context_entropy_bits</td>
-<td>Mistral next-token entropy after the preceding caretaker context.</td>
+<td>Scorer-specific next-token entropy after the preceding caretaker context.</td>
 </tr>
 <tr>
 <td>context_next_top1_prob</td>
@@ -1109,12 +1200,12 @@ ul, ol {
 <td>Z5 Context window sensitivity</td>
 <td>unit=Words</td>
 <td>Does the age trajectory of information per words change across k1/k2/k3 scoring windows?</td>
-<td>bits_per_word ~ age_months_z * C(context_k) + log_nb_words + context_entropy_bits_z</td>
+<td>bits_per_word ~ age_months_z * C(context_k) + log_nb_words</td>
 <td>gee_gaussian</td>
 <td>fit</td>
 <td>15342</td>
 <td>21</td>
-<td>0.3392</td>
+<td>0.3385</td>
 </tr>
 <tr>
 <td>Z5</td>
@@ -1123,12 +1214,12 @@ ul, ol {
 <td>Z5 Context window sensitivity</td>
 <td>unit=Morphemes</td>
 <td>Does the age trajectory of information per morphemes change across k1/k2/k3 scoring windows?</td>
-<td>bits_per_morpheme ~ age_months_z * C(context_k) + log_nb_morphemes + context_entropy_bits_z</td>
+<td>bits_per_morpheme ~ age_months_z * C(context_k) + log_nb_morphemes</td>
 <td>gee_gaussian</td>
 <td>fit</td>
 <td>15342</td>
 <td>21</td>
-<td>0.3909</td>
+<td>0.3902</td>
 </tr>
 <tr>
 <td>Z5</td>
@@ -1137,12 +1228,12 @@ ul, ol {
 <td>Z5 Context window sensitivity</td>
 <td>unit=Syllables: CMU/pkg</td>
 <td>Does the age trajectory of information per syllables: cmu/pkg change across k1/k2/k3 scoring windows?</td>
-<td>bits_per_syllable_cmu_or_pkg ~ age_months_z * C(context_k) + log_nb_syllables + context_entropy_bits_z</td>
+<td>bits_per_syllable_cmu_or_pkg ~ age_months_z * C(context_k) + log_nb_syllables</td>
 <td>gee_gaussian</td>
 <td>fit</td>
 <td>15342</td>
 <td>21</td>
-<td>0.407</td>
+<td>0.4064</td>
 </tr>
 <tr>
 <td>Z5</td>
@@ -1151,12 +1242,12 @@ ul, ol {
 <td>Z5 Context window sensitivity</td>
 <td>unit=Syllables: pkg</td>
 <td>Does the age trajectory of information per syllables: pkg change across k1/k2/k3 scoring windows?</td>
-<td>bits_per_syllable_pkg ~ age_months_z * C(context_k) + log_nb_syllables + context_entropy_bits_z</td>
+<td>bits_per_syllable_pkg ~ age_months_z * C(context_k) + log_nb_syllables</td>
 <td>gee_gaussian</td>
 <td>fit</td>
 <td>15342</td>
 <td>21</td>
-<td>0.3596</td>
+<td>0.3587</td>
 </tr>
 <tr>
 <td>Z5</td>
@@ -1165,12 +1256,12 @@ ul, ol {
 <td>Z5 Context window sensitivity</td>
 <td>unit=Phonemes</td>
 <td>Does the age trajectory of information per phonemes change across k1/k2/k3 scoring windows?</td>
-<td>bits_per_phoneme ~ age_months_z * C(context_k) + log_nb_phonemes + context_entropy_bits_z</td>
+<td>bits_per_phoneme ~ age_months_z * C(context_k) + log_nb_phonemes</td>
 <td>gee_gaussian</td>
 <td>fit</td>
 <td>15342</td>
 <td>21</td>
-<td>0.4756</td>
+<td>0.4753</td>
 </tr>
 <tr>
 <td>Z6</td>
@@ -1179,12 +1270,12 @@ ul, ol {
 <td>Z6 Question-type effort</td>
 <td>effort=Words</td>
 <td>Does caretaker question type modulate child words, and does that modulation change with age?</td>
-<td>nb_words ~ age_months_z * C(context_question_type) + context_entropy_bits_z + log_context_words_plus1</td>
+<td>nb_words ~ age_months_z * C(context_question_type) + log_context_words_plus1</td>
 <td>gee_poisson</td>
 <td>fit</td>
 <td>15342</td>
 <td>21</td>
-<td>0.1019</td>
+<td>0.1018</td>
 </tr>
 <tr>
 <td>Z6</td>
@@ -1193,12 +1284,12 @@ ul, ol {
 <td>Z6 Question-type effort</td>
 <td>effort=Morphemes</td>
 <td>Does caretaker question type modulate child morphemes, and does that modulation change with age?</td>
-<td>nb_morphemes ~ age_months_z * C(context_question_type) + context_entropy_bits_z + log_context_words_plus1</td>
+<td>nb_morphemes ~ age_months_z * C(context_question_type) + log_context_words_plus1</td>
 <td>gee_poisson</td>
 <td>fit</td>
 <td>15342</td>
 <td>21</td>
-<td>0.1023</td>
+<td>0.1022</td>
 </tr>
 <tr>
 <td>Z6</td>
@@ -1207,12 +1298,12 @@ ul, ol {
 <td>Z6 Question-type effort</td>
 <td>effort=Syllables: CMU/pkg</td>
 <td>Does caretaker question type modulate child syllables: cmu/pkg, and does that modulation change with age?</td>
-<td>nb_syllables_cmu_or_pkg ~ age_months_z * C(context_question_type) + context_entropy_bits_z + log_context_words_plus1</td>
+<td>nb_syllables_cmu_or_pkg ~ age_months_z * C(context_question_type) + log_context_words_plus1</td>
 <td>gee_poisson</td>
 <td>fit</td>
 <td>15342</td>
 <td>21</td>
-<td>0.08707</td>
+<td>0.08694</td>
 </tr>
 <tr>
 <td>Z6</td>
@@ -1221,12 +1312,12 @@ ul, ol {
 <td>Z6 Question-type effort</td>
 <td>effort=Syllables: pkg</td>
 <td>Does caretaker question type modulate child syllables: pkg, and does that modulation change with age?</td>
-<td>nb_syllables_pkg ~ age_months_z * C(context_question_type) + context_entropy_bits_z + log_context_words_plus1</td>
+<td>nb_syllables_pkg ~ age_months_z * C(context_question_type) + log_context_words_plus1</td>
 <td>gee_poisson</td>
 <td>fit</td>
 <td>15342</td>
 <td>21</td>
-<td>0.08191</td>
+<td>0.08178</td>
 </tr>
 <tr>
 <td>Z6</td>
@@ -1235,12 +1326,12 @@ ul, ol {
 <td>Z6 Question-type effort</td>
 <td>effort=Phonemes</td>
 <td>Does caretaker question type modulate child phonemes, and does that modulation change with age?</td>
-<td>nb_phonemes ~ age_months_z * C(context_question_type) + context_entropy_bits_z + log_context_words_plus1</td>
+<td>nb_phonemes ~ age_months_z * C(context_question_type) + log_context_words_plus1</td>
 <td>gee_poisson</td>
 <td>fit</td>
 <td>15342</td>
 <td>21</td>
-<td>0.08055</td>
+<td>0.08042</td>
 </tr>
 <tr>
 <td>Z7</td>
@@ -5374,7 +5465,7 @@ ul, ol {
 <td>fit</td>
 <td>15342</td>
 <td>21</td>
-<td>0.3909</td>
+<td>0.3902</td>
 <td>Does the age trajectory of information per morphemes change across k1/k2/k3 scoring windows?</td>
 </tr>
 <tr>
@@ -5384,7 +5475,7 @@ ul, ol {
 <td>fit</td>
 <td>15342</td>
 <td>21</td>
-<td>0.4756</td>
+<td>0.4753</td>
 <td>Does the age trajectory of information per phonemes change across k1/k2/k3 scoring windows?</td>
 </tr>
 <tr>
@@ -5394,7 +5485,7 @@ ul, ol {
 <td>fit</td>
 <td>15342</td>
 <td>21</td>
-<td>0.407</td>
+<td>0.4064</td>
 <td>Does the age trajectory of information per syllables: cmu/pkg change across k1/k2/k3 scoring windows?</td>
 </tr>
 <tr>
@@ -5404,7 +5495,7 @@ ul, ol {
 <td>fit</td>
 <td>15342</td>
 <td>21</td>
-<td>0.3596</td>
+<td>0.3587</td>
 <td>Does the age trajectory of information per syllables: pkg change across k1/k2/k3 scoring windows?</td>
 </tr>
 <tr>
@@ -5414,7 +5505,7 @@ ul, ol {
 <td>fit</td>
 <td>15342</td>
 <td>21</td>
-<td>0.3392</td>
+<td>0.3385</td>
 <td>Does the age trajectory of information per words change across k1/k2/k3 scoring windows?</td>
 </tr>
 </tbody></table>
@@ -5680,233 +5771,233 @@ ul, ol {
 <td>Z5 Context window sensitivity</td>
 <td>unit=Words</td>
 <td>age_months_z</td>
-<td>-0.7007</td>
-<td>0.1229</td>
+<td>-0.7024</td>
+<td>0.1211</td>
 <td>&lt;.001</td>
 </tr>
 <tr>
 <td>Z5 Context window sensitivity</td>
 <td>unit=Words</td>
 <td>age_months_z:C(context_k)[T.k2]</td>
-<td>0.3276</td>
-<td>0.0767</td>
+<td>0.3251</td>
+<td>0.07897</td>
 <td>&lt;.001</td>
 </tr>
 <tr>
 <td>Z5 Context window sensitivity</td>
 <td>unit=Words</td>
 <td>age_months_z:C(context_k)[T.k3]</td>
-<td>0.4525</td>
-<td>0.07682</td>
+<td>0.4541</td>
+<td>0.07391</td>
 <td>&lt;.001</td>
 </tr>
 <tr>
 <td>Z5 Context window sensitivity</td>
 <td>unit=Words</td>
 <td>log_nb_words</td>
-<td>-4.753</td>
-<td>0.2066</td>
-<td>&lt;.001</td>
-</tr>
-<tr>
-<td>Z5 Context window sensitivity</td>
-<td>unit=Words</td>
-<td>context_entropy_bits_z</td>
-<td>-0.1535</td>
-<td>0.04556</td>
+<td>-4.759</td>
+<td>0.2063</td>
 <td>&lt;.001</td>
 </tr>
 <tr>
 <td>Z5 Context window sensitivity</td>
 <td>unit=Morphemes</td>
 <td>age_months_z</td>
-<td>-0.6745</td>
-<td>0.1119</td>
+<td>-0.6761</td>
+<td>0.1099</td>
 <td>&lt;.001</td>
 </tr>
 <tr>
 <td>Z5 Context window sensitivity</td>
 <td>unit=Morphemes</td>
 <td>age_months_z:C(context_k)[T.k2]</td>
-<td>0.3085</td>
-<td>0.07931</td>
+<td>0.3061</td>
+<td>0.08208</td>
 <td>&lt;.001</td>
 </tr>
 <tr>
 <td>Z5 Context window sensitivity</td>
 <td>unit=Morphemes</td>
 <td>age_months_z:C(context_k)[T.k3]</td>
-<td>0.4495</td>
-<td>0.07247</td>
-<td>&lt;.001</td>
-</tr>
-<tr>
-<td>Z5 Context window sensitivity</td>
-<td>unit=Morphemes</td>
-<td>context_entropy_bits_z</td>
-<td>-0.1557</td>
-<td>0.04198</td>
+<td>0.4511</td>
+<td>0.07041</td>
 <td>&lt;.001</td>
 </tr>
 <tr>
 <td>Z5 Context window sensitivity</td>
 <td>unit=Syllables: CMU/pkg</td>
 <td>age_months_z</td>
-<td>-0.362</td>
-<td>0.08012</td>
+<td>-0.3634</td>
+<td>0.0791</td>
 <td>&lt;.001</td>
 </tr>
 <tr>
 <td>Z5 Context window sensitivity</td>
 <td>unit=Syllables: CMU/pkg</td>
 <td>age_months_z:C(context_k)[T.k2]</td>
-<td>0.2568</td>
-<td>0.07016</td>
+<td>0.2549</td>
+<td>0.07061</td>
 <td>&lt;.001</td>
 </tr>
 <tr>
 <td>Z5 Context window sensitivity</td>
 <td>unit=Syllables: CMU/pkg</td>
 <td>age_months_z:C(context_k)[T.k3]</td>
-<td>0.3601</td>
-<td>0.07389</td>
-<td>&lt;.001</td>
-</tr>
-<tr>
-<td>Z5 Context window sensitivity</td>
-<td>unit=Syllables: CMU/pkg</td>
-<td>context_entropy_bits_z</td>
-<td>-0.1157</td>
-<td>0.03456</td>
+<td>0.3612</td>
+<td>0.07187</td>
 <td>&lt;.001</td>
 </tr>
 <tr>
 <td>Z5 Context window sensitivity</td>
 <td>unit=Syllables: pkg</td>
 <td>age_months_z</td>
-<td>-0.3229</td>
-<td>0.09699</td>
+<td>-0.3247</td>
+<td>0.09531</td>
 <td>&lt;.001</td>
 </tr>
 <tr>
 <td>Z5 Context window sensitivity</td>
 <td>unit=Syllables: pkg</td>
 <td>age_months_z:C(context_k)[T.k2]</td>
-<td>0.2229</td>
-<td>0.06537</td>
-<td>&lt;.001</td>
+<td>0.2205</td>
+<td>0.06706</td>
+<td>0.001</td>
 </tr>
 <tr>
 <td>Z5 Context window sensitivity</td>
 <td>unit=Syllables: pkg</td>
 <td>age_months_z:C(context_k)[T.k3]</td>
-<td>0.3389</td>
-<td>0.07494</td>
-<td>&lt;.001</td>
-</tr>
-<tr>
-<td>Z5 Context window sensitivity</td>
-<td>unit=Syllables: pkg</td>
-<td>context_entropy_bits_z</td>
-<td>-0.1486</td>
-<td>0.03652</td>
+<td>0.3404</td>
+<td>0.07184</td>
 <td>&lt;.001</td>
 </tr>
 <tr>
 <td>Z5 Context window sensitivity</td>
 <td>unit=Phonemes</td>
 <td>age_months_z</td>
-<td>-0.01825</td>
-<td>0.04007</td>
-<td>0.649</td>
+<td>-0.01887</td>
+<td>0.03974</td>
+<td>0.635</td>
 </tr>
 <tr>
 <td>Z5 Context window sensitivity</td>
 <td>unit=Phonemes</td>
 <td>age_months_z:C(context_k)[T.k2]</td>
-<td>0.1098</td>
-<td>0.03493</td>
+<td>0.1091</td>
+<td>0.03525</td>
 <td>0.002</td>
 </tr>
 <tr>
 <td>Z5 Context window sensitivity</td>
 <td>unit=Phonemes</td>
 <td>age_months_z:C(context_k)[T.k3]</td>
-<td>0.1972</td>
-<td>0.03438</td>
+<td>0.1976</td>
+<td>0.03411</td>
 <td>&lt;.001</td>
-</tr>
-<tr>
-<td>Z5 Context window sensitivity</td>
-<td>unit=Phonemes</td>
-<td>context_entropy_bits_z</td>
-<td>-0.04582</td>
-<td>0.01823</td>
-<td>0.012</td>
 </tr>
 <tr>
 <td>Z6 Question-type effort</td>
 <td>effort=Words</td>
 <td>age_months_z</td>
-<td>0.2212</td>
-<td>0.02564</td>
+<td>0.2211</td>
+<td>0.02566</td>
 <td>&lt;.001</td>
 </tr>
 <tr>
 <td>Z6 Question-type effort</td>
 <td>effort=Words</td>
 <td>age_months_z:C(context_question_type)[T.other question]</td>
-<td>0.03017</td>
-<td>0.01011</td>
+<td>0.03033</td>
+<td>0.01022</td>
 <td>0.003</td>
 </tr>
 <tr>
 <td>Z6 Question-type effort</td>
 <td>effort=Words</td>
 <td>age_months_z:C(context_question_type)[T.wh-question]</td>
-<td>0.03792</td>
-<td>0.016</td>
+<td>0.03774</td>
+<td>0.01602</td>
 <td>0.018</td>
 </tr>
 <tr>
 <td>Z6 Question-type effort</td>
 <td>effort=Words</td>
 <td>age_months_z:C(context_question_type)[T.yes/no question]</td>
-<td>0.001418</td>
-<td>0.02482</td>
-<td>0.954</td>
-</tr>
-<tr>
-<td>Z6 Question-type effort</td>
-<td>effort=Words</td>
-<td>context_entropy_bits_z</td>
-<td>0.008167</td>
-<td>0.008695</td>
-<td>0.348</td>
+<td>0.001659</td>
+<td>0.02465</td>
+<td>0.946</td>
 </tr>
 <tr>
 <td>Z6 Question-type effort</td>
 <td>effort=Morphemes</td>
 <td>age_months_z</td>
-<td>0.2306</td>
-<td>0.02617</td>
+<td>0.2304</td>
+<td>0.0262</td>
 <td>&lt;.001</td>
 </tr>
 <tr>
 <td>Z6 Question-type effort</td>
 <td>effort=Morphemes</td>
 <td>age_months_z:C(context_question_type)[T.other question]</td>
-<td>0.03427</td>
-<td>0.009822</td>
+<td>0.03442</td>
+<td>0.009922</td>
 <td>&lt;.001</td>
 </tr>
 <tr>
 <td>Z6 Question-type effort</td>
 <td>effort=Morphemes</td>
 <td>age_months_z:C(context_question_type)[T.wh-question]</td>
-<td>0.04604</td>
-<td>0.01608</td>
-<td>0.004</td>
+<td>0.04586</td>
+<td>0.01622</td>
+<td>0.005</td>
+</tr>
+<tr>
+<td>Z6 Question-type effort</td>
+<td>effort=Morphemes</td>
+<td>age_months_z:C(context_question_type)[T.yes/no question]</td>
+<td>0.009962</td>
+<td>0.02565</td>
+<td>0.698</td>
+</tr>
+<tr>
+<td>Z6 Question-type effort</td>
+<td>effort=Syllables: CMU/pkg</td>
+<td>age_months_z</td>
+<td>0.198</td>
+<td>0.02498</td>
+<td>&lt;.001</td>
+</tr>
+<tr>
+<td>Z6 Question-type effort</td>
+<td>effort=Syllables: CMU/pkg</td>
+<td>age_months_z:C(context_question_type)[T.other question]</td>
+<td>0.03582</td>
+<td>0.01069</td>
+<td>&lt;.001</td>
+</tr>
+<tr>
+<td>Z6 Question-type effort</td>
+<td>effort=Syllables: CMU/pkg</td>
+<td>age_months_z:C(context_question_type)[T.wh-question]</td>
+<td>0.04145</td>
+<td>0.01788</td>
+<td>0.020</td>
+</tr>
+<tr>
+<td>Z6 Question-type effort</td>
+<td>effort=Syllables: CMU/pkg</td>
+<td>age_months_z:C(context_question_type)[T.yes/no question]</td>
+<td>0.005949</td>
+<td>0.02542</td>
+<td>0.815</td>
+</tr>
+<tr>
+<td>Z6 Question-type effort</td>
+<td>effort=Syllables: pkg</td>
+<td>age_months_z</td>
+<td>0.1971</td>
+<td>0.02418</td>
+<td>&lt;.001</td>
 </tr>
 </tbody></table>
 <p>Question-type counts:</p>
@@ -8593,7 +8684,7 @@ ul, ol {
 <td>fit</td>
 <td>15342</td>
 <td>21</td>
-<td>0.3392</td>
+<td>0.3385</td>
 </tr>
 <tr>
 <td>Z5</td>
@@ -8602,7 +8693,7 @@ ul, ol {
 <td>fit</td>
 <td>15342</td>
 <td>21</td>
-<td>0.3909</td>
+<td>0.3902</td>
 </tr>
 <tr>
 <td>Z5</td>
@@ -8611,7 +8702,7 @@ ul, ol {
 <td>fit</td>
 <td>15342</td>
 <td>21</td>
-<td>0.407</td>
+<td>0.4064</td>
 </tr>
 <tr>
 <td>Z5</td>
@@ -8620,7 +8711,7 @@ ul, ol {
 <td>fit</td>
 <td>15342</td>
 <td>21</td>
-<td>0.3596</td>
+<td>0.3587</td>
 </tr>
 <tr>
 <td>Z5</td>
@@ -8629,7 +8720,7 @@ ul, ol {
 <td>fit</td>
 <td>15342</td>
 <td>21</td>
-<td>0.4756</td>
+<td>0.4753</td>
 </tr>
 </tbody></table>
 <p>Family key coefficients:</p>
@@ -8646,200 +8737,200 @@ ul, ol {
 <td>Z5 Context window sensitivity</td>
 <td>unit=Words</td>
 <td>C(context_k)[T.k2]</td>
-<td>-1.457</td>
-<td>0.1036</td>
+<td>-1.491</td>
+<td>0.1016</td>
 <td>&lt;.001</td>
 </tr>
 <tr>
 <td>Z5 Context window sensitivity</td>
 <td>unit=Words</td>
 <td>C(context_k)[T.k3]</td>
-<td>-2.226</td>
-<td>0.1198</td>
+<td>-2.307</td>
+<td>0.1233</td>
 <td>&lt;.001</td>
 </tr>
 <tr>
 <td>Z5 Context window sensitivity</td>
 <td>unit=Words</td>
 <td>age_months_z</td>
-<td>-0.7007</td>
-<td>0.1229</td>
+<td>-0.7024</td>
+<td>0.1211</td>
 <td>&lt;.001</td>
 </tr>
 <tr>
 <td>Z5 Context window sensitivity</td>
 <td>unit=Words</td>
 <td>age_months_z:C(context_k)[T.k2]</td>
-<td>0.3276</td>
-<td>0.0767</td>
+<td>0.3251</td>
+<td>0.07897</td>
 <td>&lt;.001</td>
 </tr>
 <tr>
 <td>Z5 Context window sensitivity</td>
 <td>unit=Words</td>
 <td>age_months_z:C(context_k)[T.k3]</td>
-<td>0.4525</td>
-<td>0.07682</td>
+<td>0.4541</td>
+<td>0.07391</td>
 <td>&lt;.001</td>
 </tr>
 <tr>
 <td>Z5 Context window sensitivity</td>
 <td>unit=Words</td>
 <td>log_nb_words</td>
-<td>-4.753</td>
-<td>0.2066</td>
-<td>&lt;.001</td>
-</tr>
-<tr>
-<td>Z5 Context window sensitivity</td>
-<td>unit=Words</td>
-<td>context_entropy_bits_z</td>
-<td>-0.1535</td>
-<td>0.04556</td>
+<td>-4.759</td>
+<td>0.2063</td>
 <td>&lt;.001</td>
 </tr>
 <tr>
 <td>Z5 Context window sensitivity</td>
 <td>unit=Morphemes</td>
 <td>C(context_k)[T.k2]</td>
-<td>-1.368</td>
-<td>0.1018</td>
+<td>-1.402</td>
+<td>0.1013</td>
 <td>&lt;.001</td>
 </tr>
 <tr>
 <td>Z5 Context window sensitivity</td>
 <td>unit=Morphemes</td>
 <td>C(context_k)[T.k3]</td>
-<td>-2.086</td>
-<td>0.1189</td>
+<td>-2.169</td>
+<td>0.1229</td>
 <td>&lt;.001</td>
 </tr>
 <tr>
 <td>Z5 Context window sensitivity</td>
 <td>unit=Morphemes</td>
 <td>age_months_z</td>
-<td>-0.6745</td>
-<td>0.1119</td>
+<td>-0.6761</td>
+<td>0.1099</td>
 <td>&lt;.001</td>
 </tr>
 <tr>
 <td>Z5 Context window sensitivity</td>
 <td>unit=Morphemes</td>
 <td>age_months_z:C(context_k)[T.k2]</td>
-<td>0.3085</td>
-<td>0.07931</td>
+<td>0.3061</td>
+<td>0.08208</td>
 <td>&lt;.001</td>
 </tr>
 <tr>
 <td>Z5 Context window sensitivity</td>
 <td>unit=Morphemes</td>
 <td>age_months_z:C(context_k)[T.k3]</td>
-<td>0.4495</td>
-<td>0.07247</td>
+<td>0.4511</td>
+<td>0.07041</td>
 <td>&lt;.001</td>
 </tr>
 <tr>
 <td>Z5 Context window sensitivity</td>
 <td>unit=Morphemes</td>
 <td>log_nb_morphemes</td>
-<td>-4.867</td>
-<td>0.1929</td>
-<td>&lt;.001</td>
-</tr>
-<tr>
-<td>Z5 Context window sensitivity</td>
-<td>unit=Morphemes</td>
-<td>context_entropy_bits_z</td>
-<td>-0.1557</td>
-<td>0.04198</td>
+<td>-4.874</td>
+<td>0.1927</td>
 <td>&lt;.001</td>
 </tr>
 <tr>
 <td>Z5 Context window sensitivity</td>
 <td>unit=Syllables: CMU/pkg</td>
 <td>C(context_k)[T.k2]</td>
-<td>-1.256</td>
-<td>0.08858</td>
+<td>-1.282</td>
+<td>0.08727</td>
 <td>&lt;.001</td>
 </tr>
 <tr>
 <td>Z5 Context window sensitivity</td>
 <td>unit=Syllables: CMU/pkg</td>
 <td>C(context_k)[T.k3]</td>
-<td>-1.877</td>
-<td>0.1068</td>
+<td>-1.938</td>
+<td>0.1073</td>
 <td>&lt;.001</td>
 </tr>
 <tr>
 <td>Z5 Context window sensitivity</td>
 <td>unit=Syllables: CMU/pkg</td>
 <td>age_months_z</td>
-<td>-0.362</td>
-<td>0.08012</td>
+<td>-0.3634</td>
+<td>0.0791</td>
 <td>&lt;.001</td>
 </tr>
 <tr>
 <td>Z5 Context window sensitivity</td>
 <td>unit=Syllables: CMU/pkg</td>
 <td>age_months_z:C(context_k)[T.k2]</td>
-<td>0.2568</td>
-<td>0.07016</td>
+<td>0.2549</td>
+<td>0.07061</td>
 <td>&lt;.001</td>
 </tr>
 <tr>
 <td>Z5 Context window sensitivity</td>
 <td>unit=Syllables: CMU/pkg</td>
 <td>age_months_z:C(context_k)[T.k3]</td>
-<td>0.3601</td>
-<td>0.07389</td>
+<td>0.3612</td>
+<td>0.07187</td>
 <td>&lt;.001</td>
 </tr>
 <tr>
 <td>Z5 Context window sensitivity</td>
 <td>unit=Syllables: CMU/pkg</td>
 <td>log_nb_syllables</td>
-<td>-4.258</td>
-<td>0.1801</td>
-<td>&lt;.001</td>
-</tr>
-<tr>
-<td>Z5 Context window sensitivity</td>
-<td>unit=Syllables: CMU/pkg</td>
-<td>context_entropy_bits_z</td>
-<td>-0.1157</td>
-<td>0.03456</td>
+<td>-4.263</td>
+<td>0.181</td>
 <td>&lt;.001</td>
 </tr>
 <tr>
 <td>Z5 Context window sensitivity</td>
 <td>unit=Syllables: pkg</td>
 <td>C(context_k)[T.k2]</td>
-<td>-1.166</td>
-<td>0.07312</td>
+<td>-1.2</td>
+<td>0.07072</td>
 <td>&lt;.001</td>
 </tr>
 <tr>
 <td>Z5 Context window sensitivity</td>
 <td>unit=Syllables: pkg</td>
 <td>C(context_k)[T.k3]</td>
-<td>-1.779</td>
-<td>0.09352</td>
+<td>-1.858</td>
+<td>0.09426</td>
 <td>&lt;.001</td>
 </tr>
 <tr>
 <td>Z5 Context window sensitivity</td>
 <td>unit=Syllables: pkg</td>
 <td>age_months_z</td>
-<td>-0.3229</td>
-<td>0.09699</td>
+<td>-0.3247</td>
+<td>0.09531</td>
 <td>&lt;.001</td>
 </tr>
 <tr>
 <td>Z5 Context window sensitivity</td>
 <td>unit=Syllables: pkg</td>
 <td>age_months_z:C(context_k)[T.k2]</td>
-<td>0.2229</td>
-<td>0.06537</td>
+<td>0.2205</td>
+<td>0.06706</td>
+<td>0.001</td>
+</tr>
+<tr>
+<td>Z5 Context window sensitivity</td>
+<td>unit=Syllables: pkg</td>
+<td>age_months_z:C(context_k)[T.k3]</td>
+<td>0.3404</td>
+<td>0.07184</td>
+<td>&lt;.001</td>
+</tr>
+<tr>
+<td>Z5 Context window sensitivity</td>
+<td>unit=Syllables: pkg</td>
+<td>log_nb_syllables</td>
+<td>-4.092</td>
+<td>0.1651</td>
+<td>&lt;.001</td>
+</tr>
+<tr>
+<td>Z5 Context window sensitivity</td>
+<td>unit=Phonemes</td>
+<td>C(context_k)[T.k2]</td>
+<td>-0.553</td>
+<td>0.04324</td>
 <td>&lt;.001</td>
 </tr>
 </tbody></table>
@@ -8847,7 +8938,7 @@ ul, ol {
 <img src="../figs/utterance_information_research_model_zoo/z5_family_coefficients.png" alt="Z5 coefficients">
 <h3>Z5.1: unit: Words</h3>
 <p><strong>Question asked by this subvariant.</strong> Does the age trajectory of information per words change across k1/k2/k3 scoring windows?</p>
-<p><strong>Formula.</strong> <code>bits_per_word ~ age_months_z * C(context_k) + log_nb_words + context_entropy_bits_z</code></p>
+<p><strong>Formula.</strong> <code>bits_per_word ~ age_months_z * C(context_k) + log_nb_words</code></p>
 <p><strong>Estimator.</strong> <code>gee_gaussian</code>. For <code>ols_cluster</code>, the fitted line is the same as OLS, but standard errors and p-values are clustered by child. For GEE models, rows are grouped by child to account for repeated utterances.</p>
 <p>Subvariant fit:</p>
 <table>
@@ -8868,7 +8959,7 @@ ul, ol {
 <td>fit</td>
 <td>15342</td>
 <td>21</td>
-<td>0.3392</td>
+<td>0.3385</td>
 <td>Does the age trajectory of information per words change across k1/k2/k3 scoring windows?</td>
 </tr>
 </tbody></table>
@@ -8886,62 +8977,54 @@ ul, ol {
 <td>Z5 Context window sensitivity</td>
 <td>unit=Words</td>
 <td>C(context_k)[T.k2]</td>
-<td>-1.457</td>
-<td>0.1036</td>
+<td>-1.491</td>
+<td>0.1016</td>
 <td>&lt;.001</td>
 </tr>
 <tr>
 <td>Z5 Context window sensitivity</td>
 <td>unit=Words</td>
 <td>C(context_k)[T.k3]</td>
-<td>-2.226</td>
-<td>0.1198</td>
+<td>-2.307</td>
+<td>0.1233</td>
 <td>&lt;.001</td>
 </tr>
 <tr>
 <td>Z5 Context window sensitivity</td>
 <td>unit=Words</td>
 <td>age_months_z</td>
-<td>-0.7007</td>
-<td>0.1229</td>
+<td>-0.7024</td>
+<td>0.1211</td>
 <td>&lt;.001</td>
 </tr>
 <tr>
 <td>Z5 Context window sensitivity</td>
 <td>unit=Words</td>
 <td>age_months_z:C(context_k)[T.k2]</td>
-<td>0.3276</td>
-<td>0.0767</td>
+<td>0.3251</td>
+<td>0.07897</td>
 <td>&lt;.001</td>
 </tr>
 <tr>
 <td>Z5 Context window sensitivity</td>
 <td>unit=Words</td>
 <td>age_months_z:C(context_k)[T.k3]</td>
-<td>0.4525</td>
-<td>0.07682</td>
+<td>0.4541</td>
+<td>0.07391</td>
 <td>&lt;.001</td>
 </tr>
 <tr>
 <td>Z5 Context window sensitivity</td>
 <td>unit=Words</td>
 <td>log_nb_words</td>
-<td>-4.753</td>
-<td>0.2066</td>
-<td>&lt;.001</td>
-</tr>
-<tr>
-<td>Z5 Context window sensitivity</td>
-<td>unit=Words</td>
-<td>context_entropy_bits_z</td>
-<td>-0.1535</td>
-<td>0.04556</td>
+<td>-4.759</td>
+<td>0.2063</td>
 <td>&lt;.001</td>
 </tr>
 </tbody></table>
 <h3>Z5.2: unit: Morphemes</h3>
 <p><strong>Question asked by this subvariant.</strong> Does the age trajectory of information per morphemes change across k1/k2/k3 scoring windows?</p>
-<p><strong>Formula.</strong> <code>bits_per_morpheme ~ age_months_z * C(context_k) + log_nb_morphemes + context_entropy_bits_z</code></p>
+<p><strong>Formula.</strong> <code>bits_per_morpheme ~ age_months_z * C(context_k) + log_nb_morphemes</code></p>
 <p><strong>Estimator.</strong> <code>gee_gaussian</code>. For <code>ols_cluster</code>, the fitted line is the same as OLS, but standard errors and p-values are clustered by child. For GEE models, rows are grouped by child to account for repeated utterances.</p>
 <p>Subvariant fit:</p>
 <table>
@@ -8962,7 +9045,7 @@ ul, ol {
 <td>fit</td>
 <td>15342</td>
 <td>21</td>
-<td>0.3909</td>
+<td>0.3902</td>
 <td>Does the age trajectory of information per morphemes change across k1/k2/k3 scoring windows?</td>
 </tr>
 </tbody></table>
@@ -8980,62 +9063,54 @@ ul, ol {
 <td>Z5 Context window sensitivity</td>
 <td>unit=Morphemes</td>
 <td>C(context_k)[T.k2]</td>
-<td>-1.368</td>
-<td>0.1018</td>
+<td>-1.402</td>
+<td>0.1013</td>
 <td>&lt;.001</td>
 </tr>
 <tr>
 <td>Z5 Context window sensitivity</td>
 <td>unit=Morphemes</td>
 <td>C(context_k)[T.k3]</td>
-<td>-2.086</td>
-<td>0.1189</td>
+<td>-2.169</td>
+<td>0.1229</td>
 <td>&lt;.001</td>
 </tr>
 <tr>
 <td>Z5 Context window sensitivity</td>
 <td>unit=Morphemes</td>
 <td>age_months_z</td>
-<td>-0.6745</td>
-<td>0.1119</td>
+<td>-0.6761</td>
+<td>0.1099</td>
 <td>&lt;.001</td>
 </tr>
 <tr>
 <td>Z5 Context window sensitivity</td>
 <td>unit=Morphemes</td>
 <td>age_months_z:C(context_k)[T.k2]</td>
-<td>0.3085</td>
-<td>0.07931</td>
+<td>0.3061</td>
+<td>0.08208</td>
 <td>&lt;.001</td>
 </tr>
 <tr>
 <td>Z5 Context window sensitivity</td>
 <td>unit=Morphemes</td>
 <td>age_months_z:C(context_k)[T.k3]</td>
-<td>0.4495</td>
-<td>0.07247</td>
+<td>0.4511</td>
+<td>0.07041</td>
 <td>&lt;.001</td>
 </tr>
 <tr>
 <td>Z5 Context window sensitivity</td>
 <td>unit=Morphemes</td>
 <td>log_nb_morphemes</td>
-<td>-4.867</td>
-<td>0.1929</td>
-<td>&lt;.001</td>
-</tr>
-<tr>
-<td>Z5 Context window sensitivity</td>
-<td>unit=Morphemes</td>
-<td>context_entropy_bits_z</td>
-<td>-0.1557</td>
-<td>0.04198</td>
+<td>-4.874</td>
+<td>0.1927</td>
 <td>&lt;.001</td>
 </tr>
 </tbody></table>
 <h3>Z5.3: unit: Syllables: CMU/pkg</h3>
 <p><strong>Question asked by this subvariant.</strong> Does the age trajectory of information per syllables: cmu/pkg change across k1/k2/k3 scoring windows?</p>
-<p><strong>Formula.</strong> <code>bits_per_syllable_cmu_or_pkg ~ age_months_z * C(context_k) + log_nb_syllables + context_entropy_bits_z</code></p>
+<p><strong>Formula.</strong> <code>bits_per_syllable_cmu_or_pkg ~ age_months_z * C(context_k) + log_nb_syllables</code></p>
 <p><strong>Estimator.</strong> <code>gee_gaussian</code>. For <code>ols_cluster</code>, the fitted line is the same as OLS, but standard errors and p-values are clustered by child. For GEE models, rows are grouped by child to account for repeated utterances.</p>
 <p>Subvariant fit:</p>
 <table>
@@ -9056,7 +9131,7 @@ ul, ol {
 <td>fit</td>
 <td>15342</td>
 <td>21</td>
-<td>0.407</td>
+<td>0.4064</td>
 <td>Does the age trajectory of information per syllables: cmu/pkg change across k1/k2/k3 scoring windows?</td>
 </tr>
 </tbody></table>
@@ -9074,62 +9149,54 @@ ul, ol {
 <td>Z5 Context window sensitivity</td>
 <td>unit=Syllables: CMU/pkg</td>
 <td>C(context_k)[T.k2]</td>
-<td>-1.256</td>
-<td>0.08858</td>
+<td>-1.282</td>
+<td>0.08727</td>
 <td>&lt;.001</td>
 </tr>
 <tr>
 <td>Z5 Context window sensitivity</td>
 <td>unit=Syllables: CMU/pkg</td>
 <td>C(context_k)[T.k3]</td>
-<td>-1.877</td>
-<td>0.1068</td>
+<td>-1.938</td>
+<td>0.1073</td>
 <td>&lt;.001</td>
 </tr>
 <tr>
 <td>Z5 Context window sensitivity</td>
 <td>unit=Syllables: CMU/pkg</td>
 <td>age_months_z</td>
-<td>-0.362</td>
-<td>0.08012</td>
+<td>-0.3634</td>
+<td>0.0791</td>
 <td>&lt;.001</td>
 </tr>
 <tr>
 <td>Z5 Context window sensitivity</td>
 <td>unit=Syllables: CMU/pkg</td>
 <td>age_months_z:C(context_k)[T.k2]</td>
-<td>0.2568</td>
-<td>0.07016</td>
+<td>0.2549</td>
+<td>0.07061</td>
 <td>&lt;.001</td>
 </tr>
 <tr>
 <td>Z5 Context window sensitivity</td>
 <td>unit=Syllables: CMU/pkg</td>
 <td>age_months_z:C(context_k)[T.k3]</td>
-<td>0.3601</td>
-<td>0.07389</td>
+<td>0.3612</td>
+<td>0.07187</td>
 <td>&lt;.001</td>
 </tr>
 <tr>
 <td>Z5 Context window sensitivity</td>
 <td>unit=Syllables: CMU/pkg</td>
 <td>log_nb_syllables</td>
-<td>-4.258</td>
-<td>0.1801</td>
-<td>&lt;.001</td>
-</tr>
-<tr>
-<td>Z5 Context window sensitivity</td>
-<td>unit=Syllables: CMU/pkg</td>
-<td>context_entropy_bits_z</td>
-<td>-0.1157</td>
-<td>0.03456</td>
+<td>-4.263</td>
+<td>0.181</td>
 <td>&lt;.001</td>
 </tr>
 </tbody></table>
 <h3>Z5.4: unit: Syllables: pkg</h3>
 <p><strong>Question asked by this subvariant.</strong> Does the age trajectory of information per syllables: pkg change across k1/k2/k3 scoring windows?</p>
-<p><strong>Formula.</strong> <code>bits_per_syllable_pkg ~ age_months_z * C(context_k) + log_nb_syllables + context_entropy_bits_z</code></p>
+<p><strong>Formula.</strong> <code>bits_per_syllable_pkg ~ age_months_z * C(context_k) + log_nb_syllables</code></p>
 <p><strong>Estimator.</strong> <code>gee_gaussian</code>. For <code>ols_cluster</code>, the fitted line is the same as OLS, but standard errors and p-values are clustered by child. For GEE models, rows are grouped by child to account for repeated utterances.</p>
 <p>Subvariant fit:</p>
 <table>
@@ -9150,7 +9217,7 @@ ul, ol {
 <td>fit</td>
 <td>15342</td>
 <td>21</td>
-<td>0.3596</td>
+<td>0.3587</td>
 <td>Does the age trajectory of information per syllables: pkg change across k1/k2/k3 scoring windows?</td>
 </tr>
 </tbody></table>
@@ -9168,62 +9235,54 @@ ul, ol {
 <td>Z5 Context window sensitivity</td>
 <td>unit=Syllables: pkg</td>
 <td>C(context_k)[T.k2]</td>
-<td>-1.166</td>
-<td>0.07312</td>
+<td>-1.2</td>
+<td>0.07072</td>
 <td>&lt;.001</td>
 </tr>
 <tr>
 <td>Z5 Context window sensitivity</td>
 <td>unit=Syllables: pkg</td>
 <td>C(context_k)[T.k3]</td>
-<td>-1.779</td>
-<td>0.09352</td>
+<td>-1.858</td>
+<td>0.09426</td>
 <td>&lt;.001</td>
 </tr>
 <tr>
 <td>Z5 Context window sensitivity</td>
 <td>unit=Syllables: pkg</td>
 <td>age_months_z</td>
-<td>-0.3229</td>
-<td>0.09699</td>
+<td>-0.3247</td>
+<td>0.09531</td>
 <td>&lt;.001</td>
 </tr>
 <tr>
 <td>Z5 Context window sensitivity</td>
 <td>unit=Syllables: pkg</td>
 <td>age_months_z:C(context_k)[T.k2]</td>
-<td>0.2229</td>
-<td>0.06537</td>
-<td>&lt;.001</td>
+<td>0.2205</td>
+<td>0.06706</td>
+<td>0.001</td>
 </tr>
 <tr>
 <td>Z5 Context window sensitivity</td>
 <td>unit=Syllables: pkg</td>
 <td>age_months_z:C(context_k)[T.k3]</td>
-<td>0.3389</td>
-<td>0.07494</td>
+<td>0.3404</td>
+<td>0.07184</td>
 <td>&lt;.001</td>
 </tr>
 <tr>
 <td>Z5 Context window sensitivity</td>
 <td>unit=Syllables: pkg</td>
 <td>log_nb_syllables</td>
-<td>-4.085</td>
-<td>0.1646</td>
-<td>&lt;.001</td>
-</tr>
-<tr>
-<td>Z5 Context window sensitivity</td>
-<td>unit=Syllables: pkg</td>
-<td>context_entropy_bits_z</td>
-<td>-0.1486</td>
-<td>0.03652</td>
+<td>-4.092</td>
+<td>0.1651</td>
 <td>&lt;.001</td>
 </tr>
 </tbody></table>
 <h3>Z5.5: unit: Phonemes</h3>
 <p><strong>Question asked by this subvariant.</strong> Does the age trajectory of information per phonemes change across k1/k2/k3 scoring windows?</p>
-<p><strong>Formula.</strong> <code>bits_per_phoneme ~ age_months_z * C(context_k) + log_nb_phonemes + context_entropy_bits_z</code></p>
+<p><strong>Formula.</strong> <code>bits_per_phoneme ~ age_months_z * C(context_k) + log_nb_phonemes</code></p>
 <p><strong>Estimator.</strong> <code>gee_gaussian</code>. For <code>ols_cluster</code>, the fitted line is the same as OLS, but standard errors and p-values are clustered by child. For GEE models, rows are grouped by child to account for repeated utterances.</p>
 <p>Subvariant fit:</p>
 <table>
@@ -9244,7 +9303,7 @@ ul, ol {
 <td>fit</td>
 <td>15342</td>
 <td>21</td>
-<td>0.4756</td>
+<td>0.4753</td>
 <td>Does the age trajectory of information per phonemes change across k1/k2/k3 scoring windows?</td>
 </tr>
 </tbody></table>
@@ -9262,57 +9321,49 @@ ul, ol {
 <td>Z5 Context window sensitivity</td>
 <td>unit=Phonemes</td>
 <td>C(context_k)[T.k2]</td>
-<td>-0.5427</td>
-<td>0.04407</td>
+<td>-0.553</td>
+<td>0.04324</td>
 <td>&lt;.001</td>
 </tr>
 <tr>
 <td>Z5 Context window sensitivity</td>
 <td>unit=Phonemes</td>
 <td>C(context_k)[T.k3]</td>
-<td>-0.7999</td>
-<td>0.04927</td>
+<td>-0.8243</td>
+<td>0.0499</td>
 <td>&lt;.001</td>
 </tr>
 <tr>
 <td>Z5 Context window sensitivity</td>
 <td>unit=Phonemes</td>
 <td>age_months_z</td>
-<td>-0.01825</td>
-<td>0.04007</td>
-<td>0.649</td>
+<td>-0.01887</td>
+<td>0.03974</td>
+<td>0.635</td>
 </tr>
 <tr>
 <td>Z5 Context window sensitivity</td>
 <td>unit=Phonemes</td>
 <td>age_months_z:C(context_k)[T.k2]</td>
-<td>0.1098</td>
-<td>0.03493</td>
+<td>0.1091</td>
+<td>0.03525</td>
 <td>0.002</td>
 </tr>
 <tr>
 <td>Z5 Context window sensitivity</td>
 <td>unit=Phonemes</td>
 <td>age_months_z:C(context_k)[T.k3]</td>
-<td>0.1972</td>
-<td>0.03438</td>
+<td>0.1976</td>
+<td>0.03411</td>
 <td>&lt;.001</td>
 </tr>
 <tr>
 <td>Z5 Context window sensitivity</td>
 <td>unit=Phonemes</td>
 <td>log_nb_phonemes</td>
-<td>-2.281</td>
-<td>0.124</td>
+<td>-2.283</td>
+<td>0.1242</td>
 <td>&lt;.001</td>
-</tr>
-<tr>
-<td>Z5 Context window sensitivity</td>
-<td>unit=Phonemes</td>
-<td>context_entropy_bits_z</td>
-<td>-0.04582</td>
-<td>0.01823</td>
-<td>0.012</td>
 </tr>
 </tbody></table>
 <h2>Z6: Question Type Predicting Effort</h2>
@@ -9340,7 +9391,7 @@ ul, ol {
 <td>fit</td>
 <td>15342</td>
 <td>21</td>
-<td>0.1019</td>
+<td>0.1018</td>
 </tr>
 <tr>
 <td>Z6</td>
@@ -9349,7 +9400,7 @@ ul, ol {
 <td>fit</td>
 <td>15342</td>
 <td>21</td>
-<td>0.1023</td>
+<td>0.1022</td>
 </tr>
 <tr>
 <td>Z6</td>
@@ -9358,7 +9409,7 @@ ul, ol {
 <td>fit</td>
 <td>15342</td>
 <td>21</td>
-<td>0.08707</td>
+<td>0.08694</td>
 </tr>
 <tr>
 <td>Z6</td>
@@ -9367,7 +9418,7 @@ ul, ol {
 <td>fit</td>
 <td>15342</td>
 <td>21</td>
-<td>0.08191</td>
+<td>0.08178</td>
 </tr>
 <tr>
 <td>Z6</td>
@@ -9376,7 +9427,7 @@ ul, ol {
 <td>fit</td>
 <td>15342</td>
 <td>21</td>
-<td>0.08055</td>
+<td>0.08042</td>
 </tr>
 </tbody></table>
 <p>Family key coefficients:</p>
@@ -9393,208 +9444,208 @@ ul, ol {
 <td>Z6 Question-type effort</td>
 <td>effort=Words</td>
 <td>C(context_question_type)[T.other question]</td>
-<td>-0.102</td>
-<td>0.01998</td>
+<td>-0.1042</td>
+<td>0.02001</td>
 <td>&lt;.001</td>
 </tr>
 <tr>
 <td>Z6 Question-type effort</td>
 <td>effort=Words</td>
 <td>C(context_question_type)[T.wh-question]</td>
-<td>-0.07197</td>
-<td>0.02825</td>
-<td>0.011</td>
+<td>-0.07694</td>
+<td>0.02742</td>
+<td>0.005</td>
 </tr>
 <tr>
 <td>Z6 Question-type effort</td>
 <td>effort=Words</td>
 <td>C(context_question_type)[T.yes/no question]</td>
-<td>-0.1258</td>
-<td>0.02303</td>
+<td>-0.131</td>
+<td>0.02404</td>
 <td>&lt;.001</td>
 </tr>
 <tr>
 <td>Z6 Question-type effort</td>
 <td>effort=Words</td>
 <td>age_months_z</td>
-<td>0.2212</td>
-<td>0.02564</td>
+<td>0.2211</td>
+<td>0.02566</td>
 <td>&lt;.001</td>
 </tr>
 <tr>
 <td>Z6 Question-type effort</td>
 <td>effort=Words</td>
 <td>age_months_z:C(context_question_type)[T.other question]</td>
-<td>0.03017</td>
-<td>0.01011</td>
+<td>0.03033</td>
+<td>0.01022</td>
 <td>0.003</td>
 </tr>
 <tr>
 <td>Z6 Question-type effort</td>
 <td>effort=Words</td>
 <td>age_months_z:C(context_question_type)[T.wh-question]</td>
-<td>0.03792</td>
-<td>0.016</td>
+<td>0.03774</td>
+<td>0.01602</td>
 <td>0.018</td>
 </tr>
 <tr>
 <td>Z6 Question-type effort</td>
 <td>effort=Words</td>
 <td>age_months_z:C(context_question_type)[T.yes/no question]</td>
-<td>0.001418</td>
-<td>0.02482</td>
-<td>0.954</td>
-</tr>
-<tr>
-<td>Z6 Question-type effort</td>
-<td>effort=Words</td>
-<td>context_entropy_bits_z</td>
-<td>0.008167</td>
-<td>0.008695</td>
-<td>0.348</td>
+<td>0.001659</td>
+<td>0.02465</td>
+<td>0.946</td>
 </tr>
 <tr>
 <td>Z6 Question-type effort</td>
 <td>effort=Words</td>
 <td>log_context_words_plus1</td>
-<td>0.02369</td>
-<td>0.009615</td>
-<td>0.014</td>
+<td>0.02435</td>
+<td>0.009193</td>
+<td>0.008</td>
 </tr>
 <tr>
 <td>Z6 Question-type effort</td>
 <td>effort=Morphemes</td>
 <td>C(context_question_type)[T.other question]</td>
-<td>-0.09947</td>
-<td>0.01786</td>
+<td>-0.1016</td>
+<td>0.01784</td>
 <td>&lt;.001</td>
 </tr>
 <tr>
 <td>Z6 Question-type effort</td>
 <td>effort=Morphemes</td>
 <td>C(context_question_type)[T.wh-question]</td>
-<td>-0.07044</td>
-<td>0.02862</td>
-<td>0.014</td>
+<td>-0.07505</td>
+<td>0.02756</td>
+<td>0.006</td>
 </tr>
 <tr>
 <td>Z6 Question-type effort</td>
 <td>effort=Morphemes</td>
 <td>C(context_question_type)[T.yes/no question]</td>
-<td>-0.1223</td>
-<td>0.02035</td>
+<td>-0.1271</td>
+<td>0.02149</td>
 <td>&lt;.001</td>
 </tr>
 <tr>
 <td>Z6 Question-type effort</td>
 <td>effort=Morphemes</td>
 <td>age_months_z</td>
-<td>0.2306</td>
-<td>0.02617</td>
+<td>0.2304</td>
+<td>0.0262</td>
 <td>&lt;.001</td>
 </tr>
 <tr>
 <td>Z6 Question-type effort</td>
 <td>effort=Morphemes</td>
 <td>age_months_z:C(context_question_type)[T.other question]</td>
-<td>0.03427</td>
-<td>0.009822</td>
+<td>0.03442</td>
+<td>0.009922</td>
 <td>&lt;.001</td>
 </tr>
 <tr>
 <td>Z6 Question-type effort</td>
 <td>effort=Morphemes</td>
 <td>age_months_z:C(context_question_type)[T.wh-question]</td>
-<td>0.04604</td>
-<td>0.01608</td>
-<td>0.004</td>
+<td>0.04586</td>
+<td>0.01622</td>
+<td>0.005</td>
 </tr>
 <tr>
 <td>Z6 Question-type effort</td>
 <td>effort=Morphemes</td>
 <td>age_months_z:C(context_question_type)[T.yes/no question]</td>
-<td>0.009737</td>
-<td>0.02583</td>
-<td>0.706</td>
-</tr>
-<tr>
-<td>Z6 Question-type effort</td>
-<td>effort=Morphemes</td>
-<td>context_entropy_bits_z</td>
-<td>0.007572</td>
-<td>0.009018</td>
-<td>0.401</td>
+<td>0.009962</td>
+<td>0.02565</td>
+<td>0.698</td>
 </tr>
 <tr>
 <td>Z6 Question-type effort</td>
 <td>effort=Morphemes</td>
 <td>log_context_words_plus1</td>
-<td>0.02286</td>
-<td>0.009994</td>
-<td>0.022</td>
+<td>0.02348</td>
+<td>0.00965</td>
+<td>0.015</td>
 </tr>
 <tr>
 <td>Z6 Question-type effort</td>
 <td>effort=Syllables: CMU/pkg</td>
 <td>C(context_question_type)[T.other question]</td>
-<td>-0.09617</td>
-<td>0.01837</td>
+<td>-0.09869</td>
+<td>0.01834</td>
 <td>&lt;.001</td>
 </tr>
 <tr>
 <td>Z6 Question-type effort</td>
 <td>effort=Syllables: CMU/pkg</td>
 <td>C(context_question_type)[T.wh-question]</td>
-<td>-0.0784</td>
-<td>0.02619</td>
-<td>0.003</td>
+<td>-0.08399</td>
+<td>0.02513</td>
+<td>&lt;.001</td>
 </tr>
 <tr>
 <td>Z6 Question-type effort</td>
 <td>effort=Syllables: CMU/pkg</td>
 <td>C(context_question_type)[T.yes/no question]</td>
-<td>-0.1291</td>
-<td>0.02309</td>
+<td>-0.1349</td>
+<td>0.02377</td>
 <td>&lt;.001</td>
 </tr>
 <tr>
 <td>Z6 Question-type effort</td>
 <td>effort=Syllables: CMU/pkg</td>
 <td>age_months_z</td>
-<td>0.1981</td>
-<td>0.02496</td>
+<td>0.198</td>
+<td>0.02498</td>
 <td>&lt;.001</td>
 </tr>
 <tr>
 <td>Z6 Question-type effort</td>
 <td>effort=Syllables: CMU/pkg</td>
 <td>age_months_z:C(context_question_type)[T.other question]</td>
-<td>0.03563</td>
-<td>0.01054</td>
+<td>0.03582</td>
+<td>0.01069</td>
 <td>&lt;.001</td>
 </tr>
 <tr>
 <td>Z6 Question-type effort</td>
 <td>effort=Syllables: CMU/pkg</td>
 <td>age_months_z:C(context_question_type)[T.wh-question]</td>
-<td>0.04162</td>
-<td>0.01772</td>
-<td>0.019</td>
+<td>0.04145</td>
+<td>0.01788</td>
+<td>0.020</td>
 </tr>
 <tr>
 <td>Z6 Question-type effort</td>
 <td>effort=Syllables: CMU/pkg</td>
 <td>age_months_z:C(context_question_type)[T.yes/no question]</td>
-<td>0.005674</td>
-<td>0.02562</td>
-<td>0.825</td>
+<td>0.005949</td>
+<td>0.02542</td>
+<td>0.815</td>
+</tr>
+<tr>
+<td>Z6 Question-type effort</td>
+<td>effort=Syllables: CMU/pkg</td>
+<td>log_context_words_plus1</td>
+<td>0.01373</td>
+<td>0.008896</td>
+<td>0.123</td>
+</tr>
+<tr>
+<td>Z6 Question-type effort</td>
+<td>effort=Syllables: pkg</td>
+<td>C(context_question_type)[T.other question]</td>
+<td>-0.105</td>
+<td>0.01823</td>
+<td>&lt;.001</td>
 </tr>
 </tbody></table>
 <p><strong>How to read this coefficient plot.</strong> Each point is a key coefficient from one subvariant in this family. Horizontal bars are approximate 95% intervals. If a bar crosses zero, the direction is uncertain in that subvariant; if the same term points the same way across subvariants, that pattern is more stable.</p>
 <img src="../figs/utterance_information_research_model_zoo/z6_family_coefficients.png" alt="Z6 coefficients">
 <h3>Z6.1: effort: Words</h3>
 <p><strong>Question asked by this subvariant.</strong> Does caretaker question type modulate child words, and does that modulation change with age?</p>
-<p><strong>Formula.</strong> <code>nb_words ~ age_months_z * C(context_question_type) + context_entropy_bits_z + log_context_words_plus1</code></p>
+<p><strong>Formula.</strong> <code>nb_words ~ age_months_z * C(context_question_type) + log_context_words_plus1</code></p>
 <p><strong>Estimator.</strong> <code>gee_poisson</code>. For <code>ols_cluster</code>, the fitted line is the same as OLS, but standard errors and p-values are clustered by child. For GEE models, rows are grouped by child to account for repeated utterances.</p>
 <p>Subvariant fit:</p>
 <table>
@@ -9615,7 +9666,7 @@ ul, ol {
 <td>fit</td>
 <td>15342</td>
 <td>21</td>
-<td>0.1019</td>
+<td>0.1018</td>
 <td>Does caretaker question type modulate child words, and does that modulation change with age?</td>
 </tr>
 </tbody></table>
@@ -9633,78 +9684,70 @@ ul, ol {
 <td>Z6 Question-type effort</td>
 <td>effort=Words</td>
 <td>C(context_question_type)[T.other question]</td>
-<td>-0.102</td>
-<td>0.01998</td>
+<td>-0.1042</td>
+<td>0.02001</td>
 <td>&lt;.001</td>
 </tr>
 <tr>
 <td>Z6 Question-type effort</td>
 <td>effort=Words</td>
 <td>C(context_question_type)[T.wh-question]</td>
-<td>-0.07197</td>
-<td>0.02825</td>
-<td>0.011</td>
+<td>-0.07694</td>
+<td>0.02742</td>
+<td>0.005</td>
 </tr>
 <tr>
 <td>Z6 Question-type effort</td>
 <td>effort=Words</td>
 <td>C(context_question_type)[T.yes/no question]</td>
-<td>-0.1258</td>
-<td>0.02303</td>
+<td>-0.131</td>
+<td>0.02404</td>
 <td>&lt;.001</td>
 </tr>
 <tr>
 <td>Z6 Question-type effort</td>
 <td>effort=Words</td>
 <td>age_months_z</td>
-<td>0.2212</td>
-<td>0.02564</td>
+<td>0.2211</td>
+<td>0.02566</td>
 <td>&lt;.001</td>
 </tr>
 <tr>
 <td>Z6 Question-type effort</td>
 <td>effort=Words</td>
 <td>age_months_z:C(context_question_type)[T.other question]</td>
-<td>0.03017</td>
-<td>0.01011</td>
+<td>0.03033</td>
+<td>0.01022</td>
 <td>0.003</td>
 </tr>
 <tr>
 <td>Z6 Question-type effort</td>
 <td>effort=Words</td>
 <td>age_months_z:C(context_question_type)[T.wh-question]</td>
-<td>0.03792</td>
-<td>0.016</td>
+<td>0.03774</td>
+<td>0.01602</td>
 <td>0.018</td>
 </tr>
 <tr>
 <td>Z6 Question-type effort</td>
 <td>effort=Words</td>
 <td>age_months_z:C(context_question_type)[T.yes/no question]</td>
-<td>0.001418</td>
-<td>0.02482</td>
-<td>0.954</td>
-</tr>
-<tr>
-<td>Z6 Question-type effort</td>
-<td>effort=Words</td>
-<td>context_entropy_bits_z</td>
-<td>0.008167</td>
-<td>0.008695</td>
-<td>0.348</td>
+<td>0.001659</td>
+<td>0.02465</td>
+<td>0.946</td>
 </tr>
 <tr>
 <td>Z6 Question-type effort</td>
 <td>effort=Words</td>
 <td>log_context_words_plus1</td>
-<td>0.02369</td>
-<td>0.009615</td>
-<td>0.014</td>
+<td>0.02435</td>
+<td>0.009193</td>
+<td>0.008</td>
 </tr>
 </tbody></table>
 <h3>Z6.2: effort: Morphemes</h3>
 <p><strong>Question asked by this subvariant.</strong> Does caretaker question type modulate child morphemes, and does that modulation change with age?</p>
-<p><strong>Formula.</strong> <code>nb_morphemes ~ age_months_z * C(context_question_type) + context_entropy_bits_z + log_context_words_plus1</code></p>
+<p><strong>Formula.</strong> <code>nb_morphemes ~ age_months_z * C(context_question_type) + log_context_words_plus1</code></p>
 <p><strong>Estimator.</strong> <code>gee_poisson</code>. For <code>ols_cluster</code>, the fitted line is the same as OLS, but standard errors and p-values are clustered by child. For GEE models, rows are grouped by child to account for repeated utterances.</p>
 <p>Subvariant fit:</p>
 <table>
@@ -9725,7 +9768,7 @@ ul, ol {
 <td>fit</td>
 <td>15342</td>
 <td>21</td>
-<td>0.1023</td>
+<td>0.1022</td>
 <td>Does caretaker question type modulate child morphemes, and does that modulation change with age?</td>
 </tr>
 </tbody></table>
@@ -9743,78 +9786,70 @@ ul, ol {
 <td>Z6 Question-type effort</td>
 <td>effort=Morphemes</td>
 <td>C(context_question_type)[T.other question]</td>
-<td>-0.09947</td>
-<td>0.01786</td>
+<td>-0.1016</td>
+<td>0.01784</td>
 <td>&lt;.001</td>
 </tr>
 <tr>
 <td>Z6 Question-type effort</td>
 <td>effort=Morphemes</td>
 <td>C(context_question_type)[T.wh-question]</td>
-<td>-0.07044</td>
-<td>0.02862</td>
-<td>0.014</td>
+<td>-0.07505</td>
+<td>0.02756</td>
+<td>0.006</td>
 </tr>
 <tr>
 <td>Z6 Question-type effort</td>
 <td>effort=Morphemes</td>
 <td>C(context_question_type)[T.yes/no question]</td>
-<td>-0.1223</td>
-<td>0.02035</td>
+<td>-0.1271</td>
+<td>0.02149</td>
 <td>&lt;.001</td>
 </tr>
 <tr>
 <td>Z6 Question-type effort</td>
 <td>effort=Morphemes</td>
 <td>age_months_z</td>
-<td>0.2306</td>
-<td>0.02617</td>
+<td>0.2304</td>
+<td>0.0262</td>
 <td>&lt;.001</td>
 </tr>
 <tr>
 <td>Z6 Question-type effort</td>
 <td>effort=Morphemes</td>
 <td>age_months_z:C(context_question_type)[T.other question]</td>
-<td>0.03427</td>
-<td>0.009822</td>
+<td>0.03442</td>
+<td>0.009922</td>
 <td>&lt;.001</td>
 </tr>
 <tr>
 <td>Z6 Question-type effort</td>
 <td>effort=Morphemes</td>
 <td>age_months_z:C(context_question_type)[T.wh-question]</td>
-<td>0.04604</td>
-<td>0.01608</td>
-<td>0.004</td>
+<td>0.04586</td>
+<td>0.01622</td>
+<td>0.005</td>
 </tr>
 <tr>
 <td>Z6 Question-type effort</td>
 <td>effort=Morphemes</td>
 <td>age_months_z:C(context_question_type)[T.yes/no question]</td>
-<td>0.009737</td>
-<td>0.02583</td>
-<td>0.706</td>
-</tr>
-<tr>
-<td>Z6 Question-type effort</td>
-<td>effort=Morphemes</td>
-<td>context_entropy_bits_z</td>
-<td>0.007572</td>
-<td>0.009018</td>
-<td>0.401</td>
+<td>0.009962</td>
+<td>0.02565</td>
+<td>0.698</td>
 </tr>
 <tr>
 <td>Z6 Question-type effort</td>
 <td>effort=Morphemes</td>
 <td>log_context_words_plus1</td>
-<td>0.02286</td>
-<td>0.009994</td>
-<td>0.022</td>
+<td>0.02348</td>
+<td>0.00965</td>
+<td>0.015</td>
 </tr>
 </tbody></table>
 <h3>Z6.3: effort: Syllables: CMU/pkg</h3>
 <p><strong>Question asked by this subvariant.</strong> Does caretaker question type modulate child syllables: cmu/pkg, and does that modulation change with age?</p>
-<p><strong>Formula.</strong> <code>nb_syllables_cmu_or_pkg ~ age_months_z * C(context_question_type) + context_entropy_bits_z + log_context_words_plus1</code></p>
+<p><strong>Formula.</strong> <code>nb_syllables_cmu_or_pkg ~ age_months_z * C(context_question_type) + log_context_words_plus1</code></p>
 <p><strong>Estimator.</strong> <code>gee_poisson</code>. For <code>ols_cluster</code>, the fitted line is the same as OLS, but standard errors and p-values are clustered by child. For GEE models, rows are grouped by child to account for repeated utterances.</p>
 <p>Subvariant fit:</p>
 <table>
@@ -9835,7 +9870,7 @@ ul, ol {
 <td>fit</td>
 <td>15342</td>
 <td>21</td>
-<td>0.08707</td>
+<td>0.08694</td>
 <td>Does caretaker question type modulate child syllables: cmu/pkg, and does that modulation change with age?</td>
 </tr>
 </tbody></table>
@@ -9853,78 +9888,70 @@ ul, ol {
 <td>Z6 Question-type effort</td>
 <td>effort=Syllables: CMU/pkg</td>
 <td>C(context_question_type)[T.other question]</td>
-<td>-0.09617</td>
-<td>0.01837</td>
+<td>-0.09869</td>
+<td>0.01834</td>
 <td>&lt;.001</td>
 </tr>
 <tr>
 <td>Z6 Question-type effort</td>
 <td>effort=Syllables: CMU/pkg</td>
 <td>C(context_question_type)[T.wh-question]</td>
-<td>-0.0784</td>
-<td>0.02619</td>
-<td>0.003</td>
+<td>-0.08399</td>
+<td>0.02513</td>
+<td>&lt;.001</td>
 </tr>
 <tr>
 <td>Z6 Question-type effort</td>
 <td>effort=Syllables: CMU/pkg</td>
 <td>C(context_question_type)[T.yes/no question]</td>
-<td>-0.1291</td>
-<td>0.02309</td>
+<td>-0.1349</td>
+<td>0.02377</td>
 <td>&lt;.001</td>
 </tr>
 <tr>
 <td>Z6 Question-type effort</td>
 <td>effort=Syllables: CMU/pkg</td>
 <td>age_months_z</td>
-<td>0.1981</td>
-<td>0.02496</td>
+<td>0.198</td>
+<td>0.02498</td>
 <td>&lt;.001</td>
 </tr>
 <tr>
 <td>Z6 Question-type effort</td>
 <td>effort=Syllables: CMU/pkg</td>
 <td>age_months_z:C(context_question_type)[T.other question]</td>
-<td>0.03563</td>
-<td>0.01054</td>
+<td>0.03582</td>
+<td>0.01069</td>
 <td>&lt;.001</td>
 </tr>
 <tr>
 <td>Z6 Question-type effort</td>
 <td>effort=Syllables: CMU/pkg</td>
 <td>age_months_z:C(context_question_type)[T.wh-question]</td>
-<td>0.04162</td>
-<td>0.01772</td>
-<td>0.019</td>
+<td>0.04145</td>
+<td>0.01788</td>
+<td>0.020</td>
 </tr>
 <tr>
 <td>Z6 Question-type effort</td>
 <td>effort=Syllables: CMU/pkg</td>
 <td>age_months_z:C(context_question_type)[T.yes/no question]</td>
-<td>0.005674</td>
-<td>0.02562</td>
-<td>0.825</td>
-</tr>
-<tr>
-<td>Z6 Question-type effort</td>
-<td>effort=Syllables: CMU/pkg</td>
-<td>context_entropy_bits_z</td>
-<td>0.009119</td>
-<td>0.009494</td>
-<td>0.337</td>
+<td>0.005949</td>
+<td>0.02542</td>
+<td>0.815</td>
 </tr>
 <tr>
 <td>Z6 Question-type effort</td>
 <td>effort=Syllables: CMU/pkg</td>
 <td>log_context_words_plus1</td>
-<td>0.01301</td>
-<td>0.009296</td>
-<td>0.162</td>
+<td>0.01373</td>
+<td>0.008896</td>
+<td>0.123</td>
 </tr>
 </tbody></table>
 <h3>Z6.4: effort: Syllables: pkg</h3>
 <p><strong>Question asked by this subvariant.</strong> Does caretaker question type modulate child syllables: pkg, and does that modulation change with age?</p>
-<p><strong>Formula.</strong> <code>nb_syllables_pkg ~ age_months_z * C(context_question_type) + context_entropy_bits_z + log_context_words_plus1</code></p>
+<p><strong>Formula.</strong> <code>nb_syllables_pkg ~ age_months_z * C(context_question_type) + log_context_words_plus1</code></p>
 <p><strong>Estimator.</strong> <code>gee_poisson</code>. For <code>ols_cluster</code>, the fitted line is the same as OLS, but standard errors and p-values are clustered by child. For GEE models, rows are grouped by child to account for repeated utterances.</p>
 <p>Subvariant fit:</p>
 <table>
@@ -9945,7 +9972,7 @@ ul, ol {
 <td>fit</td>
 <td>15342</td>
 <td>21</td>
-<td>0.08191</td>
+<td>0.08178</td>
 <td>Does caretaker question type modulate child syllables: pkg, and does that modulation change with age?</td>
 </tr>
 </tbody></table>
@@ -9963,78 +9990,70 @@ ul, ol {
 <td>Z6 Question-type effort</td>
 <td>effort=Syllables: pkg</td>
 <td>C(context_question_type)[T.other question]</td>
-<td>-0.1023</td>
-<td>0.01793</td>
+<td>-0.105</td>
+<td>0.01823</td>
 <td>&lt;.001</td>
 </tr>
 <tr>
 <td>Z6 Question-type effort</td>
 <td>effort=Syllables: pkg</td>
 <td>C(context_question_type)[T.wh-question]</td>
-<td>-0.0807</td>
-<td>0.02529</td>
-<td>0.001</td>
+<td>-0.08668</td>
+<td>0.02488</td>
+<td>&lt;.001</td>
 </tr>
 <tr>
 <td>Z6 Question-type effort</td>
 <td>effort=Syllables: pkg</td>
 <td>C(context_question_type)[T.yes/no question]</td>
-<td>-0.1366</td>
-<td>0.02445</td>
+<td>-0.1429</td>
+<td>0.025</td>
 <td>&lt;.001</td>
 </tr>
 <tr>
 <td>Z6 Question-type effort</td>
 <td>effort=Syllables: pkg</td>
 <td>age_months_z</td>
-<td>0.1972</td>
-<td>0.02416</td>
+<td>0.1971</td>
+<td>0.02418</td>
 <td>&lt;.001</td>
 </tr>
 <tr>
 <td>Z6 Question-type effort</td>
 <td>effort=Syllables: pkg</td>
 <td>age_months_z:C(context_question_type)[T.other question]</td>
-<td>0.03493</td>
-<td>0.01044</td>
+<td>0.03513</td>
+<td>0.0106</td>
 <td>&lt;.001</td>
 </tr>
 <tr>
 <td>Z6 Question-type effort</td>
 <td>effort=Syllables: pkg</td>
 <td>age_months_z:C(context_question_type)[T.wh-question]</td>
-<td>0.03991</td>
-<td>0.01649</td>
-<td>0.016</td>
+<td>0.03973</td>
+<td>0.01669</td>
+<td>0.017</td>
 </tr>
 <tr>
 <td>Z6 Question-type effort</td>
 <td>effort=Syllables: pkg</td>
 <td>age_months_z:C(context_question_type)[T.yes/no question]</td>
-<td>0.01585</td>
-<td>0.0273</td>
-<td>0.562</td>
-</tr>
-<tr>
-<td>Z6 Question-type effort</td>
-<td>effort=Syllables: pkg</td>
-<td>context_entropy_bits_z</td>
-<td>0.009741</td>
-<td>0.009379</td>
-<td>0.299</td>
+<td>0.01614</td>
+<td>0.02713</td>
+<td>0.552</td>
 </tr>
 <tr>
 <td>Z6 Question-type effort</td>
 <td>effort=Syllables: pkg</td>
 <td>log_context_words_plus1</td>
-<td>0.01062</td>
-<td>0.009456</td>
-<td>0.261</td>
+<td>0.01137</td>
+<td>0.009067</td>
+<td>0.210</td>
 </tr>
 </tbody></table>
 <h3>Z6.5: effort: Phonemes</h3>
 <p><strong>Question asked by this subvariant.</strong> Does caretaker question type modulate child phonemes, and does that modulation change with age?</p>
-<p><strong>Formula.</strong> <code>nb_phonemes ~ age_months_z * C(context_question_type) + context_entropy_bits_z + log_context_words_plus1</code></p>
+<p><strong>Formula.</strong> <code>nb_phonemes ~ age_months_z * C(context_question_type) + log_context_words_plus1</code></p>
 <p><strong>Estimator.</strong> <code>gee_poisson</code>. For <code>ols_cluster</code>, the fitted line is the same as OLS, but standard errors and p-values are clustered by child. For GEE models, rows are grouped by child to account for repeated utterances.</p>
 <p>Subvariant fit:</p>
 <table>
@@ -10055,7 +10074,7 @@ ul, ol {
 <td>fit</td>
 <td>15342</td>
 <td>21</td>
-<td>0.08055</td>
+<td>0.08042</td>
 <td>Does caretaker question type modulate child phonemes, and does that modulation change with age?</td>
 </tr>
 </tbody></table>
@@ -10073,73 +10092,65 @@ ul, ol {
 <td>Z6 Question-type effort</td>
 <td>effort=Phonemes</td>
 <td>C(context_question_type)[T.other question]</td>
-<td>-0.09749</td>
-<td>0.01842</td>
+<td>-0.1003</td>
+<td>0.01849</td>
 <td>&lt;.001</td>
 </tr>
 <tr>
 <td>Z6 Question-type effort</td>
 <td>effort=Phonemes</td>
 <td>C(context_question_type)[T.wh-question]</td>
-<td>-0.06437</td>
-<td>0.02809</td>
-<td>0.022</td>
+<td>-0.07053</td>
+<td>0.02774</td>
+<td>0.011</td>
 </tr>
 <tr>
 <td>Z6 Question-type effort</td>
 <td>effort=Phonemes</td>
 <td>C(context_question_type)[T.yes/no question]</td>
-<td>-0.1282</td>
-<td>0.02312</td>
+<td>-0.1347</td>
+<td>0.02346</td>
 <td>&lt;.001</td>
 </tr>
 <tr>
 <td>Z6 Question-type effort</td>
 <td>effort=Phonemes</td>
 <td>age_months_z</td>
-<td>0.1984</td>
-<td>0.02449</td>
+<td>0.1983</td>
+<td>0.02454</td>
 <td>&lt;.001</td>
 </tr>
 <tr>
 <td>Z6 Question-type effort</td>
 <td>effort=Phonemes</td>
 <td>age_months_z:C(context_question_type)[T.other question]</td>
-<td>0.03868</td>
-<td>0.009936</td>
+<td>0.03889</td>
+<td>0.01004</td>
 <td>&lt;.001</td>
 </tr>
 <tr>
 <td>Z6 Question-type effort</td>
 <td>effort=Phonemes</td>
 <td>age_months_z:C(context_question_type)[T.wh-question]</td>
-<td>0.04221</td>
-<td>0.01753</td>
-<td>0.016</td>
+<td>0.04203</td>
+<td>0.01768</td>
+<td>0.017</td>
 </tr>
 <tr>
 <td>Z6 Question-type effort</td>
 <td>effort=Phonemes</td>
 <td>age_months_z:C(context_question_type)[T.yes/no question]</td>
-<td>0.01584</td>
-<td>0.02546</td>
-<td>0.534</td>
-</tr>
-<tr>
-<td>Z6 Question-type effort</td>
-<td>effort=Phonemes</td>
-<td>context_entropy_bits_z</td>
-<td>0.01002</td>
-<td>0.008544</td>
-<td>0.241</td>
+<td>0.01613</td>
+<td>0.02527</td>
+<td>0.523</td>
 </tr>
 <tr>
 <td>Z6 Question-type effort</td>
 <td>effort=Phonemes</td>
 <td>log_context_words_plus1</td>
-<td>0.006516</td>
-<td>0.009128</td>
-<td>0.475</td>
+<td>0.00729</td>
+<td>0.008816</td>
+<td>0.408</td>
 </tr>
 </tbody></table>
 <h2>Z7: Real Children Versus All Matched Baselines</h2>
@@ -13999,7 +14010,7 @@ ul, ol {
 <td>fit</td>
 <td>15342</td>
 <td>21</td>
-<td>0.3909</td>
+<td>0.3902</td>
 <td>Does the age trajectory of information per morphemes change across k1/k2/k3 scoring windows?</td>
 </tr>
 <tr>
@@ -14009,7 +14020,7 @@ ul, ol {
 <td>fit</td>
 <td>15342</td>
 <td>21</td>
-<td>0.4756</td>
+<td>0.4753</td>
 <td>Does the age trajectory of information per phonemes change across k1/k2/k3 scoring windows?</td>
 </tr>
 <tr>
@@ -14019,7 +14030,7 @@ ul, ol {
 <td>fit</td>
 <td>15342</td>
 <td>21</td>
-<td>0.407</td>
+<td>0.4064</td>
 <td>Does the age trajectory of information per syllables: cmu/pkg change across k1/k2/k3 scoring windows?</td>
 </tr>
 <tr>
@@ -14029,7 +14040,7 @@ ul, ol {
 <td>fit</td>
 <td>15342</td>
 <td>21</td>
-<td>0.3596</td>
+<td>0.3587</td>
 <td>Does the age trajectory of information per syllables: pkg change across k1/k2/k3 scoring windows?</td>
 </tr>
 </tbody></table>
@@ -14403,369 +14414,289 @@ ul, ol {
 <td>Z5 Context window sensitivity</td>
 <td>unit=Words</td>
 <td>age_months_z</td>
-<td>-0.7007</td>
-<td>0.1229</td>
+<td>-0.7024</td>
+<td>0.1211</td>
 <td>&lt;.001</td>
 </tr>
 <tr>
 <td>Z5 Context window sensitivity</td>
 <td>unit=Words</td>
 <td>age_months_z:C(context_k)[T.k2]</td>
-<td>0.3276</td>
-<td>0.0767</td>
+<td>0.3251</td>
+<td>0.07897</td>
 <td>&lt;.001</td>
 </tr>
 <tr>
 <td>Z5 Context window sensitivity</td>
 <td>unit=Words</td>
 <td>age_months_z:C(context_k)[T.k3]</td>
-<td>0.4525</td>
-<td>0.07682</td>
+<td>0.4541</td>
+<td>0.07391</td>
 <td>&lt;.001</td>
 </tr>
 <tr>
 <td>Z5 Context window sensitivity</td>
 <td>unit=Words</td>
 <td>log_nb_words</td>
-<td>-4.753</td>
-<td>0.2066</td>
-<td>&lt;.001</td>
-</tr>
-<tr>
-<td>Z5 Context window sensitivity</td>
-<td>unit=Words</td>
-<td>context_entropy_bits_z</td>
-<td>-0.1535</td>
-<td>0.04556</td>
+<td>-4.759</td>
+<td>0.2063</td>
 <td>&lt;.001</td>
 </tr>
 <tr>
 <td>Z5 Context window sensitivity</td>
 <td>unit=Morphemes</td>
 <td>age_months_z</td>
-<td>-0.6745</td>
-<td>0.1119</td>
+<td>-0.6761</td>
+<td>0.1099</td>
 <td>&lt;.001</td>
 </tr>
 <tr>
 <td>Z5 Context window sensitivity</td>
 <td>unit=Morphemes</td>
 <td>age_months_z:C(context_k)[T.k2]</td>
-<td>0.3085</td>
-<td>0.07931</td>
+<td>0.3061</td>
+<td>0.08208</td>
 <td>&lt;.001</td>
 </tr>
 <tr>
 <td>Z5 Context window sensitivity</td>
 <td>unit=Morphemes</td>
 <td>age_months_z:C(context_k)[T.k3]</td>
-<td>0.4495</td>
-<td>0.07247</td>
-<td>&lt;.001</td>
-</tr>
-<tr>
-<td>Z5 Context window sensitivity</td>
-<td>unit=Morphemes</td>
-<td>context_entropy_bits_z</td>
-<td>-0.1557</td>
-<td>0.04198</td>
+<td>0.4511</td>
+<td>0.07041</td>
 <td>&lt;.001</td>
 </tr>
 <tr>
 <td>Z5 Context window sensitivity</td>
 <td>unit=Syllables: CMU/pkg</td>
 <td>age_months_z</td>
-<td>-0.362</td>
-<td>0.08012</td>
+<td>-0.3634</td>
+<td>0.0791</td>
 <td>&lt;.001</td>
 </tr>
 <tr>
 <td>Z5 Context window sensitivity</td>
 <td>unit=Syllables: CMU/pkg</td>
 <td>age_months_z:C(context_k)[T.k2]</td>
-<td>0.2568</td>
-<td>0.07016</td>
+<td>0.2549</td>
+<td>0.07061</td>
 <td>&lt;.001</td>
 </tr>
 <tr>
 <td>Z5 Context window sensitivity</td>
 <td>unit=Syllables: CMU/pkg</td>
 <td>age_months_z:C(context_k)[T.k3]</td>
-<td>0.3601</td>
-<td>0.07389</td>
-<td>&lt;.001</td>
-</tr>
-<tr>
-<td>Z5 Context window sensitivity</td>
-<td>unit=Syllables: CMU/pkg</td>
-<td>context_entropy_bits_z</td>
-<td>-0.1157</td>
-<td>0.03456</td>
+<td>0.3612</td>
+<td>0.07187</td>
 <td>&lt;.001</td>
 </tr>
 <tr>
 <td>Z5 Context window sensitivity</td>
 <td>unit=Syllables: pkg</td>
 <td>age_months_z</td>
-<td>-0.3229</td>
-<td>0.09699</td>
+<td>-0.3247</td>
+<td>0.09531</td>
 <td>&lt;.001</td>
 </tr>
 <tr>
 <td>Z5 Context window sensitivity</td>
 <td>unit=Syllables: pkg</td>
 <td>age_months_z:C(context_k)[T.k2]</td>
-<td>0.2229</td>
-<td>0.06537</td>
-<td>&lt;.001</td>
+<td>0.2205</td>
+<td>0.06706</td>
+<td>0.001</td>
 </tr>
 <tr>
 <td>Z5 Context window sensitivity</td>
 <td>unit=Syllables: pkg</td>
 <td>age_months_z:C(context_k)[T.k3]</td>
-<td>0.3389</td>
-<td>0.07494</td>
-<td>&lt;.001</td>
-</tr>
-<tr>
-<td>Z5 Context window sensitivity</td>
-<td>unit=Syllables: pkg</td>
-<td>context_entropy_bits_z</td>
-<td>-0.1486</td>
-<td>0.03652</td>
+<td>0.3404</td>
+<td>0.07184</td>
 <td>&lt;.001</td>
 </tr>
 <tr>
 <td>Z5 Context window sensitivity</td>
 <td>unit=Phonemes</td>
 <td>age_months_z</td>
-<td>-0.01825</td>
-<td>0.04007</td>
-<td>0.649</td>
+<td>-0.01887</td>
+<td>0.03974</td>
+<td>0.635</td>
 </tr>
 <tr>
 <td>Z5 Context window sensitivity</td>
 <td>unit=Phonemes</td>
 <td>age_months_z:C(context_k)[T.k2]</td>
-<td>0.1098</td>
-<td>0.03493</td>
+<td>0.1091</td>
+<td>0.03525</td>
 <td>0.002</td>
 </tr>
 <tr>
 <td>Z5 Context window sensitivity</td>
 <td>unit=Phonemes</td>
 <td>age_months_z:C(context_k)[T.k3]</td>
-<td>0.1972</td>
-<td>0.03438</td>
+<td>0.1976</td>
+<td>0.03411</td>
 <td>&lt;.001</td>
-</tr>
-<tr>
-<td>Z5 Context window sensitivity</td>
-<td>unit=Phonemes</td>
-<td>context_entropy_bits_z</td>
-<td>-0.04582</td>
-<td>0.01823</td>
-<td>0.012</td>
 </tr>
 <tr>
 <td>Z6 Question-type effort</td>
 <td>effort=Words</td>
 <td>age_months_z</td>
-<td>0.2212</td>
-<td>0.02564</td>
+<td>0.2211</td>
+<td>0.02566</td>
 <td>&lt;.001</td>
 </tr>
 <tr>
 <td>Z6 Question-type effort</td>
 <td>effort=Words</td>
 <td>age_months_z:C(context_question_type)[T.other question]</td>
-<td>0.03017</td>
-<td>0.01011</td>
+<td>0.03033</td>
+<td>0.01022</td>
 <td>0.003</td>
 </tr>
 <tr>
 <td>Z6 Question-type effort</td>
 <td>effort=Words</td>
 <td>age_months_z:C(context_question_type)[T.wh-question]</td>
-<td>0.03792</td>
-<td>0.016</td>
+<td>0.03774</td>
+<td>0.01602</td>
 <td>0.018</td>
 </tr>
 <tr>
 <td>Z6 Question-type effort</td>
 <td>effort=Words</td>
 <td>age_months_z:C(context_question_type)[T.yes/no question]</td>
-<td>0.001418</td>
-<td>0.02482</td>
-<td>0.954</td>
-</tr>
-<tr>
-<td>Z6 Question-type effort</td>
-<td>effort=Words</td>
-<td>context_entropy_bits_z</td>
-<td>0.008167</td>
-<td>0.008695</td>
-<td>0.348</td>
+<td>0.001659</td>
+<td>0.02465</td>
+<td>0.946</td>
 </tr>
 <tr>
 <td>Z6 Question-type effort</td>
 <td>effort=Morphemes</td>
 <td>age_months_z</td>
-<td>0.2306</td>
-<td>0.02617</td>
+<td>0.2304</td>
+<td>0.0262</td>
 <td>&lt;.001</td>
 </tr>
 <tr>
 <td>Z6 Question-type effort</td>
 <td>effort=Morphemes</td>
 <td>age_months_z:C(context_question_type)[T.other question]</td>
-<td>0.03427</td>
-<td>0.009822</td>
+<td>0.03442</td>
+<td>0.009922</td>
 <td>&lt;.001</td>
 </tr>
 <tr>
 <td>Z6 Question-type effort</td>
 <td>effort=Morphemes</td>
 <td>age_months_z:C(context_question_type)[T.wh-question]</td>
-<td>0.04604</td>
-<td>0.01608</td>
-<td>0.004</td>
+<td>0.04586</td>
+<td>0.01622</td>
+<td>0.005</td>
 </tr>
 <tr>
 <td>Z6 Question-type effort</td>
 <td>effort=Morphemes</td>
 <td>age_months_z:C(context_question_type)[T.yes/no question]</td>
-<td>0.009737</td>
-<td>0.02583</td>
-<td>0.706</td>
-</tr>
-<tr>
-<td>Z6 Question-type effort</td>
-<td>effort=Morphemes</td>
-<td>context_entropy_bits_z</td>
-<td>0.007572</td>
-<td>0.009018</td>
-<td>0.401</td>
+<td>0.009962</td>
+<td>0.02565</td>
+<td>0.698</td>
 </tr>
 <tr>
 <td>Z6 Question-type effort</td>
 <td>effort=Syllables: CMU/pkg</td>
 <td>age_months_z</td>
-<td>0.1981</td>
-<td>0.02496</td>
+<td>0.198</td>
+<td>0.02498</td>
 <td>&lt;.001</td>
 </tr>
 <tr>
 <td>Z6 Question-type effort</td>
 <td>effort=Syllables: CMU/pkg</td>
 <td>age_months_z:C(context_question_type)[T.other question]</td>
-<td>0.03563</td>
-<td>0.01054</td>
+<td>0.03582</td>
+<td>0.01069</td>
 <td>&lt;.001</td>
 </tr>
 <tr>
 <td>Z6 Question-type effort</td>
 <td>effort=Syllables: CMU/pkg</td>
 <td>age_months_z:C(context_question_type)[T.wh-question]</td>
-<td>0.04162</td>
-<td>0.01772</td>
-<td>0.019</td>
+<td>0.04145</td>
+<td>0.01788</td>
+<td>0.020</td>
 </tr>
 <tr>
 <td>Z6 Question-type effort</td>
 <td>effort=Syllables: CMU/pkg</td>
 <td>age_months_z:C(context_question_type)[T.yes/no question]</td>
-<td>0.005674</td>
-<td>0.02562</td>
-<td>0.825</td>
-</tr>
-<tr>
-<td>Z6 Question-type effort</td>
-<td>effort=Syllables: CMU/pkg</td>
-<td>context_entropy_bits_z</td>
-<td>0.009119</td>
-<td>0.009494</td>
-<td>0.337</td>
+<td>0.005949</td>
+<td>0.02542</td>
+<td>0.815</td>
 </tr>
 <tr>
 <td>Z6 Question-type effort</td>
 <td>effort=Syllables: pkg</td>
 <td>age_months_z</td>
-<td>0.1972</td>
-<td>0.02416</td>
+<td>0.1971</td>
+<td>0.02418</td>
 <td>&lt;.001</td>
 </tr>
 <tr>
 <td>Z6 Question-type effort</td>
 <td>effort=Syllables: pkg</td>
 <td>age_months_z:C(context_question_type)[T.other question]</td>
-<td>0.03493</td>
-<td>0.01044</td>
+<td>0.03513</td>
+<td>0.0106</td>
 <td>&lt;.001</td>
 </tr>
 <tr>
 <td>Z6 Question-type effort</td>
 <td>effort=Syllables: pkg</td>
 <td>age_months_z:C(context_question_type)[T.wh-question]</td>
-<td>0.03991</td>
-<td>0.01649</td>
-<td>0.016</td>
+<td>0.03973</td>
+<td>0.01669</td>
+<td>0.017</td>
 </tr>
 <tr>
 <td>Z6 Question-type effort</td>
 <td>effort=Syllables: pkg</td>
 <td>age_months_z:C(context_question_type)[T.yes/no question]</td>
-<td>0.01585</td>
-<td>0.0273</td>
-<td>0.562</td>
-</tr>
-<tr>
-<td>Z6 Question-type effort</td>
-<td>effort=Syllables: pkg</td>
-<td>context_entropy_bits_z</td>
-<td>0.009741</td>
-<td>0.009379</td>
-<td>0.299</td>
+<td>0.01614</td>
+<td>0.02713</td>
+<td>0.552</td>
 </tr>
 <tr>
 <td>Z6 Question-type effort</td>
 <td>effort=Phonemes</td>
 <td>age_months_z</td>
-<td>0.1984</td>
-<td>0.02449</td>
+<td>0.1983</td>
+<td>0.02454</td>
 <td>&lt;.001</td>
 </tr>
 <tr>
 <td>Z6 Question-type effort</td>
 <td>effort=Phonemes</td>
 <td>age_months_z:C(context_question_type)[T.other question]</td>
-<td>0.03868</td>
-<td>0.009936</td>
+<td>0.03889</td>
+<td>0.01004</td>
 <td>&lt;.001</td>
 </tr>
 <tr>
 <td>Z6 Question-type effort</td>
 <td>effort=Phonemes</td>
 <td>age_months_z:C(context_question_type)[T.wh-question]</td>
-<td>0.04221</td>
-<td>0.01753</td>
-<td>0.016</td>
+<td>0.04203</td>
+<td>0.01768</td>
+<td>0.017</td>
 </tr>
 <tr>
 <td>Z6 Question-type effort</td>
 <td>effort=Phonemes</td>
 <td>age_months_z:C(context_question_type)[T.yes/no question]</td>
-<td>0.01584</td>
-<td>0.02546</td>
-<td>0.534</td>
-</tr>
-<tr>
-<td>Z6 Question-type effort</td>
-<td>effort=Phonemes</td>
-<td>context_entropy_bits_z</td>
-<td>0.01002</td>
-<td>0.008544</td>
-<td>0.241</td>
+<td>0.01613</td>
+<td>0.02527</td>
+<td>0.523</td>
 </tr>
 <tr>
 <td>Z7 Baseline comparison</td>
@@ -14853,6 +14784,86 @@ ul, ol {
 <td>C(target_variant)[T.random]</td>
 <td>0.3596</td>
 <td>0.004942</td>
+<td>&lt;.001</td>
+</tr>
+<tr>
+<td>Z7 Baseline comparison</td>
+<td>effort=Morphemes</td>
+<td>C(target_variant)[T.real]</td>
+<td>-0.2756</td>
+<td>0.01835</td>
+<td>&lt;.001</td>
+</tr>
+<tr>
+<td>Z7 Baseline comparison</td>
+<td>effort=Morphemes</td>
+<td>C(target_variant)[T.trigram]</td>
+<td>-0.08069</td>
+<td>0.006021</td>
+<td>&lt;.001</td>
+</tr>
+<tr>
+<td>Z7 Baseline comparison</td>
+<td>effort=Morphemes</td>
+<td>C(target_variant)[T.unigram]</td>
+<td>0.1163</td>
+<td>0.006456</td>
+<td>&lt;.001</td>
+</tr>
+<tr>
+<td>Z7 Baseline comparison</td>
+<td>effort=Morphemes</td>
+<td>age_months_z</td>
+<td>0.01434</td>
+<td>0.004918</td>
+<td>0.004</td>
+</tr>
+<tr>
+<td>Z7 Baseline comparison</td>
+<td>effort=Morphemes</td>
+<td>age_months_z:C(target_variant)[T.random]</td>
+<td>0.01397</td>
+<td>0.007368</td>
+<td>0.058</td>
+</tr>
+<tr>
+<td>Z7 Baseline comparison</td>
+<td>effort=Morphemes</td>
+<td>age_months_z:C(target_variant)[T.real]</td>
+<td>-0.03968</td>
+<td>0.00953</td>
+<td>&lt;.001</td>
+</tr>
+<tr>
+<td>Z7 Baseline comparison</td>
+<td>effort=Morphemes</td>
+<td>age_months_z:C(target_variant)[T.trigram]</td>
+<td>-0.01414</td>
+<td>0.008065</td>
+<td>0.080</td>
+</tr>
+<tr>
+<td>Z7 Baseline comparison</td>
+<td>effort=Morphemes</td>
+<td>age_months_z:C(target_variant)[T.unigram]</td>
+<td>0.008227</td>
+<td>0.007597</td>
+<td>0.279</td>
+</tr>
+<tr>
+<td>Z7 Baseline comparison</td>
+<td>effort=Syllables: CMU/pkg</td>
+<td>C(target_variant)[T.random]</td>
+<td>0.2142</td>
+<td>0.007133</td>
+<td>&lt;.001</td>
+</tr>
+<tr>
+<td>Z7 Baseline comparison</td>
+<td>effort=Syllables: CMU/pkg</td>
+<td>C(target_variant)[T.real]</td>
+<td>-0.277</td>
+<td>0.01899</td>
 <td>&lt;.001</td>
 </tr>
 </tbody></table>
