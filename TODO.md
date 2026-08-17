@@ -43,6 +43,41 @@ items were superseded or completed by the later modular direct-score workflow.
       the compact report/products, and add the decoupled response calibration
       as a new Route 2 sensitivity. Do not bypass the smoke gate.
 
+### Hall cross-sectional snapshot — 2026-08-10 to 2026-08-17
+
+- [x] Implement and test a Hall-specific preprocessor that preserves all
+      speaker tiers, situation boundaries, broad speaker roles, demographic
+      provenance, and explicit transcript exclusions.
+- [x] Preprocess all 40 local Hall files. The audit passed with 238,249 main
+      tiers, 36 primary children/70,510 child targets, and a 37-child/71,830-
+      target sensitivity that adds one folder-inferred stratum.
+- [x] Freeze an outcome-blind current-corpus comparator: one Mistral session
+      per eligible child nearest the Hall primary median age of 57 months in
+      the 54–59 month window. The manifest contains 20 children (18 non-PBM,
+      2 PBM) and does not inspect outcomes for selection.
+- [x] Run the full repository suite after complete Hall scoring and analysis
+      integration with `CUDA_VISIBLE_DEVICES='' MPLCONFIGDIR=/tmp/mpl-cache`;
+      all 417 tests passed in 300.310 seconds with expected small-fixture statistical
+      warnings and no failures.
+- [x] Build the deterministic Mila handoff archive and verify its sidecar
+      checksum. The 2,520,424-byte archive contains four k0–k3 contracts over
+      71,830 inputs (287,320 expected scores), with SHA-256
+      `23ca951da9912ea3d46235821cd877c972e7397acd64054ae5dff7d6125544a0`.
+- [x] Write the test-driven compute-repository implementation prompt at
+      `docs/compute_surprisal_mila_hall_prompt_2026-08-10.md`, including CPU
+      preparation, exact-wrapper GPU smoke, resource validation, staged waves,
+      audited resume, and final retrieval contracts.
+- [x] Add a smoke-gated Hall Mistral scoring contract for the 71,830 real child
+      targets at k0–k3, using previous adult-interlocutor turns within the same
+      situation for contextual scores. The returned archive passed its local
+      relocation audit across 287,320 utterance rows and all word/token products.
+- [x] Fit the frozen Hall snapshot models only after scoring: within-Hall
+      race-by-class descriptive contrasts at fixed exact word effort and
+      setting, then guarded age-matched external comparisons. Treat historical
+      strata and scorer/dialect effects as descriptive, not causal or deficit
+      measures. All 20 models, 21,000 bootstrap contrast draws, 547 influence
+      fits, 9 plots, and the final artifact audit passed.
+
 ### Reviewed local closeout — 2026-08-05
 
 - [x] Review and retain the sustained-onset implementation, tests, and report.

@@ -123,9 +123,25 @@ For the moment,  we are only using Brown, Manchester and Providence, but we plan
 
 ## Preprocessing Assumptions
 
-Authoritative preprocessing script:
+Authoritative longitudinal preprocessing script:
 
 - `src/prepare_datasets.py`
+
+Hall uses `src/prepare_hall_snapshot.py` because its cross-sectional files
+contain home, school, and transition settings plus parents, teachers,
+investigators, peers, siblings, unidentified speakers, and media. The Hall
+preprocessor preserves every main tier and active `@Situation` rather than
+reducing context to `CHI`/`MOT`/`FAT`.
+
+Hall scoring and modeling remain separate from the longitudinal analysis. The
+returned Mistral k0–k3 same-pass archive is integrity-checked by
+`src/audit_hall_scored_archive.py`; `src/build_hall_snapshot_analysis.py`
+then runs independent dataset, model, plot, report, and final-audit stages.
+The primary model is an exact/top-coded word-effort cell WLS with setting and
+race-by-class terms and child-clustered uncertainty. Adult-adjacent k3 and
+k0-minus-k3 outcomes, the 37th folder-inferred child, home/school, age, sex,
+equal-child weighting, child bootstrap, leave-one-child influence, and the
+outcome-blind locked 20-child external snapshot are explicit sensitivities.
 
 Current output families:
 
@@ -150,6 +166,10 @@ Current preprocessing split:
 - All CHI/MOT/FAT main-tier rows are kept in preprocessing output. Rows whose
   cleaned utterance is empty keep an empty `utterance_clean` value and are
   marked with `cleaned_is_empty` instead of being silently dropped.
+- Hall writes the same standard `chi.csv` and family `caretakers.csv` views for
+  compatibility, plus `adult_interlocutors.csv` and lossless
+  `all_speakers.csv` views with setting, speaker-role, adjacency, race, class,
+  and provenance fields.
 
 CSV text fields are quoted on write so CHILDES age strings such as `1;04.27`
 do not get split into extra spreadsheet columns by importers that also enable

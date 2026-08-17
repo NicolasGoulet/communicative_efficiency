@@ -7251,3 +7251,88 @@ CUDA_VISIBLE_DEVICES='' MPLCONFIGDIR=/tmp/mpl-cache \
   The clean-cache run passed **390 tests in 1767.508 seconds**. Expected
   Statsmodels convergence, perfect-separation, singular/rank, plotting, and
   small-fixture numerical warnings occurred; there were no failures.
+
+## 2026-08-10 - Hall cross-sectional snapshot preparation
+
+- Added `src/prepare_hall_snapshot.py` and test-first coverage for Hall's
+  demographic provenance, multi-speaker role taxonomy, situation-aware setting
+  labels, previous-turn adjacency, missing-transcript placeholders, and
+  unrevised-ASR exclusion.
+- The real 40-file preprocessing audit passed: 238,249 main tiers, 36 primary
+  children with child-specific race/class and 70,510 scorable utterances, and
+  a 37-child/71,830-row sensitivity adding only `rog` via folder-level stratum
+  inference. `grc`, `lea`, and `brh` remain explicitly inventoried exclusions.
+- Preserved all speakers under `data/preprocessed_data/Hall/` and wrote the
+  compact real-target table and audits under
+  `results/hall_snapshot_preprocessing/`. The target table records 45,921 home,
+  20,155 school, 4,659 transition, and 1,095 other-setting utterances; 33,030
+  targets immediately follow an adult interlocutor.
+- Added `src/build_hall_snapshot_comparator.py`. Its outcome-blind audit passed
+  and selected one existing Mistral session nearest the Hall median of 57
+  months within ages 54–59 for 20 children (18 non-PBM and 2 PBM). Hall remains
+  separate from the 79-child longitudinal sample and has not yet been scored.
+- Frozen design and caveats are in
+  `docs/hall_snapshot_preprocessing_and_analysis_plan.md`.
+- Full verification after the deterministic handoff integration passed 412
+  tests in 625.030 seconds with
+  `CUDA_VISIBLE_DEVICES='' MPLCONFIGDIR=/tmp/mpl-cache`; warnings were the
+  expected small-fixture Statsmodels/plotting diagnostics and there were no
+  failures.
+- Added a deterministic Hall Mila handoff builder and archive regression test.
+  The real local handoff passed with four contracts, 71,830 input rows, 287,320
+  expected scored rows, zero blank targets, zero duplicate identities, and
+  SHA-256 `23ca951da9912ea3d46235821cd877c972e7397acd64054ae5dff7d6125544a0`.
+  The archive is 2,520,424 bytes under
+  `results/scoring_bundles/hall_snapshot_mistral_real_k0_k3_v1/`.
+- Wrote `docs/compute_surprisal_mila_hall_prompt_2026-08-10.md` so the sibling
+  compute implementation is test-first, CPU-prepared before GPU eligibility,
+  smoke-only by default, Slurm-resource validated, wave-audited, resumable only
+  after contract validation, and blocked from fitting scientific effects.
+
+## 2026-08-17 - Hall Mistral retrieval, modeling, and report
+
+- Linked the returned Hall production run from the sibling compute repository
+  without copying its 455 MB archive. Although the immutable run ID retains
+  the word `smoke`, the embedded report records the completed production DAG:
+  jobs 10390804–10390810, 4/4 production contracts, and zero problems.
+- Added `src/audit_hall_scored_archive.py` and malicious-tar/relocation tests.
+  The independent local audit recomputed archive and product hashes, checked
+  all gzip row counts, source/target/context identity, model and code
+  revisions, finite scores, context truncation, safe tar members, and the
+  Hall-specific target-only policy for contextless rows.
+- Local retrieval audit: PASS. Archive SHA-256
+  `c7c2422f19f87a0096136f73bf3a1fa664f5551ed095371920b3462db6d21202`;
+  287,320 utterance rows; 1,182,476 word rows; 1,769,650 token rows;
+  1,461,794 allocation rows; 1,812 contextless rows per k1–k3; zero problems.
+- Added the restartable `src/build_hall_snapshot_analysis.py` stages:
+  `datasets`, `models`, `plots`, `report`, `audit`, and `all`. The dataset
+  stage recovered all 71,830 Hall rows, the frozen 70,510-row/36-child primary
+  sample, 32,326 primary adult-adjacent turns, 35,744 Hall design cells, and
+  all 20 outcome-blind locked comparison children (18 non-PBM, 2 PBM).
+- All 20 registered child-clustered WLS models passed without fit warnings.
+  Five primary model families completed 1,000 stratified child resamples per
+  registered contrast (21,000 draw rows total); 547 leave-one-child/corpus
+  estimates were retained. The 72 registered contrasts were finite and unique.
+- Primary within-Hall k0 race-by-class interaction: -3.516 bits, clustered 95%
+  CI [-5.730, -1.302], bootstrap [-5.752, -1.264], and leave-one-child range
+  [-4.100, -2.902]. Black-minus-White is +3.077 bits within WC but -0.439 bits
+  within UC; this is an interaction, not a single race effect.
+- Adult-adjacent k3 interaction: -3.249 bits, CI [-5.710, -0.788]. The matched
+  k0-minus-k3 context-support interaction is -0.213 bits, CI
+  [-1.105, 0.679], so the group pattern is not clearly a difference in how
+  much preceding adult context supports the child utterance.
+- Locked Hall-minus-current k0 contrast: +3.037 bits, CI [2.041, 4.032],
+  bootstrap [2.096, 3.978], leave-one-current-corpus range [2.805, 3.190]. It
+  is reported as guarded domain/era/dialect/transcription sensitivity, never
+  as a causal cohort or SES effect.
+- Generated and visually inspected nine figures plus
+  `docs/hall_snapshot_mistral_analysis.md` and `.html`. The final audit passed
+  20/20 models, 72 contrasts, five complete bootstrap families, 9/9 figures,
+  and all required scientific guardrails; it wrote
+  `results/hall_snapshot_analysis/final/ANALYSIS_COMPLETE_AND_AUDITED`.
+- Verification commands included the complete `--stage all` pipeline, 11
+  focused Hall tests, Python compilation, `git diff --check`, and the full
+  repository suite with `CUDA_VISIBLE_DEVICES='' MPLCONFIGDIR=/tmp/mpl-cache`.
+  The full suite passed 417 tests in 300.310 seconds; the emitted convergence,
+  separation, rank, and small-fixture numerical warnings were expected and no
+  test failed.

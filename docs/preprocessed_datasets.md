@@ -1,6 +1,6 @@
 # Currently Preprocessed Datasets
 
-Last checked: 2026-05-20.
+Last checked: 2026-08-10.
 
 This file describes the datasets currently present under
 `data/preprocessed_data/`. A dataset is considered **Stage 0 preprocessed** when
@@ -79,6 +79,8 @@ The current auditable grouping file is
   from naturalistic caregiver-child analyses.
 - `unassigned`: present in `data/preprocessed_data/` but not yet assigned in
   the grouping file.
+- `cross_sectional_sociolinguistic_snapshot`: Hall's age-four, multi-setting
+  cross-sectional design. It is excluded from the longitudinal strict default.
 
 ## Current Summary
 
@@ -96,6 +98,7 @@ are CSV sanity checks.
 | Demetras1 | naturalistic_caregiver_child | yes | 1 | 6,842 | 8,270 | 0 | 0 | 0 | 0 | 0 | 0 |
 | EHS | caregiver_child_structured_observation | no | 126 | 45,930 | 109,720 | 46 | 59 | 0 | 0 | 0 | 0 |
 | Forrester | naturalistic_caregiver_child | yes | 1 | 6,664 | 8,890 | 0 | 0 | 0 | 0 | 0 | 0 |
+| Hall | cross_sectional_sociolinguistic_snapshot | no | 40 | 71,830 | 49,343 | 0 | 0 | 0 | 0 | 0 | 0 |
 | Kuczaj | naturalistic_caregiver_child | yes | 1 | 37,109 | 28,223 | 0 | 0 | 0 | 0 | 0 | 0 |
 | Lara | naturalistic_caregiver_child | yes | 1 | 49,328 | 81,449 | 0 | 0 | 0 | 0 | 0 | 0 |
 | MPI-EVA-Manchester | naturalistic_caregiver_child | yes | 4 | 462,100 | 546,929 | 0 | 0 | 0 | 0 | 0 | 0 |
@@ -108,11 +111,11 @@ are CSV sanity checks.
 
 Totals:
 
-- Child folders: 270
-- Child rows: 1,518,309
-- Non-empty cleaned child utterances: 1,315,158
-- Caretaker rows: 1,789,736
-- Non-empty cleaned caretaker utterances: 1,721,010
+- Child folders: 310
+- Child rows: 1,593,965
+- Non-empty cleaned child utterances: 1,386,988
+- Caretaker rows: 1,840,403
+- Non-empty cleaned caretaker utterances: 1,770,353
 - Child rows missing `age_months`: 672
 - Caretaker rows missing `age_months`: 581
 - CSV row-width issues: 0
@@ -132,6 +135,7 @@ These datasets are currently ready for real-utterance analyses that use
 - Demetras1
 - EHS
 - Forrester
+- Hall
 - Kuczaj
 - Lara
 - MPI-EVA-Manchester
@@ -181,6 +185,16 @@ These datasets currently have compact child-side surprisal scoring files:
 - **EHS**: Stage 0 ready, but assigned to structured observation. It has a small
   number of rows missing `age_months`.
 - **Forrester**: Stage 0 ready; strict naturalistic default.
+- **Hall**: ready through the dedicated cross-sectional preprocessor
+  `src/prepare_hall_snapshot.py`. It preserves all speaker tiers and active
+  `@Situation` labels in `all_speakers.csv`, writes separate adult-interlocutor
+  and family-caretaker views, and records race/social-class provenance and
+  transcript exclusions. The primary snapshot has 36 children; a 37-child
+  sensitivity adds one folder-inferred stratum. Hall is not part of the strict
+  longitudinal default. Its completed k0–k3 Mistral same-pass archive passed
+  the local relocation audit, and the separate cross-sectional model/report
+  workflow is complete under `results/hall_snapshot_analysis/` and
+  `docs/hall_snapshot_mistral_analysis.html`.
 - **Kuczaj**: Stage 0 ready; strict naturalistic default.
 - **Lara**: Stage 0 ready; strict naturalistic default. The `ELS` grandmother
   tier is included with caretakers.
@@ -199,5 +213,3 @@ These datasets currently have compact child-side surprisal scoring files:
 
 - **Thomas**: discussed as a strict candidate, but `Thomas.zip` was not present
   in `data/zip_files` at the last check, so it is not extracted or preprocessed.
-- **Hall**: listed in the broader project overview, but there is no current
-  `data/preprocessed_data/Hall/` directory in this checkout.

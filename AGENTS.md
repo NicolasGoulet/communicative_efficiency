@@ -84,9 +84,18 @@ Observational CHILDES results can be described as consistent with developmental
 adaptation or efficiency, but do not by themselves prove that children
 optimize an objective.
 
+Treat Hall as a separate cross-sectional sociolinguistic snapshot, not as an
+80th longitudinal child or a 14th strict-naturalistic corpus. Its historical
+race/social-class strata support within-Hall descriptive contrasts near age
+four, with child-clustered uncertainty and explicit setting controls. Any
+race/class score difference may reflect dialect, recording era, geography,
+transcription, setting, or language-model representation; do not interpret it
+as a causal SES effect, linguistic deficit, or inherent group efficiency.
+
 ## Current Active Data And Analysis State
 
-Status verified locally on 2026-07-21.
+Core longitudinal state was verified locally on 2026-07-21; the Hall snapshot
+state below was verified on 2026-08-17.
 
 Primary external scored/feature handoffs:
 
@@ -98,6 +107,7 @@ results/external/compute_surprisal_mila/context_entropy_mistral
 results/external/compute_surprisal_mila/raw_surprisal_heldout_real_child_generalization_2026-06-16
 results/external/compute_surprisal_mila/raw_surprisal_cleaned_naturalistic_79_children_all_available_ages_fp16
 results/external/compute_surprisal_mila/raw_surprisal_tinydialogues_pbm_21_children_all_6_conditions_k0_k1_k2_k3_fp32
+results/external/compute_surprisal_mila/hall_snapshot_mistral_word_surprisal_20260813_66812c4
 ```
 
 These are symlinks into:
@@ -119,6 +129,35 @@ Current strict naturalistic big-cleaned bundle:
 ```text
 data/big_cleaned_dataset/default_naturalistic_merged_006_023/
 ```
+
+The separately prepared Hall snapshot is under
+`data/preprocessed_data/Hall/`, with compact audits and a real-target scoring
+table under `results/hall_snapshot_preprocessing/`. Its 2026-08-10 audit passed
+40 source files and 238,249 main tiers. The frozen primary sample contains 36
+children and 70,510 scorable child utterances; the 37-child/71,830-row
+sensitivity adds one folder-inferred demographic stratum. Three files remain
+explicitly excluded: two missing-transcript placeholders and one unrevised-ASR
+file with no identified target-child tier. The completed Hall Mistral
+same-pass archive is local through the model/run-labelled external symlink. Its
+independent relocation audit passed 4/4 k0–k3 contracts: 287,320 utterance
+rows, 1,182,476 word rows, 1,769,650 token rows, 1,461,794 allocation rows,
+and zero problems. The 455,153,574-byte archive SHA-256 is
+`c7c2422f19f87a0096136f73bf3a1fa664f5551ed095371920b3462db6d21202`.
+An outcome-blind 54–59-month comparison manifest selects one session nearest
+57 months for 20 current Mistral children.
+
+The completed modular Hall analysis is under
+`results/hall_snapshot_analysis/`, with its human-facing report at
+`docs/hall_snapshot_mistral_analysis.html`. All 20 registered models passed,
+five primary model families completed 1,000 stratified child bootstraps, 72
+registered contrasts and 9 plots passed the final audit, and
+`ANALYSIS_COMPLETE_AND_AUDITED` is present. At fixed cleaned word count and
+setting, the primary k0 race-by-class interaction is -3.516 bits (clustered
+95% CI [-5.730, -1.302]); it is a scorer-indexed descriptive interaction, not
+a causal SES effect. The adult-adjacent k0-minus-k3 context-support interaction
+is -0.213 bits with an interval crossing zero. The guarded Hall-minus-current
+locked-snapshot k0 contrast is +3.037 bits (95% CI [2.041, 4.032]); treat it as
+domain/era/dialect/transcription sensitivity, not a causal cohort effect.
 
 This bundle uses additive random/unigram/bigram/trigram dictionaries with one
 first bin `006-023`, followed by 6-month bins:
@@ -279,6 +318,10 @@ as a replicated onset.
 
 Important current facts:
 
+- the Hall Mistral same-pass archive is local and passed an independent
+  relocation-aware audit with exact archive/input hashes, safe members, 4/4
+  contracts, full row identities, and no scoring problems. Its 20-model
+  cross-sectional analysis and final report also pass their complete audit;
 - the PBM same-pass Mistral, Qwen3-14B, and TinyDialogues word productions are
   local and passed their 504-contract relocation audits, immutable handoff,
   exact-pairing, and no-effect feature gates. Each scorer has the exact same
@@ -346,6 +389,13 @@ Current supervisor-facing utterance-information report:
 ```text
 docs/predicting_utterance_level_information_report.md
 docs/predicting_utterance_level_information_report.html
+```
+
+The separate Hall cross-sectional report is:
+
+```text
+docs/hall_snapshot_mistral_analysis.md
+docs/hall_snapshot_mistral_analysis.html
 ```
 
 The July supervisor-report landing page and formal methods reference are:
@@ -533,6 +583,10 @@ communicative_efficiency/
   scoring-ready CSVs.
 - `src/create_pbm_early_baseline_rescoring_bundle.py`: PBM-only `006-023`
   generated-baseline handoff bundle for Mila rescoring.
+- `src/audit_hall_scored_archive.py`: relocation-aware integrity, product, and
+  cross-context audit for the returned Hall Mistral archive.
+- `src/build_hall_snapshot_analysis.py`: modular Hall dataset, model,
+  bootstrap, influence, plot, report, and final-audit workflow.
 - `src/generate_lstm_utterances.py`: word-level LSTM model code.
 - `src/run_lstm_baseline_pipeline.py`: config-driven LSTM orchestration.
 - `src/build_route1_analysis_dataset.py`: audited PBM scored/effort long table.
@@ -632,9 +686,10 @@ env UV_CACHE_DIR=/tmp/uv-cache uv run python -m unittest discover -s tests
 Do not copy an old test count into new notes. Record the command, date, pass
 count, and any expected warnings from the test run actually performed.
 
-Latest full-suite verification on 2026-07-22 after the interactive results
-explorer integration and status reconciliation: 390 tests passed in 1767.508
-seconds with `CUDA_VISIBLE_DEVICES=''`. The clean-cache run emitted expected
+Latest full-suite verification on 2026-08-17 after the completed Hall scoring,
+relocation audit, modeling, plots, and report integration: 417 tests passed in
+300.310 seconds with
+`CUDA_VISIBLE_DEVICES=''`. The run emitted expected
 Statsmodels convergence, perfect-separation, singular-fit, plotting, and
 small-fixture numerical warnings but no test failures. Treat model-fit warnings
 in production analyses as audit items even when unit tests allow them.
