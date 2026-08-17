@@ -20,6 +20,27 @@ This section is the authoritative active checklist. The longer dated sections
 below are retained as implementation/audit history; some of their unchecked
 items were superseded or completed by the later modular direct-score workflow.
 
+### August supervisor report workflow — 2026-08-17
+
+- [x] Define the staged reporting architecture, scientific guardrails, shared-
+      worktree safety contract, and small operator guide under
+      `docs/august_supervisor_workflow/`.
+- [x] Prepare copy-ready, test-contracted prompts for bootstrap, evidence
+      freeze, contracts, result extraction, synthesis, plots, report, landing
+      page, independent red team, conditional remediation, and final
+      integration.
+- [ ] Run prompt 00 only after this documentation is reviewed and merged to a
+      clean `main`; then run one fresh task at a time in strict order.
+- [ ] Complete prompts 01–07 on `agent/august-supervisor-report-v1`, requiring
+      `STAGE_PASS`, the exact predecessor SHA, tests, manifests, and a clean
+      worktree at every handoff.
+- [ ] Run prompt 08 independently. If it returns `AUDIT_FAIL`, run prompt 09
+      only on its explicit remediation allowlist and repeat prompt 08 in a
+      fresh task until it returns `AUDIT_PASS`.
+- [ ] Run prompt 10, the full repository suite, deterministic rebuild checks,
+      and the final integrated audit before creating
+      `AUGUST_REPORT_COMPLETE_AND_AUDITED` or publishing the package.
+
 ### Complete local modeling and scientific synthesis — 2026-08-06
 
 - [x] Run every locally eligible component of the complete analysis machine.

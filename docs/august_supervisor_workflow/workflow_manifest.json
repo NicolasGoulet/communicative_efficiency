@@ -1,0 +1,90 @@
+{
+  "workflow_id": "august_supervisor_report_v1",
+  "version": "2026-08-17",
+  "repository": "communicative_efficiency",
+  "branch": "agent/august-supervisor-report-v1",
+  "shared_physical_worktree": true,
+  "completion_marker": "AUGUST_REPORT_COMPLETE_AND_AUDITED",
+  "operator_guide": "docs/august_supervisor_workflow/README.md",
+  "workflow_contract": "docs/august_supervisor_workflow/WORKFLOW_CONTRACT.md",
+  "stages": [
+    {
+      "stage_id": "00",
+      "name": "bootstrap",
+      "prompt": "docs/august_supervisor_workflow/prompts/00_bootstrap.md",
+      "predecessor": null,
+      "start_condition": "clean main containing this workflow"
+    },
+    {
+      "stage_id": "01",
+      "name": "evidence_freeze",
+      "prompt": "docs/august_supervisor_workflow/prompts/01_evidence_freeze.md",
+      "predecessor": "00",
+      "start_condition": "STAGE_PASS"
+    },
+    {
+      "stage_id": "02",
+      "name": "contracts",
+      "prompt": "docs/august_supervisor_workflow/prompts/02_contracts.md",
+      "predecessor": "01",
+      "start_condition": "STAGE_PASS"
+    },
+    {
+      "stage_id": "03",
+      "name": "extract_results",
+      "prompt": "docs/august_supervisor_workflow/prompts/03_extract_results.md",
+      "predecessor": "02",
+      "start_condition": "STAGE_PASS"
+    },
+    {
+      "stage_id": "04",
+      "name": "synthesis",
+      "prompt": "docs/august_supervisor_workflow/prompts/04_synthesis.md",
+      "predecessor": "03",
+      "start_condition": "STAGE_PASS"
+    },
+    {
+      "stage_id": "05",
+      "name": "plots",
+      "prompt": "docs/august_supervisor_workflow/prompts/05_plots.md",
+      "predecessor": "04",
+      "start_condition": "STAGE_PASS"
+    },
+    {
+      "stage_id": "06",
+      "name": "report",
+      "prompt": "docs/august_supervisor_workflow/prompts/06_report.md",
+      "predecessor": "05",
+      "start_condition": "STAGE_PASS"
+    },
+    {
+      "stage_id": "07",
+      "name": "landing_page",
+      "prompt": "docs/august_supervisor_workflow/prompts/07_landing_page.md",
+      "predecessor": "06",
+      "start_condition": "STAGE_PASS"
+    },
+    {
+      "stage_id": "08",
+      "name": "independent_red_team",
+      "prompt": "docs/august_supervisor_workflow/prompts/08_red_team.md",
+      "predecessor": "07_or_09",
+      "start_condition": "STAGE_PASS"
+    },
+    {
+      "stage_id": "09",
+      "name": "remediation",
+      "prompt": "docs/august_supervisor_workflow/prompts/09_remediation.md",
+      "predecessor": "08",
+      "start_condition": "AUDIT_FAIL",
+      "next_stage": "08"
+    },
+    {
+      "stage_id": "10",
+      "name": "final_integration",
+      "prompt": "docs/august_supervisor_workflow/prompts/10_final_integration.md",
+      "predecessor": "08",
+      "start_condition": "AUDIT_PASS"
+    }
+  ]
+}

@@ -417,10 +417,11 @@ user may be editing it manually between agent turns. Keep the report
 supervisor-facing: avoid implementation paths, repo workflow details, and
 internal labels such as "Route 1" in the report body.
 
-The report is still a June working draft centered on the 21-child PBM sample.
-Its prose saying that LSTM scoring and response sampling are still planned is
-stale; verify all status language against the artifacts above before editing.
-The newest working evidence has not yet been fully promoted into that report:
+The current integrated report was refreshed through the early-August direct,
+Bayes, response-space, onset, and local modeling synthesis, but it still does
+not promote the completed three-scorer word analysis or Hall snapshot into one
+current supervisor package. Verify all status language against the artifacts
+above before editing. Useful working evidence remains distributed across:
 
 ```text
 docs/new_efforts_report_index.html
@@ -444,6 +445,18 @@ response-entropy interaction is in the opposite direction for the principal
 residual/percentile outcomes. Treat this as a result or a measurement
 diagnostic to be replicated after semantic-entropy calibration; do not spin it
 as confirmation of the original hypothesis.
+
+### August supervisor-report workflow
+
+The staged, copy-ready operator guide is
+`docs/august_supervisor_workflow/README.md`; its detailed scientific and stage
+contract is beside it. Run prompts in strict numbered order, with exactly one
+fresh task per stage and one shared physical worktree. Every handoff must name
+the predecessor/resulting SHA, actual tests, manifests, blockers, and a clean
+status. Never run the stages concurrently. Plotting and rendering consume
+frozen saved artifacts and do not fit models. A failed independent audit goes
+through the conditional remediation prompt and then a fresh audit before final
+integration.
 
 ## Current Scientific And Compute Focus
 

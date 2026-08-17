@@ -3,6 +3,36 @@
 Living project memory: discoveries, decisions, bugs, commands that worked, and
 current state. Prefer dated notes.
 
+## 2026-08-17 - August supervisor workflow documentation
+
+- Added `docs/august_supervisor_workflow/README.md`, a short operator guide
+  explaining exactly when to start each fresh agent task and how to pass the
+  predecessor SHA forward.
+- Added the detailed workflow/scientific contract, a machine-readable stage
+  manifest, and 11 copy-ready prompts covering bootstrap, evidence freeze,
+  schemas, saved-result extraction, synthesis, plotting, integrated report,
+  landing page, independent red team, conditional remediation, and final
+  integration.
+- The workflow uses one branch and one shared physical worktree sequentially.
+  Each stage requires a clean exact-SHA handoff, a tracked-file allowlist,
+  test-driven red/green evidence, an isolated commit, and `STAGE_PASS`. The
+  independent audit cannot edit report products; `AUDIT_FAIL` loops through a
+  narrowly allowlisted remediation and a fresh audit.
+- Reporting stages consume frozen audited artifacts. They cannot fit or select
+  models, read raw scored trees during plotting, pool raw cross-tokenizer bits,
+  or convert pending evidence into a result. PBM discovery/non-PBM
+  confirmation and the separate descriptive Hall snapshot stay explicit.
+- TDD began with the new documentation-contract test failing on the absent
+  workflow. After implementation and tightening exact handoff wording, its 4
+  tests passed. The complete regression command then passed 421 tests in
+  297.193 seconds with only the repository's expected small-fixture numerical
+  and convergence warnings:
+
+```bash
+CUDA_VISIBLE_DEVICES='' MPLCONFIGDIR=/tmp/mpl-august-workflow \
+  .venv/bin/python -m unittest discover -s tests
+```
+
 ## 2026-08-06 - Complete local fitting and paper-level scientific synthesis
 
 - Ran the complete modular analysis machine over all locally eligible Route 1,

@@ -340,6 +340,42 @@ Data movement policy:
 
 TODO: Describe the analysis plan.
 
+## August Supervisor Reporting Architecture
+
+The August report is a publication workflow over frozen, audited results; it is
+not a new modeling workflow. Its copy-ready operator guide and complete stage
+contract live under `docs/august_supervisor_workflow/`.
+
+The dependency chain is deliberately narrow:
+
+```text
+evidence freeze -> contracts -> saved-result extraction -> synthesis
+                -> plots -> report -> landing page -> independent audit
+                -> conditional remediation/re-audit -> final integration
+```
+
+Each stage runs in a fresh sequential agent task on one shared branch and one
+shared physical worktree. It starts from the exact predecessor SHA and a clean
+status, has a tracked-file allowlist, uses test-driven development, commits its
+own reviewed change, and returns a machine-checkable handoff. Concurrent stages
+are prohibited because they would race on the same branch and generated
+manifests.
+
+Model fitting, bootstrap estimation, and model selection are outside this
+reporting chain. The model-results stage extracts estimates and provenance from
+hash-locked PASS artifacts. Plotting reads compact frozen tables. Narrative
+rendering reads only synthesis and plot manifests. New or missing evidence is
+recorded as pending and must enter a separate preregistered analysis lane.
+
+The primary tracked products are a concise
+`docs/august_supervisor_index.html`, an integrated Markdown/HTML report, and
+links to existing audited technical companions. A red-team stage audits every
+claim ID, number, source, link, image, interpretation, deterministic build, and
+Git/data boundary without editing the products. A failed audit permits only a
+targeted remediation task followed by a fresh independent re-audit. The final
+completion marker is allowed only after that audit passes and the full test and
+rebuild gates succeed.
+
 ## Open Scientific Questions
 
 - TODO: What does "efficiency" mean for the first paper draft?
