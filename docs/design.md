@@ -376,6 +376,16 @@ targeted remediation task followed by a fresh independent re-audit. The final
 completion marker is allowed only after that audit passes and the full test and
 rebuild gates succeed.
 
+Final integration is owned by the thin
+`src/build_august_supervisor_report.py` controller. Its independently callable
+stages are `datasets`, `model-results`, `synthesis`, `plots`, `report`,
+`index`, and `audit`; `all` executes that exact order. Each call delegates to
+the established module and revalidates the predecessor manifest chain. The
+completion gate additionally requires a clean authorized branch, a current
+commit-bound `AUDIT_PASS`, complete products, and a passing test summary. It
+then writes an ignored JSON marker containing the commit, report-manifest and
+audit hashes, all product hashes, test results, and UTC timestamp.
+
 ## Open Scientific Questions
 
 - TODO: What does "efficiency" mean for the first paper draft?

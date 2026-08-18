@@ -417,11 +417,24 @@ user may be editing it manually between agent turns. Keep the report
 supervisor-facing: avoid implementation paths, repo workflow details, and
 internal labels such as "Route 1" in the report body.
 
-The current integrated report was refreshed through the early-August direct,
-Bayes, response-space, onset, and local modeling synthesis, but it still does
-not promote the completed three-scorer word analysis or Hall snapshot into one
-current supervisor package. Verify all status language against the artifacts
-above before editing. Useful working evidence remains distributed across:
+The current August supervisor package integrates the direct, three-scorer
+word, corrected-Bayes, response-space, sustained-onset, trajectory, and Hall
+evidence while preserving the frozen claim IDs and sample roles:
+
+```text
+docs/august_supervisor_index.html
+docs/august_supervisor_report.md
+docs/august_supervisor_report.html
+```
+
+Its thin controller is `src/build_august_supervisor_report.py`. It runs the
+existing dataset, model-result extraction, synthesis, plot, report, index, and
+independent-audit stages without fitting or selecting models. The final local
+completion record is the ignored
+`results/august_supervisor_report/AUGUST_REPORT_COMPLETE_AND_AUDITED`; it is
+valid only when its audit and product hashes bind to the current clean commit.
+Verify all status language against those artifacts before editing. Useful
+technical evidence also remains distributed across:
 
 ```text
 docs/new_efforts_report_index.html

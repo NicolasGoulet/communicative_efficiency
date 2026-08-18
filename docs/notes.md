@@ -3,6 +3,31 @@
 Living project memory: discoveries, decisions, bugs, commands that worked, and
 current state. Prefer dated notes.
 
+## 2026-08-18 - August supervisor package final integration
+
+- Added `src/build_august_supervisor_report.py`, a thin controller over the
+  existing `datasets`, `model-results`, `synthesis`, `plots`, `report`,
+  `index`, and `audit` modules plus the ordered `all` stage. It verifies the
+  full manifest chain and contains no model-fitting or plotting
+  implementation.
+- Added completion-gate coverage for missing or stale manifests, changed
+  artifact hashes, absent or stale `AUDIT_PASS`, incomplete products, dirty
+  Git state, invalid stages, and direct script invocation. TDD first failed on
+  the absent controller and then on the direct-entrypoint import boundary; the
+  final focused suite passed 9/9.
+- Ran the six pre-audit stages independently from frozen inputs. Two separate
+  report-only rebuilds produced byte-identical Markdown, HTML, landing page,
+  six plot images, page registry, and stage manifests.
+- Verification passed 69/69 August workflow tests in 3.145 seconds and 486/486
+  repository tests in 314.315 seconds, with zero skips, failures, or errors.
+  The observed numerical, convergence, perfect-separation, and deprecation
+  warnings were the established small-fixture warnings.
+- Final completion is fail-closed: the independent audit runs only from the
+  clean committed workflow branch, and the ignored
+  `results/august_supervisor_report/AUGUST_REPORT_COMPLETE_AND_AUDITED`
+  records the exact commit, audit, manifest, product hashes, test summary, and
+  timestamp.
+
 ## 2026-08-17 - August supervisor workflow documentation
 
 - Added `docs/august_supervisor_workflow/README.md`, a short operator guide

@@ -29,17 +29,23 @@ items were superseded or completed by the later modular direct-score workflow.
       freeze, contracts, result extraction, synthesis, plots, report, landing
       page, independent red team, conditional remediation, and final
       integration.
-- [ ] Run prompt 00 only after this documentation is reviewed and merged to a
+- [x] Run prompt 00 only after this documentation is reviewed and merged to a
       clean `main`; then run one fresh task at a time in strict order.
-- [ ] Complete prompts 01–07 on `agent/august-supervisor-report-v1`, requiring
+- [x] Complete prompts 01–07 on `agent/august-supervisor-report-v1`, requiring
       `STAGE_PASS`, the exact predecessor SHA, tests, manifests, and a clean
       worktree at every handoff.
-- [ ] Run prompt 08 independently. If it returns `AUDIT_FAIL`, run prompt 09
+- [x] Run prompt 08 independently. Its first audit findings were remediated
+      through prompt 09, then a fresh prompt 08 at `40d65a5` returned
+      `AUDIT_PASS` with zero findings.
+      If a later audit returns `AUDIT_FAIL`, run prompt 09
       only on its explicit remediation allowlist and repeat prompt 08 in a
       fresh task until it returns `AUDIT_PASS`.
-- [ ] Run prompt 10, the full repository suite, deterministic rebuild checks,
+- [x] Run prompt 10, the full repository suite, deterministic rebuild checks,
       and the final integrated audit before creating
-      `AUGUST_REPORT_COMPLETE_AND_AUDITED` or publishing the package.
+      `AUGUST_REPORT_COMPLETE_AND_AUDITED` or publishing the package. The
+      controller tests passed 9/9, all August tests passed 69/69, and the full
+      suite passed 486/486; the final ignored marker carries the clean-commit
+      audit and product hashes.
 
 ### Complete local modeling and scientific synthesis — 2026-08-06
 
