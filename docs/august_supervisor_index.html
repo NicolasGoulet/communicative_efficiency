@@ -1,0 +1,240 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>August 2026 Supervisor Report</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #172522;
+      --muted: #50625d;
+      --paper: #f7f5ef;
+      --surface: #fffdf8;
+      --line: #cad3ce;
+      --accent: #155f63;
+      --supported: #17633a;
+      --qualified: #8a5b00;
+      --contrary: #9a352d;
+      --descriptive: #5555a4;
+      --pending: #5c6268;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body { margin: 0; color: var(--ink); background: var(--paper); line-height: 1.62; }
+    a { color: var(--accent); text-underline-offset: .18em; text-decoration-thickness: .09em; }
+    a:hover { text-decoration-thickness: .16em; }
+    a:focus-visible { outline: 3px solid #f0a202; outline-offset: 4px; border-radius: 2px; }
+    .skip-link { position: absolute; left: 1rem; top: -5rem; z-index: 20; padding: .7rem 1rem; background: #fff; color: #000; }
+    .skip-link:focus { top: 1rem; }
+    .site-header { background: #123b3d; color: #fff; }
+    .header-inner, main, footer { width: min(1160px, calc(100% - 2rem)); margin-inline: auto; }
+    .header-inner { display: flex; align-items: center; justify-content: space-between; gap: 1.25rem; padding: .9rem 0; }
+    .brand { margin: 0; font-weight: 760; letter-spacing: .01em; }
+    nav ul { display: flex; flex-wrap: wrap; gap: .55rem 1rem; margin: 0; padding: 0; list-style: none; }
+    nav a { color: #fff; }
+    main { padding: 3.4rem 0 4rem; }
+    section { scroll-margin-top: 1.5rem; margin-top: 4rem; }
+    .hero { display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(17rem, .65fr); gap: 2rem; align-items: start; margin-top: 0; }
+    .eyebrow, .status-label { text-transform: uppercase; letter-spacing: .09em; font-size: .78rem; font-weight: 800; }
+    h1 { max-width: 18ch; margin: .25rem 0 1rem; font-size: clamp(2.35rem, 6vw, 4.8rem); line-height: 1.02; letter-spacing: -.045em; }
+    h2 { margin: 0 0 .6rem; font-size: clamp(1.65rem, 3vw, 2.35rem); line-height: 1.15; }
+    h3 { margin: .25rem 0 .65rem; line-height: 1.25; }
+    .lede { max-width: 68ch; color: var(--muted); font-size: 1.12rem; }
+    .primary-link, .card-link { display: inline-block; font-weight: 750; }
+    .primary-link { margin-top: .5rem; padding: .72rem 1rem; border-radius: .35rem; color: #fff; background: var(--accent); text-decoration: none; }
+    .scope-warning, .warning { border-left: .32rem solid currentColor; background: #fff8df; }
+    .scope-warning { margin: 0; padding: 1rem 1.1rem; color: #5c4700; }
+    .legend { display: grid; gap: .55rem; margin: 0; padding: 0; list-style: none; }
+    .legend-item { display: grid; grid-template-columns: minmax(9rem, .42fr) 1fr; gap: .8rem; padding: .72rem .85rem; border: 1px solid var(--line); border-left: .35rem solid currentColor; background: var(--surface); }
+    .legend-item span { color: var(--ink); }
+    .status-supported { color: var(--supported); }
+    .status-qualified { color: var(--qualified); }
+    .status-contrary { color: var(--contrary); }
+    .status-descriptive { color: var(--descriptive); }
+    .status-pending { color: var(--pending); }
+    .result-grid { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 1rem; margin-top: 1.4rem; }
+    .result-card { grid-column: span 2; display: flex; flex-direction: column; padding: 1.15rem; border: 1px solid var(--line); border-top: .42rem solid currentColor; border-radius: .45rem; background: var(--surface); box-shadow: 0 .35rem 1rem rgba(20, 45, 40, .06); }
+    .result-card:nth-child(4) { grid-column: 2 / span 2; }
+    .result-card p:not(.status-label) { color: var(--ink); }
+    .result-card .warning { margin-top: auto; padding: .7rem .8rem; font-size: .92rem; }
+    .result-card .card-link { margin-top: .35rem; }
+    .feature { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(16rem, .8fr); gap: 1.4rem; align-items: start; padding: 1rem; border: 1px solid var(--line); background: var(--surface); }
+    .feature img { display: block; width: 100%; height: auto; border: 1px solid var(--line); }
+    figcaption { color: var(--muted); font-size: .94rem; }
+    .resource-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr)); gap: .8rem; padding: 0; list-style: none; }
+    .resource-card { padding: 1rem; border: 1px solid var(--line); background: var(--surface); }
+    .resource-card p { color: var(--muted); }
+    .archive-box { padding: 1rem 1.2rem; border: 1px dashed #8b9690; background: #ecebe6; }
+    .archive-box ul { margin-bottom: 0; }
+    footer { padding: 1.5rem 0 3rem; color: var(--muted); border-top: 1px solid var(--line); }
+    @media (max-width: 900px) {
+      .hero, .feature { grid-template-columns: 1fr; }
+      .result-card, .result-card:nth-child(4) { grid-column: span 3; }
+    }
+    @media (max-width: 720px) {
+      .header-inner { display: block; }
+      nav { margin-top: .6rem; }
+      main { padding-top: 2.2rem; }
+      section { margin-top: 3rem; }
+      .result-grid { display: block; }
+      .result-card { margin-bottom: .8rem; }
+      .legend-item { grid-template-columns: 1fr; gap: .2rem; }
+      h1 { font-size: clamp(2.2rem, 13vw, 3.4rem); }
+    }
+    @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+  </style>
+</head>
+<body>
+  <a class="skip-link" href="#main-content">Skip to the report overview</a>
+  <header class="site-header">
+    <div class="header-inner">
+      <p class="brand">Communicative efficiency · August 2026</p>
+      <nav aria-label="Landing-page sections">
+        <ul>
+          <li><a href="#executive-summary">Results</a></li>
+          <li><a href="#current-resources">Current reports</a></li>
+          <li><a href="#archives">Archives</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+  <main id="main-content" tabindex="-1">
+    <section class="hero" aria-labelledby="page-title">
+      <div>
+        <p class="eyebrow">Supervisor consultation landing page</p>
+        <h1 id="page-title">What the current evidence supports—and what remains open</h1>
+        <p class="lede">A concise entry point to the frozen August synthesis, its five evidence statuses, and the audited technical companions. Result text below is drawn from the frozen claim registry.</p>
+        <a class="primary-link" href="august_supervisor_report.html">Open the integrated August supervisor report</a>
+      </div>
+      <p class="scope-warning" role="note" data-claim-ids="DIRECT_PBM_MISTRAL_CONTEXTUAL DIRECT_NONPBM_MISTRAL_CONTEXTUAL_PRIMARY HALL_RACE_CLASS_INTERACTION"><strong>Scope warning.</strong> PBM is the 21-child discovery sample; the remaining 58 children are the separate confirmation sample. Hall remains a separate historical, cross-sectional, descriptive analysis.</p>
+    </section>
+
+    <section id="status-legend" aria-labelledby="status-heading">
+      <h2 id="status-heading">How to read the evidence labels</h2>
+      <p>Every executive card carries a visible label and interpretation text; color is only a secondary cue.</p>
+      <ul class="legend"><li class="legend-item status-supported"><strong>Completed / supported</strong><span>The analysis is complete and the frozen evidence supports the registered reading.</span></li>
+<li class="legend-item status-qualified"><strong>Qualified</strong><span>The result is informative, but a stated gate limits its interpretation or promotion.</span></li>
+<li class="legend-item status-contrary"><strong>Contrary</strong><span>The observed direction runs opposite to the registered prediction.</span></li>
+<li class="legend-item status-descriptive"><strong>Descriptive</strong><span>The comparison is explicitly non-causal and separate from longitudinal confirmation.</span></li>
+<li class="legend-item status-pending"><strong>Pending</strong><span>The required evidence or validation is not yet complete.</span></li></ul>
+    </section>
+
+    <section id="executive-summary" aria-labelledby="executive-heading">
+      <h2 id="executive-heading">Five-result executive summary</h2>
+      <p>These cards intentionally keep supported, qualified, contrary, descriptive, and pending evidence distinct.</p>
+      <div class="result-grid"><article class="result-card status-supported" data-status="SUPPORTED" data-claim-id="DIRECT_PBM_MISTRAL_CONTEXTUAL">
+<p class="status-label">Completed / supported</p>
+<h3>PBM discovery: predictability at fixed effort</h3>
+<p>Report as increasing Mistral predictability or conventionality of form at fixed measured effort in the discovery sample.</p>
+<p class="warning" role="note"><strong>Interpretation limit.</strong> This is model-based self-information, not listener utility, Shannon information conveyed, causal optimization, or a normative efficiency optimum.</p>
+<a class="card-link" href="direct_surprisal_results_explorer.html">Open Direct Results Explorer</a>
+</article>
+<article class="result-card status-qualified" data-status="QUALIFIED" data-claim-id="DIRECT_NONPBM_MISTRAL_CONTEXTUAL_PRIMARY">
+<p class="status-label">Qualified</p>
+<h3>Non-PBM confirmation: direction, not confirmation</h3>
+<p>Direction-consistent but not confirmed under the frozen primary clustered interval.</p>
+<p class="warning" role="note"><strong>Interpretation limit.</strong> The primary interval crosses zero; no sensitivity analysis may be substituted to declare confirmation.</p>
+<a class="card-link" href="august_supervisor_report.html">Open August Supervisor Report</a>
+</article>
+<article class="result-card status-contrary" data-status="CONTRARY" data-claim-id="DIRECT_NONPBM_MISTRAL_CONTEXT_GAIN">
+<p class="status-label">Contrary</p>
+<h3>Context gain: opposite to the registered direction</h3>
+<p>The confirmation sample supports a negative direction, explicitly contrary to the registered positive prediction.</p>
+<p class="warning" role="note"><strong>Interpretation limit.</strong> Do not reinterpret a replicated opposite sign as confirmation of the original directional hypothesis.</p>
+<a class="card-link" href="august_supervisor_report.html">Open August Supervisor Report</a>
+</article>
+<article class="result-card status-descriptive" data-status="DESCRIPTIVE" data-claim-id="HALL_RACE_CLASS_INTERACTION">
+<p class="status-label">Descriptive</p>
+<h3>Hall: a separate historical snapshot</h3>
+<p>A scorer-indexed, within-Hall historical descriptive interaction at fixed cleaned word count and setting.</p>
+<p class="warning" role="note"><strong>Interpretation limit.</strong> Not a causal SES effect, linguistic deficit, inherent group efficiency, or longitudinal developmental estimate; dialect, era, geography, transcription, setting, and LM representation remain plausible sources.</p>
+<a class="card-link" href="hall_snapshot_mistral_analysis.html">Open Hall Snapshot</a>
+</article>
+<article class="result-card status-pending" data-status="PENDING" data-claim-id="LISTENER_UTILITY_OUTCOME">
+<p class="status-label">Pending</p>
+<h3>Listener-relevant utility remains unvalidated</h3>
+<p>Broad communicative-success claims remain pending.</p>
+<p class="warning" role="note"><strong>Interpretation limit.</strong> Target surprisal or context gain alone is not listener utility. Blocker: No validated downstream caregiver-response, repair, clarification, acknowledgement, or contingency outcome has been registered. Required resolution: Define and validate the listener outcome, freeze its sample and model, and require a PASS/COMPLETE analysis marker.</p>
+<a class="card-link" href="august_supervisor_report.html">Open August Supervisor Report</a>
+</article></div>
+    </section>
+
+    <section id="featured-figure" aria-labelledby="figure-heading">
+      <h2 id="figure-heading">Discovery and confirmation at a glance</h2>
+      <figure class="feature" data-claim-ids="DIRECT_NONPBM_MISTRAL_CONTEXTUAL_BOOTSTRAP DIRECT_NONPBM_MISTRAL_CONTEXTUAL_PRIMARY DIRECT_PBM_MISTRAL_CONTEXTUAL">
+        <img src="../results/august_supervisor_report/plots/figure_01_fixed_effort_predictability.png" alt="Two-panel interval plot. The PBM discovery panel shows a negative contextual-surprisal age slope whose interval remains below zero. The non-PBM panel shows the clustered primary interval crossing zero and a separately labelled child-resampling sensitivity interval below zero." loading="lazy" decoding="async">
+        <figcaption><strong>Audited figure.</strong> Fixed-effort contextual Mistral age slopes. The 21-child PBM discovery estimate is supported; the separate 58-child primary estimate is direction-consistent but not confirmed because its clustered interval crosses zero. The child-resampling interval is shown only as sensitivity. The PBM discovery and non-PBM confirmation estimates remain explicitly separated.</figcaption>
+      </figure>
+    </section>
+
+    <section id="current-resources" aria-labelledby="resources-heading">
+      <h2 id="resources-heading">Current August package and evidence resources</h2>
+      <p>All current destinations below resolve through the frozen page registry.</p>
+      <ul class="resource-grid"><li class="resource-card">
+<h3>Integrated August supervisor report</h3>
+<p>Open the current scientific synthesis with claim-level caveats and figures.</p>
+<a href="august_supervisor_report.html">Open Integrated August supervisor report</a>
+</li>
+<li class="resource-card">
+<h3>Copy-ready report source</h3>
+<p>Open the Markdown version of the integrated August report.</p>
+<a href="august_supervisor_report.md">Open Copy-ready report source</a>
+</li>
+<li class="resource-card">
+<h3>Direct-results explorer</h3>
+<p>Open the saved-model explorer and individual direct-score profiles.</p>
+<a href="direct_surprisal_results_explorer.html">Open Direct-results explorer</a>
+</li>
+<li class="resource-card">
+<h3>Word-level cross-scorer report</h3>
+<p>Open the separate Mistral, Qwen3-14B, and TinyDialogues comparison.</p>
+<a href="word_cross_scorer_comparison.html">Open Word-level cross-scorer report</a>
+</li>
+<li class="resource-card">
+<h3>Hall historical snapshot report</h3>
+<p>Open the separate cross-sectional and domain-sensitivity analysis.</p>
+<a href="hall_snapshot_mistral_analysis.html">Open Hall historical snapshot report</a>
+</li>
+<li class="resource-card">
+<h3>Corrected candidate-set Bayes report</h3>
+<p>Open the cross-fitted finite-candidate-set decomposition and validation.</p>
+<a href="corrected_pbm_bayes_report.html">Open Corrected candidate-set Bayes report</a>
+</li>
+<li class="resource-card">
+<h3>Sustained-onset report</h3>
+<p>Open the frozen simultaneous-band onset analysis.</p>
+<a href="direct_surprisal_onset_confirmation.html">Open Sustained-onset report</a>
+</li>
+<li class="resource-card">
+<h3>Individual child trajectories</h3>
+<p>Open the paired TinyDialogues–Mistral child-level trajectory gallery.</p>
+<a href="paired_tinydialogues_mistral_child_trajectories.html">Open Individual child trajectories</a>
+</li>
+<li class="resource-card">
+<h3>Formal definitions</h3>
+<p>Open the mathematical definitions used across the report package.</p>
+<a href="july_meeting_definitions.html">Open Formal definitions</a>
+</li>
+<li class="resource-card">
+<h3>Evidence inventory</h3>
+<p>Open the technical analysis inventory and its status/guardrail map.</p>
+<a href="complete_analysis_machine_index.html">Open Evidence inventory</a>
+</li></ul>
+    </section>
+
+    <section id="archives" aria-labelledby="archives-heading">
+      <div class="archive-box">
+        <h2 id="archives-heading">Archived June and July packages</h2>
+        <p>These earlier landing pages are preserved for historical consultation only. They are not redirects and are not the current August synthesis.</p>
+        <ul><li><a href="june_25th_meeting_index.html">Archive: June 25 meeting package</a></li>
+<li><a href="july_meeting_index.html">Archive: July meeting package</a></li></ul>
+      </div>
+    </section>
+  </main>
+  <footer>
+    <p>Frozen August 2026 reporting package · navigation and prose rendered without refitting models or generating new results.</p>
+  </footer>
+</body>
+</html>
