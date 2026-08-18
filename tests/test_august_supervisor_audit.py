@@ -176,9 +176,7 @@ class AugustSupervisorAuditTests(unittest.TestCase):
             ),
         )
         self.assertEqual(summary["guardrail_count"], 8)
-        self.assertEqual(
-            _codes(findings) - {"TRAJECTORY_HETEROGENEITY_MISSING"}, set()
-        )
+        self.assertEqual(_codes(findings), set())
 
         with tempfile.TemporaryDirectory(
             prefix=".august-audit-language-", dir=ROOT
@@ -208,7 +206,8 @@ class AugustSupervisorAuditTests(unittest.TestCase):
             stripped_trajectory = Path(tmp) / "stripped_trajectory.html"
             strip_pattern = re.compile(
                 r"heterogen|var(?:y|ies|iation)\s+(?:across|among)\s+"
-                r"(?:children|individual)|(?:not|no)\s+(?:one\s+)?universal\s+"
+                r"(?:children|individual)|(?:not|no)\s+"
+                r"(?:establish(?:es|ed|ing)?\s+)?(?:one\s+)?universal\s+"
                 r"developmental",
                 flags=re.IGNORECASE,
             )

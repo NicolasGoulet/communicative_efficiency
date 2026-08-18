@@ -1492,7 +1492,7 @@ def audit_scientific_language(
     trajectory_text = f"{report}\n{index}\n{trajectory}".lower()
     trajectory_guardrail = re.search(
         r"heterogen|var(?:y|ies|iation)\s+(?:across|among)\s+(?:children|individual)|"
-        r"(?:not|no)\s+(?:one\s+)?universal\s+developmental",
+        r"(?:not|no)\s+(?:establish(?:es|ed|ing)?\s+)?(?:one\s+)?universal\s+developmental",
         trajectory_text,
     )
     if trajectory_guardrail is None:
