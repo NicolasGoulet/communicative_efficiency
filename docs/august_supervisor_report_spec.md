@@ -96,7 +96,7 @@ These readings are mandatory, not optional caveats:
 
 | Claim ID | Role | Status | Required reading |
 |---|---|---|---|
-| `DIRECT_PBM_MISTRAL_CONTEXTUAL` | PROMOTED | SUPPORTED | PBM Mistral contextual surprisal decreases by 0.131 bits/month at fixed word effort (clustered 95% CI -0.179 to -0.083). This is predictability/conventionality, not listener utility or a normative optimum. |
+| `DIRECT_PBM_MISTRAL_CONTEXTUAL` | PROMOTED | SUPPORTED | PBM Mistral contextual surprisal decreases by 0.131 bits/month at fixed word effort (clustered 95% CI -0.179 to -0.083). This is predictability/conventionality, not listener utility or a normative optimum. Individual profiles do not establish one universal developmental law. |
 | `DIRECT_PBM_TINY_CONTEXTUAL` | SUPPORTING | SUPPORTED | The negative P1 direction repeats under TinyDialogues (-0.222, clustered 95% CI -0.311 to -0.132) on the same PBM children. |
 | `DIRECT_PAIRED_CONTEXTUAL_SCORER_DIFFERENCE` | SUPPORTING | QUALIFIED | On 443,848 exact paired rows, the Tiny-minus-Mistral P1 slope difference is -0.089 (paired bootstrap 95% interval -0.152 to -0.028); magnitude is scorer-calibration dependent. |
 | `DIRECT_NONPBM_MISTRAL_CONTEXTUAL_PRIMARY` | PROMOTED | QUALIFIED | The 58-child primary slope is -0.062 bits/month with child-clustered 95% CI -0.132 to +0.007: direction-consistent, not confirmed. |

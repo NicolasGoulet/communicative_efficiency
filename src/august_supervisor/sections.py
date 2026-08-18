@@ -577,7 +577,8 @@ def build_report_sections(evidence: ReportEvidence) -> tuple[ReportSection, ...]
                         "The negative fixed-effort age direction is supported for PBM "
                         "with Mistral and repeats with TinyDialogues on the same children. "
                         "It is not listener utility, greater Shannon information "
-                        "communicated, or proof of optimization."
+                        "communicated, or proof of optimization. Individual profiles do "
+                        "not establish one universal developmental law."
                     ),
                 ),
                 statement(

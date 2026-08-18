@@ -182,7 +182,7 @@
       "evidence_status": "SUPPORTED",
       "source": {"canonical_artifact": "results/current_scientific_synthesis/direct_primary_estimates.csv", "source_sha256": "241758ddaa7bebb7b359dd220b8dda64748330dc29c2a21dc10c0407a0a868e1", "required_marker": {"path": "results/direct_surprisal_replication/mistral_full79/modular/models/model_manifest.json", "expectation": "status=COMPLETE_WITH_RECORDED_FIT_STATUS and failed=0", "observed": "COMPLETE_WITH_RECORDED_FIT_STATUS; failed=0", "satisfied": true}},
       "required_interpretation": "Report as increasing Mistral predictability or conventionality of form at fixed measured effort in the discovery sample.",
-      "required_limitation": "This is model-based self-information, not listener utility, Shannon information conveyed, causal optimization, or a normative efficiency optimum.",
+      "required_limitation": "This is model-based self-information, not listener utility, Shannon information conveyed, causal optimization, or a normative efficiency optimum. Individual profiles do not establish one universal developmental law.",
       "destination_section": "Utterance predictability at fixed effort",
       "figure_eligibility": "PRIMARY"
     },

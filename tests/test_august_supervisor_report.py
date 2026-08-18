@@ -151,6 +151,10 @@ class AugustSupervisorReportTests(unittest.TestCase):
             self.assertIn("not listener utility", lower)
             self.assertIn("not semantic uncertainty", lower)
             self.assertIn("not a causal ses effect", lower)
+            self.assertIn(
+                "individual profiles do not establish one universal developmental law",
+                lower,
+            )
             for label in (
                 "Supported",
                 "Qualified",

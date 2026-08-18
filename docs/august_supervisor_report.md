@@ -36,7 +36,7 @@ The report uses discovery, confirmation, scorer-robustness, and cross-sectional 
 
 The estimand is scorer self-information conditional on measured word effort and child baseline. Lower surprisal means greater scorer-based predictability or conventionality of form.
 
-**Supported.** The negative fixed-effort age direction is supported for PBM with Mistral and repeats with TinyDialogues on the same children. It is not listener utility, greater Shannon information communicated, or proof of optimization.
+**Supported.** The negative fixed-effort age direction is supported for PBM with Mistral and repeats with TinyDialogues on the same children. It is not listener utility, greater Shannon information communicated, or proof of optimization. Individual profiles do not establish one universal developmental law.
 
 **Qualified.** The paired scorer comparison supports directional robustness, but tokenizer and calibration differences prevent a universal cross-model magnitude interpretation.
 

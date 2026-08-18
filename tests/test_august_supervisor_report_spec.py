@@ -188,6 +188,14 @@ class AugustSupervisorReportSpecTests(unittest.TestCase):
                 "required_limitation"
             ].lower(),
         )
+        self.assertIn(
+            "individual profiles do not establish one universal developmental law",
+            claims["DIRECT_PBM_MISTRAL_CONTEXTUAL"]["required_limitation"].lower(),
+        )
+        self.assertIn(
+            "individual profiles do not establish one universal developmental law",
+            self.spec_text.lower(),
+        )
 
     def test_all_required_locked_readings_are_present(self) -> None:
         required = {
