@@ -1,0 +1,393 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Data Overview — Predicting Utterance and Word Surprisal</title>
+<style>
+:root {
+  color-scheme: light;
+  --ink: #1e2528;
+  --muted: #5e686d;
+  --line: #d9e0df;
+  --paper: #ffffff;
+  --soft: #f5f7f6;
+  --accent: #2f6f73;
+  --accent2: #c76f2c;
+}
+body {
+  margin: 0;
+  background: #eef2f1;
+  color: var(--ink);
+  font: 16px/1.58 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+main {
+  max-width: 980px;
+  margin: 34px auto 56px;
+  padding: 48px 58px;
+  background: var(--paper);
+  box-shadow: 0 18px 50px rgba(31, 45, 48, 0.12);
+}
+h1, h2, h3, h4 {
+  line-height: 1.18;
+  margin: 1.6em 0 0.55em;
+}
+h1 {
+  margin-top: 0;
+  font-size: 2.25rem;
+  border-bottom: 3px solid var(--accent);
+  padding-bottom: 0.45em;
+}
+h2 {
+  font-size: 1.55rem;
+  color: var(--accent);
+}
+h3 {
+  font-size: 1.18rem;
+}
+p {
+  margin: 0.75em 0;
+}
+a {
+  color: var(--accent);
+}
+blockquote {
+  border-left: 4px solid var(--accent2);
+  margin: 1.1em 0;
+  padding: 0.05em 1.1em;
+  color: var(--muted);
+  background: #fff8f2;
+}
+code {
+  background: var(--soft);
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  padding: 0.08em 0.3em;
+  font-family: "SFMono-Regular", Consolas, monospace;
+  font-size: 0.92em;
+}
+pre {
+  background: #f5f7f6;
+  color: var(--ink);
+  border: 1px solid var(--line);
+  padding: 1em;
+  overflow-x: auto;
+  border-radius: 7px;
+}
+pre code {
+  background: transparent;
+  border: 0;
+  padding: 0;
+  color: inherit;
+}
+table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 1.15em 0 1.45em;
+  font-size: 0.95em;
+}
+.plot-layout {
+  table-layout: fixed;
+  margin: 1.1em auto 1.45em;
+}
+.plot-layout,
+.plot-layout tr,
+.plot-layout td {
+  border: 0;
+  background: transparent;
+}
+.plot-layout td {
+  padding: 0.35em 0.55em 0.95em;
+  text-align: center;
+  vertical-align: top;
+}
+.plot-layout img {
+  width: 100%;
+  max-width: 100%;
+  margin: 0 auto 0.35em;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: white;
+}
+.plot-layout .centered-cell img {
+  width: 54%;
+}
+.plot-caption {
+  color: var(--muted);
+  font-size: 0.85em;
+  line-height: 1.35;
+}
+th, td {
+  border: 1px solid var(--line);
+  padding: 0.54em 0.68em;
+  vertical-align: top;
+}
+th {
+  background: #e7efed;
+  text-align: left;
+}
+tr:nth-child(even) td {
+  background: #fafbfb;
+}
+.plot-layout tr:nth-child(even) td {
+  background: transparent;
+}
+img {
+  max-width: 100%;
+  display: block;
+  margin: 1.1em auto 0.45em;
+}
+.figure-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.05rem 1.25rem;
+  align-items: start;
+  margin: 1.1em 0 1.45em;
+}
+.figure-grid.two-one {
+  max-width: 900px;
+  margin-left: auto;
+  margin-right: auto;
+}
+.figure-grid.five-panel {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+.figure-grid figure {
+  margin: 0;
+}
+.figure-grid img {
+  width: 100%;
+  max-width: 100%;
+  margin: 0;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: white;
+}
+.figure-grid figcaption {
+  color: var(--muted);
+  font-size: 0.85em;
+  line-height: 1.35;
+  text-align: center;
+  margin-top: 0.35em;
+}
+.figure-grid .centered {
+  grid-column: 1 / -1;
+  justify-self: center;
+  max-width: 58%;
+}
+.figure-grid.two-one .centered {
+  max-width: 54%;
+}
+.figure-grid.five-panel .centered {
+  max-width: 52%;
+}
+ul, ol {
+  padding-left: 1.4em;
+}
+.caption {
+  color: var(--muted);
+  font-size: 0.92em;
+  margin-top: -0.15em;
+}
+@media print {
+  body {
+    background: white;
+  }
+  main {
+    box-shadow: none;
+    margin: 0;
+    max-width: none;
+    padding: 28px;
+  }
+}
+@media screen and (max-width: 540px) {
+  .figure-grid {
+    grid-template-columns: 1fr;
+  }
+  .figure-grid .centered,
+  .figure-grid.five-panel .centered {
+    grid-column: auto;
+    max-width: 100%;
+  }
+}
+
+.report-nav {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  margin: -1.1rem -0.4rem 2rem;
+  padding: 0.65rem;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.96);
+  box-shadow: 0 7px 22px rgba(31, 45, 48, 0.08);
+}
+.report-nav a {
+  flex: 1 1 130px;
+  padding: 0.55rem 0.75rem;
+  border-radius: 7px;
+  color: var(--muted);
+  font-weight: 650;
+  text-align: center;
+  text-decoration: none;
+}
+.report-nav a:hover {
+  background: var(--soft);
+  color: var(--accent);
+}
+.report-nav a.active {
+  background: var(--accent);
+  color: white;
+}
+.route-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+  margin: 1.25rem 0 1.7rem;
+}
+.route-card {
+  display: flex;
+  min-height: 120px;
+  flex-direction: column;
+  gap: 0.35rem;
+  padding: 1.05rem;
+  border: 1px solid var(--line);
+  border-top: 5px solid var(--accent);
+  border-radius: 9px;
+  color: var(--ink);
+  text-decoration: none;
+  background: var(--paper);
+}
+.route-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 28px rgba(31, 45, 48, 0.10);
+}
+.route-card span {
+  color: var(--muted);
+  font-size: 0.84rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.route-card strong {
+  color: var(--accent);
+  font-size: 1.16rem;
+}
+.route-card em {
+  color: var(--muted);
+  font-style: normal;
+  line-height: 1.35;
+}
+.next-page {
+  margin-top: 2.2rem;
+  padding: 1rem 1.2rem;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  text-align: right;
+  background: var(--soft);
+  font-weight: 650;
+}
+@media screen and (max-width: 720px) {
+  .route-grid { grid-template-columns: 1fr; }
+  .report-nav { position: static; }
+  main {
+    margin: 0;
+    padding: 28px 22px 42px;
+    box-shadow: none;
+  }
+  table {
+    display: block;
+    max-width: 100%;
+    overflow-x: auto;
+    font-size: 0.86em;
+  }
+}
+</style>
+</head>
+<body>
+<main>
+<div class="report-nav" aria-label="Report pages"><a class="active" href="august_routes_report.html">Data overview</a><a href="august_routes_route1.html">Route 1</a><a href="august_routes_route2.html">Route 2</a><a href="august_routes_word_level.html">Word level</a></div>
+<h1>Data and analysis overview</h1>
+<p>This is the entry page for the supervisor-facing report. It restores the July reading order: first understand the data and measurements, then open one analysis at a time. The longer audited August package remains unchanged as the evidence archive.</p>
+<h2>The three analysis pages</h2>
+<div class="route-grid"><a class="route-card" href="august_routes_route1.html"><span>Page 2</span><strong>Route 1</strong><em>Utterance surprisal at fixed word effort</em></a><a class="route-card" href="august_routes_route2.html"><span>Page 3</span><strong>Route 2</strong><em>Child effort relative to a generated response space</em></a><a class="route-card" href="august_routes_word_level.html"><span>Page 4</span><strong>Word level</strong><em>Same-word surprisal across three scorers</em></a></div>
+<h2>Corpora, children, and inferential roles</h2>
+<p>The longitudinal data come from 13 strict-naturalistic CHILDES corpora. Brown, Manchester, and Providence form the <strong>21-child PBM discovery sample</strong>. The other 58 children across 10 corpora are a separate <strong>non-PBM confirmation sample</strong>. These roles are fixed and the samples are not pooled for a stronger-looking result.</p>
+<p>TinyDialogues and the three word-level scorers reuse the PBM children. Agreement across them is scorer robustness, not independent-sample confirmation. Hall remains a separate historical cross-sectional/domain-sensitivity analysis and is not part of these four pages.</p>
+<table>
+<thead><tr>
+<th>analysis</th>
+<th>sample</th>
+<th>analysis_rows</th>
+<th>children</th>
+<th>role</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>Route 1</td>
+<td>Mistral — PBM discovery</td>
+<td>444325</td>
+<td>21</td>
+<td>discovery</td>
+</tr>
+<tr>
+<td>Route 1</td>
+<td>TinyDialogues — PBM robustness</td>
+<td>443848</td>
+<td>21</td>
+<td>same-child scorer robustness</td>
+</tr>
+<tr>
+<td>Route 1</td>
+<td>Mistral — non-PBM confirmation</td>
+<td>678071</td>
+<td>58</td>
+<td>confirmation</td>
+</tr>
+<tr>
+<td>Route 2</td>
+<td>PBM utterances; final models use 976 child-session aggregates</td>
+<td>444325</td>
+<td>21</td>
+<td>response-space exploration</td>
+</tr>
+<tr>
+<td>Word level</td>
+<td>exact shared PBM word-occurrence set</td>
+<td>1032963</td>
+<td>21</td>
+<td>same-child scorer robustness</td>
+</tr>
+</tbody></table>
+<blockquote><p>Row counts are analysis-specific denominators. The same utterance or word occurrence can contribute to more than one separately fit scorer, so the rows in this table must not be added together.</p></blockquote>
+<h2>Developmental coverage</h2>
+<p>The age distribution is uneven, as expected in longitudinal CHILDES data. The plot shows Mistral contextual-score coverage for the two longitudinal samples; it does not combine discovery and confirmation.</p>
+<img src="../results/august_routes_report/plots/data_contextual_coverage_by_age.png" alt="PBM and non-PBM contextual-score coverage by age">
+<p>The first bin combines 6–23 months; subsequent bins are six-month intervals through 60–65 months. Later-age estimates depend on fewer utterances and a changing mix of children and corpora, which is why child identity, within-child change, clustering, and repeated-measures checks matter.</p>
+<h2>What is measured</h2>
+<ul>
+<li><strong>Unconditional utterance surprisal (k0):</strong> <code>-log2 p(u)</code>, a scorer-indexed measure of form predictability without preceding conversational context.</li>
+<li><strong>Contextual utterance surprisal (k3):</strong> <code>-log2 p(u | c)</code>, using up to three preceding caregiver utterances.</li>
+<li><strong>Context gain:</strong> <code>k0 - k3</code>, kept separate from unconditional form frequency.</li>
+<li><strong>Production effort:</strong> lexical word count is the primary validated measure in these pages. Alternative morpheme, syllable, and phoneme measures remain sensitivities pending full validation.</li>
+<li><strong>Response-space uncertainty:</strong> exact-string entropy over sampled Mistral responses. It is generator- and setting-dependent and is not semantic entropy.</li>
+<li><strong>Word-level surprisal:</strong> scorer-specific information assigned to aligned word occurrences; Mistral, Qwen3-14B, and TinyDialogues are fit separately because their tokenizers and raw bit scales differ.</li>
+</ul>
+<h2>Why the models become more complex</h2>
+<p>Many utterances come from the same child, and many word observations repeat the same lexical item. The report therefore starts with transparent descriptive lines, then adds effort controls, child identity, within-child decompositions, GEE or mixed effects, nonlinear age terms, and whole-child resampling. The more complex models are checks around a declared primary estimand; they are not used to select whichever result is most favorable.</p>
+<h2>How to read the plots</h2>
+<p>A downward surprisal line means that the scorer finds the form more predictable at older ages under the controls named for that model. It does not by itself mean that more Shannon information was communicated, that a listener benefited, or that the child reached a normative efficiency optimum. Shaded ribbons are model-based uncertainty, not the raw spread of utterances.</p>
+<h2>Full evidence preserved</h2>
+<ul>
+<li><a href="august_supervisor_index.html">Original audited August package</a></li>
+<li><a href="august_supervisor_report.html">Complete August supervisor report</a></li>
+<li><a href="august_routes_report.embedded.html">Combined self-contained archive of the three analysis pages</a></li>
+</ul>
+<div class="next-page">Next: <a href="august_routes_route1.html">Route 1 — utterance surprisal at fixed effort →</a></div>
+</main>
+</body>
+</html>

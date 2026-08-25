@@ -1,0 +1,426 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Route 2 — Effort Relative to a Response Space</title>
+<style>
+:root {
+  color-scheme: light;
+  --ink: #1e2528;
+  --muted: #5e686d;
+  --line: #d9e0df;
+  --paper: #ffffff;
+  --soft: #f5f7f6;
+  --accent: #2f6f73;
+  --accent2: #c76f2c;
+}
+body {
+  margin: 0;
+  background: #eef2f1;
+  color: var(--ink);
+  font: 16px/1.58 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+main {
+  max-width: 980px;
+  margin: 34px auto 56px;
+  padding: 48px 58px;
+  background: var(--paper);
+  box-shadow: 0 18px 50px rgba(31, 45, 48, 0.12);
+}
+h1, h2, h3, h4 {
+  line-height: 1.18;
+  margin: 1.6em 0 0.55em;
+}
+h1 {
+  margin-top: 0;
+  font-size: 2.25rem;
+  border-bottom: 3px solid var(--accent);
+  padding-bottom: 0.45em;
+}
+h2 {
+  font-size: 1.55rem;
+  color: var(--accent);
+}
+h3 {
+  font-size: 1.18rem;
+}
+p {
+  margin: 0.75em 0;
+}
+a {
+  color: var(--accent);
+}
+blockquote {
+  border-left: 4px solid var(--accent2);
+  margin: 1.1em 0;
+  padding: 0.05em 1.1em;
+  color: var(--muted);
+  background: #fff8f2;
+}
+code {
+  background: var(--soft);
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  padding: 0.08em 0.3em;
+  font-family: "SFMono-Regular", Consolas, monospace;
+  font-size: 0.92em;
+}
+pre {
+  background: #f5f7f6;
+  color: var(--ink);
+  border: 1px solid var(--line);
+  padding: 1em;
+  overflow-x: auto;
+  border-radius: 7px;
+}
+pre code {
+  background: transparent;
+  border: 0;
+  padding: 0;
+  color: inherit;
+}
+table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 1.15em 0 1.45em;
+  font-size: 0.95em;
+}
+.plot-layout {
+  table-layout: fixed;
+  margin: 1.1em auto 1.45em;
+}
+.plot-layout,
+.plot-layout tr,
+.plot-layout td {
+  border: 0;
+  background: transparent;
+}
+.plot-layout td {
+  padding: 0.35em 0.55em 0.95em;
+  text-align: center;
+  vertical-align: top;
+}
+.plot-layout img {
+  width: 100%;
+  max-width: 100%;
+  margin: 0 auto 0.35em;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: white;
+}
+.plot-layout .centered-cell img {
+  width: 54%;
+}
+.plot-caption {
+  color: var(--muted);
+  font-size: 0.85em;
+  line-height: 1.35;
+}
+th, td {
+  border: 1px solid var(--line);
+  padding: 0.54em 0.68em;
+  vertical-align: top;
+}
+th {
+  background: #e7efed;
+  text-align: left;
+}
+tr:nth-child(even) td {
+  background: #fafbfb;
+}
+.plot-layout tr:nth-child(even) td {
+  background: transparent;
+}
+img {
+  max-width: 100%;
+  display: block;
+  margin: 1.1em auto 0.45em;
+}
+.figure-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.05rem 1.25rem;
+  align-items: start;
+  margin: 1.1em 0 1.45em;
+}
+.figure-grid.two-one {
+  max-width: 900px;
+  margin-left: auto;
+  margin-right: auto;
+}
+.figure-grid.five-panel {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+.figure-grid figure {
+  margin: 0;
+}
+.figure-grid img {
+  width: 100%;
+  max-width: 100%;
+  margin: 0;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: white;
+}
+.figure-grid figcaption {
+  color: var(--muted);
+  font-size: 0.85em;
+  line-height: 1.35;
+  text-align: center;
+  margin-top: 0.35em;
+}
+.figure-grid .centered {
+  grid-column: 1 / -1;
+  justify-self: center;
+  max-width: 58%;
+}
+.figure-grid.two-one .centered {
+  max-width: 54%;
+}
+.figure-grid.five-panel .centered {
+  max-width: 52%;
+}
+ul, ol {
+  padding-left: 1.4em;
+}
+.caption {
+  color: var(--muted);
+  font-size: 0.92em;
+  margin-top: -0.15em;
+}
+@media print {
+  body {
+    background: white;
+  }
+  main {
+    box-shadow: none;
+    margin: 0;
+    max-width: none;
+    padding: 28px;
+  }
+}
+@media screen and (max-width: 540px) {
+  .figure-grid {
+    grid-template-columns: 1fr;
+  }
+  .figure-grid .centered,
+  .figure-grid.five-panel .centered {
+    grid-column: auto;
+    max-width: 100%;
+  }
+}
+
+.report-nav {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  margin: -1.1rem -0.4rem 2rem;
+  padding: 0.65rem;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.96);
+  box-shadow: 0 7px 22px rgba(31, 45, 48, 0.08);
+}
+.report-nav a {
+  flex: 1 1 130px;
+  padding: 0.55rem 0.75rem;
+  border-radius: 7px;
+  color: var(--muted);
+  font-weight: 650;
+  text-align: center;
+  text-decoration: none;
+}
+.report-nav a:hover {
+  background: var(--soft);
+  color: var(--accent);
+}
+.report-nav a.active {
+  background: var(--accent);
+  color: white;
+}
+.route-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+  margin: 1.25rem 0 1.7rem;
+}
+.route-card {
+  display: flex;
+  min-height: 120px;
+  flex-direction: column;
+  gap: 0.35rem;
+  padding: 1.05rem;
+  border: 1px solid var(--line);
+  border-top: 5px solid var(--accent);
+  border-radius: 9px;
+  color: var(--ink);
+  text-decoration: none;
+  background: var(--paper);
+}
+.route-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 28px rgba(31, 45, 48, 0.10);
+}
+.route-card span {
+  color: var(--muted);
+  font-size: 0.84rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.route-card strong {
+  color: var(--accent);
+  font-size: 1.16rem;
+}
+.route-card em {
+  color: var(--muted);
+  font-style: normal;
+  line-height: 1.35;
+}
+.next-page {
+  margin-top: 2.2rem;
+  padding: 1rem 1.2rem;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  text-align: right;
+  background: var(--soft);
+  font-weight: 650;
+}
+@media screen and (max-width: 720px) {
+  .route-grid { grid-template-columns: 1fr; }
+  .report-nav { position: static; }
+  main {
+    margin: 0;
+    padding: 28px 22px 42px;
+    box-shadow: none;
+  }
+  table {
+    display: block;
+    max-width: 100%;
+    overflow-x: auto;
+    font-size: 0.86em;
+  }
+}
+</style>
+</head>
+<body>
+<main>
+<div class="report-nav" aria-label="Report pages"><a href="august_routes_report.html">Data overview</a><a href="august_routes_route1.html">Route 1</a><a class="active" href="august_routes_route2.html">Route 2</a><a href="august_routes_word_level.html">Word level</a></div>
+<h1>Route 2 — effort relative to a generated response space</h1>
+<p><strong>Question.</strong> Relative to responses generated for the same context, does child word effort change with age and exact-string response uncertainty? This is a different estimand from Route 1.</p>
+<blockquote><p>Main result: relative effort increases with age, but the age-by-response-entropy interaction is negative in the principal session models—the opposite of the original simple positive-interaction prediction.</p></blockquote>
+<h2>Route 2 results</h2>
+<h3>Model 0 — raw relative-effort trajectories</h3>
+<p>Observed child utterances lengthen with age, but generated expected length also changes. Raw child effort and effort relative to the generated distribution therefore stay separate.</p>
+<img src="../results/august_routes_report/plots/route2_model0_raw_lines.png" alt="Route 2 raw trajectories">
+<h3>Model 1 — age and child identity</h3>
+<p>The simplest adjusted model asks whether relative effort changes with age after stable child differences are controlled. It does not yet ask whether contextual uncertainty changes the developmental trajectory.</p>
+<h3>Model 2 — add response entropy and situation-specific controls</h3>
+<pre><code>relative effort ~ age * response entropy
+                + generated expected words
+                + context word count + next-token context entropy
+                + child identity</code></pre>
+<p>The lines hold other continuous predictors at their saved reference values and show low, middle, and high exact-string response entropy.</p>
+<img src="../results/august_routes_report/plots/route2_model2_adjusted_lines.png" alt="Route 2 fully adjusted regression lines">
+<h3>Model 3 — GEE, Mundlak, and mixed-effects checks</h3>
+<p>The comparison includes an utterance-level child-fixed model, child-session GEE, within/between-child Mundlak GEE, and a random-intercept/random-age mixed model. These handle longitudinal repetition differently and keep estimator sensitivity visible.</p>
+<img src="../results/august_routes_report/plots/route2_model3_complex_lines.png" alt="Route 2 GEE, Mundlak, and mixed-model regression lines">
+<h4>Fully adjusted age terms</h4>
+<table>
+<thead><tr>
+<th>model</th>
+<th>estimate</th>
+<th>ci_low</th>
+<th>ci_high</th>
+<th>p_value</th>
+<th>adjustment</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>Linear child-fixed baseline</td>
+<td>0.093</td>
+<td>0.080</td>
+<td>0.106</td>
+<td>3.39e-43</td>
+<td>utterance rows; child fixed effects; uncertainty clustered by child</td>
+</tr>
+<tr>
+<td>Session GEE</td>
+<td>0.089</td>
+<td>0.078</td>
+<td>0.101</td>
+<td>3.15e-50</td>
+<td>child-session means; exchangeable repeated observations grouped by child</td>
+</tr>
+<tr>
+<td>Within/between-child GEE</td>
+<td>0.089</td>
+<td>0.078</td>
+<td>0.100</td>
+<td>4.83e-56</td>
+<td>separates within-child age from child mean age; grouped by child</td>
+</tr>
+<tr>
+<td>Mixed model</td>
+<td>0.102</td>
+<td>0.090</td>
+<td>0.114</td>
+<td>7.00e-60</td>
+<td>child-session means; random child intercept and age slope</td>
+</tr>
+</tbody></table>
+<h4>Fully adjusted age × response-entropy terms</h4>
+<table>
+<thead><tr>
+<th>model</th>
+<th>estimate</th>
+<th>ci_low</th>
+<th>ci_high</th>
+<th>p_value</th>
+<th>adjustment</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>Linear child-fixed baseline</td>
+<td>1.82e-04</td>
+<td>-0.001</td>
+<td>0.002</td>
+<td>0.814</td>
+<td>utterance rows; child fixed effects; uncertainty clustered by child</td>
+</tr>
+<tr>
+<td>Session GEE</td>
+<td>-0.025</td>
+<td>-0.038</td>
+<td>-0.011</td>
+<td>3.58e-04</td>
+<td>child-session means; exchangeable repeated observations grouped by child</td>
+</tr>
+<tr>
+<td>Within/between-child GEE</td>
+<td>-0.023</td>
+<td>-0.047</td>
+<td>0.001</td>
+<td>0.065</td>
+<td>separates within-child age from child mean age; grouped by child</td>
+</tr>
+<tr>
+<td>Mixed model</td>
+<td>-0.024</td>
+<td>-0.033</td>
+<td>-0.016</td>
+<td>7.38e-08</td>
+<td>child-session means; random child intercept and age slope</td>
+</tr>
+</tbody></table>
+<h2>Route 2 conclusion</h2>
+<p>The session GEE and mixed model support a positive age association in relative effort and a negative age-by-entropy interaction. The utterance-level fixed-effect model does not show the same interaction, so aggregation and estimator sensitivity remain part of the result. Exact-string entropy is model-, prompt-, temperature-, seed-, and surface-form-dependent; it is not semantic uncertainty or listener utility.</p>
+<div class="next-page">Next: <a href="august_routes_word_level.html">Word-level surprisal →</a></div>
+</main>
+</body>
+</html>

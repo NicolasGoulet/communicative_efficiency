@@ -1,0 +1,509 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Route 1 — Utterance Surprisal at Fixed Effort</title>
+<style>
+:root {
+  color-scheme: light;
+  --ink: #1e2528;
+  --muted: #5e686d;
+  --line: #d9e0df;
+  --paper: #ffffff;
+  --soft: #f5f7f6;
+  --accent: #2f6f73;
+  --accent2: #c76f2c;
+}
+body {
+  margin: 0;
+  background: #eef2f1;
+  color: var(--ink);
+  font: 16px/1.58 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+main {
+  max-width: 980px;
+  margin: 34px auto 56px;
+  padding: 48px 58px;
+  background: var(--paper);
+  box-shadow: 0 18px 50px rgba(31, 45, 48, 0.12);
+}
+h1, h2, h3, h4 {
+  line-height: 1.18;
+  margin: 1.6em 0 0.55em;
+}
+h1 {
+  margin-top: 0;
+  font-size: 2.25rem;
+  border-bottom: 3px solid var(--accent);
+  padding-bottom: 0.45em;
+}
+h2 {
+  font-size: 1.55rem;
+  color: var(--accent);
+}
+h3 {
+  font-size: 1.18rem;
+}
+p {
+  margin: 0.75em 0;
+}
+a {
+  color: var(--accent);
+}
+blockquote {
+  border-left: 4px solid var(--accent2);
+  margin: 1.1em 0;
+  padding: 0.05em 1.1em;
+  color: var(--muted);
+  background: #fff8f2;
+}
+code {
+  background: var(--soft);
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  padding: 0.08em 0.3em;
+  font-family: "SFMono-Regular", Consolas, monospace;
+  font-size: 0.92em;
+}
+pre {
+  background: #f5f7f6;
+  color: var(--ink);
+  border: 1px solid var(--line);
+  padding: 1em;
+  overflow-x: auto;
+  border-radius: 7px;
+}
+pre code {
+  background: transparent;
+  border: 0;
+  padding: 0;
+  color: inherit;
+}
+table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 1.15em 0 1.45em;
+  font-size: 0.95em;
+}
+.plot-layout {
+  table-layout: fixed;
+  margin: 1.1em auto 1.45em;
+}
+.plot-layout,
+.plot-layout tr,
+.plot-layout td {
+  border: 0;
+  background: transparent;
+}
+.plot-layout td {
+  padding: 0.35em 0.55em 0.95em;
+  text-align: center;
+  vertical-align: top;
+}
+.plot-layout img {
+  width: 100%;
+  max-width: 100%;
+  margin: 0 auto 0.35em;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: white;
+}
+.plot-layout .centered-cell img {
+  width: 54%;
+}
+.plot-caption {
+  color: var(--muted);
+  font-size: 0.85em;
+  line-height: 1.35;
+}
+th, td {
+  border: 1px solid var(--line);
+  padding: 0.54em 0.68em;
+  vertical-align: top;
+}
+th {
+  background: #e7efed;
+  text-align: left;
+}
+tr:nth-child(even) td {
+  background: #fafbfb;
+}
+.plot-layout tr:nth-child(even) td {
+  background: transparent;
+}
+img {
+  max-width: 100%;
+  display: block;
+  margin: 1.1em auto 0.45em;
+}
+.figure-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.05rem 1.25rem;
+  align-items: start;
+  margin: 1.1em 0 1.45em;
+}
+.figure-grid.two-one {
+  max-width: 900px;
+  margin-left: auto;
+  margin-right: auto;
+}
+.figure-grid.five-panel {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+.figure-grid figure {
+  margin: 0;
+}
+.figure-grid img {
+  width: 100%;
+  max-width: 100%;
+  margin: 0;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: white;
+}
+.figure-grid figcaption {
+  color: var(--muted);
+  font-size: 0.85em;
+  line-height: 1.35;
+  text-align: center;
+  margin-top: 0.35em;
+}
+.figure-grid .centered {
+  grid-column: 1 / -1;
+  justify-self: center;
+  max-width: 58%;
+}
+.figure-grid.two-one .centered {
+  max-width: 54%;
+}
+.figure-grid.five-panel .centered {
+  max-width: 52%;
+}
+ul, ol {
+  padding-left: 1.4em;
+}
+.caption {
+  color: var(--muted);
+  font-size: 0.92em;
+  margin-top: -0.15em;
+}
+@media print {
+  body {
+    background: white;
+  }
+  main {
+    box-shadow: none;
+    margin: 0;
+    max-width: none;
+    padding: 28px;
+  }
+}
+@media screen and (max-width: 540px) {
+  .figure-grid {
+    grid-template-columns: 1fr;
+  }
+  .figure-grid .centered,
+  .figure-grid.five-panel .centered {
+    grid-column: auto;
+    max-width: 100%;
+  }
+}
+
+.report-nav {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  margin: -1.1rem -0.4rem 2rem;
+  padding: 0.65rem;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.96);
+  box-shadow: 0 7px 22px rgba(31, 45, 48, 0.08);
+}
+.report-nav a {
+  flex: 1 1 130px;
+  padding: 0.55rem 0.75rem;
+  border-radius: 7px;
+  color: var(--muted);
+  font-weight: 650;
+  text-align: center;
+  text-decoration: none;
+}
+.report-nav a:hover {
+  background: var(--soft);
+  color: var(--accent);
+}
+.report-nav a.active {
+  background: var(--accent);
+  color: white;
+}
+.route-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+  margin: 1.25rem 0 1.7rem;
+}
+.route-card {
+  display: flex;
+  min-height: 120px;
+  flex-direction: column;
+  gap: 0.35rem;
+  padding: 1.05rem;
+  border: 1px solid var(--line);
+  border-top: 5px solid var(--accent);
+  border-radius: 9px;
+  color: var(--ink);
+  text-decoration: none;
+  background: var(--paper);
+}
+.route-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 28px rgba(31, 45, 48, 0.10);
+}
+.route-card span {
+  color: var(--muted);
+  font-size: 0.84rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.route-card strong {
+  color: var(--accent);
+  font-size: 1.16rem;
+}
+.route-card em {
+  color: var(--muted);
+  font-style: normal;
+  line-height: 1.35;
+}
+.next-page {
+  margin-top: 2.2rem;
+  padding: 1rem 1.2rem;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  text-align: right;
+  background: var(--soft);
+  font-weight: 650;
+}
+@media screen and (max-width: 720px) {
+  .route-grid { grid-template-columns: 1fr; }
+  .report-nav { position: static; }
+  main {
+    margin: 0;
+    padding: 28px 22px 42px;
+    box-shadow: none;
+  }
+  table {
+    display: block;
+    max-width: 100%;
+    overflow-x: auto;
+    font-size: 0.86em;
+  }
+}
+</style>
+</head>
+<body>
+<main>
+<div class="report-nav" aria-label="Report pages"><a href="august_routes_report.html">Data overview</a><a class="active" href="august_routes_route1.html">Route 1</a><a href="august_routes_route2.html">Route 2</a><a href="august_routes_word_level.html">Word level</a></div>
+<h1>Route 1 — utterance surprisal at fixed effort</h1>
+<p><strong>Question.</strong> At the same measured word effort, does contextual self-information of the child&#x27;s utterance change with age?</p>
+<blockquote><p>Main result: PBM Mistral and same-child TinyDialogues lines are negative after child adjustment. The separate non-PBM Mistral estimate is also negative, but its frozen primary clustered interval crosses zero, so the confirmation criterion is not met.</p></blockquote>
+<h2>Route 1 results</h2>
+<h3>Model 0 — raw developmental trajectories</h3>
+<p>The raw lines show what changes with age before adjustment. They mix development with longer utterances, child composition, and corpus composition, so they orient the reader but do not answer the fixed-effort question.</p>
+<img src="../results/august_routes_report/plots/route1_model0_raw_lines.png" alt="Route 1 raw regression lines">
+<h3>Model 1 — control measured effort</h3>
+<pre><code>contextual utterance surprisal ~ age + exact/top-coded word count</code></pre>
+<p>These fitted lines compare utterances at the same word count but omit child identity. This effort-only HC1 model is a diagnostic bridge from the raw plot, not a registered primary claim.</p>
+<img src="../results/august_routes_report/plots/route1_model1_effort_only_lines.png" alt="Route 1 effort-only regression lines">
+<table>
+<thead><tr>
+<th>sample</th>
+<th>age_estimate</th>
+<th>ci_low</th>
+<th>ci_high</th>
+<th>p_value</th>
+<th>children</th>
+<th>source_rows</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>Mistral — PBM discovery</td>
+<td>-0.016</td>
+<td>-0.026</td>
+<td>-0.005</td>
+<td>0.003</td>
+<td>21</td>
+<td>444325</td>
+</tr>
+<tr>
+<td>TinyDialogues — PBM robustness</td>
+<td>-0.080</td>
+<td>-0.096</td>
+<td>-0.065</td>
+<td>8.44e-25</td>
+<td>21</td>
+<td>443848</td>
+</tr>
+<tr>
+<td>Mistral — non-PBM confirmation</td>
+<td>-0.087</td>
+<td>-0.094</td>
+<td>-0.081</td>
+<td>1.41e-145</td>
+<td>58</td>
+<td>678071</td>
+</tr>
+</tbody></table>
+<h3>Model 2 — control child identity</h3>
+<pre><code>contextual utterance surprisal ~ age + exact/top-coded word count + child identity</code></pre>
+<p>This is the registered primary design. Exact word-effort cells are weighted by their utterance counts, stable between-child differences are absorbed, and uncertainty is clustered or bootstrapped by whole child.</p>
+<img src="../results/august_routes_report/plots/route1_model2_child_adjusted_lines.png" alt="Route 1 child-adjusted regression lines">
+<h3>Model 3 — nonlinear and repeated-measures checks</h3>
+<p>The final figure compares the child-fixed WLS primary line with a quadratic-age curve, a Mundlak within/between-child decomposition, population-average GEE, and an available random-age mixed-model sensitivity. Their slopes and curvature are the comparison; intercepts and weighting differ.</p>
+<img src="../results/august_routes_report/plots/route1_model3_complex_lines.png" alt="Route 1 nonlinear, Mundlak, GEE, and mixed-model lines">
+<p>The mixed sensitivity uses unweighted design cells and is not a replacement for the weighted primary model. Singular fits are omitted. The frozen primary interval remains the decision rule for non-PBM confirmation.</p>
+<h4>Mistral PBM discovery</h4>
+<table>
+<thead><tr>
+<th>model</th>
+<th>estimate</th>
+<th>ci_low</th>
+<th>ci_high</th>
+<th>p_value</th>
+<th>adjustment</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>Linear child-adjusted</td>
+<td>-0.131</td>
+<td>-0.179</td>
+<td>-0.083</td>
+<td>7.70e-08</td>
+<td>exact word-effort cells; child fixed effects; 95% interval clustered by child</td>
+</tr>
+<tr>
+<td>Nonlinear age</td>
+<td>-0.155</td>
+<td>-0.228</td>
+<td>-0.082</td>
+<td>2.89e-05</td>
+<td>adds age squared; reported coefficient is the local slope at centered age; child fixed effects; clustered by child</td>
+</tr>
+<tr>
+<td>Within/between child</td>
+<td>-0.133</td>
+<td>-0.182</td>
+<td>-0.084</td>
+<td>8.42e-08</td>
+<td>separates within-child age from between-child mean age; corpus controls; clustered by child</td>
+</tr>
+<tr>
+<td>Repeated-measures GEE</td>
+<td>-0.152</td>
+<td>-0.200</td>
+<td>-0.104</td>
+<td>5.74e-10</td>
+<td>Gaussian GEE with exchangeable within-child correlation; exact word-effort controls</td>
+</tr>
+</tbody></table>
+<h4>TinyDialogues PBM scorer robustness</h4>
+<table>
+<thead><tr>
+<th>model</th>
+<th>estimate</th>
+<th>ci_low</th>
+<th>ci_high</th>
+<th>p_value</th>
+<th>adjustment</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>Linear child-adjusted</td>
+<td>-0.222</td>
+<td>-0.311</td>
+<td>-0.132</td>
+<td>1.24e-06</td>
+<td>exact word-effort cells; child fixed effects; 95% interval clustered by child</td>
+</tr>
+<tr>
+<td>Nonlinear age</td>
+<td>-0.272</td>
+<td>-0.391</td>
+<td>-0.153</td>
+<td>7.06e-06</td>
+<td>adds age squared; reported coefficient is the local slope at centered age; child fixed effects; clustered by child</td>
+</tr>
+<tr>
+<td>Within/between child</td>
+<td>-0.221</td>
+<td>-0.313</td>
+<td>-0.130</td>
+<td>2.09e-06</td>
+<td>separates within-child age from between-child mean age; corpus controls; clustered by child</td>
+</tr>
+<tr>
+<td>Repeated-measures GEE</td>
+<td>-0.226</td>
+<td>-0.311</td>
+<td>-0.141</td>
+<td>1.86e-07</td>
+<td>Gaussian GEE with exchangeable within-child correlation; exact word-effort controls</td>
+</tr>
+</tbody></table>
+<h4>Mistral non-PBM confirmation</h4>
+<table>
+<thead><tr>
+<th>model</th>
+<th>estimate</th>
+<th>ci_low</th>
+<th>ci_high</th>
+<th>p_value</th>
+<th>adjustment</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>Linear child-adjusted</td>
+<td>-0.062</td>
+<td>-0.132</td>
+<td>0.007</td>
+<td>0.079</td>
+<td>exact word-effort cells; child fixed effects; 95% interval clustered by child</td>
+</tr>
+<tr>
+<td>Nonlinear age</td>
+<td>-0.089</td>
+<td>-0.160</td>
+<td>-0.018</td>
+<td>0.014</td>
+<td>adds age squared; reported coefficient is the local slope at centered age; child fixed effects; clustered by child</td>
+</tr>
+<tr>
+<td>Within/between child</td>
+<td>-0.062</td>
+<td>-0.131</td>
+<td>0.007</td>
+<td>0.080</td>
+<td>separates within-child age from between-child mean age; corpus controls; clustered by child</td>
+</tr>
+<tr>
+<td>Repeated-measures GEE</td>
+<td>-0.104</td>
+<td>—</td>
+<td>—</td>
+<td>—</td>
+<td>Gaussian GEE with exchangeable within-child correlation; exact word-effort controls</td>
+</tr>
+</tbody></table>
+<h2>Route 1 conclusion</h2>
+<p>The strongest supported claim is narrow: within PBM discovery, older children&#x27;s utterances are more predictable to the scorer at the same exact/top-coded word effort after child identity is controlled. TinyDialogues repeats the direction on the same children. The non-PBM primary result remains qualified because its registered interval includes zero.</p>
+<div class="next-page">Next: <a href="august_routes_route2.html">Route 2 — effort relative to response space →</a></div>
+</main>
+</body>
+</html>
