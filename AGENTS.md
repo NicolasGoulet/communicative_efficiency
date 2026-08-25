@@ -37,6 +37,29 @@ Broad scientific objects:
   information at fixed production effort, and production effort relative to
   contextual predictability / a generated response space.
 
+The project currently has four primary analysis tracks. Use these plain names
+instead of assuming that an internal "Route 1" or "Route 2" label is
+self-explanatory:
+
+1. **Utterance-level predictability**: model unconditional utterance
+   surprisal, contextual utterance surprisal, and context support as children
+   age, with effort and stable child identity controlled explicitly; compare
+   real child utterances with caregiver utterances and clearly named generated
+   baselines where the comparison is valid.
+2. **Utterance-level effort adaptation**: model words, morphemes, syllables,
+   phoneme proxies, or related effort outcomes from age and conversational
+   conditions, both as raw child effort and relative to the generated response
+   distribution for the same context.
+3. **Word-level contextual support**: test whether lexical rarity and age
+   interact such that relatively rare words become increasingly supported by
+   their utterance/conversational context, while controlling word identity,
+   position, utterance properties, and child identity.
+4. **Joint information-effort response clouds**: locate each observed child
+   utterance inside the information-by-effort cloud of Qwen responses to the
+   same context and model how that location changes with age. This is a
+   generated-response-space comparison, not proof of an optimum or a
+   meaning-preserving choice set.
+
 Do not equate lower surprisal, higher surprisal, shorter speech, or longer
 speech with communicative efficiency in isolation. State the estimand and
 controls explicitly. In particular, the current negative fixed-effort age
@@ -94,8 +117,10 @@ as a causal SES effect, linguistic deficit, or inherent group efficiency.
 
 ## Current Active Data And Analysis State
 
-Core longitudinal state was verified locally on 2026-07-21; the Hall snapshot
-state below was verified on 2026-08-17.
+The authoritative longitudinal handoffs and local Route 1/Route 2 products
+below were rechecked on 2026-08-25; the Hall snapshot state below was verified
+on 2026-08-17. When any later historical paragraph conflicts with the dated
+analysis-ready map in this section, use this section.
 
 Primary external scored/feature handoffs:
 
@@ -108,6 +133,7 @@ results/external/compute_surprisal_mila/raw_surprisal_heldout_real_child_general
 results/external/compute_surprisal_mila/raw_surprisal_cleaned_naturalistic_79_children_all_available_ages_fp16
 results/external/compute_surprisal_mila/raw_surprisal_tinydialogues_pbm_21_children_all_6_conditions_k0_k1_k2_k3_fp32
 results/external/compute_surprisal_mila/hall_snapshot_mistral_word_surprisal_20260813_66812c4
+results/external/compute_surprisal_mila/qwen_response_mistral_full100_20260817_f5dd5aa
 ```
 
 These are symlinks into:
@@ -123,6 +149,92 @@ complete PBM scored tree where the 006-023 generated-baseline patch has been
 merged into the main cleaned Mistral results. New Mila products should be
 symlinked here only after they have been rsynced locally and passed audits in
 `compute_surprisal_mila`.
+
+### Authoritative analysis-ready data map (2026-08-25)
+
+For new work, start from these products rather than reconstructing paths from
+old reports:
+
+- **Utterance-level predictability, all 79 children / 13 corpora**:
+  `results/direct_surprisal_replication/mistral_full79/child_direct_surprisal_wide.csv.gz`
+  is the 1,140,695-row child table and
+  `results/direct_surprisal_replication/mistral_full79/caretaker_direct_surprisal_wide.csv.gz`
+  is the 1,470,154-row caregiver table. Their source and scope contract is
+  `results/direct_surprisal_replication/mistral_full79/manifest.json`; their
+  staged analysis is under
+  `results/direct_surprisal_replication/mistral_full79/modular/`. The raw
+  scored-tree symlink is
+  `results/external/compute_surprisal_mila/raw_surprisal_cleaned_naturalistic_79_children_all_available_ages_fp16`.
+- **PBM utterance comparisons with generated baselines**:
+  `results/route1_analysis_dataset/route1_scored_utterance_effort_context_entropy_with_lstm_long.csv.gz`
+  contains the PBM real, random, unigram, bigram, trigram, and additive
+  same-length LSTM comparisons. Use
+  `results/direct_surprisal_replication/tinydialogues_pbm/` and
+  `results/direct_surprisal_replication/paired_tiny_mistral_pbm/` for the
+  PBM TinyDialogues and paired-scorer products. These products are not
+  remaining-58 confirmation data.
+- **All-79 Qwen response space for effort and joint clouds**:
+  `results/external/compute_surprisal_mila/qwen_response_mistral_full100_20260817_f5dd5aa`
+  is the canonical symlink to the extracted, audited handoff at
+  `/home/apaixonada/EvaPortelance/Projet_1/compute_surprisal_mila/mila_results/qwen_response_mistral_full_scoring/20260817_qwen_response_mistral_full75_smoke_f5dd5aa_v1/extracted_run`.
+  Within it,
+  `prepared/inputs/core75/` and `prepared/inputs/extension25/` contain all 100
+  generated response texts per context; `processed/core75/` and
+  `processed/extension25/` contain per-response Mistral k0/k3 utterance
+  scores; and `context_means/full100/` contains the 100-response means.
+  `CORE75_COMPLETE`, `EXTENSION25_COMPLETE`, and `FULL100_AVAILABLE` must all
+  be present before use.
+- **Completed all-79 effort/cloud analysis**:
+  `results/full79_joint_efficiency_analysis/` is the primary conditional
+  effort-and-information product. Its 15/15 registered nonlinear models and
+  38/38 independent audit checks passed, and
+  `FULL79_JOINT_EFFICIENCY_COMPLETE_AND_AUDITED` is present. Read
+  `docs/full79_joint_efficiency_pipeline.md` before rebuilding it and use
+  `docs/full79_joint_efficiency_explorer.html` for consultation. The separate
+  fixed-effort six-model atlas is under
+  `results/full79_information_effort_clouds/` and
+  `docs/full79_information_effort_clouds.html`; its core analysis is complete,
+  but its all-source marker remains deliberately withheld until an audited
+  full-79 LSTM handoff exists.
+- **Completed utterance-informativity extension**:
+  `results/utterance_informativity_analysis/` contains the child/caretaker
+  occurrence tables, recurrent exact-string table, 30 newly fitted models,
+  Route 1 and Route 2 model inventories, standardized age estimates, and the
+  passing final audit. Its frozen scientific contract is
+  `docs/utterance_informativity_route1_route2_protocol.md`; its human report is
+  `docs/utterance_informativity_route1_route2_report.html`.
+- **Word-level information, PBM 21 only**: the owning repository is
+  `/home/apaixonada/EvaPortelance/Projet_1/developmental_word_information`.
+  Its three canonical input symlinks are under
+  `data/external/compute_surprisal_mila/` and are named
+  `mistral_7b_v03_pbm21_word_20260731_e890ec1_v1`,
+  `qwen3_14b_pbm21_word_20260803_c82d219_v1`, and
+  `tinydialogues_pbm21_word_20260730_e890ec1_v1`. Completed analyses and
+  `COMPLETE_AND_AUDITED` markers are under
+  `results/modular_analysis/{mistral_pbm21,qwen_pbm21,tinydialogues_pbm21}/`.
+- **Separate secondary products**: Hall remains under
+  `results/hall_snapshot_analysis/`; corrected cross-fitted PBM Bayes results
+  remain under `results/corrected_pbm_bayes_v2/`; and audited PBM complexity
+  and legacy n-gram products remain under
+  `results/mila_modular_runs_2026_07_08/products/`.
+
+The full100 Qwen/Mistral handoff is complete, not pending. Its extension archive
+is 3,305,320,336 bytes with SHA-256
+`909e961b980377be6ad39c738d02801896e6ec921661b7947723224157bb1160`.
+The final audit passed 16,138,100 extension rows and the disjoint union passed
+645,524 contexts with exactly 100 responses per context. Local verification
+found 512 files in every core75, extension25, and full100 product family; all
+645,524 full100 context means are finite and match exactly the 645,524 context
+IDs and 1,122,396 eligible real-child rows in the all-79 table, with zero
+per-context multiplicity mismatches.
+
+The all-79 Qwen-response effort summaries, joined analysis tables, conditional
+models, and cloud plots have now been produced locally; no further generation,
+scoring, or Mila retrieval is needed to reproduce the current Route 2 result.
+Exact-string response entropy uses all 100 `target_text` values per context.
+Semantic-cluster entropy remains unavailable. The response scoring handoff is
+utterance-level only and contains no generated-response word/token/allocation
+payload.
 
 Current strict naturalistic big-cleaned bundle:
 
@@ -331,15 +443,18 @@ Important current facts:
 - the remaining-58 real-child Mistral same-pass word DAG is implemented and
   locally audited at compute commit `aa6555f`. It targets 232 contracts and
   requires a fresh exact-wrapper smoke before production; no Mila job ran;
-- `developmental_word_information` commit `727d08d` owns the frozen protocol,
+- `developmental_word_information` was locally verified at commit
+  `12bd91b66d7fdb5155a8e380eabc807aa8017cf1`; it owns the frozen protocol,
   input audits, exact word pairing, registered 27-model engine, bootstrap,
   plots, reports, and final audit. The protocol SHA-256 is
   `705143ea70e4c3852fe852205010973fca7742d927c0a85993a917bf084d5989`;
   cross-scorer effects must be fit separately and raw score magnitudes must not
   be pooled;
 - the full-79 direct-Mistral score tree is available, but full-79 context
-  entropy, word-level surprisal, LSTM targets/scores, response-space products,
-  complexity products, and corrected Bayes scores are not all available;
+  entropy, word-level surprisal, LSTM targets/scores, complexity products, and
+  corrected Bayes scores are not all available. The all-79 Qwen response-space
+  text and utterance-level Mistral k0/k3 products are available through the
+  full100 handoff above;
 - TinyDialogues covers the 21-child PBM discovery set for real, random,
   unigram, bigram, trigram, and caretaker targets at k0-k3; it does not yet
   cover the other 58 children or the PBM LSTM candidates;
@@ -347,12 +462,26 @@ Important current facts:
   trigram, and additive same-length LSTM k3/k4/k5 targets scored by Mistral;
 - PBM additive LSTM generation and scoring are complete; they are no longer a
   merely planned baseline;
-- the production response-space run contains 268,712 unique k3 caregiver
-  contexts and 26,871,200 selected samples (100 per context), with 176
-  incomplete/fallback settings retained as audit flags;
-- the local Route 2 table covers about 444k PBM child utterances, not all 79
-  children, and generated responses have not yet been scored for a full
-  information-effort cloud;
+- the older Mistral-generated response-space products under
+  `results/route2_response_space/` remain PBM-only: about 444k child
+  utterances and 268,712 contexts. Keep their 176 incomplete/fallback settings
+  as audit flags and never relabel this legacy table as all-79;
+- the newer all-79 response space is the Qwen-generated/Mistral-scored full100
+  handoff verified on 2026-08-24: 64,552,400 scored responses, 645,524
+  contexts, 79 children, and 13 corpora. The conditional all-79 effort/cloud
+  suite is now complete: 15/15 models passed across pooled, PBM-discovery, and
+  non-PBM-confirmation scopes. At 42 months, its pooled absolute-length ratio
+  from response-entropy p10 to p90 is 1.028 [1.014, 1.043], whereas the
+  Qwen-relative effort odds ratio is 0.931 [0.902, 0.962]. Preserve this
+  estimand distinction and the developmental reversal;
+- the utterance-informativity extension fitted 24 opportunity-weighted
+  child-cell standardization models and six developmental k0/k3-density
+  coupling models. The child age-by-k0-density interaction is unsupported in
+  PBM discovery (+0.0065 per six months, interval crossing zero) and negative
+  in the other-58 confirmation sample (-0.0061, 95% CI [-0.0118, -0.0003]).
+  Because discovery and confirmation directions differ, this is not a
+  replicated developmental effect. Caregiver coupling is approximately
+  unchanged;
 - July modular-repo products are under
   `results/mila_modular_runs_2026_07_08/products/`: PBM n-gram Bayes scores and
   PBM complexity predictors have passed their recorded join audits;
@@ -389,6 +518,16 @@ Current supervisor-facing utterance-information report:
 ```text
 docs/predicting_utterance_level_information_report.md
 docs/predicting_utterance_level_information_report.html
+```
+
+The current Route 1/Route 2 methods and model handoffs are:
+
+```text
+docs/utterance_informativity_route1_route2_protocol.md
+docs/utterance_informativity_route1_route2_report.html
+docs/full79_joint_efficiency_pipeline.md
+docs/full79_joint_efficiency_explorer.html
+docs/full79_information_effort_clouds.html
 ```
 
 The separate Hall cross-sectional report is:
@@ -473,55 +612,40 @@ integration.
 
 ## Current Scientific And Compute Focus
 
-Priorities as of the 2026-07-21 data-readiness audit:
+Current priorities and genuine compute gaps as of 2026-08-25:
 
-1. Freeze a PBM-discovery / non-PBM-confirmation protocol before examining the
-   remaining children's main estimates. Predeclare the primary context-gain,
-   effort-adaptation, and onset estimands and their predicted directions.
-2. Build the model-namespaced TinyDialogues PBM analysis and paired
-   TinyDialogues-versus-Mistral robustness report from the audited 504-file
-   handoff. Repeat applicable current direct-score models and record explicit
-   blockers for context-entropy, LSTM, heldout, and Route 2 products.
-3. Build and audit the full-79 Mistral analysis table, patch or flag the 24
-   blank generated score cells, and produce individual trajectories for all 79
-   children before fitting the frozen non-PBM confirmation models.
-4. Preserve the full-79 compact final report/marker beside the local archive
-   and freeze model/input manifests for both scorers.
-5. Define the primary conversational eligibility sample: genuine child turns
-   responding to a caregiver in the same session. Preserve flags for turn
-   distance, child-initiated turns, imitation, routines/reading, backchannels,
-   and repair sequences; manually validate a stratified subset.
-6. Refit the fixed-effort analysis with unconditional surprisal, contextual
-   surprisal, and context gain kept separate. Prototype downstream caregiver
-   response utility and validated repair/clarification outcomes before making
-   a broad communicative-success claim.
-7. Calibrate sampled response uncertainty before rerunning the main effort
-   hypothesis: compare exact-string and semantic-cluster entropy, sparse-sample
-   estimators, sample-size rarefaction, seeds, prompts/temperatures, and at
-   least one decoupled generator sensitivity where feasible.
-8. Preserve the completed word-effort child-bootstrap/simultaneous-band onset
-   result (`not_established` in both PBM and non-PBM). Repeat the frozen rule
-   only after full-79 morpheme, syllable, and phoneme effort controls have been
-   validated; do not promote a nominal age-bin contrast as onset.
-9. Use the corrected cross-fitted Bayes report as a decomposition/robustness
-   result, not a replacement for direct Mistral surprisal. If extending it,
-   score LSTM or meaning-preserving candidates as newly named candidate sets,
-   retain separate prior/context components, and rerun all held-out validation
-   gates. Keep the original overlapping reverse-trigram product methods-only.
-10. Reconcile the main supervisor report with the completed LSTM,
-   response-space, Bayes, complexity, and scientific-audit work. Keep
-   supported findings, contrary-direction findings, and proposed analyses
-   visually distinct.
-11. Extend complexity validation for CHAT morphology, phonological proxies,
-   lexical diversity, and dependency feasibility before treating them as
-   primary controls.
-12. If the full response cloud remains a priority, score sampled responses on
-   Mila and distinguish Mistral-generated/Mistral-scored self-reference from
-   decoupled generators. Reserve efficiency-frontier claims for a separately
-   validated meaning-preserving candidate set.
-13. Use SES, race/ethnicity, parental education, sex/gender, or nationality
-   only with explicit metadata-level provenance. Current coverage is too
-   sparse for most of these to serve as general covariates.
+1. Preserve the completed all-79 utterance-effort and joint
+   information-effort analyses and their frozen PBM-discovery,
+   non-PBM-confirmation, and all-79-descriptive scopes. Do not substitute the
+   older PBM response-space table or refit models during plotting/reporting.
+2. Keep unconditional surprisal, contextual surprisal, and context support as
+   separate utterance-level outcomes. Caregiver input, real child speech, and
+   generated candidates are different comparison objects and require explicit
+   target-role/candidate labels.
+3. Treat word-level information as PBM21-only until a completed remaining-58
+   production and relocation audit exist. The current three-scorer word results
+   are scorer robustness within the discovery sample, not independent-sample
+   confirmation.
+4. Treat the completed exact-string response entropy and generated-effort
+   summaries as model/prompt/temperature-specific. Semantic-cluster entropy is
+   the next measurement extension, not a missing transfer.
+5. Preserve the completed onset result (`not_established` in both PBM and
+   non-PBM). Do not promote a nominal age-bin contrast as a replicated onset.
+6. Use corrected cross-fitted PBM Bayes results only as a
+   decomposition/robustness analysis; keep prior, context-evidence, and
+   candidate-set components visible.
+7. Validate morphology, syllable, phoneme, and other complexity measures before
+   promoting them to primary all-79 effort controls. Full-79 complexity and
+   corrected-Bayes products are not currently complete.
+8. A full-79 same-length LSTM workflow exists, but no completed production
+   marker has been retrieved. The completed PBM LSTM remains valid and should
+   not be rerun merely because full-79 is absent.
+9. Develop listener-relevant utility only with an actual downstream outcome,
+   such as caregiver-response predictive gain or validated repair/clarification
+   labels. Response predictability alone is not listener utility.
+10. Use SES, race/ethnicity, parental education, sex/gender, or nationality
+    only with explicit metadata-level provenance. Keep Hall separate from the
+    79-child longitudinal analysis.
 
 The legacy in-repo LSTM implementation remains useful for audits and local CPU
 smokes, but real new training belongs on Mila. The execution-oriented baseline
@@ -737,10 +861,18 @@ in production analyses as audit items even when unit tests allow them.
   defining the direction and construct. Prefer predictability,
   conventionality, or contextual support where those are the actual measures.
 - Do not describe response-space samples as same-meaning paraphrases.
+- Do not use random, n-gram, or same-length LSTM baselines to test effort:
+  their length is fixed to the observed child utterance by construction. Use
+  the free-length Qwen response distribution for generated-relative effort.
 - Do not describe Mistral response entropy as model-independent behavioral
   uncertainty.
 - Do not conflate raw child-effort models with generated-relative effort
   models, or silently treat generated expected effort as a standard confound.
+- Do not call the full100 Qwen/Mistral handoff word-level. It contains
+  utterance-level k0/k3 scores and response texts only. For per-response cloud
+  analyses, combine the disjoint `processed/core75/` and
+  `processed/extension25/` tables; for context-level expected information, use
+  `context_means/full100/`.
 - Do not describe the legacy Bayes score as normalized `p(u | c)`.
 - Do not promote the legacy Bayes pilot as evidence that real child utterances
   outperform generated alternatives until candidate scoring is cross-fitted

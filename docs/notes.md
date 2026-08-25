@@ -7391,3 +7391,164 @@ CUDA_VISIBLE_DEVICES='' MPLCONFIGDIR=/tmp/mpl-cache \
   The full suite passed 417 tests in 300.310 seconds; the emitted convergence,
   separation, rank, and small-fixture numerical warnings were expected and no
   test failed.
+
+## 2026-08-24 - Pooled all-79 joint information-effort clouds
+
+- Added `src/build_full79_information_effort_clouds.py`, with independently
+  resumable `datasets`, `metrics`, `models`, `plots`, `report`, and `audit`
+  stages. Plotting and reporting consume frozen manifests and do not refit.
+- The canonical full100 Qwen/Mistral handoff passed a fresh local scan and
+  hash audit: 512 shards in each input/product family, 645,524 contexts,
+  48,414,300 core responses plus 16,138,100 extension responses, exactly 100
+  unique responses per context, and 64,552,400 finite scored responses.
+- The all-79 direct table contributed 1,122,396 eligible real-child rows over
+  79 children and 13 corpora, with zero unmatched Qwen contexts. Random,
+  unigram, bigram, and trigram sources each preserve the same eligible row
+  opportunity set; four bigram and two trigram score cells retain their
+  explicitly audited upstream missing scores.
+- Saved exact Qwen context summaries and a child-age-model-length table. The
+  final raw plotting unit is one mean contextual-surprisal value for each
+  model, exact word length, and age bin. The complete grid has six models,
+  lengths 1--12, and eight age bins: exactly `6 x 12 x 8 = 576` unique cells.
+- Replaced both rejected visual designs with the requested fixed-effort atlas.
+  Its six model rows each have panels for lengths 1--4, 5--8, and 9--12;
+  within every panel, each exact length is a separate labelled line. Points
+  are raw age-bin means, while lines and ribbons are adjusted regression
+  predictions and 95% intervals. Row-specific y scales keep every model
+  readable; the companion 3D view uses a common information scale and places
+  all 576 cells together as age x exact length x information.
+- Fitted 31 opportunity-weighted models with child fixed effects and
+  child-clustered covariance: per-model linear age, quadratic age, categorical
+  age-bin, age-by-exact-length, and bits-per-token checks, plus a joint
+  source-balanced interaction model. All 31 fits passed. The primary adjusted
+  total-bit age slopes were -0.081 bits/month for observed child utterances,
+  +0.025 for Qwen responses, +0.185 for random baselines, -0.038 for unigram,
+  -0.045 for bigram, and -0.041 for trigram candidates. These slopes control
+  exact length and stable child identity; the nonlinear panels and registered
+  sensitivity fits remain visible rather than assuming linearity.
+- Published `docs/full79_information_effort_clouds.md` and `.html`, the main
+  fixed-effort atlas, the linear-versus-quadratic diagnostic, the coefficient
+  comparison, and static plus interactive 3D products. Visual inspection
+  passed the main atlas and all diagnostic/3D views. Rebuilds remove the stale
+  context-gallery and percentile-primary products from the rejected designs.
+- Exact any-cap incidence is not identifiable from the canonical scored
+  handoff because it omits Qwen generation-token/cap-hit fields. The audit
+  records this explicitly and does not substitute Mistral evaluation tokens;
+  the upstream selected-response contract has zero cap-without-boundary rows.
+- No canonical audited full-79 LSTM scored handoff exists locally. The PBM-only
+  LSTM was not substituted. The final audit passed all core products and wrote
+  `CORE_CLOUDS_COMPLETE_LSTM_PENDING`; it correctly withheld
+  `FULL79_INFORMATION_EFFORT_CLOUDS_COMPLETE_AND_AUDITED`. The exact future
+  LSTM ingestion schema is frozen under the analysis results.
+- Focused fixture coverage passed 3 tests, including a canonical 75+25
+  response union, the complete 576-cell model-length-age grid, all 31 model
+  fits, every staged artifact, and the LSTM gate. The final repository-wide command
+  `CUDA_VISIBLE_DEVICES='' MPLCONFIGDIR=/tmp/mpl-full79-cloud
+  .venv/bin/python -m unittest discover -s tests` passed **520 tests in
+  387.391 seconds** against the final redesigned controller state. Expected small-fixture
+  statistical and convergence warnings occurred; there were no failures.
+
+## 2026-08-25 - Full-79 conditional joint-efficiency analysis
+
+- Froze the scientific contract in
+  `docs/full79_joint_efficiency_analysis_design.md`: length is an adaptive
+  response to context demand, fixed-effort predictability is a complementary
+  estimand, and raw Qwen nondominance is secondary because generated responses
+  do not preserve intended meaning.
+- Added `src/build_full79_joint_efficiency_analysis.py` with independently
+  runnable `datasets`, `metrics`, `models`, `plots`, `report`, and `audit`
+  stages. Added `src/fit_full79_joint_efficiency_models.R` as the dedicated
+  `mgcv::bam` engine. Every stage writes and verifies input/output hashes;
+  plotting and reporting consume saved outputs and do not fit models.
+- The dataset gate passed 1,122,396 unique eligible child utterances, 645,524
+  contexts, 79 children, 13 corpora, and zero invalid core values. The metrics
+  stage rescanned all 64,552,400 Qwen responses, exactly 100 per context.
+  Exact-length Qwen support is at least five for 525,873 observations and zero
+  for 381,978 observations.
+- Replaced mean-only cloud summaries with empirical effort and information
+  percentiles, exact-length conditional k3 percentiles and median gaps,
+  nearest-cloud and nearest-dominating distances, raw dominance proportions,
+  child-age cells, and 500 whole-child bootstrap trajectories.
+- All 15 registered nonlinear repeated-measures models converged: nine in the
+  all-79 pooled descriptive scope and unchanged M1/M3/M4 core models in PBM
+  discovery and other-58 confirmation. Every fit contains child random
+  intercepts, child random age and entropy slopes, and a corpus random
+  intercept. The minimum finite smooth k-index was 0.953.
+- At 42 months, the pooled negative-binomial M1 length ratio for response
+  entropy p10 to p90 is 1.028 (95% CI [1.014, 1.043]); PBM discovery is 1.042
+  [1.026, 1.059] and other-58 confirmation is 1.017 [0.999, 1.037]. Absolute
+  length adaptation is therefore modest and not uniformly confirmed at that
+  age.
+- The beta-GAMM relative-effort response reverses over development. At 42
+  months the pooled effort-percentile odds ratio is 0.931 [0.902, 0.962], with
+  the same negative direction in PBM discovery and other-58 confirmation;
+  near 18 months it is positive. This preserves the contrary result rather
+  than claiming that children always lengthen relative to Qwen as entropy
+  rises.
+- At two exact words, the supported-range age difference in contextual k3
+  total surprisal is -3.47 bits [-4.84, -2.10] pooled, -5.77 [-10.54, -1.01]
+  in PBM discovery, and -2.34 [-3.96, -0.71] in other-58 confirmation. Common
+  short lengths become more Mistral-predictable; sparse long-length endpoints
+  are visibly unstable and are not generalized.
+- The all-79 same-length child-minus-Qwen k3 gap remains positive in raw
+  child-balanced summaries. Under high exact-string entropy, M5 estimates a
+  -2.56-bit age difference [-3.89, -1.24]. This is explicitly described as a
+  scorer-indexed form comparison, not a meaning-preserving optimum.
+- Produced and visually inspected 17 figures, including the paper-inspired
+  model-by-length-by-age atlas, the requested one-line-per-exact-length raw and
+  adjusted trajectories, nonlinear length and information surfaces, the
+  joint percentile phase portrait, child heterogeneity, context clouds,
+  diagnostics, sample-scope contrasts, and the corrected PBM Bayes sidecar.
+- Published `docs/full79_joint_efficiency_explorer.md` and the standalone,
+  filterable browser document `docs/full79_joint_efficiency_explorer.html`.
+  The browser includes plot filters/modals, all 15 model records, and a live
+  microscope over 8 audited contexts and 840 response rows.
+- The independent audit passed 38/38 checks: exact data/Qwen counts, all model
+  scopes and convergence, covariance-aware contrasts, smooth bases, 17 PNGs,
+  image links, JavaScript syntax, interactive context counts, and all required
+  scientific guardrails. It wrote
+  `FULL79_JOINT_EFFICIENCY_COMPLETE_AND_AUDITED`.
+- Added the durable operator handoff
+  `docs/full79_joint_efficiency_pipeline.md` and focused dataset/hash,
+  bootstrap, and model-contract tests in
+  `tests/test_build_full79_joint_efficiency_analysis.py`; all 3 focused tests
+  passed.
+- The final stable repository-wide verification used
+  `CUDA_VISIBLE_DEVICES='' MPLCONFIGDIR=/tmp/mpl-joint-efficiency-full-rerun
+  .venv/bin/python -m unittest discover -s tests` and passed **533 tests in
+  394.037 seconds**. Expected convergence, separation, rank, and plotting
+  warnings came from small synthetic legacy fixtures; there were no failures.
+
+## 2026-08-25 - Utterance-level informativity extension
+
+- Froze the analysis contract in
+  `docs/utterance_informativity_route1_route2_protocol.md`. The main unit is an
+  utterance occurrence; recurrent exact strings are secondary, and the
+  existing PBM21 word-level work remains a separate lexical extension.
+- Kept the three scorer objects distinct: unconditional utterance surprisal
+  `k0`, contextual utterance surprisal `k3`, and context support `k0 - k3`.
+  Lower k3 is described as greater Mistral predictability, not greater Shannon
+  information or demonstrated listener utility.
+- Built 1,122,396 eligible child and 1,467,432 caregiver occurrence rows over
+  all 79 children, 13 corpora, and eight age bins. The recurrent-string gate
+  retained 567 child and 536 caregiver types with at least 100 occurrences,
+  10 children, and three corpora.
+- Fitted 24 opportunity-weighted child-cell models for k3, k0, context support,
+  and k3 per Mistral token across child/caregiver and PBM/non-PBM/all-79 scopes,
+  then g-standardized the eight age-bin estimates over a common measured-word
+  effort and child reference distribution.
+- Fitted six developmental frequency-informativity coupling models using k0
+  density as a model-based unconditional-form predictor. The child
+  age-by-k0-density interaction was unsupported in PBM discovery (+0.006503 per
+  six months, 95% CI [-0.008936, 0.021942]) and negative in non-PBM
+  confirmation (-0.006051, [-0.011835, -0.000267]). The differing directions
+  preclude a replication claim. Caregiver coupling was approximately stable.
+- Inventoried 78 existing Route 1 and 14 existing Route 2/joint passed model
+  records without duplicating their fits. The report therefore connects the
+  new informativity extension to the already frozen fixed-effort and adaptive
+  effort analyses while preserving their different estimands.
+- The final staged `datasets -> models -> report -> audit` workflow passed with
+  30/30 new models, 192 standardized age rows, 48 coupling contrasts, 1,103
+  recurrent types, and no audit problems. The targeted compatibility suite
+  passed 22 tests. Commit `8b94f60` contains the controller, focused tests,
+  protocol, and generated report.

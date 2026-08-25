@@ -47,6 +47,79 @@ items were superseded or completed by the later modular direct-score workflow.
       suite passed 486/486; the final ignored marker carries the clean-commit
       audit and product hashes.
 
+### All-79 joint information-effort clouds — 2026-08-24
+
+- [x] Build and run the independently resumable `datasets`, `metrics`,
+      `models`, `plots`, `report`, and `audit` stages from the canonical
+      Qwen100/Mistral full100 handoff and the all-79 direct-score table.
+- [x] Audit 645,524 contexts, exactly 100 Qwen responses per context,
+      64,552,400 finite scored responses, the disjoint 75+25 union, all
+      observed/context joins, source counts, frozen output hashes, and the
+      pooled 79-child/13-corpus scope.
+- [x] Replace the rejected pooled-scatter and same-context-gallery designs with
+      the requested exact model-by-length-by-age analysis. The raw plotting
+      grid contains exactly one mean-information value for every one of six
+      models, 12 exact lengths, and eight age bins: `6 x 12 x 8 = 576` cells.
+- [x] Reproduce the earlier fixed-effort visual grammar: age on the x-axis,
+      information on the y-axis, exact lengths as separate labelled lines, and
+      length panels grouped as 1--4, 5--8, and 9--12 words. Show raw age-bin
+      means together with child-controlled regression predictions and 95%
+      intervals for every model.
+- [x] Publish the complete 576-cell 3D model-by-length-by-age view, linear and
+      quadratic regression diagnostics, fixed-length coefficient comparisons,
+      length distributions, and the Markdown/HTML report. All 31 registered
+      weighted child-fixed-effect/child-clustered fits passed.
+- [ ] Ingest the additive same-length LSTM only after a canonical full-79
+      `COMPLETE_AND_AUDITED` scored handoff exists. Until then retain
+      `CORE_CLOUDS_COMPLETE_LSTM_PENDING` and do not write the all-source
+      completion marker.
+
+### Full-79 conditional joint efficiency explorer — 2026-08-25
+
+- [x] Implement the staged `datasets -> metrics -> models -> plots -> report ->
+      audit` workflow specified in
+      `docs/full79_joint_efficiency_analysis_design.md`. Every stage must bind
+      its saved inputs and outputs by schema and hash; plotting/reporting must
+      never refit models.
+- [x] Fit the registered nonlinear repeated-measures suite: negative-binomial
+      GAMMs for raw and generated-relative effort, robust GAMMs for information
+      at adaptive effort and exact-length Qwen gaps, a beta GAMM for effort
+      calibration, and a secondary binomial nondominance diagnostic. Control
+      child identity and developmental heterogeneity explicitly.
+- [x] Produce the registered visualization families, including the
+      age-by-response-entropy demand surface, length calibration, paper-style
+      exact-length atlas, joint cloud phase portrait, full distributions,
+      child heterogeneity, context examples, diagnostics, and the separate
+      corrected-Bayes decomposition sidecar.
+- [x] Publish a polished browser-based explorer under
+      `docs/full79_joint_efficiency_explorer.html`, with a Markdown evidence
+      source, clear navigation, model cards, formulas, interpretation limits,
+      and links to frozen tables and manifests.
+- [x] Run focused tests, production audits, visual inspection, report link
+      checks, and the repository-wide suite before writing
+      `FULL79_JOINT_EFFICIENCY_COMPLETE_AND_AUDITED`.
+
+### Utterance-level informativity extension — 2026-08-25
+
+- [x] Freeze an utterance-primary informativity protocol that keeps k0
+      unconditional surprisal, k3 contextual surprisal, and k0-minus-k3
+      context support separate. Preserve PBM discovery, other-58 confirmation,
+      and all-79 descriptive scopes.
+- [x] Build child and caregiver occurrence tables, opportunity-weighted
+      child-age-effort cells, and a separately gated recurrent exact-string
+      type table without substituting a word-level analysis for the utterance
+      estimand.
+- [x] Fit 24 effort-standardization models and six age-by-unconditional-density
+      coupling models with child-clustered covariance. Retain all 78 applicable
+      frozen Route 1 model records and 14 applicable Route 2/joint records as
+      inventories rather than silently refitting them.
+- [x] Publish the protocol and Markdown/HTML report, pass the independent
+      artifact audit, and write
+      `UTTERANCE_INFORMATIVITY_COMPLETE_AND_AUDITED`.
+- [ ] Treat the existing PBM21 three-scorer word-level work as a secondary
+      lexical extension. Do not call it independent-sample confirmation until
+      the remaining-58 word-scoring production is complete and audited.
+
 ### Complete local modeling and scientific synthesis — 2026-08-06
 
 - [x] Run every locally eligible component of the complete analysis machine.
@@ -65,10 +138,10 @@ items were superseded or completed by the later modular direct-score workflow.
       outputs. It inventories 607 fitted variants/outcome fits, separates PBM
       discovery from non-PBM confirmation, preserves the contrary Route 2 and
       P3 results, and records that sustained onset is not established.
-- [ ] After the current Qwen-response/Mistral-scoring Mila smoke and audit
-      pass, submit production through its explicit approval command, retrieve
-      the compact report/products, and add the decoupled response calibration
-      as a new Route 2 sensitivity. Do not bypass the smoke gate.
+- [x] Complete the Qwen-response/Mistral-scoring production and audit, retrieve
+      the immutable full100 handoff, and use it for the pooled all-79
+      information-effort cloud analysis. The verified handoff contains
+      645,524 contexts and 64,552,400 scored responses.
 
 ### Hall cross-sectional snapshot — 2026-08-10 to 2026-08-17
 
