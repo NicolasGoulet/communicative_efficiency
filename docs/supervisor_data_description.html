@@ -1,0 +1,282 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Data description — Supervisor Report</title>
+<style>
+:root { --ink: #1e2528; --muted: #536267; --line: #d9e0df; --accent: #2f6f73; --paper: #ffffff; --soft: #fafbfb; --warm: #c76f2c; }
+* { box-sizing: border-box; }
+body { margin: 0; background: #eef2f1; color: var(--ink); font: 17px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+main { max-width: 920px; margin: 48px auto; padding: 42px 48px; background: var(--paper); box-shadow: 0 18px 50px rgba(31, 45, 48, .12); }
+h1 { margin-top: 0; border-bottom: 3px solid var(--accent); padding-bottom: .35em; }
+h2 { margin-top: 2em; color: var(--accent); }
+h3 { margin-top: 1.5em; }
+.intro { color: var(--muted); max-width: 760px; }
+.links { display: grid; gap: 16px; margin-top: 32px; }
+a.card { display: block; padding: 20px 22px; border: 1px solid var(--line); border-radius: 8px; color: inherit; text-decoration: none; background: var(--soft); }
+a.card:hover { border-color: var(--accent); background: #f3f8f7; }
+.title { font-weight: 700; font-size: 1.12rem; color: var(--accent); }
+.description { margin-top: 5px; color: #5b696d; font-size: .95rem; }
+.back { display: inline-block; margin-bottom: 24px; color: var(--accent); font-weight: 650; text-decoration: none; }
+.back:hover { text-decoration: underline; }
+.summary { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin: 24px 0; }
+.summary .item { padding: 16px; border: 1px solid var(--line); border-radius: 8px; background: var(--soft); }
+.summary strong { display: block; color: var(--accent); font-size: 1.55rem; line-height: 1.15; }
+.summary span { display: block; margin-top: 4px; color: var(--muted); font-size: .9rem; }
+table { width: 100%; margin: 18px 0 26px; border-collapse: collapse; font-size: .91rem; }
+th, td { padding: 9px 10px; border: 1px solid var(--line); text-align: left; vertical-align: top; }
+th { background: #e7efed; }
+tr:nth-child(even) td { background: var(--soft); }
+figure { margin: 24px 0 32px; }
+figure img { display: block; width: 100%; border: 1px solid var(--line); border-radius: 6px; background: white; }
+figcaption { margin-top: 8px; color: var(--muted); font-size: .9rem; }
+main > img { display: block; width: 100%; max-width: 100%; margin: 24px 0 8px; border: 1px solid var(--line); border-radius: 6px; background: white; }
+.distribution-gallery { position: relative; margin: 24px 0 32px; }
+.distribution-gallery figure { margin: 0; }
+.distribution-arrow { position: absolute; z-index: 2; top: 50%; transform: translateY(-70%); width: 46px; height: 46px; border: 1px solid rgba(47, 111, 115, .45); border-radius: 50%; background: rgba(255, 255, 255, .92); color: var(--accent); font-size: 1.65rem; line-height: 1; cursor: pointer; box-shadow: 0 2px 10px rgba(31, 45, 48, .18); }
+.distribution-arrow:hover, .distribution-arrow:focus-visible { background: white; border-color: var(--accent); outline: 3px solid rgba(47, 111, 115, .18); }
+.distribution-arrow.previous { left: 12px; }
+.distribution-arrow.next { right: 12px; }
+.distribution-position { font-weight: 700; color: var(--accent); }
+.note { margin: 22px 0; padding: 14px 18px; border-left: 4px solid var(--warm); background: #fff8f2; color: var(--muted); }
+.age-bins { display: flex; flex-wrap: wrap; gap: 8px; padding: 0; list-style: none; }
+.age-bins li { padding: 5px 9px; border: 1px solid var(--line); border-radius: 5px; background: var(--soft); font-family: ui-monospace, SFMono-Regular, Consolas, monospace; font-size: .86rem; }
+code { padding: .08em .3em; border: 1px solid var(--line); border-radius: 4px; background: var(--soft); }
+@media screen and (max-width: 700px) {
+  main { margin: 0; padding: 28px 22px 42px; box-shadow: none; }
+  .summary { grid-template-columns: 1fr; }
+  .table-wrap { max-width: 100%; overflow-x: auto; }
+  table { min-width: 700px; font-size: .84rem; }
+  .distribution-arrow { width: 40px; height: 40px; }
+}
+</style>
+</head>
+<body>
+<main>
+<h1>Data description</h1>
+<p><a href="supervisor_report.html">← Back to report home</a></p>
+<p>The developmental dataset contains recordings of caregiver–child speech from CHILDES. This page describes the children, the source corpora, their age coverage, and the measurements currently available.</p>
+<table>
+<thead><tr>
+<th>Dataset summary</th>
+<th>Count</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>Children observed at multiple ages</td>
+<td>79</td>
+</tr>
+<tr>
+<td>Longitudinal caregiver–child corpora</td>
+<td>13</td>
+</tr>
+<tr>
+<td>Scored child utterances</td>
+<td>1,140,695</td>
+</tr>
+<tr>
+<td>Scored caregiver utterances</td>
+<td>1,470,154</td>
+</tr>
+</tbody></table>
+<h2>What a corpus is</h2>
+<p>A <strong>corpus</strong> is a collection of transcripts assembled by one research project. Each corpus has its own participants, recording schedule, setting, and transcription practices. A corpus is not the same thing as a child, a recording session, or an utterance.</p>
+<p>The 79 children come from 13 corpora. The children have repeated recordings at different ages, which is why we describe them as longitudinally observed.</p>
+<h2>How the corpora were selected</h2>
+<p>The combined dataset includes longitudinal, non-clinical caregiver–child interaction corpora with usable child identity, caregiver speech, age, and session information. The recordings primarily capture spontaneous family, home, or play interaction rather than a clinical probe or a tightly standardized elicitation task.</p>
+<p>The corpora do not all use identical recording procedures. They differ in geography, setting, sampling density, age coverage, and transcription conventions. These differences remain visible in the corpus table and are considered in the statistical analyses.</p>
+<p>Champaign and EHS are not included because their observations are more explicitly task-structured. Cummings is a clinical/probe corpus and its locally prepared files do not contain caregiver rows. Hall is analyzed separately because it is a cross-sectional sociolinguistic sample near age four rather than a longitudinal developmental corpus. Thomas was considered but was not locally available when this dataset was assembled.</p>
+<h2>How the 79 children are used in the analyses</h2>
+<p>We first developed the analyses using the 21 children from Brown, Manchester, and Providence. We then evaluated the same questions in the other 58 children. Finally, we combined all 79 children to estimate the overall relationships in the complete dataset. All three analyses are reported so that the combined estimate does not conceal differences between the two groups.</p>
+<table>
+<thead><tr>
+<th>Analysis group</th>
+<th>Children</th>
+<th>Corpora</th>
+<th>Child utterances</th>
+<th>Caregiver utterances</th>
+<th>Child sessions</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>Brown, Manchester, and Providence</td>
+<td>21</td>
+<td>3</td>
+<td>446,985</td>
+<td>668,903</td>
+<td>983</td>
+</tr>
+<tr>
+<td>Other 10 corpora</td>
+<td>58</td>
+<td>10</td>
+<td>693,710</td>
+<td>801,251</td>
+<td>1,770</td>
+</tr>
+<tr>
+<td>All 13 corpora combined</td>
+<td>79</td>
+<td>13</td>
+<td>1,140,695</td>
+<td>1,470,154</td>
+<td>2,753</td>
+</tr>
+</tbody></table>
+<h2>Developmental age distributions</h2>
+<p>The first age group combines observations from 6–23 months. The remaining groups cover six-month intervals through 60–65 months. The left and right arrows move between the complete dataset, the two analysis groups, and each of the 13 individual corpora.</p>
+<div class="distribution-gallery" data-distribution-count="16">
+<button class="distribution-arrow previous" type="button" aria-label="Previous distribution">&#8592;</button>
+<figure>
+<img class="distribution-image" src="../results/supervisor_report/data_description/utterance_coverage_by_age.png" alt="All 79 children">
+<figcaption><span class="distribution-position">1 of 16</span> · <span class="distribution-label">All 79 children</span></figcaption>
+</figure>
+<button class="distribution-arrow next" type="button" aria-label="Next distribution">&#8594;</button>
+</div>
+<script>
+(() => {
+const views=[{"id":"all_children","label":"All 79 children","title":"Longitudinal utterance coverage by developmental age","src":"../results/supervisor_report/data_description/utterance_coverage_by_age.png"},{"id":"three_corpora","label":"Brown, Manchester, and Providence (21 children)","title":"Longitudinal utterance coverage by age — Brown + Manchester + Providence","src":"../results/supervisor_report/data_description/utterance_coverage_by_age__three_corpora.png"},{"id":"other_corpora","label":"Other 10 corpora (58 children)","title":"Longitudinal utterance coverage by age — Other 10 corpora","src":"../results/supervisor_report/data_description/utterance_coverage_by_age__other_corpora.png"},{"id":"corpus_belfast","label":"Belfast corpus","title":"Longitudinal utterance coverage by developmental age — Belfast","src":"../results/supervisor_report/data_description/utterance_coverage_by_age__corpus_belfast.png"},{"id":"corpus_brown","label":"Brown corpus","title":"Longitudinal utterance coverage by developmental age — Brown","src":"../results/supervisor_report/data_description/utterance_coverage_by_age__corpus_brown.png"},{"id":"corpus_demetras1","label":"Demetras1 corpus","title":"Longitudinal utterance coverage by developmental age — Demetras1","src":"../results/supervisor_report/data_description/utterance_coverage_by_age__corpus_demetras1.png"},{"id":"corpus_forrester","label":"Forrester corpus","title":"Longitudinal utterance coverage by developmental age — Forrester","src":"../results/supervisor_report/data_description/utterance_coverage_by_age__corpus_forrester.png"},{"id":"corpus_kuczaj","label":"Kuczaj corpus","title":"Longitudinal utterance coverage by developmental age — Kuczaj","src":"../results/supervisor_report/data_description/utterance_coverage_by_age__corpus_kuczaj.png"},{"id":"corpus_lara","label":"Lara corpus","title":"Longitudinal utterance coverage by developmental age — Lara","src":"../results/supervisor_report/data_description/utterance_coverage_by_age__corpus_lara.png"},{"id":"corpus_mpi_eva_manchester","label":"MPI-EVA-Manchester corpus","title":"Longitudinal utterance coverage by developmental age — MPI-EVA-Manchester","src":"../results/supervisor_report/data_description/utterance_coverage_by_age__corpus_mpi_eva_manchester.png"},{"id":"corpus_manchester","label":"Manchester corpus","title":"Longitudinal utterance coverage by developmental age — Manchester","src":"../results/supervisor_report/data_description/utterance_coverage_by_age__corpus_manchester.png"},{"id":"corpus_post","label":"Post corpus","title":"Longitudinal utterance coverage by developmental age — Post","src":"../results/supervisor_report/data_description/utterance_coverage_by_age__corpus_post.png"},{"id":"corpus_providence","label":"Providence corpus","title":"Longitudinal utterance coverage by developmental age — Providence","src":"../results/supervisor_report/data_description/utterance_coverage_by_age__corpus_providence.png"},{"id":"corpus_sachs","label":"Sachs corpus","title":"Longitudinal utterance coverage by developmental age — Sachs","src":"../results/supervisor_report/data_description/utterance_coverage_by_age__corpus_sachs.png"},{"id":"corpus_weist","label":"Weist corpus","title":"Longitudinal utterance coverage by developmental age — Weist","src":"../results/supervisor_report/data_description/utterance_coverage_by_age__corpus_weist.png"},{"id":"corpus_wells","label":"Wells corpus","title":"Longitudinal utterance coverage by developmental age — Wells","src":"../results/supervisor_report/data_description/utterance_coverage_by_age__corpus_wells.png"}];
+const gallery=document.querySelector(".distribution-gallery");
+if(!gallery){return;}
+const image=gallery.querySelector(".distribution-image");
+const position=gallery.querySelector(".distribution-position");
+const label=gallery.querySelector(".distribution-label");
+let current=0;
+const show=(index)=>{current=(index+views.length)%views.length;const view=views[current];image.src=view.src;image.alt=view.label;position.textContent=`${current+1} of ${views.length}`;label.textContent=view.label;};
+gallery.querySelector(".previous").addEventListener("click",()=>show(current-1));
+gallery.querySelector(".next").addEventListener("click",()=>show(current+1));
+gallery.addEventListener("keydown",(event)=>{if(event.key==="ArrowLeft"){show(current-1);}if(event.key==="ArrowRight"){show(current+1);}});
+})();
+</script>
+<h2>Corpora and children</h2>
+<table>
+<thead><tr>
+<th>Corpus</th>
+<th>Children</th>
+<th>Child utterances</th>
+<th>Sessions</th>
+<th>Observed ages in months</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>Belfast</td>
+<td>8</td>
+<td>22,942</td>
+<td>90</td>
+<td>24.1–54.2</td>
+</tr>
+<tr>
+<td>Brown</td>
+<td>3</td>
+<td>92,555</td>
+<td>214</td>
+<td>18.0–62.4</td>
+</tr>
+<tr>
+<td>Demetras1</td>
+<td>1</td>
+<td>6,842</td>
+<td>26</td>
+<td>24.9–47.9</td>
+</tr>
+<tr>
+<td>Forrester</td>
+<td>1</td>
+<td>6,663</td>
+<td>35</td>
+<td>12.0–60.0</td>
+</tr>
+<tr>
+<td>Kuczaj</td>
+<td>1</td>
+<td>37,109</td>
+<td>210</td>
+<td>28.8–60.4</td>
+</tr>
+<tr>
+<td>Lara</td>
+<td>1</td>
+<td>49,328</td>
+<td>120</td>
+<td>21.4–39.8</td>
+</tr>
+<tr>
+<td>MPI-EVA-Manchester</td>
+<td>4</td>
+<td>462,100</td>
+<td>687</td>
+<td>24.0–61.6</td>
+</tr>
+<tr>
+<td>Manchester</td>
+<td>12</td>
+<td>232,614</td>
+<td>408</td>
+<td>20.7–36.3</td>
+</tr>
+<tr>
+<td>Post</td>
+<td>3</td>
+<td>8,068</td>
+<td>30</td>
+<td>19.2–32.2</td>
+</tr>
+<tr>
+<td>Providence</td>
+<td>6</td>
+<td>121,816</td>
+<td>361</td>
+<td>11.1–48.1</td>
+</tr>
+<tr>
+<td>Sachs</td>
+<td>1</td>
+<td>16,344</td>
+<td>93</td>
+<td>15.0–57.1</td>
+</tr>
+<tr>
+<td>Weist</td>
+<td>6</td>
+<td>46,347</td>
+<td>182</td>
+<td>25.0–60.2</td>
+</tr>
+<tr>
+<td>Wells</td>
+<td>32</td>
+<td>37,967</td>
+<td>297</td>
+<td>17.7–60.8</td>
+</tr>
+</tbody></table>
+<img src="../results/supervisor_report/data_description/child_longitudinal_coverage.png" alt="Observed age span for each of the 79 children">
+<p>The horizontal lines show the youngest and oldest recorded age for each child. Teal identifies children from Brown, Manchester, and Providence; orange identifies children from the other 10 corpora.</p>
+<h2>Available measurements</h2>
+<table>
+<thead><tr>
+<th>Measurement</th>
+<th>Current coverage</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>Mistral utterance surprisal</td>
+<td>All 79 children: 1,140,695 child utterances and 1,470,154 caregiver utterances, scored with zero to three preceding caregiver utterances.</td>
+</tr>
+<tr>
+<td>TinyDialogues utterance surprisal</td>
+<td>The same 21 children from Brown, Manchester, and Providence.</td>
+</tr>
+<tr>
+<td>Word-level surprisal from Mistral, Qwen3-14B, and TinyDialogues</td>
+<td>A shared set of 1,032,963 word occurrences from the same 21 children, analyzed separately for each language model.</td>
+</tr>
+<tr>
+<td>Generated caregiver responses</td>
+<td>444,325 child utterances from the same 21 children, linked to 268,712 preceding conversational contexts.</td>
+</tr>
+</tbody></table>
+</main>
+</body>
+</html>
