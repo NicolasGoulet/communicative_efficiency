@@ -16,8 +16,10 @@ from prepare_datasets import (  # noqa: E402
     PREPARED_CHAT_COLUMNS,
     age_from_filename_stem,
     age_from_parent_month_dir,
+    age_from_edinburgh_filename,
     caretaker_speakers_for_unit,
     discover_dataset_units,
+    included_main_tier_lines,
     process_input_path,
     read_session_metadata,
 )
@@ -39,9 +41,88 @@ class TestPrepareDatasets(unittest.TestCase):
             self.assertIn(dataset, DEFAULT_RAW_ROOTS)
 
     def test_known_dataset_registry_includes_strict_naturalistic_downloads(self):
-        for dataset in ("Lara", "Sachs", "Weist", "Kuczaj", "Post", "Demetras1", "Forrester"):
+        for dataset in (
+            "Lara",
+            "Sachs",
+            "Weist",
+            "Kuczaj",
+            "Post",
+            "Demetras1",
+            "Forrester",
+            "Howe",
+            "Tardif",
+            "Valian",
+            "Higginson",
+            "Edinburgh",
+            "Thomas",
+        ):
             self.assertIn(dataset, DATASETS)
             self.assertIn(dataset, DEFAULT_RAW_ROOTS)
+
+    def test_tardif_root_files_are_separate_children_and_book_only_file_is_excluded(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            base = Path(tmp)
+            for filename in ("e01.cha", "e02.cha", "e26book.cha"):
+                (base / filename).write_text("@Begin\n", encoding="utf-8")
+
+            units = discover_dataset_units("Tardif", base)
+
+        self.assertEqual([unit.child_id for unit in units], ["e01", "e02"])
+        self.assertEqual({unit.source_group for unit in units}, {"Tardif_toyplay_only"})
+
+    def test_valian_root_sessions_are_grouped_by_child_number(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            base = Path(tmp)
+            for filename in ("01a.cha", "01b.cha", "02a.cha"):
+                (base / filename).write_text("@Begin\n", encoding="utf-8")
+
+            units = discover_dataset_units("Valian", base)
+
+        by_child = {unit.child_id: unit for unit in units}
+        self.assertEqual(sorted(by_child), ["01", "02"])
+        self.assertEqual([path.name for path in by_child["01"].files], ["01a.cha", "01b.cha"])
+
+    def test_tardif_filter_keeps_toyplay_main_tiers_and_excludes_book_tiers(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            cha_path = Path(tmp) / "e01.cha"
+            cha_path.write_text(
+                "\n".join(
+                    [
+                        "@Begin",
+                        "@Comment:\tbook",
+                        "*CHI:\tbook words .",
+                        "*MOT:\tread this .",
+                        "@Comment:\tmechanical toys",
+                        "*CHI:\ttoy words .",
+                        "*MOT:\tturn it .",
+                        "@Comment:\tregular toys",
+                        "*CHI:\tblocks .",
+                    ]
+                ),
+                encoding="utf-8",
+            )
+
+            included = included_main_tier_lines("Tardif", cha_path)
+
+        self.assertEqual(included, {6, 7, 9})
+
+    def test_edinburgh_filename_age_fallback_and_bad_header_repair(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            bad_header = Path(tmp) / "martin0902.cha"
+            bad_header.write_text(
+                "@Begin\n@ID:\teng|Edinburgh|CHI|0;00.03|male|||Target_Child|||\n*CHI:\tba .\n",
+                encoding="utf-8",
+            )
+            missing_header = Path(tmp) / "sophia1505.cha"
+            missing_header.write_text("@Begin\n*CHI:\tba .\n", encoding="utf-8")
+
+            raw, months = age_from_edinburgh_filename(bad_header)
+            repaired = read_session_metadata(bad_header, dataset="Edinburgh")
+            inferred = read_session_metadata(missing_header, dataset="Edinburgh")
+
+        self.assertEqual((raw, months), ("0;09.00", 9.0))
+        self.assertEqual(repaired["age_months"], 9.0)
+        self.assertEqual(inferred["age_months"], 15.0)
 
     # Use case: several strict naturalistic corpora store all CHAT files for
     # one target child directly in the corpus root rather than under a child

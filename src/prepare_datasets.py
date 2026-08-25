@@ -56,6 +56,12 @@ DATASETS = (
     "Post",
     "Demetras1",
     "Forrester",
+    "Howe",
+    "Tardif",
+    "Valian",
+    "Higginson",
+    "Edinburgh",
+    "Thomas",
 )
 
 DEFAULT_RAW_ROOTS = {
@@ -159,6 +165,42 @@ DEFAULT_RAW_ROOTS = {
         Path.cwd() / "data" / "raw_data" / "Forrester",
         Path.cwd() / "data" / "Forrester",
     ],
+    "Howe": [
+        PROJECT_ROOT / "data" / "raw_data" / "Howe",
+        PROJECT_ROOT / "data" / "Howe",
+        Path.cwd() / "data" / "raw_data" / "Howe",
+        Path.cwd() / "data" / "Howe",
+    ],
+    "Tardif": [
+        PROJECT_ROOT / "data" / "raw_data" / "Tardif",
+        PROJECT_ROOT / "data" / "Tardif",
+        Path.cwd() / "data" / "raw_data" / "Tardif",
+        Path.cwd() / "data" / "Tardif",
+    ],
+    "Valian": [
+        PROJECT_ROOT / "data" / "raw_data" / "Valian",
+        PROJECT_ROOT / "data" / "Valian",
+        Path.cwd() / "data" / "raw_data" / "Valian",
+        Path.cwd() / "data" / "Valian",
+    ],
+    "Higginson": [
+        PROJECT_ROOT / "data" / "raw_data" / "Higginson",
+        PROJECT_ROOT / "data" / "Higginson",
+        Path.cwd() / "data" / "raw_data" / "Higginson",
+        Path.cwd() / "data" / "Higginson",
+    ],
+    "Edinburgh": [
+        PROJECT_ROOT / "data" / "raw_data" / "Edinburgh",
+        PROJECT_ROOT / "data" / "Edinburgh",
+        Path.cwd() / "data" / "raw_data" / "Edinburgh",
+        Path.cwd() / "data" / "Edinburgh",
+    ],
+    "Thomas": [
+        PROJECT_ROOT / "data" / "raw_data" / "Thomas",
+        PROJECT_ROOT / "data" / "Thomas",
+        Path.cwd() / "data" / "raw_data" / "Thomas",
+        Path.cwd() / "data" / "Thomas",
+    ],
 }
 
 ROOT_DIRECT_CHILD_IDS = {
@@ -167,7 +209,21 @@ ROOT_DIRECT_CHILD_IDS = {
     "Kuczaj": "Abe",
     "Demetras1": "Trevor",
     "Forrester": "Ella",
+    "Thomas": "Thomas",
 }
+
+ROOT_FILE_PER_CHILD_DATASETS = {"Tardif"}
+ROOT_PREFIX_GROUP_PATTERNS = {
+    # Valian has two or three sessions per child: 01a, 01b, 04a, 04b, 04c, ...
+    "Valian": re.compile(r"^(?P<child>\d{2})[a-z]+$", re.IGNORECASE),
+    # Howe has two sessions per child: barry1, barry2, eileen1, eileen2, ...
+    "Howe": re.compile(r"^(?P<child>[a-z][a-z_-]*?)\d+$", re.IGNORECASE),
+    # Edinburgh filenames concatenate pseudonym, age month, and session number,
+    # e.g. adam0901. The currently documented ages are 09, 15, and 21 months.
+    "Edinburgh": re.compile(r"^(?P<child>.+?)(?:09|15|21)\d{2}$", re.IGNORECASE),
+}
+
+TARDIF_INCLUDED_COMMENTS = {"mechanical toys", "regular toys"}
 
 DEFAULT_CARETAKER_SPEAKERS = ("MOT", "FAT")
 CARETAKER_SPEAKERS_BY_DATASET = {
@@ -200,6 +256,9 @@ PREPARED_CHAT_COLUMNS = [
 CHI_ID_RE = re.compile(r"^@ID:\s*[^|]*\|[^|]*\|CHI\|([^|]*)\|([^|]*)\|", re.IGNORECASE)
 FILENAME_AGE_RE = re.compile(r"^(?P<years>\d{2})(?P<months>\d{2})(?P<days>\d{2})(?:[a-z])?$", re.IGNORECASE)
 PARENT_MONTH_AGE_RE = re.compile(r"^(?P<months>\d{2})(?:[-_a-z]+)$", re.IGNORECASE)
+EDINBURGH_FILENAME_RE = re.compile(
+    r"^[a-z_-]+(?P<months>09|15)(?P<session>\d{2})$", re.IGNORECASE
+)
 COMMENT_AGE_RE = re.compile(r"^@Comment:\s*age\s+is\s+(.+?)\s*$", re.IGNORECASE)
 COMMENT_SEX_RE = re.compile(r"^@Comment:\s*sex\s+is\s+(.+?)\s*$", re.IGNORECASE)
 
@@ -283,7 +342,18 @@ def age_from_parent_month_dir(cha_path: Path) -> Tuple[str, Optional[float]]:
     return age_raw, float(total_months)
 
 
-def read_session_metadata(cha_path: Path) -> Dict[str, object]:
+def age_from_edinburgh_filename(cha_path: Path) -> Tuple[str, Optional[float]]:
+    """Infer Edinburgh's nominal 9- or 15-month wave from its filename."""
+    match = EDINBURGH_FILENAME_RE.match(cha_path.stem)
+    if not match:
+        return "", None
+    total_months = int(match.group("months"))
+    years, months = divmod(total_months, 12)
+    age_raw = f"{years};{months:02d}.00"
+    return age_raw, float(total_months)
+
+
+def read_session_metadata(cha_path: Path, dataset: str = "") -> Dict[str, object]:
     """
     Read only the CHI age and sex metadata from one CHAT file.
 
@@ -320,6 +390,18 @@ def read_session_metadata(cha_path: Path) -> Dict[str, object]:
         age_raw, _ = age_from_filename_stem(cha_path)
     if not age_raw:
         age_raw, _ = age_from_parent_month_dir(cha_path)
+
+    # Edinburgh filenames encode the nominal recording wave (09 or 15
+    # months). Prefer the transcript's more precise @ID age when compatible,
+    # but repair missing or grossly inconsistent metadata such as
+    # martin0902.cha's erroneous `0;00.03` header.
+    if dataset == "Edinburgh":
+        filename_age_raw, filename_age_months = age_from_edinburgh_filename(cha_path)
+        parsed_age_months = age_str_to_months(age_raw)
+        if filename_age_months is not None and (
+            parsed_age_months is None or abs(parsed_age_months - filename_age_months) > 2.0
+        ):
+            age_raw = filename_age_raw
 
     return {
         "age_raw": age_raw,
@@ -455,6 +537,40 @@ def discover_dataset_units(dataset: str, base_dir: Path) -> List[ChatUnit]:
             for child_id, files in sorted(files_by_child.items())
         ]
 
+    if dataset in ROOT_FILE_PER_CHILD_DATASETS:
+        return [
+            ChatUnit(
+                child_id=cha_path.stem,
+                files=[cha_path],
+                base_dir=base_dir,
+                dataset=dataset,
+                source_group=f"{dataset}_toyplay_only" if dataset == "Tardif" else dataset,
+            )
+            for cha_path in _files_directly_under(base_dir)
+            # `e26book.cha` is a separate book-only sample. The other Tardif
+            # files contain book, mechanical-toy, and regular-toy blocks; the
+            # book blocks are filtered in `prepared_rows_for_unit` below.
+            if not (dataset == "Tardif" and cha_path.stem.lower().endswith("book"))
+        ]
+
+    if dataset in ROOT_PREFIX_GROUP_PATTERNS:
+        pattern = ROOT_PREFIX_GROUP_PATTERNS[dataset]
+        files_by_child: Dict[str, List[Path]] = defaultdict(list)
+        for cha_path in _files_directly_under(base_dir):
+            match = pattern.match(cha_path.stem)
+            child_id = match.group("child") if match else cha_path.stem
+            files_by_child[child_id].append(cha_path)
+        return [
+            ChatUnit(
+                child_id=child_id,
+                files=sorted(files),
+                base_dir=base_dir,
+                dataset=dataset,
+                source_group=dataset,
+            )
+            for child_id, files in sorted(files_by_child.items())
+        ]
+
     direct_files = _files_directly_under(base_dir)
     if direct_files:
         return [
@@ -485,6 +601,32 @@ def caretaker_speakers_for_unit(unit: ChatUnit) -> Tuple[str, ...]:
     return CARETAKER_SPEAKERS_BY_DATASET.get(unit.dataset, DEFAULT_CARETAKER_SPEAKERS)
 
 
+def included_main_tier_lines(dataset: str, cha_path: Path) -> Optional[set[int]]:
+    """
+    Return allowed main-tier line numbers for corpus-specific sample filters.
+
+    Goal: keep raw CHAT immutable while making the scientific sample explicit.
+    Tardif interleaves book sharing, mechanical-toy play, and regular-toy play
+    in the same files. The training expansion is defined as the two toy-play
+    blocks, so its book-sharing main tiers are excluded from Stage 0 outputs.
+    Other corpora currently use every selected main tier and return ``None``.
+    """
+    if dataset != "Tardif":
+        return None
+
+    included: set[int] = set()
+    active_comment = ""
+    with cha_path.open(encoding="utf-8", errors="replace") as handle:
+        for line_no, raw_line in enumerate(handle, start=1):
+            stripped = raw_line.strip()
+            if stripped.lower().startswith("@comment:"):
+                active_comment = stripped.split(":", 1)[1].strip().lower()
+                continue
+            if stripped.startswith("*") and active_comment in TARDIF_INCLUDED_COMMENTS:
+                included.add(line_no)
+    return included
+
+
 def prepared_rows_for_unit(unit: ChatUnit) -> List[Dict[str, object]]:
     """
     Build all prepared CHI/MOT/FAT rows for one child-like unit.
@@ -498,8 +640,11 @@ def prepared_rows_for_unit(unit: ChatUnit) -> List[Dict[str, object]]:
     role_counts = {speaker: 0 for speaker in speakers}
 
     for session_id, cha_path in enumerate(sorted(unit.files), start=1):
-        metadata = read_session_metadata(cha_path)
+        metadata = read_session_metadata(cha_path, dataset=unit.dataset)
+        included_lines = included_main_tier_lines(unit.dataset, cha_path)
         for raw_row in iter_cleaned_chat_rows(cha_path, base_dir=unit.base_dir, speakers=speakers):
+            if included_lines is not None and int(raw_row["line_no"]) not in included_lines:
+                continue
             speaker = str(raw_row["speaker"])
             reference_line = f"{raw_row['file']}:{raw_row['line_no']}"
             role_counts[speaker] += 1

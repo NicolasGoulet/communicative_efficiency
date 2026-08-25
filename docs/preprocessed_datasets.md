@@ -1,6 +1,6 @@
 # Currently Preprocessed Datasets
 
-Last checked: 2026-08-10.
+Last checked: 2026-08-25.
 
 This file describes the datasets currently present under
 `data/preprocessed_data/`. A dataset is considered **Stage 0 preprocessed** when
@@ -88,6 +88,11 @@ Counts below are row counts after Stage 0 preprocessing. `child_nonempty` and
 `caretaker_nonempty` count rows whose `utterance_clean` is not blank. Missing age
 counts are rows where `age_months` is blank. Row-width and blank-header checks
 are CSV sanity checks.
+
+The legacy analysis-dataset table and totals below do not include the separate
+six-corpus transformer-training expansion. Its exact Stage-0 and eligible-row
+counts are frozen in `docs/transformer_training_expansion.md` and
+`results/transformer_training_expansion/full_20260825/dataset_audit.csv`.
 
 | Dataset | Group | Strict Default | Child Folders | Child Non-Empty | Caretaker Non-Empty | Child Missing Age | Caretaker Missing Age | N-Gram Files | Context Files | Scoring Files | CSV Issues |
 | --- | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
@@ -211,5 +216,10 @@ These datasets currently have compact child-side surprisal scoring files:
 
 ## Not Currently Preprocessed
 
-- **Thomas**: discussed as a strict candidate, but `Thomas.zip` was not present
-  in `data/zip_files` at the last check, so it is not extracted or preprocessed.
+- **Transformer-training expansion**: Tardif (24 children, toy-play blocks
+  only), Valian (21), Higginson (3), Howe (16), Edinburgh (47), and Thomas (1)
+  are Stage 0 ready. These six corpora are a PBM-excluded model-training
+  expansion, not additions to the authoritative 79-child observational
+  analysis sample. See
+  `docs/transformer_training_expansion.md` for exact counts and the audited
+  architecture-neutral handoff.

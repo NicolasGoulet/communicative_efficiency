@@ -1,0 +1,74 @@
+{
+  "purpose": "PBM-excluded naturalistic child-response training data for BabyLlama-style causal and T5-style encoder-decoder models",
+  "context_utterances": 3,
+  "max_context_tokens": 60,
+  "age_range_months": [6, 65],
+  "age_bins": [
+    [6, 23],
+    [24, 29],
+    [30, 35],
+    [36, 41],
+    [42, 47],
+    [48, 53],
+    [54, 59],
+    [60, 65]
+  ],
+  "training_datasets_existing": [
+    "Belfast",
+    "Demetras1",
+    "Forrester",
+    "Kuczaj",
+    "Lara",
+    "MPI-EVA-Manchester",
+    "Post",
+    "Sachs",
+    "Weist",
+    "Wells"
+  ],
+  "training_datasets_expansion": [
+    "Howe",
+    "Tardif",
+    "Valian",
+    "Higginson",
+    "Edinburgh",
+    "Thomas"
+  ],
+  "held_out_evaluation_datasets": [
+    "Brown",
+    "Manchester",
+    "Providence"
+  ],
+  "selection_rules": {
+    "Tardif": "Retain the mechanical-toy and regular-toy blocks; exclude book-sharing blocks and e26book.cha.",
+    "all": "Use non-empty cleaned CHI targets, prior non-empty caregiver turns from the same session, and ages 6 through 65 months inclusive. PBM is never included in training or internal validation."
+  },
+  "sources": [
+    {
+      "datasets": ["Tardif", "Valian", "Higginson"],
+      "url": "https://talkbank.org/childes/access/Eng-NA/0-Eng-NA-MOR.zip",
+      "local_archive": "data/zip_files/0-Eng-NA-MOR.zip",
+      "sha256": "b7ad9046e5fbab91f5aec3bd15f82c6a98ce9abf19699f8c76d84d7196d3eeb2"
+    },
+    {
+      "datasets": ["Howe"],
+      "url": "https://talkbank.org/data/childes/Eng-UK/Howe?f=zip",
+      "local_archive": "data/zip_files/Howe.zip",
+      "sha256": "14e7123be595b618edc5773b310cfbdfd54c657f2c3d3791dbabc38a5c763f04",
+      "access": "TalkBank authenticated download"
+    },
+    {
+      "datasets": ["Edinburgh"],
+      "url": "https://talkbank.org/data/childes/Eng-UK/Edinburgh?f=zip",
+      "local_archive": "data/zip_files/Edinburgh.zip",
+      "sha256": "969aa808bc85f208d9655951807e70d9566a8e05f6621d686c5588600f996776",
+      "access": "TalkBank authenticated download"
+    },
+    {
+      "datasets": ["Thomas"],
+      "url": "https://talkbank.org/data/childes/Eng-UK/Thomas?f=zip",
+      "local_archive": "data/zip_files/Thomas.zip",
+      "sha256": "0b5e030b53858ef9668e22b5d949441e701206e1afdaf103c2f205142ec34ddc",
+      "access": "TalkBank authenticated download"
+    }
+  ]
+}
