@@ -1,0 +1,121 @@
+{
+  "schema_version": 1,
+  "package_id": "cross_population_child_scoring_20260826_v1",
+  "contexts": ["k0", "k1", "k2", "k3"],
+  "models": [
+    {
+      "model_key": "mistral-7b-v0.3",
+      "model_id": "mistralai/Mistral-7B-v0.3",
+      "role": "primary_direct_scorer"
+    },
+    {
+      "model_key": "tinydialogues",
+      "model_id": "LaurensWink/SmolLM2-135M_variants",
+      "role": "developmental_scorer_robustness"
+    },
+    {
+      "model_key": "qwen3-14b",
+      "model_id": "Qwen/Qwen3-14B",
+      "role": "larger_scorer_robustness"
+    }
+  ],
+  "collections": [
+    {
+      "collection_id": "longitudinal_naturalistic79",
+      "prepared_root": "data/preprocessed_data",
+      "analysis_group": "naturalistic_caregiver_child",
+      "population_class": "nonclinical_or_unspecified",
+      "speech_setting": "longitudinal_naturalistic_caregiver_child",
+      "expected_children": 79,
+      "datasets": [
+        "Belfast",
+        "Brown",
+        "Demetras1",
+        "Forrester",
+        "Kuczaj",
+        "Lara",
+        "MPI-EVA-Manchester",
+        "Manchester",
+        "Post",
+        "Providence",
+        "Sachs",
+        "Weist",
+        "Wells"
+      ]
+    },
+    {
+      "collection_id": "naturalistic_training_expansion112",
+      "prepared_root": "data/preprocessed_data",
+      "analysis_group": "naturalistic_training_expansion",
+      "population_class": "nonclinical_or_unspecified",
+      "speech_setting": "naturalistic_or_play_based_caregiver_child",
+      "expected_children": 112,
+      "datasets": [
+        "Tardif",
+        "Valian",
+        "Higginson",
+        "Howe",
+        "Edinburgh",
+        "Thomas"
+      ]
+    },
+    {
+      "collection_id": "structured_nonclinical170",
+      "prepared_root": "data/preprocessed_data",
+      "analysis_group": "caregiver_child_structured_observation",
+      "population_class": "nonclinical",
+      "speech_setting": "structured_observation",
+      "expected_children": 170,
+      "datasets": ["Champaign", "EHS"]
+    },
+    {
+      "collection_id": "clinical_and_matched_controls494",
+      "prepared_root": "data/preprocessed_clinical_data",
+      "analysis_group": "clinical_and_matched_controls",
+      "population_class": "clinical_or_within_corpus_control",
+      "speech_setting": "clinical_or_control_recording_protocol",
+      "expected_children": 494,
+      "datasets": [
+        "Ambrose_HL",
+        "Ambrose_TD",
+        "Cummings_PD",
+        "Feldman_SLI",
+        "Feldman_TD",
+        "Flusberg_DS",
+        "Hooshyar_DS",
+        "Hooshyar_TD",
+        "Nicholas_HL",
+        "Nicholas_TD",
+        "Rescorla_LT",
+        "Rescorla_TD",
+        "Rondal_DS",
+        "Rondal_TD",
+        "UCSD_SLI"
+      ]
+    }
+  ],
+  "hall": {
+    "collection_id": "hall_cross_sectional_snapshot",
+    "analysis_group": "cross_sectional_sociolinguistic_snapshot",
+    "population_class": "nonclinical_historical_snapshot",
+    "speech_setting": "naturalistic_home_school_transition",
+    "input_csv": "results/hall_snapshot_preprocessing/hall_child_snapshot_scoring.csv",
+    "expected_children": 37,
+    "expected_primary_children": 36,
+    "expected_rows": 71830
+  },
+  "reuse": [
+    {
+      "models": ["mistral-7b-v0.3", "tinydialogues", "qwen3-14b"],
+      "datasets": ["Brown", "Manchester", "Providence"],
+      "coverage": "word_level_k0_k1_k2_k3",
+      "action": "reuse_existing_audited_product"
+    },
+    {
+      "models": ["mistral-7b-v0.3"],
+      "datasets": ["Hall"],
+      "coverage": "word_level_k0_k1_k2_k3",
+      "action": "reuse_existing_audited_product"
+    }
+  ]
+}

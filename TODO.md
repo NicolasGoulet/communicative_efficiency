@@ -20,6 +20,24 @@ This section is the authoritative active checklist. The longer dated sections
 below are retained as implementation/audit history; some of their unchecked
 items were superseded or completed by the later modular direct-score workflow.
 
+### Unified clinical/non-clinical scoring expansion — 2026-08-26
+
+- [x] Audit all identified installed naturalistic, structured, clinical/control,
+      expansion, and Hall sources; rebuild the 15-group clinical preprocessing
+      output and pass its focused tests.
+- [x] Freeze the 37-dataset, 877-scoreable-child, 1,825,624-target real-child
+      k0–k3 handoff for Mistral, TinyDialogues, and Qwen3-14B. Preserve design,
+      population, clinical/control, and Hall strata explicitly.
+- [x] Reuse the audited PBM three-scorer word products and Hall Mistral product;
+      mark the remaining 101 model-by-dataset cells as pending rather than
+      duplicating completed scoring.
+- [x] Implement the compute-repository CPU preflight, exact-wrapper four-context
+      GPU smoke, all-or-none 14-run release gate, audited k0/k3/k1/k2 waves,
+      resumable output contracts, final archives, and one-OTP operator runbook.
+- [ ] Transfer the frozen archive to Mila, review all 14 GPU smoke reports,
+      explicitly release production, retrieve the audited archives, and import
+      them here. No Mila work has been submitted yet.
+
 ### August supervisor report workflow — 2026-08-17
 
 - [x] Define the staged reporting architecture, scientific guardrails, shared-

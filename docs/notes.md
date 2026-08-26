@@ -7589,3 +7589,30 @@ CUDA_VISIBLE_DEVICES='' MPLCONFIGDIR=/tmp/mpl-cache \
   exact two-architecture GPU smoke, staged audits, immutable data split,
   censoring gate, and the boundary that downstream Mistral scoring is a
   separate compute-repository task.
+
+## 2026-08-26 - Unified clinical/non-clinical scoring handoff
+
+- Rebuilt the installed clinical archive through the existing 15-group
+  preprocessor. It contains 494 source folders (240 controls, 254 clinical),
+  481 children with scoreable targets, 215,820 child utterances, and 396,887
+  caregiver utterances. The 13 unscoreable clinical/control folders are
+  explicitly audited.
+- Combined that output with the strict naturalistic 79, the 112-child
+  training expansion, Champaign/EHS structured observations, and Hall. The
+  resulting 37-dataset handoff accounts for 892 source folders, 877 scoreable
+  children, and 1,825,624 real child targets. The 15 total unscoreable folders
+  are 13 clinical/control plus two EHS folders.
+- Froze real-child k0–k3 same-pass word-surprisal scoring under Mistral-7B-v0.3,
+  TinyDialogues, and Qwen3-14B while preserving population, setting,
+  clinical/control, and Hall metadata. PBM three-scorer products and Hall
+  Mistral are reuse cells; 101 model-by-dataset cells remain pending.
+- The deterministic archive SHA-256 is
+  `e441d48f14c568b7cabd97aac1389bdfb15d1916ba144afc924adaf24d9baf28`.
+  No Mila jobs were submitted. The compute-side pipeline is designed as 14
+  independent group/model runs with a shared immutable runtime, exact-wrapper
+  four-context GPU smokes, explicit all-smoke review/release, audited staged
+  production, resumable contracts, and final archives.
+- The final local CPU preflight instantiated all 14 model/group runs and all
+  404 pending dataset-context contracts successfully. It also caught and fixed
+  scorer CSV loading so compressed headers are decompressed before delimiter
+  detection and the literal Forrester utterance `nan` remains lexical data.

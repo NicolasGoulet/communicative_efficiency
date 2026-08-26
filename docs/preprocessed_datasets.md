@@ -1,6 +1,40 @@
 # Currently Preprocessed Datasets
 
-Last checked: 2026-08-25.
+Last checked: 2026-08-26.
+
+## Unified cross-population audit — 2026-08-26
+
+All identified installed CHILDES/CHAT data in the project scope are now
+preprocessed and represented in one audited child-scoring handoff:
+
+`results/cross_population_scoring_handoff/cross_population_child_scoring_20260826_v1.tar.gz`
+
+It contains 37 dataset inputs, 892 source child folders, 877 children with
+scoreable targets, and 1,825,624 real child utterances. The 15 folders without
+scoreable child targets are retained in the audit rather than silently counted
+as scored children. The package SHA-256 is
+`e441d48f14c568b7cabd97aac1389bdfb15d1916ba144afc924adaf24d9baf28`.
+
+The handoff keeps five designs separate:
+
+- 79 strict longitudinal naturalistic children in 13 corpora;
+- 112 children in the six-corpus naturalistic training expansion;
+- 170 source folders in Champaign/EHS structured observations (168 scoreable);
+- 494 source folders in 15 clinical/matched-control groups (481 scoreable);
+- Hall's separate 37-child cross-sectional sensitivity snapshot (36 primary).
+
+The clinical/control groups are Ambrose HL/TD, Cummings PD, Feldman SLI/TD,
+Flusberg DS, Hooshyar DS/TD, Nicholas HL/TD, Rescorla LT/TD, Rondal DS/TD, and
+UCSD SLI. These are not all naturalistic: the strict 79 and six-corpus expansion
+are naturalistic; Champaign/EHS are structured observations; the clinical
+groups use clinical/control recording protocols; Hall mixes home, school, and
+transition settings.
+
+Scoring is frozen for Mistral-7B-v0.3, TinyDialogues, and Qwen3-14B at k0–k3.
+PBM (Brown/Manchester/Providence) three-scorer word products and Hall Mistral
+are reused. The other 101 model-by-dataset cells remain pending Mila execution;
+do not describe them as scored until their GPU smoke, production, and audits
+pass.
 
 This file describes the datasets currently present under
 `data/preprocessed_data/`. A dataset is considered **Stage 0 preprocessed** when
@@ -214,7 +248,7 @@ These datasets currently have compact child-side surprisal scoring files:
 - **Weist**: Stage 0 ready; strict naturalistic default.
 - **Wells**: Stage 0 ready; strict naturalistic default.
 
-## Not Currently Preprocessed
+## Separate Stage-0 Expansion (Ready)
 
 - **Transformer-training expansion**: Tardif (24 children, toy-play blocks
   only), Valian (21), Higginson (3), Howe (16), Edinburgh (47), and Thomas (1)

@@ -230,6 +230,16 @@ old reports:
   remain under `results/corrected_pbm_bayes_v2/`; and audited PBM complexity
   and legacy n-gram products remain under
   `results/mila_modular_runs_2026_07_08/products/`.
+- **Unified cross-population scoring handoff, compute pending**:
+  `results/cross_population_scoring_handoff/full_20260826/` and its deterministic
+  archive cover 37 datasets, 892 source folders, 877 scoreable children, and
+  1,825,624 real child targets across strict naturalistic, training-expansion,
+  structured, clinical/control, and Hall designs. The archive SHA-256 is
+  `e441d48f14c568b7cabd97aac1389bdfb15d1916ba144afc924adaf24d9baf28`.
+  It freezes separate Mistral, TinyDialogues, and Qwen3-14B k0-k3 word-level
+  scoring. PBM three-scorer outputs and Hall Mistral are reuse cells; the other
+  101 model-by-dataset cells have not yet been scored on Mila. Do not describe
+  the handoff as completed model output.
 
 The full100 Qwen/Mistral handoff is complete, not pending. Its extension archive
 is 3,305,320,336 bytes with SHA-256
