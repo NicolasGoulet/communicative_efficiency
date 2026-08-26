@@ -14,7 +14,7 @@ When a task is completed, move any useful result or decision into
 - Add commands that verify the task.
 - Link to files when the task concerns a specific script or output.
 
-## Current Focus — Reconciled 2026-07-22
+## Current Focus — Reconciled 2026-08-26
 
 This section is the authoritative active checklist. The longer dated sections
 below are retained as implementation/audit history; some of their unchecked
@@ -69,10 +69,38 @@ items were superseded or completed by the later modular direct-score workflow.
       quadratic regression diagnostics, fixed-length coefficient comparisons,
       length distributions, and the Markdown/HTML report. All 31 registered
       weighted child-fixed-effect/child-clustered fits passed.
-- [ ] Ingest the additive same-length LSTM only after a canonical full-79
-      `COMPLETE_AND_AUDITED` scored handoff exists. Until then retain
-      `CORE_CLOUDS_COMPLETE_LSTM_PENDING` and do not write the all-source
-      completion marker.
+- [x] Retrieve and independently verify the canonical all-79 additive
+      same-length LSTM handoff. Generation and Mistral `k0`/`k3` scoring are
+      complete for 1,140,218 rows and 79 children; the compute handoff has
+      `COMPLETE_AND_AUDITED` and score-table SHA-256
+      `03af2bc6abbca362eb9c7529b921e84048d65f68f6c950b841384e187271345e`.
+- [ ] Link that immutable handoff into `results/external/compute_surprisal_mila/`,
+      satisfy the frozen LSTM ingestion schema, rebuild the fixed-effort cloud
+      stages, and replace `CORE_CLOUDS_COMPLETE_LSTM_PENDING` only after the
+      new all-source audit passes. No Mila regeneration or rescoring is needed.
+
+### PBM-held-out BabyLlama-sized LLaMA and T5 baselines — 2026-08-26
+
+- [x] Build and push the from-scratch two-architecture implementation on
+      `generate_baselines_mila` branch `codex/pbm-transformer-generators` at
+      `a455000568f70506d4501d62f32c7c3a24e6fd53`, including the shared tokenizer,
+      selection/refit policy, generation audit, exact-wrapper smoke, and
+      dependency-gated Slurm DAG.
+- [x] Build and audit the PBM-excluded input handoff at
+      `results/transformer_training_expansion/full_20260825/`: 763,494 train,
+      175,216 whole-child-disjoint validation, 938,710 development, and
+      446,508 PBM evaluation examples, with zero PBM overlap in learning data.
+- [ ] Transfer the immutable input handoff and the frozen runtime to Mila,
+      rehash the inputs there, and run the exact production-wrapper GPU smoke
+      for both architectures. Do not treat login-node imports as a GPU smoke.
+- [ ] After and only after the two-architecture smoke audit passes, run the
+      dependency-gated `2 architectures x 8 cumulative cutoffs = 16` final
+      model DAG. Preserve the selected-epoch fresh refit on development data
+      and the 0.1% generation-censoring gate.
+- [ ] Retrieve and independently audit the scorer-ready generated-response
+      handoff. Then, as a separate project, smoke and run Mistral `k0`/`k3`
+      scoring in `compute_surprisal_mila`; do not conflate generation completion
+      with scoring completion.
 
 ### Full-79 conditional joint efficiency explorer — 2026-08-25
 
@@ -195,10 +223,10 @@ items were superseded or completed by the later modular direct-score workflow.
 - [x] Reauthenticate the GitHub CLI and publish the reviewed closeout plus the
       complete analysis controller. Draft PR #2 is open from
       `agent/project-status-closeout`.
-- [ ] Keep all cluster-side retrieval, rsync, and Slurm actions manual. The
-      ordered user command sheet remains
-      `docs/mila_handoff_commands_2026-07-22.md` and intentionally stops before
-      full-79 LSTM scoring because that scoring wrapper is not audited.
+- [x] Historical closeout: the July command sheet intentionally stopped before
+      full-79 LSTM scoring. That limitation was superseded by the later audited
+      generation and Mistral-scoring workflows, whose immutable local handoff
+      is now complete. Do not reuse the July stop point as current status.
 
 ### New word-information program — 2026-08-05
 
@@ -310,11 +338,10 @@ items were superseded or completed by the later modular direct-score workflow.
       `134f4df4eb3bc60df93fe1dfee72811012b08ea2`, add explicit single-task
       Slurm requests, pass its local tests/shell audit, push the branch, and
       open draft PR #1. No Mila job was submitted.
-- [ ] Run the smoke-gated full-79 k3 same-length LSTM DAG in
-      `generate_baselines_mila`, retrieve its compact reports and final marker,
-      then score and analyze the generated targets under a model-specific
-      handoff contract. Follow `docs/mila_handoff_commands_2026-07-22.md` only
-      through the explicit generation/retrieval stop point.
+- [x] Run and audit the full-79 k3 same-length LSTM generation DAG, then run and
+      audit Mistral utterance `k0`/`k3` scoring. The 1,140,218-row immutable
+      compute handoff is local; analysis-repository ingestion remains the open
+      task recorded above.
 - [ ] Decide after scientific review whether full-79 TinyDialogues scoring,
       full-79 context entropy/word-level surprisal, or a scored generated
       response cloud is worth the additional compute.
@@ -655,11 +682,11 @@ merely to increase the number of fits.
       characters, validated morphology, syllables, phonemes, lexical rarity,
       vocabulary trajectory) after missingness and quality are audited by
       child/corpus/age.
-- [ ] Treat context entropy, word-level neural surprisal, full-79 LSTM,
-      response-space entropy, semantic entropy, and corrected Bayes scores as
-      separate missing/partial predictor projects. Do not let their PBM-only
-      availability block the primary direct-Mistral confirmation, and do not
-      pretend they are full-79 controls.
+- [ ] Treat context entropy, word-level neural surprisal, semantic entropy,
+      complexity, and corrected Bayes scores as separate missing/partial
+      predictor projects. Full-79 LSTM targets/scores and exact-string Qwen
+      response-space entropy now exist, but their availability does not turn
+      them into ordinary controls or meaning-preserving alternatives.
 - [ ] Decide whether full-79 TinyDialogues scoring is scientifically worth the
       additional compute after the PBM cross-scorer report is reviewed. If
       selected, create a new smoke/manifest/audit contract; the 504-file PBM
@@ -850,9 +877,9 @@ scope, not as an optional later extension.
       k3 caretaker context and same-length generation only, with eight additive
       age-bin models. Add CPU preparation, exact-wrapper GPU smoke, staged
       arrays, audits, and final marker handling.
-- [ ] Execute the selected full-79 LSTM DAG on Mila and retrieve its compact
-      reports. The local real-data preparation audit passed, but no production
-      checkpoint or generated full-79 output exists yet.
+- [x] Execute the selected full-79 LSTM DAG on Mila, retrieve and audit its
+      compact generation handoff, and complete separate Mistral `k0`/`k3`
+      scoring. This historical task is complete; do not rerun it.
 - [ ] Add checksums/manifests to every generated-baseline export so scorer
       repos can verify that row order, row ids, context windows, and utterance
       counts match expectations.

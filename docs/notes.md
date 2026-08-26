@@ -7552,3 +7552,40 @@ CUDA_VISIBLE_DEVICES='' MPLCONFIGDIR=/tmp/mpl-cache \
   recurrent types, and no audit problems. The targeted compatibility suite
   passed 22 tests. Commit `8b94f60` contains the controller, focused tests,
   protocol, and generated report.
+
+## 2026-08-26 - Compute-state reconciliation and transformer execution handoff
+
+- Reconciled a state transition that older analysis documentation had not yet
+  absorbed. Full-79 additive same-length LSTM generation and separate Mistral
+  utterance `k0`/`k3` scoring are complete and audited in the sibling compute
+  repository. The canonical local handoff is
+  `/home/apaixonada/EvaPortelance/Projet_1/compute_surprisal_mila/mila_results/lstm_full79_mistral_scoring/current/`.
+  It covers 1,140,218 rows, all 79 children, and both contexts with zero blank,
+  fallback, or generation-failure rows. The score-table SHA-256 is
+  `03af2bc6abbca362eb9c7529b921e84048d65f68f6c950b841384e187271345e`.
+- The completed compute state does not mean the LSTM has been incorporated into
+  the current fixed-effort cloud artifact. The analysis repo still points its
+  generic LSTM symlink at the older PBM-only handoff, and
+  `results/full79_information_effort_clouds/CORE_CLOUDS_COMPLETE_LSTM_PENDING`
+  remains accurate for the currently built atlas. The next LSTM task is local
+  link/import, frozen-schema and identity audit, staged rebuild, and report
+  update. Mila regeneration and rescoring are unnecessary.
+- Recorded the PBM-held-out small-transformer execution state. The audited
+  training handoff at
+  `results/transformer_training_expansion/full_20260825/` contains 763,494
+  training, 175,216 whole-child-disjoint validation, 938,710 development, and
+  446,508 PBM evaluation examples, with Brown, Manchester, and Providence
+  excluded from every learning split.
+- The `generate_baselines_mila` worktree
+  `.worktrees/generate-pbm-transformers` is on pushed branch
+  `codex/pbm-transformer-generators` at
+  `a455000568f70506d4501d62f32c7c3a24e6fd53`. Its frozen design is a
+  BabyLlama-sized decoder-only LLaMA and an encoder-decoder T5, each about 58M
+  parameters, trained from scratch over eight cumulative age cutoffs: 16 final
+  models. No transformer Mila job has yet been submitted.
+- Added the fresh-task execution prompt at
+  `docs/prompts/start_pbm_transformer_generation_mila_2026-08-26.md`. It
+  authorizes the existing dependency-gated generation DAG while preserving the
+  exact two-architecture GPU smoke, staged audits, immutable data split,
+  censoring gate, and the boundary that downstream Mistral scoring is a
+  separate compute-repository task.

@@ -2,7 +2,7 @@
 
 **Project:** On Communicative Efficiency of Child Language Use
 
-**Evidence snapshot:** 24 August 2026
+**Evidence snapshot:** 26 August 2026
 
 **Purpose:** self-contained handoff for discussing the scientific story, deciding the final analyses, and writing the paper
 
@@ -16,7 +16,8 @@ This document is meant to be pasted into, or read by, another model that has no 
 - the datasets, sample roles, scorers, generated baselines, and response spaces;
 - the completed statistical analyses and their exact headline estimates;
 - the results that were supported, qualified, contrary to prediction, descriptive, or still pending;
-- the new all-79-child Qwen/Mistral response-space handoff that is complete at the data level but has not yet been analyzed statistically;
+- the completed all-79-child Qwen/Mistral response-space analysis and the
+  completed-but-not-yet-imported all-79 additive-LSTM score handoff;
 - the claims that are and are not licensed by the evidence;
 - the remaining decisions needed before the final paper can be frozen.
 
@@ -38,7 +39,21 @@ Several results prevent a broader, simpler “children become more communicative
 4. A discrete sustained developmental onset is not established in either the discovery or confirmation sample under simultaneous child-bootstrap bands.
 5. No validated listener-relevant utility outcome has yet been analyzed. Target surprisal is not comprehension, communicative success, or evidence that children optimize a normative objective.
 
-The new all-79 Qwen-generated/Mistral-scored response space is fully local and audited: 645,524 contexts, exactly 100 responses per context, and 64,552,400 scored responses. This finally makes the planned all-79 utterance-effort and joint information-effort cloud analyses possible without additional generation, scoring, or Mila retrieval. Those statistical analyses and plots have not yet been produced.
+The all-79 Qwen-generated/Mistral-scored response space and its main
+conditional effort/cloud analysis are now complete and audited: 645,524
+contexts, exactly 100 responses per context, 64,552,400 scored responses, 15/15
+registered nonlinear models, and 38/38 final audit checks. At 42 months, the
+pooled absolute-length ratio from response-entropy p10 to p90 is 1.028 [1.014,
+1.043], whereas the Qwen-relative effort odds ratio is 0.931 [0.902, 0.962].
+The estimands differ and the relative-effort result reverses developmentally;
+the simple prediction of uniformly stronger entropy-conditioned lengthening is
+not supported.
+
+The full-79 same-length additive-LSTM generation and separate Mistral `k0`/`k3`
+scoring are also complete for 1,140,218 targets and all 79 children. That
+immutable compute handoff is local, but it has not yet been linked into this
+analysis repository or incorporated into the fixed-effort cloud atlas. No
+additional LSTM generation or scoring is needed.
 
 ## Evidence labels used throughout
 
@@ -83,7 +98,12 @@ The word analysis uses three separately fit scorers on the exact same PBM occurr
 
 ### 4. Joint information-effort response clouds
 
-This planned final track will locate each observed child utterance in the two-dimensional information-by-effort cloud of 100 Qwen responses to the same conversational context. The generated responses have Mistral k0 and k3 utterance scores and their text is available for effort extraction.
+This completed track locates each observed child utterance in the
+information-by-effort cloud of 100 Qwen responses to the same conversational
+context. The generated responses have Mistral k0 and k3 utterance scores and
+their text supplies lexical effort and exact-string response entropy. The
+audited outputs are under `results/full79_joint_efficiency_analysis/`, with the
+consultation view at `docs/full79_joint_efficiency_explorer.html`.
 
 This is a generated-response-space comparison. It does not define a meaning-preserving choice set and cannot show that the observed utterance is Pareto-optimal, rationally chosen, or globally efficient.
 
@@ -568,7 +588,14 @@ Positive slopes mean the generated-minus-real surprisal gap increases with age. 
 
 These are comparisons of string plausibility under the scorers. The candidate strings do not preserve intended meaning. They cannot justify claims about optimal choices, Pareto frontiers, or a child selecting the best utterance among equivalent alternatives.
 
-The PBM additive LSTM `k3`, `k4`, and `k5` same-length generations and Mistral scoring are complete. They provide stronger controlled neural baselines, but they remain PBM-only and meaning-uncontrolled. A full-79 LSTM workflow exists, but no completed production marker is available.
+The PBM additive LSTM `k3`, `k4`, and `k5` same-length generations and Mistral
+scoring are complete. They provide stronger controlled neural baselines, but
+they remain meaning-uncontrolled. The selected full-79 extension uses additive
+age-bin training, caregiver context `k3`, and same-length generation only. Its
+generation and Mistral utterance `k0`/`k3` scoring are complete and audited for
+1,140,218 rows and 79 children. Its score-table SHA-256 is
+`03af2bc6abbca362eb9c7529b921e84048d65f68f6c950b841384e187271345e`.
+Analysis-repository import is still pending.
 
 ## Completed result 3: word-level information across three scorers
 
@@ -812,9 +839,14 @@ The corrected Bayes decomposition and Hall models are additional completed analy
 
 This large model inventory should not become a paper organized around hundreds of models. The final paper needs a small declared primary model, a compact sensitivity ladder, and transparent appendices.
 
-## What the new all-79 Qwen response space now enables
+## Historical design implemented by the all-79 Qwen analysis
 
-The Qwen/Mistral handoff closes the largest previous data gap. No additional generation or scoring is needed for utterance-level effort and information-effort analyses.
+The following design section records the requirements that guided the now
+completed analysis. The authoritative fitted products are
+`results/full79_joint_efficiency_analysis/` and
+`results/full79_information_effort_clouds/`; the report is
+`docs/full79_joint_efficiency_explorer.html`. No additional Qwen generation or
+Mistral scoring is needed to reproduce those results.
 
 ### Required feature stage
 
@@ -969,17 +1001,20 @@ At minimum, retain:
 
 Do not choose the estimator or outcome that produces the most favorable result. Freeze one primary outcome and one primary repeated-measures estimator, then report the rest as a sensitivity ladder.
 
-### Current code status for this analysis
+### Final code status for this analysis
 
-An uncommitted work-in-progress controller exists at:
+The early controller below was committed as a data/audit runner:
 
 ```text
 src/build_full79_qwen_route2_analysis.py
 ```
 
-It defines a broad, non-selective model registry and expects 64,552,400 responses, 645,524 contexts, 79 children, 13 corpora, and 1,122,396 eligible real rows. However, its current default input path and feature contract refer to an older `response_generation/.../merged` layout. The canonical current handoff is the `qwen_response_mistral_full100_20260817_f5dd5aa` core75/extension25 layout described above. The controller must be adapted or given a compatible feature stage before it can be treated as the final analysis pipeline.
-
-There is no `results/full79_qwen_route2_analysis/FULL79_QWEN_ROUTE2_COMPLETE_AND_AUDITED` marker at this snapshot. Therefore no statistical result from the new all-79 response cloud should be reported yet.
+It is not the final model owner. The final staged controller is
+`src/build_full79_joint_efficiency_analysis.py`, with the dedicated nonlinear
+model engine `src/fit_full79_joint_efficiency_models.R`. The final audit marker
+is
+`results/full79_joint_efficiency_analysis/FULL79_JOINT_EFFICIENCY_COMPLETE_AND_AUDITED`.
+Report results from those frozen products rather than from the early runner.
 
 ## Results that are superseded or must remain exploratory
 
@@ -993,7 +1028,10 @@ The original unnormalized Bayes decomposition omitted `p(c)`, used in-sample PBM
 
 ### Superseded response-space availability statement
 
-Older reports said the Qwen-generated/Mistral-scored response product was incoming or pending. It is now fully local and audited. What remains pending is the local feature extraction, join, statistical modeling, and plotting.
+Older reports said the Qwen-generated/Mistral-scored response product or its
+analysis was pending. Both the full100 handoff and the primary all-79
+conditional effort/cloud analysis are now local and audited. Semantic-cluster
+entropy remains a future construct-validation extension.
 
 ### Exploratory change-point scans
 
@@ -1174,15 +1212,26 @@ It is required for a strong claim about communicative success or efficiency, but
 
 ## Genuine remaining gaps
 
-1. The all-79 Qwen effort summaries, exact-string entropy table, real-child join, models, and cloud plots have not been produced.
-2. The remaining-58 word-level Mistral production has not run; the current word evidence is PBM-only.
-3. Full-79 morphology, syllable, phoneme, and broader complexity products are not all complete and validated.
-4. No validated listener-relevant outcome exists.
-5. The structurally defined caregiver-responsive sample still needs adjudication of 18,172 `context_k1` mismatches and a 325-row manual validation sample.
-6. Semantic-cluster response entropy is unavailable.
-7. Full-79 same-length LSTM generation/scoring has no retrieved completion marker.
-8. Full-79 corrected Bayes and next-token context-entropy coverage are incomplete.
-9. Demographic variables are too sparse or corpus-dependent for general developmental covariate claims. Hall is the only completed targeted sociolinguistic snapshot and must remain separate.
+1. The remaining-58 word-level Mistral production has not run; the current
+   word evidence is PBM-only.
+2. Full-79 morphology, syllable, phoneme, and broader complexity products are
+   not all complete and validated.
+3. No validated listener-relevant outcome exists.
+4. The structurally defined caregiver-responsive sample still needs
+   adjudication of 18,172 `context_k1` mismatches and a 325-row manual
+   validation sample.
+5. Semantic-cluster response entropy is unavailable; current response entropy
+   is exact-string and generator/prompt/temperature-specific.
+6. The completed full-79 LSTM score handoff still needs exact local ingestion
+   into the fixed-effort cloud analysis and a rebuilt all-source audit.
+7. The PBM-held-out BabyLlama-sized LLaMA and T5 pipelines are implemented but
+   have not yet run on Mila. The frozen design is two architectures by eight
+   cumulative age cutoffs, or 16 final models.
+8. Full-79 corrected Bayes and next-token context-entropy coverage are
+   incomplete.
+9. Demographic variables are too sparse or corpus-dependent for general
+   developmental covariate claims. Hall is the only completed targeted
+   sociolinguistic snapshot and must remain separate.
 
 ## Authoritative local artifact map
 

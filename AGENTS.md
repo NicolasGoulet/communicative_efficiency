@@ -173,6 +173,17 @@ old reports:
   `results/direct_surprisal_replication/paired_tiny_mistral_pbm/` for the
   PBM TinyDialogues and paired-scorer products. These products are not
   remaining-58 confirmation data.
+- **Completed all-79 additive-LSTM generation and Mistral scoring handoff**:
+  `/home/apaixonada/EvaPortelance/Projet_1/compute_surprisal_mila/mila_results/lstm_full79_mistral_scoring/current/`
+  is the canonical local symlink to the immutable audited handoff. It contains
+  1,140,218 scorer-ready same-length additive-LSTM targets for all 79 children,
+  with utterance-level Mistral `k0` and `k3` scores. Its audit is `PASS`,
+  `markers/COMPLETE_AND_AUDITED` is present, and the compressed score table has
+  SHA-256 `03af2bc6abbca362eb9c7529b921e84048d65f68f6c950b841384e187271345e`.
+  This completed compute product has **not yet been linked into
+  `results/external/compute_surprisal_mila/` or ingested into the fixed-effort
+  all-79 cloud analysis**. Do not rerun generation or scoring; the next task is
+  local import, exact identity/hash audit, analysis rebuild, and report update.
 - **All-79 Qwen response space for effort and joint clouds**:
   `results/external/compute_surprisal_mila/qwen_response_mistral_full100_20260817_f5dd5aa`
   is the canonical symlink to the extracted, audited handoff at
@@ -194,8 +205,10 @@ old reports:
   fixed-effort six-model atlas is under
   `results/full79_information_effort_clouds/` and
   `docs/full79_information_effort_clouds.html`; its core analysis is complete,
-  but its all-source marker remains deliberately withheld until an audited
-  full-79 LSTM handoff exists.
+  but its current all-source marker remains deliberately withheld because the
+  now-completed full-79 LSTM handoff has not yet been ingested. The existing
+  `CORE_CLOUDS_COMPLETE_LSTM_PENDING` marker describes the current analysis
+  artifact, not the current compute availability.
 - **Completed utterance-informativity extension**:
   `results/utterance_informativity_analysis/` contains the child/caretaker
   occurrence tables, recurrent exact-string table, 30 newly fitted models,
@@ -450,11 +463,12 @@ Important current facts:
   `705143ea70e4c3852fe852205010973fca7742d927c0a85993a917bf084d5989`;
   cross-scorer effects must be fit separately and raw score magnitudes must not
   be pooled;
-- the full-79 direct-Mistral score tree is available, but full-79 context
-  entropy, word-level surprisal, LSTM targets/scores, complexity products, and
-  corrected Bayes scores are not all available. The all-79 Qwen response-space
-  text and utterance-level Mistral k0/k3 products are available through the
-  full100 handoff above;
+- the full-79 direct-Mistral score tree and the audited full-79 additive-LSTM
+  target/score handoff are available. Full-79 context entropy, word-level
+  surprisal, complexity products, and corrected Bayes scores are not all
+  available. The LSTM product still requires analysis-repo ingestion. The
+  all-79 Qwen response-space text and utterance-level Mistral k0/k3 products
+  are available through the full100 handoff above;
 - TinyDialogues covers the 21-child PBM discovery set for real, random,
   unigram, bigram, trigram, and caretaker targets at k0-k3; it does not yet
   cover the other 58 children or the PBM LSTM candidates;
@@ -612,7 +626,7 @@ integration.
 
 ## Current Scientific And Compute Focus
 
-Current priorities and genuine compute gaps as of 2026-08-25:
+Current priorities and genuine compute gaps as of 2026-08-26:
 
 1. Preserve the completed all-79 utterance-effort and joint
    information-effort analyses and their frozen PBM-discovery,
@@ -637,9 +651,10 @@ Current priorities and genuine compute gaps as of 2026-08-25:
 7. Validate morphology, syllable, phoneme, and other complexity measures before
    promoting them to primary all-79 effort controls. Full-79 complexity and
    corrected-Bayes products are not currently complete.
-8. A full-79 same-length LSTM workflow exists, but no completed production
-   marker has been retrieved. The completed PBM LSTM remains valid and should
-   not be rerun merely because full-79 is absent.
+8. The full-79 same-length additive-LSTM generation and Mistral k0/k3 scoring
+   handoff is complete and audited for 1,140,218 rows and all 79 children. It
+   is not yet imported into this repository's fixed-effort cloud products.
+   Import and rebuild locally; do not repeat the Mila generation/scoring run.
 9. Develop listener-relevant utility only with an actual downstream outcome,
    such as caregiver-response predictive gain or validated repair/clarification
    labels. Response predictability alone is not listener utility.
@@ -690,8 +705,49 @@ The LSTM pipeline:
 Do not claim that a new LSTM was trained unless a real training command was run
 and its checkpoints, vocabulary, manifest, and audits exist. Do not rerun the
 completed PBM proof-of-concept merely because older documentation calls it
-"planned." The full-79 k3 workflow is implemented and locally validated as of
-2026-07-14, but no Mila GPU production run or final marker has been retrieved.
+"planned." The full-79 k3 workflow subsequently completed generation and
+Mistral k0/k3 scoring; its immutable local compute handoff is named above.
+Only its import into the analysis repository remains pending.
+
+For the PBM-held-out small-transformer baseline task, use the existing clean
+worktree and branch:
+
+```text
+/home/apaixonada/EvaPortelance/Projet_1/communicative_efficiency/.worktrees/generate-pbm-transformers
+branch: codex/pbm-transformer-generators
+commit: a455000568f70506d4501d62f32c7c3a24e6fd53
+```
+
+Read `docs/pbm-transformer-pipeline.md` and
+`configs/pbm_transformers_from_scratch_v1.json` there before acting. The
+frozen design is two from-scratch, approximately 58M-parameter models over
+eight cumulative age cutoffs: a BabyLlama-sized decoder-only LLaMA and an
+encoder-decoder T5, for 16 final models total. Call the first architecture
+"BabyLlama-sized LLaMA trained from scratch," not a BabyLlama replication:
+the published BabyLlama used teacher distillation and this experiment does
+not. Brown, Manchester, and Providence are held out from tokenizer training,
+training, validation, and epoch selection.
+
+The audited upstream input is
+`results/transformer_training_expansion/full_20260825/`: 763,494 training,
+175,216 whole-child-disjoint validation, 938,710 development, and 446,508 PBM
+evaluation examples. The generation/scoring split is strict:
+
+- `generate_baselines_mila` trains, selects/refits, and generates one
+  unconstrained-length response per PBM target;
+- the 128-subword-token ceiling is a safety bound whose censoring rate must be
+  at most 0.1%, not an analytical length constraint;
+- the exact two-architecture GPU smoke must pass before production can run;
+- `2 x 8 = 16` is the final model count; do not create PBM cross-validation
+  folds or 24 models;
+- Mistral `k0`/`k3` scoring belongs in `compute_surprisal_mila` and starts only
+  after the generated handoff is complete, retrieved, and audited.
+
+The transformer implementation and smoke-gated Slurm DAG are complete and
+pushed, but no transformer Mila training job has been submitted as of
+2026-08-26. The next execution step is handoff/runtime transfer and the exact
+two-architecture GPU smoke, followed by the dependency-gated 16-model run only
+after the smoke audit passes.
 
 ## Repository Map
 
