@@ -1,0 +1,53 @@
+{
+  "schema_version": "1.0.0",
+  "package_id": "downstream_caregiver_response_utility_full79_20260827_v1",
+  "source_flags": "results/conversational_eligibility/full79_child_conversational_flags.csv.gz",
+  "source_flags_sha256": "82fa51aab312d00e28367b296a5dcf9a506fea3a5b7ddc4723308da936cabe59",
+  "source_audit": "results/conversational_eligibility/full79_child_conversational_flags.audit.json",
+  "shuffle_seed": 20260827,
+  "expected": {
+    "source_rows": 1140218,
+    "datasets": 13,
+    "children": 79,
+    "sensitivity_rows": 613741,
+    "primary_rows": 413084,
+    "pbm_primary_rows": 174860,
+    "non_pbm_primary_rows": 238224
+  },
+  "conditions": [
+    {
+      "condition": "unconditional",
+      "context_column": ""
+    },
+    {
+      "condition": "base_context",
+      "context_column": "context_base"
+    },
+    {
+      "condition": "matched_child",
+      "context_column": "context_matched_child"
+    },
+    {
+      "condition": "shuffled_child",
+      "context_column": "context_shuffled_child"
+    },
+    {
+      "condition": "child_only",
+      "context_column": "context_child_only"
+    }
+  ],
+  "models": [
+    {
+      "model_key": "mistral-7b-v0.3",
+      "model_id": "mistralai/Mistral-7B-v0.3"
+    },
+    {
+      "model_key": "tinydialogues",
+      "model_id": "LaurensWink/SmolLM2-135M_variants"
+    },
+    {
+      "model_key": "qwen3-14b",
+      "model_id": "Qwen/Qwen3-14B"
+    }
+  ]
+}
