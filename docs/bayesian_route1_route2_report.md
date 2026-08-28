@@ -70,7 +70,7 @@ sample role, or Qwen adjustment.
 
 ## Reproducibility state
 
-- Branch: `agent/bayesian-route1-route2-v1`; report-build HEAD: `f52a7f102dd87a6a566ef72bbf24519efda16202`.
+- Branch: `agent/bayesian-route1-route2-v1`; report-build HEAD: `91783db6b1f4baa65545366820998e523063beb8`.
 - Frozen starting SHA: `f52a7f102dd87a6a566ef72bbf24519efda16202`.
 - Backend: repository-local brms 2.23.0, cmdstanr 0.9.0, CmdStan 2.39.0.
 - Source paper SHA-256: `cecf8f0e696c3b95a3b4033352e484e3c0b863560959c793e8d67ebd957f1957`.
