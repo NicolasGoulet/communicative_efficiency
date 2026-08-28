@@ -5,6 +5,8 @@
 .cmdstan/
 src/stan/b5_bivariate_measurement_error
 src/stan/b5_bivariate_measurement_error.hpp
+src/stan/joint_adaptive_efficiency_measurement_error
+src/stan/joint_adaptive_efficiency_measurement_error.hpp
 .pytest_cache/
 .mypy_cache/
 .ruff_cache/

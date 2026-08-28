@@ -229,6 +229,24 @@ old reports:
   deliberately absent. Do not
   report pilot coefficients as scientific results or bypass the gate by
   silently changing the raw-row unit, likelihood, sample roles, or estimand.
+- **Focused Bayesian joint adaptive-efficiency extension, complete and
+  audited**: `results/bayesian_joint_adaptive_efficiency_20260828/` contains a
+  separately frozen, bounded analysis of the project's central joint question.
+  It uses 1,122,396 utterances to estimate shared session-clustered
+  three-coefficient summaries for 78 children, then fits one trivariate
+  hierarchical measurement-error model, one wider-prior sensitivity, and 13
+  leave-one-corpus stress tests. The population fixed-effort k3 age slope is
+  -0.685 bits per six months (95% CrI [-1.131, -0.239]); the entropy/effort
+  slope at 42 months is +0.00584 log(1+words) per entropy SD
+  [-0.00018, 0.01196], with 90.4% of the posterior in the declared small-effect
+  ROPE; its age interaction is -0.00155 [-0.00389, 0.00085], with 99.9% in the
+  ROPE. The hypothesized cross-child correlation is -0.005
+  [-0.310, 0.295], unsupported. All 15 fits had zero divergences and zero
+  treedepth saturation; the completion marker is
+  `FOCUSED_JOINT_ANALYSIS_COMPLETE_AND_AUDITED`. Read
+  `docs/bayesian_joint_adaptive_efficiency_report.html`. This extension does
+  not complete or override the stopped 189-fit program and is not listener
+  utility.
 - **Word-level information, PBM 21 only**: the owning repository is
   `/home/apaixonada/EvaPortelance/Projet_1/developmental_word_information`.
   Its three canonical input symlinks are under
@@ -659,14 +677,15 @@ frozen saved artifacts and do not fit models. A failed independent audit goes
 through the conditional remediation prompt and then a fresh audit before final
 integration.
 
-### Planned Bayesian Route 1 / Route 2 program
+### Bayesian Route 1 / Route 2 pilot-stop and focused joint extension
 
 The reviewed design proposal is
 `docs/bayesian_route1_route2_program_2026-08-28.md`; the copy-ready fresh-chat
 implementation prompt is
-`docs/prompts/start_bayesian_route1_route2_program_2026-08-28.md`. This is a
-design state only: no Bayesian model has been fitted, no Bayesian dependency
-has been selected or installed, and no result may be claimed.
+`docs/prompts/start_bayesian_route1_route2_program_2026-08-28.md`. That broad
+program was implemented through an audited real-data pilot and remains stopped
+before production because its 189-fit inventory projected to 8,312 CPU-hours.
+Its pilot coefficients are not scientific results.
 
 The first implementation lane contains exactly five priority families:
 
@@ -687,6 +706,20 @@ primary decision rule. Prior predictive checks, synthetic recovery,
 convergence/ESS/divergence audits, posterior predictive checks, prior
 sensitivity, age-shape stacking, and leave-one-child/corpus validation are
 mandatory.
+
+After returning to the motivating emails and meetings, a separate focused
+joint extension was frozen and completed at
+`docs/bayesian_joint_adaptive_efficiency_protocol.md`. It treats the existing
+nonlinear GAMMs as the primary marginal analyses and adds one compact
+trivariate measurement-error synthesis of child-level fixed-effort
+predictability, demand-sensitive effort at 42 months, and developmental change
+in demand sensitivity. Corpus is a nuisance hierarchy; PBM is a discovery
+label and never a prior. The model and report passed their independent audit
+in 19.3 wall minutes / 1.285 CPU-hours. Its strongest result is the negative
+fixed-effort predictability slope; demand-sensitive effort is modest, the
+developmental effort interaction is practically near zero, and the predicted
+cross-route child correlation is unsupported. The downstream caregiver-
+response utility analysis remains the decisive next test.
 
 ## Current Scientific And Compute Focus
 

@@ -20,6 +20,34 @@ This section is the authoritative active checklist. The longer dated sections
 below are retained as implementation/audit history; some of their unchecked
 items were superseded or completed by the later modular direct-score workflow.
 
+### Focused Bayesian joint adaptive-efficiency extension — completed 2026-08-28
+
+- [x] Return the Bayesian work to the project's scientific center: contextual
+      demand predicting speaker effort, fixed-effort form predictability, and
+      their coordinated development. Treat corpus as background hierarchical
+      structure rather than the research question; do not use PBM estimates as
+      Bayesian priors.
+- [x] Freeze the compact H1-H4 protocol at
+      `docs/bayesian_joint_adaptive_efficiency_protocol.md`, with one
+      trivariate child-level measurement-error model, one wider-prior
+      sensitivity, and 13 leave-one-corpus stress tests.
+- [x] Derive three coefficients and their shared 3 x 3 session-clustered
+      covariance for 78 eligible children from all 1,122,396 joined
+      utterances. Exclude only Weist/Emily under the outcome-blind five-session
+      identifiability rule.
+- [x] Pass synthetic recovery, both full posterior fits, all 13 influence
+      refits, posterior predictive checks, prior sensitivity, staged report
+      generation, and the independent completion audit. Total measured fitting
+      cost was 19.3 wall minutes / 1.285 CPU-hours, with zero divergences and
+      zero treedepth saturation.
+- [x] Publish `docs/bayesian_joint_adaptive_efficiency_report.{md,html}` and
+      preserve the interpretation boundary: the result concerns scorer
+      predictability and word effort, not listener utility or an optimum.
+- [ ] When the downstream caregiver-response score archives pass relocation
+      audit, apply the frozen utility protocol. This is the decisive next test
+      for a strong communicative-efficiency claim; do not substitute more
+      corpus expansion for it.
+
 ### Bayesian Route 1 / Route 2 extension — pilot stopped 2026-08-28
 
 - [x] Review Levshina's Bayesian-statistics-in-linguistics paper and translate
@@ -50,20 +78,16 @@ items were superseded or completed by the later modular direct-score workflow.
       the 189-fit suite projected to 8,312 CPU-hours against the frozen
       2,000-hour ceiling. Production was correctly blocked, with no automatic
       aggregation, estimand change, or Mila launch.
-- [ ] Before any production fit, approve a revised CPU and compilation plan.
-      Then fit all five families only after a new
-      passing pilot gate, retain unchanged
-      formulas across sample scopes, run prior/age-shape/influence
-      sensitivities, and compare with existing frequentist fits without
-      outcome-selected replacement models.
+- [x] Do not launch the 189-fit production grid. After scientific review, keep
+      its audited STOP as resource-planning history and use the separately
+      frozen focused joint adaptive-efficiency extension above.
 - [x] Publish the compact pilot handoff at
       `docs/bayesian_route1_route2_report.{md,html}` and pass the independent
       `PILOT_STOP_AUDITED` audit. The production completion marker remains
       deliberately absent.
-- [ ] After approved production fitting, publish a scientific posterior report
-      and independent production completion audit.
-      Do not call this a prospective confirmation, an efficiency optimum, or
-      a meaning-preserving generated-response comparison.
+- [x] Publish the separately scoped focused scientific posterior report and
+      independent completion audit. Do not relabel it as completion of the
+      original 189-fit inventory or as prospective confirmation.
 
 ### Unified clinical/non-clinical scoring expansion — 2026-08-26
 

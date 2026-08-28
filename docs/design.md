@@ -379,6 +379,37 @@ continuation requires explicit review of the CPU and compilation plan,
 followed by a new passing gate; it may not silently change the sample,
 likelihood, raw-row unit, or estimand.
 
+## Focused Bayesian Joint Adaptive-Efficiency Extension
+
+The broad pilot remains stopped, but it does not prevent a separately frozen
+analysis whose estimand and computation match the project's scientific center.
+The focused extension models three child coefficients jointly:
+
+1. the Mistral k3 age slope at fixed exact/top-coded word effort;
+2. the response-entropy slope of `log(1 + child words)` at 42 months;
+3. the six-month developmental change in that entropy/effort slope.
+
+The first-stage equations are fitted separately within child, and a shared
+session-clustered sandwich calculation preserves their full 3 x 3 estimation
+covariance. Children require five sessions, leaving 78 of 79; the exclusion of
+Weist/Emily is an outcome-blind repeated-measures identifiability rule. The
+Bayesian second stage treats the coefficient vector as measured with known
+error and estimates population means, corpus nuisance effects, child
+heterogeneity, and child-level correlations.
+
+This two-stage design preserves the joint scientific question without running
+NUTS over 1.1 million utterances. It is a post-hoc extension of already
+inspected outcomes. Its `log(1 + words)` effort result is complementary to,
+not a replacement for, the existing negative-binomial GAMMs. Cross-child
+correlation represents coordinated variation only. Listener utility remains
+unmeasured until the downstream caregiver-response gain is scored and audited.
+
+The protocol is `docs/bayesian_joint_adaptive_efficiency_protocol.md`; the
+controller and backend are
+`src/build_bayesian_joint_adaptive_efficiency_20260828.py` and
+`src/fit_bayesian_joint_adaptive_efficiency.R`. The audited human report is
+`docs/bayesian_joint_adaptive_efficiency_report.html`.
+
 ## August Supervisor Reporting Architecture
 
 The August report is a publication workflow over frozen, audited results; it is

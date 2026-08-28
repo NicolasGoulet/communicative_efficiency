@@ -1,0 +1,138 @@
+{
+  "program_id": "bayesian_joint_adaptive_efficiency_20260828",
+  "contract_version": "2026-08-28.v1",
+  "status": "frozen_posthoc_focused_extension",
+  "starting_git_sha": "612cc1e7c4ba429f9b75efbb07a6535792a72a3c",
+  "scientific_center": "joint developmental calibration of speaker effort and fixed-effort form predictability",
+  "input": {
+    "path": "results/bayesian_route1_route2_20260828/datasets/b5_shared_utterance_rows.parquet",
+    "sha256": "f45b927f6dd309b8c8c8aa1d76bada26992408e53e3a38479174262fe9dabae9",
+    "rows": 1122396,
+    "children": 79,
+    "corpora": 13
+  },
+  "eligibility": {
+    "minimum_sessions": 5,
+    "expected_included_children": 78,
+    "expected_excluded_children": ["Weist/Emily"],
+    "reason": "A child-specific developmental slope and a three-dimensional session-clustered covariance cannot be stably estimated from three sessions."
+  },
+  "scaling": {
+    "age_center_months": 42.0,
+    "age_unit_months": 6.0,
+    "entropy_reference": "all-79 mean and SD inherited from the audited source",
+    "entropy_p10_z": -1.3773902988214823,
+    "entropy_p90_z": 1.3396347517189275,
+    "route1_outcome": "Mistral k3 utterance sum bits",
+    "route2_outcome": "log(1 + cleaned child word count)"
+  },
+  "estimands": [
+    {
+      "id": "r1_age",
+      "label": "fixed-effort predictability age slope",
+      "formula": "k3_bits ~ age_z + C(word_count_top12)",
+      "unit": "Mistral bits per six months",
+      "hypothesis": "H3",
+      "direction": "negative"
+    },
+    {
+      "id": "r2_entropy_42",
+      "label": "demand-sensitive effort at 42 months",
+      "formula": "log1p(child_words) ~ age_z * entropy_z + context_words_z",
+      "unit": "log(1 + words) per response-entropy SD",
+      "hypothesis": "H1",
+      "direction": "positive"
+    },
+    {
+      "id": "r2_age_entropy",
+      "label": "developmental change in demand sensitivity",
+      "formula": "log1p(child_words) ~ age_z * entropy_z + context_words_z",
+      "unit": "change in the entropy slope per six months",
+      "hypothesis": "H2",
+      "direction": "two_sided_posthoc"
+    }
+  ],
+  "joint_model": {
+    "family": "trivariate_normal_measurement_error",
+    "formula": "coefficient_hat_child[3] ~ MVN(theta_child[3], known_session_clustered_cov_child); theta_child ~ MVN(mu + corpus_effect, Sigma_child)",
+    "primary_correlation": "corr(r1_age, r2_age_entropy)",
+    "theoretical_direction": "negative",
+    "interpretation": "coordinated development, not optimization or causality"
+  },
+  "priors": {
+    "regularizing": {
+      "population_sd": [1.0, 0.15, 0.08],
+      "child_sd_scale": [1.5, 0.15, 0.08],
+      "corpus_sd_scale": [0.75, 0.08, 0.05],
+      "lkj_eta": 4.0
+    },
+    "wide_sensitivity": {
+      "population_sd": [2.0, 0.30, 0.16],
+      "child_sd_scale": [3.0, 0.30, 0.16],
+      "corpus_sd_scale": [1.5, 0.16, 0.10],
+      "lkj_eta": 2.0
+    },
+    "source": "effect-scale regularization; PBM estimates are not used as priors"
+  },
+  "ropes": {
+    "r1_age": 0.5,
+    "r2_entropy_42": 0.009950330853168092,
+    "r2_age_entropy": 0.005,
+    "correlation": 0.1
+  },
+  "sampler": {
+    "seed": 20260828,
+    "chains": 4,
+    "parallel_chains": 4,
+    "warmup": 1000,
+    "sampling": 1500,
+    "adapt_delta": 0.99,
+    "max_treedepth": 12
+  },
+  "influence_sampler": {
+    "chains": 4,
+    "parallel_chains": 4,
+    "warmup": 500,
+    "sampling": 500,
+    "adapt_delta": 0.99,
+    "max_treedepth": 12
+  },
+  "diagnostic_gates": {
+    "primary_all_parameters": {
+      "maximum_rhat": 1.01,
+      "minimum_bulk_ess": 400,
+      "minimum_tail_ess": 400
+    },
+    "influence_registered_outputs": {
+      "maximum_rhat": 1.015,
+      "minimum_bulk_ess": 400,
+      "minimum_tail_ess": 400,
+      "variables": [
+        "population_mean[1]",
+        "population_mean[2]",
+        "population_mean[3]",
+        "child_correlation[1,3]"
+      ]
+    },
+    "all_fits": {
+      "maximum_divergences": 0,
+      "maximum_treedepth_saturated": 0,
+      "minimum_energy_bfmi": 0.3
+    },
+    "note": "Influence refits use half-length chains and are posterior-mean stress tests, not separate inferential fits. All-parameter diagnostics remain saved."
+  },
+  "runtime_gate": {
+    "maximum_total_cpu_hours": 2.0,
+    "maximum_wall_minutes": 45.0
+  },
+  "interpretation_guardrails": [
+    "This is a post-hoc joint extension; the underlying outcomes were inspected previously.",
+    "PBM is a discovery label, not a Bayesian prior.",
+    "Corpus is background hierarchical structure, not the scientific focus.",
+    "Lower k3 surprisal means greater scorer predictability or conventionality, not greater Shannon information transmitted.",
+    "Exact-string response entropy is generator-, prompt-, temperature-, and surface-form-dependent.",
+    "The Route 2 coefficient describes log(1 + words), not listener benefit.",
+    "Cross-child correlations indicate coordinated developmental variation, not optimization or causality.",
+    "A strong communicative-efficiency claim remains contingent on the downstream caregiver-response utility analysis."
+  ]
+}

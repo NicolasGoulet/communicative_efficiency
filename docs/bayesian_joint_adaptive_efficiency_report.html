@@ -1,0 +1,371 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bayesian Joint Adaptive-Efficiency Analysis</title>
+<style>
+:root {
+  color-scheme: light;
+  --ink: #1e2528;
+  --muted: #5e686d;
+  --line: #d9e0df;
+  --paper: #ffffff;
+  --soft: #f5f7f6;
+  --accent: #2f6f73;
+  --accent2: #c76f2c;
+}
+body {
+  margin: 0;
+  background: #eef2f1;
+  color: var(--ink);
+  font: 16px/1.58 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+main {
+  max-width: 980px;
+  margin: 34px auto 56px;
+  padding: 48px 58px;
+  background: var(--paper);
+  box-shadow: 0 18px 50px rgba(31, 45, 48, 0.12);
+}
+h1, h2, h3, h4 {
+  line-height: 1.18;
+  margin: 1.6em 0 0.55em;
+}
+h1 {
+  margin-top: 0;
+  font-size: 2.25rem;
+  border-bottom: 3px solid var(--accent);
+  padding-bottom: 0.45em;
+}
+h2 {
+  font-size: 1.55rem;
+  color: var(--accent);
+}
+h3 {
+  font-size: 1.18rem;
+}
+p {
+  margin: 0.75em 0;
+}
+a {
+  color: var(--accent);
+}
+blockquote {
+  border-left: 4px solid var(--accent2);
+  margin: 1.1em 0;
+  padding: 0.05em 1.1em;
+  color: var(--muted);
+  background: #fff8f2;
+}
+code {
+  background: var(--soft);
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  padding: 0.08em 0.3em;
+  font-family: "SFMono-Regular", Consolas, monospace;
+  font-size: 0.92em;
+}
+pre {
+  background: #f5f7f6;
+  color: var(--ink);
+  border: 1px solid var(--line);
+  padding: 1em;
+  overflow-x: auto;
+  border-radius: 7px;
+}
+pre code {
+  background: transparent;
+  border: 0;
+  padding: 0;
+  color: inherit;
+}
+table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 1.15em 0 1.45em;
+  font-size: 0.95em;
+}
+.plot-layout {
+  table-layout: fixed;
+  margin: 1.1em auto 1.45em;
+}
+.plot-layout,
+.plot-layout tr,
+.plot-layout td {
+  border: 0;
+  background: transparent;
+}
+.plot-layout td {
+  padding: 0.35em 0.55em 0.95em;
+  text-align: center;
+  vertical-align: top;
+}
+.plot-layout img {
+  width: 100%;
+  max-width: 100%;
+  margin: 0 auto 0.35em;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: white;
+}
+.plot-layout .centered-cell img {
+  width: 54%;
+}
+.plot-caption {
+  color: var(--muted);
+  font-size: 0.85em;
+  line-height: 1.35;
+}
+th, td {
+  border: 1px solid var(--line);
+  padding: 0.54em 0.68em;
+  vertical-align: top;
+}
+th {
+  background: #e7efed;
+  text-align: left;
+}
+tr:nth-child(even) td {
+  background: #fafbfb;
+}
+.plot-layout tr:nth-child(even) td {
+  background: transparent;
+}
+img {
+  max-width: 100%;
+  display: block;
+  margin: 1.1em auto 0.45em;
+}
+.figure-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.05rem 1.25rem;
+  align-items: start;
+  margin: 1.1em 0 1.45em;
+}
+.figure-grid.two-one {
+  max-width: 900px;
+  margin-left: auto;
+  margin-right: auto;
+}
+.figure-grid.five-panel {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+.figure-grid figure {
+  margin: 0;
+}
+.figure-grid img {
+  width: 100%;
+  max-width: 100%;
+  margin: 0;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: white;
+}
+.figure-grid figcaption {
+  color: var(--muted);
+  font-size: 0.85em;
+  line-height: 1.35;
+  text-align: center;
+  margin-top: 0.35em;
+}
+.figure-grid .centered {
+  grid-column: 1 / -1;
+  justify-self: center;
+  max-width: 58%;
+}
+.figure-grid.two-one .centered {
+  max-width: 54%;
+}
+.figure-grid.five-panel .centered {
+  max-width: 52%;
+}
+ul, ol {
+  padding-left: 1.4em;
+}
+.caption {
+  color: var(--muted);
+  font-size: 0.92em;
+  margin-top: -0.15em;
+}
+@media print {
+  body {
+    background: white;
+  }
+  main {
+    box-shadow: none;
+    margin: 0;
+    max-width: none;
+    padding: 28px;
+  }
+}
+@media screen and (max-width: 540px) {
+  .figure-grid {
+    grid-template-columns: 1fr;
+  }
+  .figure-grid .centered,
+  .figure-grid.five-panel .centered {
+    grid-column: auto;
+    max-width: 100%;
+  }
+}
+</style>
+</head>
+<body>
+<main>
+<h1>Bayesian Joint Adaptive-Efficiency Analysis</h1>
+<p>Status: <strong>PASS</strong>. This is a focused post-hoc joint extension over <strong>78 children</strong> and <strong>13 corpora</strong>. Corpus is a background hierarchical effect, not the research question.</p>
+<h2>Main question</h2>
+<p>Do children jointly develop (a) context-sensitive allocation of production effort and (b) more predictable utterance forms at fixed effort?</p>
+<h2>Posterior results</h2>
+<table>
+<thead><tr>
+<th>Hypothesis</th>
+<th>Estimand</th>
+<th>Posterior mean [95% CrI]</th>
+<th>P(theory direction)</th>
+<th>P(ROPE)</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>H1</td>
+<td>Demand-sensitive effort at 42 months</td>
+<td>0.006 [0.000, 0.012]</td>
+<td>0.972</td>
+<td>0.904</td>
+</tr>
+<tr>
+<td>H2</td>
+<td>Developmental change in demand sensitivity</td>
+<td>-0.002 [-0.004, 0.001]</td>
+<td>—</td>
+<td>0.999</td>
+</tr>
+<tr>
+<td>H3</td>
+<td>Fixed-effort predictability development</td>
+<td>-0.685 [-1.131, -0.239]</td>
+<td>0.997</td>
+<td>0.195</td>
+</tr>
+<tr>
+<td>H4</td>
+<td>Coordinated child-level development</td>
+<td>-0.005 [-0.310, 0.295]</td>
+<td>0.511</td>
+<td>0.479</td>
+</tr>
+</tbody></table>
+<p>H2 is deliberately two-sided because the developmental reversal had already been inspected. Its row therefore does not promote a selected sign as a new confirmatory probability.</p>
+<h3>Scientific reading</h3>
+<ul>
+<li><strong>H1:</strong> The posterior favors a positive entropy/effort association at 42</li>
+<p>months (<code>P(positive) = 0.972</code>), but <code>90.4%</code> of the posterior remains inside the declared small-effect ROPE. This is evidence for a modest direction, not a large effort response.</p>
+<li><strong>H2:</strong> The age-by-entropy coefficient is close to zero, with</li>
+<p><code>99.9%</code> of its posterior in the ROPE. The estimated entropy response attenuates with age, but this focused linear joint model does not support a practically large developmental change.</p>
+<li><strong>H3:</strong> Fixed-effort contextual surprisal decreases with age</li>
+<p>(<code>P(negative) = 0.997</code>). This is the clearest joint-model result and describes growing scorer predictability/conventionality.</p>
+<li><strong>H4:</strong> The key cross-child correlation is centered almost exactly at zero</li>
+<p>and has a wide interval. There is no evidence here that children with stronger fixed-effort predictability development also strengthen their demand-sensitive effort allocation.</p>
+</ul>
+<img src="../figs/bayesian_joint_adaptive_efficiency_20260828/population_effects.png" alt="Population coefficient intervals">
+<h2>Effort calibration across age</h2>
+<p>The ratio below compares the model&#x27;s <code>log(1 + words)</code> prediction at the observed all-79 response-entropy p90 versus p10. It is not the raw negative-binomial word-count ratio from the completed GAMM analysis.</p>
+<table>
+<thead><tr>
+<th>Age</th>
+<th>High/low entropy ratio in modeled (words + 1)</th>
+<th>P(entropy slope &gt; 0)</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>18</td>
+<td>1.033 [1.011, 1.055]</td>
+<td>0.996</td>
+</tr>
+<tr>
+<td>24</td>
+<td>1.029 [1.011, 1.047]</td>
+<td>0.997</td>
+</tr>
+<tr>
+<td>30</td>
+<td>1.025 [1.010, 1.040]</td>
+<td>0.998</td>
+</tr>
+<tr>
+<td>36</td>
+<td>1.020 [1.006, 1.035]</td>
+<td>0.995</td>
+</tr>
+<tr>
+<td>42</td>
+<td>1.016 [0.999, 1.033]</td>
+<td>0.972</td>
+</tr>
+<tr>
+<td>48</td>
+<td>1.012 [0.991, 1.033]</td>
+<td>0.866</td>
+</tr>
+<tr>
+<td>54</td>
+<td>1.008 [0.982, 1.034]</td>
+<td>0.709</td>
+</tr>
+<tr>
+<td>60</td>
+<td>1.003 [0.972, 1.035]</td>
+<td>0.582</td>
+</tr>
+</tbody></table>
+<img src="../figs/bayesian_joint_adaptive_efficiency_20260828/entropy_adaptation_by_age.png" alt="Developmental effort calibration">
+<h2>Coordinated development</h2>
+<p>H4 concerns the between-child correlation between the fixed-effort predictability age slope and the developmental change in demand-sensitive effort. A negative value is the efficiency-motivated direction because more negative surprisal development would accompany a more positive change in the entropy/effort relationship. Regardless of sign, this is coordinated variation—not evidence of optimization.</p>
+<table>
+<thead><tr>
+<th>Child-level association</th>
+<th>Correlation [95% CrI]</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>Predictability development × effort at 42 months</td>
+<td>0.102 [-0.215, 0.404]</td>
+</tr>
+<tr>
+<td>Predictability development × effort development</td>
+<td>-0.005 [-0.310, 0.295]</td>
+</tr>
+<tr>
+<td>Effort at 42 months × effort development</td>
+<td>0.783 [0.581, 0.909]</td>
+</tr>
+</tbody></table>
+<p>The pronounced positive association is internal to the two effort coefficients: children with a higher entropy/effort slope at 42 months also tend to have a more positive developmental change in that slope. In contrast, neither effort coefficient shows a clear child-level association with fixed-effort predictability development. Intercept/slope parameterization can affect the within-effort correlation, so the age-specific effort curves remain the primary interpretation.</p>
+<img src="../figs/bayesian_joint_adaptive_efficiency_20260828/between_child_correlations.png" alt="Between-child correlations">
+<h2>Robustness and computation</h2>
+<ul>
+<li>Prior sensitivity: mu_r2_entropy_42 shift 0.0001; mu_r2_age_entropy shift 0.0001; mu_r1_age shift 0.0477; rho_r1_age_entropy shift 0.0147.</li>
+<li>Leave-one-corpus influence: H1-H3 retained their signs under every corpus omission; H4 reversed sign in 5/13 omissions. The largest shifts by parameter were mu_r1_age 0.1517, mu_r2_entropy_42 0.0037, mu_r2_age_entropy 0.0014, rho_r1_age_entropy 0.0841.</li>
+<li>Total fitting runtime: 19.3 minutes.</li>
+<li>The model uses a three-dimensional session-clustered measurement-error</li>
+<p>likelihood over child coefficients; it does not run NUTS over 1.1 million utterance rows.</p>
+</ul>
+<h2>Interpretation boundary</h2>
+<ul>
+<li>This is a post-hoc joint extension; the underlying outcomes were inspected previously.</li>
+<li>PBM is a discovery label, not a Bayesian prior.</li>
+<li>Corpus is background hierarchical structure, not the scientific focus.</li>
+<li>Lower k3 surprisal means greater scorer predictability or conventionality, not greater Shannon information transmitted.</li>
+<li>Exact-string response entropy is generator-, prompt-, temperature-, and surface-form-dependent.</li>
+<li>The Route 2 coefficient describes log(1 + words), not listener benefit.</li>
+<li>Cross-child correlations indicate coordinated developmental variation, not optimization or causality.</li>
+<li>A strong communicative-efficiency claim remains contingent on the downstream caregiver-response utility analysis.</li>
+</ul>
+<p>The next decisive test remains downstream caregiver-response predictive gain: whether the observed child utterance improves prediction of the caregiver&#x27;s actual next response, exceeds a shuffled-child negative control, and becomes more useful at fixed effort with age.</p>
+</main>
+</body>
+</html>

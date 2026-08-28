@@ -3,6 +3,57 @@
 Living project memory: discoveries, decisions, bugs, commands that worked, and
 current state. Prefer dated notes.
 
+## 2026-08-28 - Focused Bayesian joint adaptive-efficiency analysis complete
+
+- Re-read the motivating email, original TeX-authored proposal, June 4 meeting
+  transcript, formal definitions, final-paper handoff, full-79 joint report,
+  and frozen downstream utility protocol. The scientific center is contextual
+  demand -> speaker effort paired with listener-side value at fixed effort;
+  corpus splitting is validation machinery, not the core question.
+- Froze `docs/bayesian_joint_adaptive_efficiency_protocol.md`. PBM is retained
+  only as a discovery label and is not used to construct priors. The model is
+  explicitly post-hoc because the underlying outcomes and developmental
+  reversal were already inspected.
+- Built shared session-clustered three-coefficient estimates from all
+  1,122,396 joined utterances. The five-session rule retained 78 children and
+  all 13 corpora, excluding only Weist/Emily (three sessions). No covariance
+  matrix required positive-definiteness regularization.
+- The trivariate measurement-error model estimates fixed-effort k3 development,
+  the entropy/effort slope at 42 months, and its age interaction. It includes
+  partial pooling over children and background corpus effects. One wider-prior
+  fit and 13 leave-one-corpus refits use the unchanged likelihood.
+- H1 is small: +0.00584 log(1+words) per entropy SD at 42 months, 95% CrI
+  [-0.00018, 0.01196], `P(positive)=0.972`, but 90.4% of the posterior lies in
+  the declared small-effect ROPE. The implied p90/p10 response-entropy ratio
+  in modeled words+1 is 1.016 [0.999, 1.033] at 42 months.
+- H2 is practically near zero: -0.00155 per six months [-0.00389, 0.00085],
+  with 99.9% of the posterior inside the ROPE. The estimated high/low entropy
+  ratio attenuates from 1.033 [1.011, 1.055] at 18 months to 1.003
+  [0.972, 1.035] at 60 months.
+- H3 is the clearest result: fixed-effort contextual surprisal changes by
+  -0.685 bits per six months [-1.131, -0.239], with `P(negative)=0.997`.
+  This is greater Mistral predictability/conventionality, not greater Shannon
+  information or listener utility.
+- H4 is unsupported: the child-level correlation between H3 and H2 is -0.005
+  [-0.310, 0.295]. The secondary within-effort correlation between the
+  42-month entropy slope and its developmental change is +0.783
+  [0.581, 0.909]; age-specific curves remain primary because intercept/slope
+  parameterization can affect this association.
+- Both full fits and all 13 influence fits completed in 19.3 measured wall
+  minutes / 1.285 CPU-hours. All 15 had zero divergences, zero treedepth
+  saturation, and BFMI above 0.50. Primary all-parameter maximum R-hat was
+  1.0054; influence registered-output maximum R-hat was 1.0123 with minimum
+  bulk ESS 408.6. H1-H3 retained their signs under every corpus omission; H4
+  changed sign under 5/13 omissions, reinforcing the null/unstable reading.
+- The wider-prior mean shifts were 0.00014 (H1), 0.00006 (H2), 0.04770 bits
+  (H3), and 0.01467 (H4). All 12 posterior predictive checks passed. The final
+  staged audit wrote `FOCUSED_JOINT_ANALYSIS_COMPLETE_AND_AUDITED`; the report
+  is `docs/bayesian_joint_adaptive_efficiency_report.{md,html}`.
+- Focused regression verification passed 23/23 relevant tests, and the full
+  repository suite passed 559/559 tests in 623.772 seconds. The decisive next
+  scientific step remains the frozen downstream caregiver-response utility
+  analysis after its scorer archives pass relocation audit.
+
 ## 2026-08-28 - Bayesian Route 1 / Route 2 implementation and audited pilot STOP
 
 - Created branch `agent/bayesian-route1-route2-v1` from clean analysis-lineage
