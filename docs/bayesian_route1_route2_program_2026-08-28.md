@@ -1,10 +1,13 @@
 # Bayesian Route 1 / Route 2 Analysis Program
 
-Status: **design proposal only**, reviewed 2026-08-28. No Bayesian model in
-this document has been fitted and no result may be inferred from the proposed
-direction. Existing frequentist results have already been inspected, so this
-program is a post-hoc robustness and extension program, not a new
-outcome-blind preregistration.
+Status: **implemented through an audited real-data pilot; production stopped**,
+2026-08-28. Six synthetic posterior fits and seven representative real-data
+pilot fits were run, but pilot coefficients are not scientific results. All
+seven real-data fits passed the sampler-diagnostic gate with zero divergences,
+but the 189-fit production registry projected to 8,312 CPU-hours against a
+frozen 2,000-hour gate, so no production posterior was launched. Existing
+frequentist results had already been inspected; this is a post-hoc robustness
+and extension program, not a new outcome-blind preregistration.
 
 ## Source paper and methodological translation
 
@@ -302,12 +305,11 @@ rank percentile over a six-month interval, not generic coefficient cutoffs.
 
 ## Computation and dependency decision
 
-The current Python project environment contains no PyMC, Bambi, Stan, or brms.
-The existing nonlinear suite uses `mgcv::bam`. The implementation task should
-prefer `brms` with a pinned CmdStan backend because it directly supports the
-required Student-t, negative-binomial, zero-one-inflated beta, distributional,
-and multivariate formulas. This is a preference, not permission to install
-unreviewed global dependencies.
+The implementation uses a repository-local `.bayes-r-lib` with brms 2.23.0
+and cmdstanr 0.9.0 plus repository-local CmdStan 2.39.0 under `.cmdstan/`.
+Neither directory is committed, and the global R library was not modified.
+This backend supports the required Student-t, negative-binomial,
+zero-one-inflated beta, distributional, and multivariate formulas.
 
 Before changing dependencies:
 
@@ -321,7 +323,7 @@ Do not run these statistical models on Mila GPUs. If workstation CPU fitting
 is infeasible, produce a compact benchmark report and a CPU compute plan
 before any cluster submission work.
 
-## Proposed staged workflow and namespace
+## Implemented staged workflow and namespace
 
 Use a new isolated namespace:
 
@@ -332,7 +334,7 @@ docs/bayesian_route1_route2_report.md
 docs/bayesian_route1_route2_report.html
 ```
 
-Required stages:
+Independently callable stages:
 
 ```text
 contract -> datasets -> priors -> synthetic-smoke -> real-pilot
@@ -344,6 +346,12 @@ manifest. Plotting and reporting never refit. Production completion requires
 all five model families, all registered sample scopes, prior and posterior
 predictive checks, sensitivity fits, influence diagnostics, a deterministic
 report rebuild, and an independent final audit.
+
+The 2026-08-28 run stopped at the frozen real-pilot gate. The downstream
+stages record all 189 production fits as blocked, summarize only pilot
+diagnostics and resource projections, render the compact handoff, and verify
+that the production completion audit fails. The only marker is
+`PILOT_STOP_AUDITED`; `BAYESIAN_ROUTE1_ROUTE2_COMPLETE_AND_AUDITED` is absent.
 
 ## Interpretation contract
 

@@ -3,6 +3,64 @@
 Living project memory: discoveries, decisions, bugs, commands that worked, and
 current state. Prefer dated notes.
 
+## 2026-08-28 - Bayesian Route 1 / Route 2 implementation and audited pilot STOP
+
+- Created branch `agent/bayesian-route1-route2-v1` from clean analysis-lineage
+  SHA `f52a7f102dd87a6a566ef72bbf24519efda16202`. The tracked contract freezes
+  seven immutable input hashes, PBM/non-PBM/all-79 roles, B1-B5 formulas and
+  variants, three age shapes, three prior sets, posterior queries, six-month
+  ROPEs, pilot gates, and a four-chain production sampler.
+- Installed and audited a repository-local backend only: brms 2.23.0,
+  cmdstanr 0.9.0, and CmdStan 2.39.0. The CmdStan Bernoulli example compiled;
+  all required binaries and package paths resolve under this repository; the
+  global R library was not modified. A machine R startup override of
+  `R_LIBS_USER` was detected, so the runner now sets `.libPaths()` explicitly
+  and audits the resolved package directories.
+- Added the staged controller
+  `src/build_bayesian_route1_route2_20260828.py`, R backend
+  `src/fit_bayesian_route1_route2_models.R`, custom B5 Stan model
+  `src/stan/b5_bivariate_measurement_error.stan`, pinned contract/config, and
+  focused tests. Stages are independently callable and hash-bound:
+  `contract`, `datasets`, `priors`, `synthetic-smoke`, `real-pilot`, `models`,
+  `diagnostics`, `synthesis`, `plots`, `report`, and `audit`.
+- Rebuilt and re-audited 1,140,695 Route 1 utterances, 4,562,780 paired k0-k3
+  long rows, 118,380 exact cells, and 1,122,396 Route 2 rows. The rank audit
+  preserved 145,618 literal zeros, 127,565 literal ones, and maximum rank200
+  error `1.421e-14`. All 15 prior-predictive plausibility gates passed.
+- Six actual posterior synthetic fits passed: B1 Student measurement error,
+  B2 Student location-scale, B3 negative binomial, B4 beta-binomial, B4 ZOIB,
+  and B5 bivariate measurement error. All 19 registered posterior recovery
+  checks passed, with zero divergences and no treedepth saturation in the
+  final smoke. The separate deterministic likelihood recovery suite also
+  passed B1-B5.
+- The authoritative fresh real pilot selected 24 children across all 13
+  corpora and used 600 B1
+  cells, 1,200 B2 rows, 1,200 shared B3/B4 rows, and 35,229 utterances for 100
+  shared bootstrap draws per child's B5 slope pair. All seven representative
+  fits executed, passed the sampler-diagnostic thresholds, and had zero
+  divergences. The pilot backend now forces fresh compile/sample fits and
+  clears only exact disposable fit directories so cached RDS files cannot
+  corrupt elapsed-time projections on rerun.
+- The exact 189-fit registry projects to 8,312.046 CPU-hours, above the frozen
+  2,000-hour ceiling. Maximum projected single-fit wall time is 33.475 hours,
+  maximum memory is 2.829 GB, and total output is 84.785 GB. The controller
+  therefore returned `STOP_UNSAFE`; no production posterior, Mila work,
+  changed aggregation, or altered estimand was launched.
+- Downstream stages consumed saved artifacts only, recorded all 189 production
+  fits as blocked, rendered two pilot/resource figures and
+  `docs/bayesian_route1_route2_report.{md,html}`, and passed the independent
+  `PILOT_STOP_AUDITED` audit. The audit proves that production completeness
+  fails and the full completion marker is absent. Pilot coefficients are not
+  scientific results; the frequentist analyses remain the evidence base.
+- Focused workflow verification passed 15/15 tests. The final repository-wide
+  run passed 554/554 tests in 625.430 seconds with zero failures or errors.
+  Observed warnings were the established small/singular-fixture numerical and
+  convergence warnings plus perfect-separation, plotting, and deprecation
+  warnings; none arose as a failed Bayesian pilot gate.
+- Safe continuation requires explicit review of the CPU and compilation plan,
+  followed by a new passing pilot. It may not silently replace raw-row
+  likelihoods, scopes, priors, or estimands.
+
 ## 2026-08-28 - Bayesian Route 1 / Route 2 design and fresh-chat handoff
 
 - Reviewed Natalia Levshina's 38-page methodological paper, *A Bayesian dawn

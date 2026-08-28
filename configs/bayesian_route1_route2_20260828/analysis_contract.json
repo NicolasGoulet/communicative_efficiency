@@ -1,0 +1,191 @@
+{
+  "program_id": "bayesian_route1_route2_20260828",
+  "contract_version": "2026-08-28.v1",
+  "status": "frozen_preproduction_posthoc_extension",
+  "starting_git_sha": "f52a7f102dd87a6a566ef72bbf24519efda16202",
+  "source_paper": {
+    "path": "/home/apaixonada/Downloads/2509.17161v1.pdf",
+    "sha256": "cecf8f0e696c3b95a3b4033352e484e3c0b863560959c793e8d67ebd957f1957"
+  },
+  "backend": {
+    "r": "4.6.1",
+    "brms": "2.23.0",
+    "cmdstanr": "0.9.0",
+    "cmdstan": "2.39.0",
+    "library": ".bayes-r-lib",
+    "cmdstan_path": ".cmdstan/cmdstan-2.39.0",
+    "global_install_allowed": false
+  },
+  "backend_lock": {
+    "path": "configs/bayesian_route1_route2_20260828/backend_lock.json",
+    "sha256": "1ed5f3f6fe104ccab2cf90f0cd58af0b7cd503ed19fb392b86a7b82aceffdc89"
+  },
+  "sample_scopes": [
+    "pbm_discovery",
+    "non_pbm_replication",
+    "all79_descriptive"
+  ],
+  "sample_roles": {
+    "pbm_discovery": "posthoc_discovery_21_children",
+    "non_pbm_replication": "preserved_split_posthoc_replication_58_children",
+    "all79_descriptive": "pooled_descriptive_79_children"
+  },
+  "scope_datasets": {
+    "pbm_discovery": ["Brown", "Manchester", "Providence"],
+    "non_pbm_replication": [
+      "Belfast", "Demetras1", "Forrester", "Kuczaj", "Lara",
+      "MPI-EVA-Manchester", "Post", "Sachs", "Weist", "Wells"
+    ],
+    "all79_descriptive": [
+      "Belfast", "Brown", "Demetras1", "Forrester", "Kuczaj", "Lara",
+      "MPI-EVA-Manchester", "Manchester", "Post", "Providence", "Sachs",
+      "Weist", "Wells"
+    ]
+  },
+  "model_families": ["B1", "B2", "B3", "B4", "B5"],
+  "age_shapes": ["linear", "quadratic", "low_rank_smooth"],
+  "prior_sets": ["weak", "skeptical", "wide"],
+  "inputs": {
+    "route1_wide": {
+      "path": "results/direct_surprisal_replication/mistral_full79/child_direct_surprisal_wide.csv.gz",
+      "sha256": "4edf9194481e15a04bc23dd8be03a26c95c0a7c2baddbadd5b3d18011786adad"
+    },
+    "route1_trajectory": {
+      "path": "results/direct_surprisal_replication/mistral_full79/modular/prepared/trajectory_input.csv.gz",
+      "sha256": "bdfc70ce1979a5199d55c6f033c0d1e903198855fc8d87adbda8eb84f74b1c92"
+    },
+    "route1_model_summaries": {
+      "path": "results/direct_surprisal_replication/mistral_full79/modular/models/model_summaries.csv",
+      "sha256": "086b3116455aec1c064e857a2377fb6aa2cb19280b1ff97c2577e457b4382c85"
+    },
+    "route2_model_rows": {
+      "path": "results/full79_joint_efficiency_analysis/metrics/model_rows.parquet",
+      "sha256": "9baeb821ae485697294ff217be4688fb7783f653ff626de9b71cdc6a34a43f23"
+    },
+    "route2_child_age_cells": {
+      "path": "results/full79_joint_efficiency_analysis/metrics/child_age_metric_cells.parquet",
+      "sha256": "aa8cdf4bb25706a3dc66abc6b4ddc0117f0d09c39b91910c1eada9dd133eccf8"
+    },
+    "route2_observed_cloud_metrics": {
+      "path": "results/full79_joint_efficiency_analysis/metrics/observed_cloud_metrics.parquet",
+      "sha256": "f1cda416132cbf0b1451881850e4769020ebf12d0e819fc9513e0af6e0d42fb5"
+    },
+    "route2_model_registry": {
+      "path": "results/full79_joint_efficiency_analysis/models/combined_model_registry.csv",
+      "sha256": "ce32bea64a9fd49285427cbdb0ba91a2b13147cfe23012248bea331a96f984b4"
+    }
+  },
+  "expected_data": {
+    "route1_rows": 1140695,
+    "route2_rows": 1122396,
+    "children": 79,
+    "corpora": 13,
+    "qwen_responses_per_context": 100,
+    "rank_zero_endpoints": 145618,
+    "rank_one_endpoints": 127565,
+    "pbm_children": 21,
+    "non_pbm_children": 58
+  },
+  "scaling": {
+    "age_center_months": 42.0,
+    "age_unit_months": 6.0,
+    "word_top_code": 12,
+    "standardize_route2_predictors_over": "all79_descriptive"
+  },
+  "ropes": {
+    "bits_six_month": 0.5,
+    "words_six_month": 0.1,
+    "rank_percentile_six_month": 0.02
+  },
+  "families": {
+    "B1": {
+      "name": "joint_context_depth_route1",
+      "unit": "child_session_word_condition_cell",
+      "family": "student",
+      "variants": ["paired_primary"],
+      "formula": "cell_mean_bits | se(cell_se_bits, sigma=TRUE) ~ 0 + condition + AGE + condition:word_count_top12 + (0 + condition + condition:age_z | child_key) + (0 + condition | dataset)",
+      "contrasts": ["k0-k1", "k1-k2", "k2-k3", "k0-k3", "six_month_age_derivative_by_condition"],
+      "diagnostics": ["rhat", "bulk_ess", "tail_ess", "divergences", "treedepth", "energy_bfmi", "ppc_by_age_effort_child_corpus", "psis_loo"],
+      "synthetic_truth": {"context_offsets": [0.0, -2.0, -3.0, -4.0], "age_slopes": [-0.2, -0.25, -0.3, -0.35], "nu": 7.0}
+    },
+    "B2": {
+      "name": "route1_location_scale",
+      "unit": "observed_child_utterance",
+      "family": "student_distributional",
+      "variants": ["location_scale_primary"],
+      "formula": "bf(k3_bits ~ AGE_WORD_SURFACE + (1 + age_z | child_key) + (1 | dataset), sigma ~ AGE + word_count_top12 + (1 | child_key) + (1 | dataset))",
+      "contrasts": ["six_month_mean_change_words_1_to_4", "six_month_log_sigma_change_words_1_to_4", "supported_age_range_change"],
+      "diagnostics": ["rhat", "bulk_ess", "tail_ess", "divergences", "treedepth", "energy_bfmi", "ppc_by_age_effort_child_corpus", "psis_loo"],
+      "synthetic_truth": {"mean_age_slope": -0.35, "log_sigma_age_slope": -0.12, "nu": 7.0}
+    },
+    "B3": {
+      "name": "raw_route2_effort_adaptation",
+      "unit": "observed_child_utterance",
+      "family": "negbinomial",
+      "variants": ["raw_total_association_primary", "qwen_expected_length_adjusted_sensitivity"],
+      "formula": "child_words ~ AGE + ENTROPY + AGE_ENTROPY + CONTEXT + (1 + age_z + entropy_z | child_key) + (1 | dataset)",
+      "sensitivity_formula": "+ QWEN_EXPECTED_LENGTH",
+      "contrasts": ["entropy_p10_p90_length_ratio_by_age", "six_month_length_ratio_by_entropy", "supported_surface"],
+      "diagnostics": ["rhat", "bulk_ess", "tail_ess", "divergences", "treedepth", "energy_bfmi", "ppc_by_age_entropy_child_corpus", "psis_loo"],
+      "synthetic_truth": {"intercept": 0.8, "age": 0.1, "entropy": 0.15, "age_entropy": -0.12, "shape": 3.0}
+    },
+    "B4": {
+      "name": "endpoint_aware_qwen_relative_effort",
+      "unit": "observed_child_utterance",
+      "family": "beta_binomial_and_zero_one_inflated_beta",
+      "variants": ["beta_binomial_primary", "zoib_registered_sensitivity"],
+      "formula": "rank200 | trials(200) ~ AGE + ENTROPY + AGE_ENTROPY + CONTEXT + (1 + age_z + entropy_z | child_key) + (1 | dataset)",
+      "sensitivity_formula": "bf(effort_percentile_in_qwen ~ ROUTE2_PREDICTORS, zoi ~ AGE + ENTROPY + AGE_ENTROPY + (1 | child_key) + (1 | dataset), coi ~ AGE + ENTROPY + AGE_ENTROPY + (1 | child_key) + (1 | dataset))",
+      "contrasts": ["entropy_p10_p90_rank_change_by_age", "six_month_rank_percentile_change", "endpoint_calibration"],
+      "diagnostics": ["rhat", "bulk_ess", "tail_ess", "divergences", "treedepth", "energy_bfmi", "ppc_endpoint_and_rank_bands", "psis_loo"],
+      "synthetic_truth": {"mu_age": 0.25, "mu_entropy": -0.2, "phi": 18.0, "endpoint_probability": 0.22, "upper_given_endpoint": 0.45}
+    },
+    "B5": {
+      "name": "bivariate_child_information_effort_development",
+      "unit": "child_slope_pair",
+      "family": "bivariate_normal_measurement_error",
+      "variants": ["shared_bootstrap_measurement_error_primary"],
+      "formula": "y_child[2] ~ MVN(theta_child[2], known_shared_bootstrap_cov_child); theta_child ~ MVN(mu + corpus_effect, Sigma_between)",
+      "contrasts": ["population_mean_vector", "between_child_correlation", "leave_one_child", "leave_one_corpus"],
+      "diagnostics": ["rhat", "bulk_ess", "tail_ess", "divergences", "treedepth", "energy_bfmi", "ppc_child_slopes", "psis_loo"],
+      "synthetic_truth": {"mean": [-0.25, 0.1], "sd": [0.12, 0.1], "correlation": -0.4}
+    }
+  },
+  "priors": {
+    "weak": {"coefficient_sd": 0.75, "smooth_sd": 0.75, "random_sd": 0.75, "lkj_eta": 2.0, "dispersion_log_sd": 0.75},
+    "skeptical": {"coefficient_sd": 0.35, "smooth_sd": 0.35, "random_sd": 0.4, "lkj_eta": 4.0, "dispersion_log_sd": 0.4},
+    "wide": {"coefficient_sd": 1.5, "smooth_sd": 1.5, "random_sd": 1.5, "lkj_eta": 1.0, "dispersion_log_sd": 1.5}
+  },
+  "pilot_gate": {
+    "pilot_rows_B1": 600,
+    "pilot_rows_B2": 1200,
+    "pilot_rows_B3": 1200,
+    "pilot_rows_B4": 1200,
+    "pilot_children_B5": 24,
+    "chains": 2,
+    "warmup": 250,
+    "sampling": 250,
+    "max_projected_single_fit_wall_hours": 72.0,
+    "max_projected_total_cpu_hours": 2000.0,
+    "max_projected_peak_memory_gb": 96.0,
+    "max_projected_output_gb": 250.0,
+    "minimum_bulk_ess_per_hour": 20.0
+  },
+  "production_sampler": {
+    "chains": 4,
+    "parallel_chains": 4,
+    "warmup": 1000,
+    "sampling": 1000,
+    "adapt_delta": 0.99,
+    "max_treedepth": 15,
+    "seed": 20260828
+  },
+  "interpretation_guardrails": [
+    "Lower surprisal means greater scorer predictability or conventionality, not greater Shannon information transmitted.",
+    "Raw child effort and Qwen-relative effort are distinct estimands.",
+    "Qwen responses are not meaning-preserving alternatives.",
+    "Exact-string response entropy is model-, prompt-, and temperature-dependent.",
+    "Cross-child slope correlation is coordinated development, not optimization or causality.",
+    "This is a post-hoc Bayesian extension with a preserved split, not a prospective confirmation."
+  ]
+}

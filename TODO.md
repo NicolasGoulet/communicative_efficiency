@@ -14,13 +14,13 @@ When a task is completed, move any useful result or decision into
 - Add commands that verify the task.
 - Link to files when the task concerns a specific script or output.
 
-## Current Focus — Reconciled 2026-08-26
+## Current Focus — Reconciled 2026-08-28
 
 This section is the authoritative active checklist. The longer dated sections
 below are retained as implementation/audit history; some of their unchecked
 items were superseded or completed by the later modular direct-score workflow.
 
-### Bayesian Route 1 / Route 2 extension — proposed 2026-08-28
+### Bayesian Route 1 / Route 2 extension — pilot stopped 2026-08-28
 
 - [x] Review Levshina's Bayesian-statistics-in-linguistics paper and translate
       only its methodologically relevant ideas into analyses supported by the
@@ -33,20 +33,35 @@ items were superseded or completed by the later modular direct-score workflow.
       `docs/bayesian_route1_route2_program_2026-08-28.md` and the complete
       fresh-chat implementation prompt at
       `docs/prompts/start_bayesian_route1_route2_program_2026-08-28.md`.
-- [ ] In a dedicated branch from the current clean analysis lineage, freeze
+- [x] In dedicated branch `agent/bayesian-route1-route2-v1` from starting SHA
+      `f52a7f102dd87a6a566ef72bbf24519efda16202`, freeze
       source hashes, row identities, formulas, priors, effect-scale ROPEs,
       posterior queries, and PBM/non-PBM/all-79 scopes before production fits.
-- [ ] Audit and pin a repository-local Bayesian backend; run synthetic
+- [x] Audit and pin repository-local brms 2.23.0, cmdstanr 0.9.0, and CmdStan
+      2.39.0; run synthetic
       compile/recovery tests, prior predictive checks, and a representative
       real-data runtime/memory pilot before fitting any full model.
-- [ ] Implement the staged `contract -> datasets -> priors -> synthetic-smoke
+- [x] Implement the staged `contract -> datasets -> priors -> synthetic-smoke
       -> real-pilot -> models -> diagnostics -> synthesis -> plots -> report
-      -> audit` workflow with independent hash-bound manifests.
-- [ ] Fit all five families only after the pilot gate, retain unchanged
+      -> audit` workflow with independent hash-bound manifests. The downstream
+      stages deterministically record the pilot STOP and cannot refit.
+- [x] Enforce the real-data pilot gate. Seven representative fits completed;
+      all passed the sampler-diagnostic thresholds with zero divergences, but
+      the 189-fit suite projected to 8,312 CPU-hours against the frozen
+      2,000-hour ceiling. Production was correctly blocked, with no automatic
+      aggregation, estimand change, or Mila launch.
+- [ ] Before any production fit, approve a revised CPU and compilation plan.
+      Then fit all five families only after a new
+      passing pilot gate, retain unchanged
       formulas across sample scopes, run prior/age-shape/influence
       sensitivities, and compare with existing frequentist fits without
       outcome-selected replacement models.
-- [ ] Publish a compact technical report and independent completion audit.
+- [x] Publish the compact pilot handoff at
+      `docs/bayesian_route1_route2_report.{md,html}` and pass the independent
+      `PILOT_STOP_AUDITED` audit. The production completion marker remains
+      deliberately absent.
+- [ ] After approved production fitting, publish a scientific posterior report
+      and independent production completion audit.
       Do not call this a prospective confirmation, an efficiency optimum, or
       a meaning-preserving generated-response comparison.
 

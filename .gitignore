@@ -1,6 +1,10 @@
 # Local environments and caches
 .venv/
 .uv-cache/
+.bayes-r-lib/
+.cmdstan/
+src/stan/b5_bivariate_measurement_error
+src/stan/b5_bivariate_measurement_error.hpp
 .pytest_cache/
 .mypy_cache/
 .ruff_cache/

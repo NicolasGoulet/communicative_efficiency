@@ -1,0 +1,30 @@
+{
+  "lock_version": "2026-08-28.v1",
+  "scope": "repository_local_bayesian_backend",
+  "r": "4.6.1",
+  "direct_pins": {
+    "brms": {
+      "version": "2.23.0",
+      "source": "https://cran.r-project.org/src/contrib/Archive/brms/brms_2.23.0.tar.gz"
+    },
+    "cmdstanr": {
+      "version": "0.9.0",
+      "source": "https://stan-dev.r-universe.dev/src/contrib/cmdstanr_0.9.0.tar.gz"
+    },
+    "cmdstan": {
+      "version": "2.39.0",
+      "source": "https://github.com/stan-dev/cmdstan/releases/download/v2.39.0/cmdstan-2.39.0.tar.gz"
+    }
+  },
+  "audited_support_snapshot": {
+    "posterior": "1.7.1",
+    "loo": "2.10.1.9000",
+    "bayesplot": "1.16.0.9000",
+    "data.table": "1.18.6.1",
+    "jsonlite": "2.0.0"
+  },
+  "library": ".bayes-r-lib",
+  "cmdstan_path": ".cmdstan/cmdstan-2.39.0",
+  "global_install_allowed": false,
+  "note": "Direct modeling components are exact-version installs. Support-package versions are an audited snapshot; every run records resolved versions and repository-local package paths."
+}

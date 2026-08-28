@@ -336,12 +336,12 @@ Data movement policy:
   PBM integration tests pass, then the full preprocessed bundle is rsynced to
   Mila cluster storage.
 
-## Planned Analyses
+## Bayesian Route 1 / Route 2 Pilot-Stop Program
 
 The completed frequentist Route 1 and Route 2 analyses remain the primary
-evidence base. A new, explicitly post-hoc Bayesian robustness and extension
-program was proposed on 2026-08-28 after reviewing Levshina's methodological
-paper on Bayesian statistics in linguistics.
+evidence base. An explicitly post-hoc Bayesian robustness and extension
+program was implemented and piloted on 2026-08-28 after reviewing Levshina's
+methodological paper on Bayesian statistics in linguistics.
 
 Its first lane uses only existing audited all-79 inputs and contains five
 families:
@@ -358,9 +358,26 @@ families:
 
 The complete formulas, candidate backlog, sample roles, validation gates, and
 interpretation contract are in
-`docs/bayesian_route1_route2_program_2026-08-28.md`. No Bayesian fit currently
-exists. This program does not authorize new language-model scoring and does
-not redefine lower surprisal or shorter speech as efficiency by themselves.
+`docs/bayesian_route1_route2_program_2026-08-28.md`. The implemented controller
+is `src/build_bayesian_route1_route2_20260828.py`; the brms/CmdStan backend is
+`src/fit_bayesian_route1_route2_models.R`; and B5 uses
+`src/stan/b5_bivariate_measurement_error.stan`.
+
+The repository-local backend, immutable datasets, priors, and six synthetic
+posterior fits passed their gates. Seven representative real-data pilot fits
+then completed with zero divergences and passed their sampler-diagnostic gate.
+Production is currently blocked because all 189 registered
+scope/shape/prior/variant fits project to 8,312 CPU-hours versus the frozen
+2,000-hour ceiling. The downstream stages
+record this as `PILOT_STOP_AUDITED`; they do not refit or report pilot
+coefficients as scientific evidence. The full production completion marker is
+deliberately absent. No Bayesian production posterior currently exists.
+
+This program does not authorize new language-model scoring and does not
+redefine lower surprisal or shorter speech as efficiency by themselves. Any
+continuation requires explicit review of the CPU and compilation plan,
+followed by a new passing gate; it may not silently change the sample,
+likelihood, raw-row unit, or estimand.
 
 ## August Supervisor Reporting Architecture
 

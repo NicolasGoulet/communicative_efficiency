@@ -118,8 +118,9 @@ as a causal SES effect, linguistic deficit, or inherent group efficiency.
 ## Current Active Data And Analysis State
 
 The authoritative longitudinal handoffs and local Route 1/Route 2 products
-below were rechecked on 2026-08-25; the Hall snapshot state below was verified
-on 2026-08-17. When any later historical paragraph conflicts with the dated
+below were rechecked on 2026-08-25; the Bayesian pilot state was verified on
+2026-08-28; and the Hall snapshot state below was verified on 2026-08-17. When
+any later historical paragraph conflicts with the dated
 analysis-ready map in this section, use this section.
 
 Primary external scored/feature handoffs:
@@ -216,6 +217,18 @@ old reports:
   passing final audit. Its frozen scientific contract is
   `docs/utterance_informativity_route1_route2_protocol.md`; its human report is
   `docs/utterance_informativity_route1_route2_report.html`.
+- **Bayesian Route 1 / Route 2 extension, audited pilot STOP**:
+  `results/bayesian_route1_route2_20260828/` contains the hash-bound contract,
+  full data audits, prior checks, six passing synthetic posterior fits, seven
+  representative real-data pilot fits, and the independent
+  `PILOT_STOP_AUDITED` marker. The human handoff is
+  `docs/bayesian_route1_route2_report.html`. Production is not complete: B5
+  passed its sampler-diagnostic gate with zero divergences, but the 189-fit
+  program projects to 8,312 CPU-hours against its frozen 2,000-hour ceiling.
+  No production posterior was run and the production completion marker is
+  deliberately absent. Do not
+  report pilot coefficients as scientific results or bypass the gate by
+  silently changing the raw-row unit, likelihood, sample roles, or estimand.
 - **Word-level information, PBM 21 only**: the owning repository is
   `/home/apaixonada/EvaPortelance/Projet_1/developmental_word_information`.
   Its three canonical input symlinks are under
