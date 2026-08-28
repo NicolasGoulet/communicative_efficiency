@@ -20,6 +20,36 @@ This section is the authoritative active checklist. The longer dated sections
 below are retained as implementation/audit history; some of their unchecked
 items were superseded or completed by the later modular direct-score workflow.
 
+### Bayesian Route 1 / Route 2 extension — proposed 2026-08-28
+
+- [x] Review Levshina's Bayesian-statistics-in-linguistics paper and translate
+      only its methodologically relevant ideas into analyses supported by the
+      existing all-79 Route 1 and Route 2 products.
+- [x] Rank a broader 12-analysis candidate inventory and select exactly five
+      Phase-1 families: paired k0-k3 context depth, Route 1 location-scale,
+      raw-effort negative binomial, endpoint-aware Qwen effort rank, and joint
+      child-level information-effort slopes.
+- [x] Write the scientific design at
+      `docs/bayesian_route1_route2_program_2026-08-28.md` and the complete
+      fresh-chat implementation prompt at
+      `docs/prompts/start_bayesian_route1_route2_program_2026-08-28.md`.
+- [ ] In a dedicated branch from the current clean analysis lineage, freeze
+      source hashes, row identities, formulas, priors, effect-scale ROPEs,
+      posterior queries, and PBM/non-PBM/all-79 scopes before production fits.
+- [ ] Audit and pin a repository-local Bayesian backend; run synthetic
+      compile/recovery tests, prior predictive checks, and a representative
+      real-data runtime/memory pilot before fitting any full model.
+- [ ] Implement the staged `contract -> datasets -> priors -> synthetic-smoke
+      -> real-pilot -> models -> diagnostics -> synthesis -> plots -> report
+      -> audit` workflow with independent hash-bound manifests.
+- [ ] Fit all five families only after the pilot gate, retain unchanged
+      formulas across sample scopes, run prior/age-shape/influence
+      sensitivities, and compare with existing frequentist fits without
+      outcome-selected replacement models.
+- [ ] Publish a compact technical report and independent completion audit.
+      Do not call this a prospective confirmation, an efficiency optimum, or
+      a meaning-preserving generated-response comparison.
+
 ### Unified clinical/non-clinical scoring expansion — 2026-08-26
 
 - [x] Audit all identified installed naturalistic, structured, clinical/control,

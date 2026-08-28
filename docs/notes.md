@@ -3,6 +3,35 @@
 Living project memory: discoveries, decisions, bugs, commands that worked, and
 current state. Prefer dated notes.
 
+## 2026-08-28 - Bayesian Route 1 / Route 2 design and fresh-chat handoff
+
+- Reviewed Natalia Levshina's 38-page methodological paper, *A Bayesian dawn
+  in linguistics: Trends, benefits and good practices* (local SHA-256
+  `cecf8f0e696c3b95a3b4033352e484e3c0b863560959c793e8d67ebd957f1957`).
+  The paper motivates partial pooling, non-Gaussian likelihoods, model
+  uncertainty, and rigorous prior/posterior checking; it does not itself
+  supply a communicative-efficiency theory.
+- Audited the existing inputs needed for a Bayesian extension. The Route 1
+  all-79 wide table contains paired Mistral k0-k3 scores. The Route 2 model
+  table contains 1,122,396 eligible utterances, 79 children, and 13 corpora.
+  Its empirical Qwen effort percentile has substantial literal endpoint mass
+  (145,618 zeros; 127,565 ones) and lies exactly on a 201-point midrank grid,
+  motivating an endpoint-aware rank likelihood rather than only an
+  open-interval beta transform.
+- Ranked 12 possible analyses and selected five for Phase 1: joint context
+  depth, Route 1 location-scale, raw-effort negative binomial, empirical
+  Qwen-rank beta-binomial/ZOIB, and bivariate child-level Route 1/Route 2
+  slopes. Discovery-to-replication posterior prediction and age-shape stacking
+  are mandatory validation layers rather than extra outcome-selected models.
+- Added the complete design at
+  `docs/bayesian_route1_route2_program_2026-08-28.md` and the copy-ready
+  implementation prompt at
+  `docs/prompts/start_bayesian_route1_route2_program_2026-08-28.md`.
+- This turn changed documentation only. No Bayesian package was installed, no
+  model was fitted, no result was generated, and no Mila job was submitted.
+  The current frequentist results remain authoritative until an independently
+  audited Bayesian workflow exists.
+
 ## 2026-08-18 - August supervisor package final integration
 
 - Added `src/build_august_supervisor_report.py`, a thin controller over the

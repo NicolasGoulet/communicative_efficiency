@@ -240,6 +240,18 @@ old reports:
   scoring. PBM three-scorer outputs and Hall Mistral are reuse cells; the other
   101 model-by-dataset cells have not yet been scored on Mila. Do not describe
   the handoff as completed model output.
+- **Downstream caregiver-response utility, scoring in progress/partly
+  stopped**: `results/downstream_caregiver_response_handoff/` freezes 613,741
+  immediate next-caregiver targets from the strict-naturalistic 79 children,
+  with 413,084 primary caregiver-child-caregiver triads. The protocol is
+  `docs/downstream_caregiver_response_efficiency_protocol.md`. A three-scorer
+  Mila launch began on 2026-08-28. At the last user-provided status, all three
+  preparation/smoke/release gates passed; TinyDialogues and Mistral completed
+  their base-context score waves but their first CPU audits failed, while Qwen
+  base-context scoring was still running. No downstream score archive is
+  analysis-ready yet. Do not join, analyze, or describe results until the
+  compute failure is diagnosed and every returned archive passes relocation
+  audit locally.
 
 The full100 Qwen/Mistral handoff is complete, not pending. Its extension archive
 is 3,305,320,336 bytes with SHA-256
@@ -633,6 +645,35 @@ status. Never run the stages concurrently. Plotting and rendering consume
 frozen saved artifacts and do not fit models. A failed independent audit goes
 through the conditional remediation prompt and then a fresh audit before final
 integration.
+
+### Planned Bayesian Route 1 / Route 2 program
+
+The reviewed design proposal is
+`docs/bayesian_route1_route2_program_2026-08-28.md`; the copy-ready fresh-chat
+implementation prompt is
+`docs/prompts/start_bayesian_route1_route2_program_2026-08-28.md`. This is a
+design state only: no Bayesian model has been fitted, no Bayesian dependency
+has been selected or installed, and no result may be claimed.
+
+The first implementation lane contains exactly five priority families:
+
+1. a paired hierarchical k0-k3 context-depth Route 1 model;
+2. a Route 1 location-scale model for mean and residual predictability;
+3. a negative-binomial raw-effort Route 2 response surface;
+4. an endpoint-aware Qwen effort-rank model, with beta-binomial primary and
+   zero-one-inflated beta sensitivity;
+5. a bivariate measurement-error synthesis of child-specific Route 1 and
+   Route 2 developmental slopes.
+
+Use the already audited all-79 Mistral and Qwen-response products; Phase 1
+requires no new neural scoring or Mila job. Preserve PBM discovery,
+non-PBM replication, and all-79 descriptive scopes. Existing outcomes have
+already been inspected, so call this a post-hoc Bayesian robustness/extension
+program rather than a new prospective confirmation. Bayes factors are not a
+primary decision rule. Prior predictive checks, synthetic recovery,
+convergence/ESS/divergence audits, posterior predictive checks, prior
+sensitivity, age-shape stacking, and leave-one-child/corpus validation are
+mandatory.
 
 ## Current Scientific And Compute Focus
 

@@ -338,7 +338,29 @@ Data movement policy:
 
 ## Planned Analyses
 
-TODO: Describe the analysis plan.
+The completed frequentist Route 1 and Route 2 analyses remain the primary
+evidence base. A new, explicitly post-hoc Bayesian robustness and extension
+program was proposed on 2026-08-28 after reviewing Levshina's methodological
+paper on Bayesian statistics in linguistics.
+
+Its first lane uses only existing audited all-79 inputs and contains five
+families:
+
+1. paired hierarchical context-depth modeling of k0-k3 surprisal;
+2. distributional modeling of both the mean and residual variability of k3
+   surprisal at fixed effort;
+3. negative-binomial modeling of raw child effort over age and response-space
+   entropy;
+4. endpoint-aware modeling of the child's empirical effort rank among 100
+   Qwen responses;
+5. bivariate hierarchical synthesis of child-specific Route 1 and Route 2
+   developmental slopes with measurement error.
+
+The complete formulas, candidate backlog, sample roles, validation gates, and
+interpretation contract are in
+`docs/bayesian_route1_route2_program_2026-08-28.md`. No Bayesian fit currently
+exists. This program does not authorize new language-model scoring and does
+not redefine lower surprisal or shorter speech as efficiency by themselves.
 
 ## August Supervisor Reporting Architecture
 
