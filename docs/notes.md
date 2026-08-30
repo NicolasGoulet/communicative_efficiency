@@ -3,6 +3,47 @@
 Living project memory: discoveries, decisions, bugs, commands that worked, and
 current state. Prefer dated notes.
 
+## 2026-08-29 - Bidirectional dyadic analysis handoff
+
+- Consolidated the proposed caregiver input `A_t` -> child output `C_t` ->
+  caregiver response `A_t+1` extension at
+  `docs/bidirectional_dyadic_communicative_efficiency_protocol.md`. The new
+  coupling coefficients had not been inspected when the protocol was written;
+  completed marginal child/caregiver trajectories were already known.
+- Added the short fresh-agent kickoff at
+  `docs/prompts/start_bidirectional_dyadic_efficiency_2026-08-29.md`. It points
+  to the canonical protocol and stage gates instead of duplicating formulas.
+- The protocol connects rather than replaces existing work: Pawar/Cychosz-style
+  frequency-informativity trajectories, fixed-effort child predictability,
+  Qwen-response demand and effort, caregiver-response effort, response-function
+  candidates, and the frozen downstream predictive-gain estimand.
+- Immediate local work is not blocked on neural scoring. The 413,084 strict
+  triads and 613,741-row sensitivity handoff already contain ordered texts,
+  effort, age, and exact identities; direct child/caregiver Mistral tables and
+  conversational flags supply `k0`, `k3`, context support, and speaker codes.
+- The bounded frequentist lane contains adult-to-child predictability,
+  adult-to-child effort, and child-to-caregiver response-effort models, with
+  separate `k0` and context-support decompositions. It requires within/between
+  decomposition, whole-child bootstrap, influence checks, equalized-age
+  sampling, age scrambling, and turn-pair shuffling.
+- The Bayesian lane is a small multivariate child/dyad-level measurement-error
+  synthesis, not a rerun of the stopped 189-fit grid. It follows the existing
+  Levshina-derived requirements for partial pooling, appropriate likelihoods,
+  priors independent of PBM point estimates, prior predictive checks,
+  synthetic recovery, posterior diagnostics/checks, sensitivity, and ROPEs.
+- Downstream utility remains blocked on complete five-condition scorer
+  archives plus local relocation audits. Response-function models remain
+  blocked on the 325-row manual validation. Parent-only analyses require a
+  speaker-identity sidecar and CHAT participant-role audit; caregiver remains
+  the primary term.
+- Updated the concise project compass, active checklist, and design index to
+  point to the canonical protocol. This documentation turn did not fit a
+  dyadic model, inspect a coupling coefficient, restart a Mila job, or promote
+  partial local/Mila scoring outputs to scientific results.
+- Documentation verification found no missing authoritative path and
+  `git diff --check` passed. Nine focused downstream-handoff, downstream-
+  analysis, and Bayesian-joint regression tests passed.
+
 ## 2026-08-28 - Focused Bayesian joint adaptive-efficiency analysis complete
 
 - Re-read the motivating email, original TeX-authored proposal, June 4 meeting

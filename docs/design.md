@@ -410,6 +410,37 @@ controller and backend are
 `src/fit_bayesian_joint_adaptive_efficiency.R`. The audited human report is
 `docs/bayesian_joint_adaptive_efficiency_report.html`.
 
+## Bidirectional Dyadic Extension
+
+The next analysis changes the unit from separate child/caregiver age
+trajectories to the ordered conversational triad caregiver input `A_t`, child
+output `C_t`, and caregiver response `A_t+1`. It asks whether caregiver
+effort/predictability modulates the child's next production, whether child
+effort/predictability modulates the caregiver's next response, and whether both
+couplings change with age. Momentary within-child/session deviations are the
+accommodation estimand; stable between-child/dyad differences are modeled
+separately.
+
+This extension reuses completed direct Mistral, informativity, Qwen-demand,
+and conversational-eligibility products. The strict 413,084 triads already
+contain caregiver-response word effort, so the adult-to-child and
+child-to-caregiver effort/predictability lanes require no new neural scoring.
+Downstream predictive utility remains gated on complete five-condition scorer
+archives; repair/clarification models remain gated on manual label validation.
+
+Frequentist nonlinear mixed models own the detailed population age surfaces.
+A bounded Bayesian multivariate measurement-error synthesis then estimates
+directional population effects, heterogeneity, and correlations between
+child/dyad-specific slopes. This follows the Levshina-derived rules already in
+the repository: appropriate likelihoods, partial pooling, weakly regularizing
+priors not derived from PBM estimates, prior/synthetic/posterior checks,
+effect-scale ROPEs, and no Bayes-factor-first decision rule.
+
+The complete pre-fit design, compute map, execution gates, planned namespace,
+and interpretation contract are centralized in
+`docs/bidirectional_dyadic_communicative_efficiency_protocol.md`. Do not copy
+its detailed model registry into `AGENTS.md` or create a parallel dyadic plan.
+
 ## August Supervisor Reporting Architecture
 
 The August report is a publication workflow over frozen, audited results; it is

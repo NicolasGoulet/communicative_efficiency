@@ -119,8 +119,9 @@ as a causal SES effect, linguistic deficit, or inherent group efficiency.
 
 The authoritative longitudinal handoffs and local Route 1/Route 2 products
 below were rechecked on 2026-08-25; the Bayesian pilot state was verified on
-2026-08-28; and the Hall snapshot state below was verified on 2026-08-17. When
-any later historical paragraph conflicts with the dated
+2026-08-28; the bidirectional dyadic pre-fit plan was reconciled on 2026-08-29;
+and the Hall snapshot state below was verified on 2026-08-17. When any later
+historical paragraph conflicts with the dated
 analysis-ready map in this section, use this section.
 
 Primary external scored/feature handoffs:
@@ -247,6 +248,18 @@ old reports:
   `docs/bayesian_joint_adaptive_efficiency_report.html`. This extension does
   not complete or override the stopped 189-fit program and is not listener
   utility.
+- **Bidirectional dyadic communicative efficiency, pre-fit plan**:
+  `docs/bidirectional_dyadic_communicative_efficiency_protocol.md` is the
+  canonical next-analysis handoff for the ordered sequence caregiver input
+  `A_t` -> child output `C_t` -> caregiver response `A_t+1`. The 413,084 strict
+  triads, broader 613,741 response sample, direct child/caregiver Mistral
+  scores, effort measures, and speaker-coded conversational flags support the
+  local adult-to-child and child-to-caregiver effort/predictability analyses
+  now. No new turn-coupling coefficient has been inspected. Downstream utility
+  and validated response-function models remain gated on complete relocated
+  score archives and manual label validation, respectively. Do not analyze
+  partial Mila waves, call every caregiver a parent, or interpret reciprocal
+  observational coupling as causal optimization.
 - **Word-level information, PBM 21 only**: the owning repository is
   `/home/apaixonada/EvaPortelance/Projet_1/developmental_word_information`.
   Its three canonical input symlinks are under
@@ -597,6 +610,14 @@ docs/full79_joint_efficiency_explorer.html
 docs/full79_information_effort_clouds.html
 ```
 
+The canonical next-analysis protocols are:
+
+```text
+docs/bidirectional_dyadic_communicative_efficiency_protocol.md
+docs/downstream_caregiver_response_efficiency_protocol.md
+docs/bayesian_joint_adaptive_efficiency_protocol.md
+```
+
 The separate Hall cross-sectional report is:
 
 ```text
@@ -723,7 +744,7 @@ response utility analysis remains the decisive next test.
 
 ## Current Scientific And Compute Focus
 
-Current priorities and genuine compute gaps as of 2026-08-26:
+Current priorities and genuine compute gaps as of 2026-08-29:
 
 1. Preserve the completed all-79 utterance-effort and joint
    information-effort analyses and their frozen PBM-discovery,
@@ -755,7 +776,12 @@ Current priorities and genuine compute gaps as of 2026-08-26:
 9. Develop listener-relevant utility only with an actual downstream outcome,
    such as caregiver-response predictive gain or validated repair/clarification
    labels. Response predictability alone is not listener utility.
-10. Use SES, race/ethnicity, parental education, sex/gender, or nationality
+10. Build the bidirectional dyadic lane from the frozen caregiver-child-
+    caregiver triads before expanding populations: fit adult-to-child and
+    child-to-caregiver coupling locally, separate within-dyad accommodation
+    from stable between-child differences, and preserve the downstream-score
+    and manual-label gates in the canonical protocol.
+11. Use SES, race/ethnicity, parental education, sex/gender, or nationality
     only with explicit metadata-level provenance. Keep Hall separate from the
     79-child longitudinal analysis.
 
