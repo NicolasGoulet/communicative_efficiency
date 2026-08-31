@@ -1091,6 +1091,11 @@ in production analyses as audit items even when unit tests allow them.
 This is a data-heavy research project. Do not load or print entire datasets into
 the chat/context.
 
+For Mila launches, status checks, incident recovery, or report retrieval, follow
+the personal `mila-otp-job-handoff` skill. The user exclusively handles
+interactive login/OTP. Versioned launchers must save every job ID and print a
+compact-status or one-line rsync handoff; never make chat history the run ledger.
+
 When inspecting data:
 
 - Prefer `head`, `tail`, `wc -l`, `du -h`, and column/schema summaries.
