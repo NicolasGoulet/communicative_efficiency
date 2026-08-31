@@ -89,10 +89,14 @@ items were superseded or completed by the later modular direct-score workflow.
 - [x] Publish `docs/bayesian_joint_adaptive_efficiency_report.{md,html}` and
       preserve the interpretation boundary: the result concerns scorer
       predictability and word effort, not listener utility or an optimum.
-- [ ] When the downstream caregiver-response score archives pass relocation
-      audit, apply the frozen utility protocol. This is the decisive next test
-      for a strong communicative-efficiency claim; do not substitute more
-      corpus expansion for it.
+- [x] Apply the frozen downstream caregiver-response utility protocol after
+      all three archives pass relocation audit. All 27 registered models,
+      27,000 child bootstraps, and 1,656 influence refits pass. Positive
+      matched-child gain and matched-over-shuffled gain replicate across
+      scorers, but the frozen positive age-slope gate fails: Mistral and Qwen
+      confirm negative other-58 slopes, while TinyDialogues crosses zero.
+      Preserve the distinction between immediate predictive utility and
+      increasing developmental efficiency.
 
 ### Bayesian Route 1 / Route 2 extension — pilot stopped 2026-08-28
 

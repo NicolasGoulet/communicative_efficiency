@@ -1,0 +1,346 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>Downstream caregiver-response utility</title>
+<style>
+body{font:16px/1.5 system-ui,sans-serif;max-width:1120px;margin:32px auto;padding:0 20px;color:#17202a}
+h1,h2{line-height:1.2} .callout{padding:16px 20px;background:#fff3cd;border-left:5px solid #c58900}
+.result{padding:14px 18px;background:#eaf4ff;border-left:5px solid #1f4f8a}
+table.results{border-collapse:collapse;width:100%;font-size:14px;margin:14px 0 28px}
+table.results th,table.results td{padding:7px 9px;border-bottom:1px solid #d8dee4;text-align:left}
+table.results th{background:#f2f4f7} img{max-width:100%;height:auto}
+code{background:#f2f4f7;padding:2px 4px} .small{color:#4d5966;font-size:14px}
+</style></head><body>
+<h1>Downstream caregiver-response utility</h1>
+<p class="small">Frozen-protocol analysis · strict-naturalistic CHILDES · three scorers reported separately</p>
+<div class="callout"><strong>Decisive result:</strong> child utterances make the immediate caregiver response more predictable and outperform matched shuffled child utterances, but this predictive gain does <em>not</em> increase with age at fixed child and response word counts. The frozen increasing-efficiency criterion therefore fails. Mistral and Qwen instead show a confirmed negative developmental slope; TinyDialogues is negative in PBM and inconclusive in the other 58 children.</div>
+<h2>What was tested</h2>
+<p><code>U = surprisal(response | earlier context) − surprisal(response | earlier context + actual child utterance)</code>. Positive U means the child utterance helps predict the actual next caregiver response. This is a scorer-based downstream proxy, not causal proof, comprehension, or communicative success.</p>
+<h2>Frozen gates</h2>
+<table class="dataframe results">
+  <thead>
+    <tr style="text-align: right;">
+      <th>outcome</th>
+      <th>scorer_key</th>
+      <th>scope</th>
+      <th>matched_gain_positive</th>
+      <th>matched_beats_shuffle</th>
+      <th>positive_age_slope</th>
+      <th>all_three_gates</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th></th>
+      <td>mistral-7b-v0.3</td>
+      <td>non_pbm_confirmation</td>
+      <td>PASS</td>
+      <td>PASS</td>
+      <td>FAIL</td>
+      <td>FAIL</td>
+    </tr>
+    <tr>
+      <th></th>
+      <td>mistral-7b-v0.3</td>
+      <td>pbm_discovery</td>
+      <td>PASS</td>
+      <td>PASS</td>
+      <td>FAIL</td>
+      <td>FAIL</td>
+    </tr>
+    <tr>
+      <th></th>
+      <td>qwen3-14b</td>
+      <td>non_pbm_confirmation</td>
+      <td>PASS</td>
+      <td>PASS</td>
+      <td>FAIL</td>
+      <td>FAIL</td>
+    </tr>
+    <tr>
+      <th></th>
+      <td>qwen3-14b</td>
+      <td>pbm_discovery</td>
+      <td>PASS</td>
+      <td>PASS</td>
+      <td>FAIL</td>
+      <td>FAIL</td>
+    </tr>
+    <tr>
+      <th></th>
+      <td>tinydialogues</td>
+      <td>non_pbm_confirmation</td>
+      <td>PASS</td>
+      <td>PASS</td>
+      <td>FAIL</td>
+      <td>FAIL</td>
+    </tr>
+    <tr>
+      <th></th>
+      <td>tinydialogues</td>
+      <td>pbm_discovery</td>
+      <td>PASS</td>
+      <td>PASS</td>
+      <td>FAIL</td>
+      <td>FAIL</td>
+    </tr>
+  </tbody>
+</table>
+<h2>Primary developmental slopes</h2>
+<img src="downstream_caregiver_response_primary_age_slopes.png" alt="Forest plot of developmental slopes">
+<table class="dataframe results">
+  <thead>
+    <tr style="text-align: right;">
+      <th>scorer_key</th>
+      <th>scope</th>
+      <th>slope_bits_per_6m</th>
+      <th>cluster_ci_6m</th>
+      <th>bootstrap_ci_6m</th>
+      <th>source_rows</th>
+      <th>children</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>mistral-7b-v0.3</td>
+      <td>pbm_discovery</td>
+      <td>-0.642</td>
+      <td>[-0.912, -0.371]</td>
+      <td>[-0.877, -0.386]</td>
+      <td>174860.000</td>
+      <td>21.000</td>
+    </tr>
+    <tr>
+      <td>mistral-7b-v0.3</td>
+      <td>non_pbm_confirmation</td>
+      <td>-0.271</td>
+      <td>[-0.484, -0.058]</td>
+      <td>[-0.539, -0.124]</td>
+      <td>238224.000</td>
+      <td>58.000</td>
+    </tr>
+    <tr>
+      <td>qwen3-14b</td>
+      <td>pbm_discovery</td>
+      <td>-0.813</td>
+      <td>[-1.110, -0.516]</td>
+      <td>[-1.080, -0.536]</td>
+      <td>174860.000</td>
+      <td>21.000</td>
+    </tr>
+    <tr>
+      <td>qwen3-14b</td>
+      <td>non_pbm_confirmation</td>
+      <td>-0.334</td>
+      <td>[-0.601, -0.066]</td>
+      <td>[-0.667, -0.151]</td>
+      <td>238224.000</td>
+      <td>58.000</td>
+    </tr>
+    <tr>
+      <td>tinydialogues</td>
+      <td>pbm_discovery</td>
+      <td>-0.141</td>
+      <td>[-0.185, -0.096]</td>
+      <td>[-0.189, -0.102]</td>
+      <td>174860.000</td>
+      <td>21.000</td>
+    </tr>
+    <tr>
+      <td>tinydialogues</td>
+      <td>non_pbm_confirmation</td>
+      <td>-0.047</td>
+      <td>[-0.187, 0.093]</td>
+      <td>[-0.231, 0.047]</td>
+      <td>238224.000</td>
+      <td>58.000</td>
+    </tr>
+  </tbody>
+</table>
+<h2>Level checks</h2>
+<p>These are equal-child-weight means. All confidence intervals below are 1,000-draw whole-child bootstrap intervals.</p>
+<table class="dataframe results">
+  <thead>
+    <tr style="text-align: right;">
+      <th>scorer_key</th>
+      <th>scope</th>
+      <th>outcome</th>
+      <th>mean</th>
+      <th>bootstrap_ci</th>
+      <th>children_positive_fraction</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>mistral-7b-v0.3</td>
+      <td>pbm_discovery</td>
+      <td>downstream_gain_bits</td>
+      <td>3.671</td>
+      <td>[3.232, 4.121]</td>
+      <td>1.000</td>
+    </tr>
+    <tr>
+      <td>mistral-7b-v0.3</td>
+      <td>pbm_discovery</td>
+      <td>matched_over_shuffled_bits</td>
+      <td>3.778</td>
+      <td>[3.347, 4.261]</td>
+      <td>1.000</td>
+    </tr>
+    <tr>
+      <td>mistral-7b-v0.3</td>
+      <td>non_pbm_confirmation</td>
+      <td>downstream_gain_bits</td>
+      <td>2.794</td>
+      <td>[2.537, 3.088]</td>
+      <td>1.000</td>
+    </tr>
+    <tr>
+      <td>mistral-7b-v0.3</td>
+      <td>non_pbm_confirmation</td>
+      <td>matched_over_shuffled_bits</td>
+      <td>2.686</td>
+      <td>[2.341, 3.044]</td>
+      <td>1.000</td>
+    </tr>
+    <tr>
+      <td>qwen3-14b</td>
+      <td>pbm_discovery</td>
+      <td>downstream_gain_bits</td>
+      <td>4.120</td>
+      <td>[3.613, 4.657]</td>
+      <td>1.000</td>
+    </tr>
+    <tr>
+      <td>qwen3-14b</td>
+      <td>pbm_discovery</td>
+      <td>matched_over_shuffled_bits</td>
+      <td>3.964</td>
+      <td>[3.476, 4.508]</td>
+      <td>1.000</td>
+    </tr>
+    <tr>
+      <td>qwen3-14b</td>
+      <td>non_pbm_confirmation</td>
+      <td>downstream_gain_bits</td>
+      <td>2.931</td>
+      <td>[2.613, 3.281]</td>
+      <td>1.000</td>
+    </tr>
+    <tr>
+      <td>qwen3-14b</td>
+      <td>non_pbm_confirmation</td>
+      <td>matched_over_shuffled_bits</td>
+      <td>2.719</td>
+      <td>[2.327, 3.126]</td>
+      <td>1.000</td>
+    </tr>
+    <tr>
+      <td>tinydialogues</td>
+      <td>pbm_discovery</td>
+      <td>downstream_gain_bits</td>
+      <td>0.306</td>
+      <td>[0.130, 0.433]</td>
+      <td>0.952</td>
+    </tr>
+    <tr>
+      <td>tinydialogues</td>
+      <td>pbm_discovery</td>
+      <td>matched_over_shuffled_bits</td>
+      <td>0.487</td>
+      <td>[0.420, 0.558]</td>
+      <td>1.000</td>
+    </tr>
+    <tr>
+      <td>tinydialogues</td>
+      <td>non_pbm_confirmation</td>
+      <td>downstream_gain_bits</td>
+      <td>0.211</td>
+      <td>[0.090, 0.327]</td>
+      <td>0.810</td>
+    </tr>
+    <tr>
+      <td>tinydialogues</td>
+      <td>non_pbm_confirmation</td>
+      <td>matched_over_shuffled_bits</td>
+      <td>0.400</td>
+      <td>[0.304, 0.483]</td>
+      <td>0.862</td>
+    </tr>
+  </tbody>
+</table>
+<h2>Influence</h2>
+<p>All 1,656 registered leave-one-child and leave-one-corpus fits passed. Mistral and Qwen confirmation slopes remain negative under every deletion; TinyDialogues remains near zero.</p>
+<table class="dataframe results">
+  <thead>
+    <tr style="text-align: right;">
+      <th>model_id</th>
+      <th>removed_unit_type</th>
+      <th>range_bits_per_6m</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>mistral-7b-v0.3__non_pbm_confirmation__downstream_gain_bits</td>
+      <td>child</td>
+      <td>[-0.405, -0.206]</td>
+    </tr>
+    <tr>
+      <td>mistral-7b-v0.3__non_pbm_confirmation__downstream_gain_bits</td>
+      <td>corpus</td>
+      <td>[-0.451, -0.205]</td>
+    </tr>
+    <tr>
+      <td>mistral-7b-v0.3__pbm_discovery__downstream_gain_bits</td>
+      <td>child</td>
+      <td>[-0.752, -0.546]</td>
+    </tr>
+    <tr>
+      <td>mistral-7b-v0.3__pbm_discovery__downstream_gain_bits</td>
+      <td>corpus</td>
+      <td>[-0.764, -0.423]</td>
+    </tr>
+    <tr>
+      <td>qwen3-14b__non_pbm_confirmation__downstream_gain_bits</td>
+      <td>child</td>
+      <td>[-0.505, -0.254]</td>
+    </tr>
+    <tr>
+      <td>qwen3-14b__non_pbm_confirmation__downstream_gain_bits</td>
+      <td>corpus</td>
+      <td>[-0.560, -0.252]</td>
+    </tr>
+    <tr>
+      <td>qwen3-14b__pbm_discovery__downstream_gain_bits</td>
+      <td>child</td>
+      <td>[-0.932, -0.706]</td>
+    </tr>
+    <tr>
+      <td>qwen3-14b__pbm_discovery__downstream_gain_bits</td>
+      <td>corpus</td>
+      <td>[-0.929, -0.621]</td>
+    </tr>
+    <tr>
+      <td>tinydialogues__non_pbm_confirmation__downstream_gain_bits</td>
+      <td>child</td>
+      <td>[-0.124, 0.013]</td>
+    </tr>
+    <tr>
+      <td>tinydialogues__non_pbm_confirmation__downstream_gain_bits</td>
+      <td>corpus</td>
+      <td>[-0.052, -0.040]</td>
+    </tr>
+    <tr>
+      <td>tinydialogues__pbm_discovery__downstream_gain_bits</td>
+      <td>child</td>
+      <td>[-0.154, -0.132]</td>
+    </tr>
+    <tr>
+      <td>tinydialogues__pbm_discovery__downstream_gain_bits</td>
+      <td>corpus</td>
+      <td>[-0.169, -0.109]</td>
+    </tr>
+  </tbody>
+</table>
+<h2>Design and boundary</h2>
+<p>The primary cell model controls exact/top-coded child word count, caregiver-response word count, and stable child identity, with opportunity weights and child-clustered covariance. PBM contains Brown, Manchester, and Providence (21 children; 174,860 triads); the independent confirmation contains the other 58 children (238,224 triads). Raw bits were never pooled across tokenizers.</p>
+<p class="small">A negative age slope does not show that children become worse communicators. It shows that, under this specific next-caregiver-response predictive-gain operationalization and these controls, the observed child turn contributes less additional model-predictive information with age. Observational turn sequences do not identify a causal child→caregiver effect.</p>
+</body></html>

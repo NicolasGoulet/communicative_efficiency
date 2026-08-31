@@ -13,6 +13,8 @@ import pandas as pd
 
 from src.build_downstream_caregiver_response_analysis import (
     CONDITIONS,
+    _absorbed_child_crossproducts,
+    _age_from_crossproducts,
     assemble_scorer_dataset,
     fit_primary_cell_model,
     make_model_cells,
@@ -111,6 +113,13 @@ class DownstreamCaregiverResponseAnalysisTests(unittest.TestCase):
         self.assertEqual(summary["status"], "PASS")
         self.assertAlmostEqual(summary["age_estimate"], 0.2, places=6)
         self.assertTrue(np.isfinite(coefficients["estimate"]).all())
+        absorbed = _absorbed_child_crossproducts(cells)
+        absorbed_age = _age_from_crossproducts(
+            absorbed["matrices"].sum(axis=0),
+            absorbed["vectors"].sum(axis=0),
+            age_index=absorbed["age_index"],
+        )
+        self.assertAlmostEqual(absorbed_age, summary["age_estimate"], places=10)
 
 
 if __name__ == "__main__":

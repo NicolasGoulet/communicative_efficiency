@@ -1,0 +1,38 @@
+{
+  "schema_version": "1.0.0",
+  "run_id": "20260831_123914",
+  "scoring_code_revision": "b9ad8c5109c92cbc82d48f0ab0f63a5c5494825a",
+  "expected_datasets": 13,
+  "expected_conditions": [
+    "base_context",
+    "matched_child",
+    "shuffled_child",
+    "child_only",
+    "k0"
+  ],
+  "expected_contracts": 65,
+  "expected_utterance_rows": 3068705,
+  "models": [
+    {
+      "scorer_key": "tinydialogues",
+      "archive": "downstream_caregiver_response_tinydialogues_full79_all5_utterance_surprisal_20260828_083311_tinydialogues.tar.gz",
+      "archive_bytes": 513682240,
+      "archive_sha256": "e2117148d5984a3d7e7b2963d53a53ebb547e423565b1cc43ed33dc29702b76a",
+      "link_name": "downstream_caregiver_response_tinydialogues_20260831_b9ad8c5"
+    },
+    {
+      "scorer_key": "mistral-7b-v0.3",
+      "archive": "downstream_caregiver_response_mistral-7b-v0.3_full79_all5_utterance_surprisal_20260828_083311_mistral-7b-v0.3.tar.gz",
+      "archive_bytes": 513098725,
+      "archive_sha256": "97c4e72896ed88553e7becd4e29ac4a82cdae0cced0412a16e34bb644795ca71",
+      "link_name": "downstream_caregiver_response_mistral-7b-v0.3_20260831_b9ad8c5"
+    },
+    {
+      "scorer_key": "qwen3-14b",
+      "archive": "downstream_caregiver_response_qwen3-14b_full79_all5_utterance_surprisal_20260828_083311_qwen3-14b.tar.gz",
+      "archive_bytes": 512762385,
+      "archive_sha256": "663b62b1f3ca3a7424ebe1806f2bbab5c7c0cf3a32de0af1b59940e952b5a4b7",
+      "link_name": "downstream_caregiver_response_qwen3-14b_20260831_b9ad8c5"
+    }
+  ]
+}

@@ -7833,3 +7833,23 @@ CUDA_VISIBLE_DEVICES='' MPLCONFIGDIR=/tmp/mpl-cache \
   404 pending dataset-context contracts successfully. It also caught and fixed
   scorer CSV loading so compressed headers are decompressed before delimiter
   detection and the literal Forrester utterance `nan` remains lexical data.
+
+## 2026-08-31 - Downstream caregiver-response utility complete
+
+- Imported and independently audited the completed TinyDialogues, Mistral, and
+  Qwen downstream archives: 195/195 contracts and 9,206,115 total condition
+  rows passed archive, schema, identity, artifact-hash, and relocation checks.
+- Built three 613,741-row joined response-utility tables. Every one of the
+  413,084 frozen primary triads has complete unconditional, base-context,
+  matched-child, and child-only scores.
+- All 27 primary/companion models, 27,000 whole-child bootstrap fits, and 1,656
+  leave-one-child/corpus refits passed. The absorbed fixed-effect bootstrap was
+  validated against all primary WLS age estimates to maximum absolute error
+  1.22e-14.
+- Downstream gain and matched-over-shuffled gain are positive in both PBM and
+  the other-58 sample for every scorer. The frozen positive developmental gate
+  fails: other-58 age slopes are -0.0452 bits/month for Mistral (clustered 95%
+  CI [-0.0806, -0.0097]), -0.0556 for Qwen [-0.1002, -0.0110], and -0.0079
+  for TinyDialogues [-0.0312, 0.0154]. This supports immediate scorer-based
+  child-turn utility, not increasing downstream utility with age or a causal
+  child-to-caregiver effect.

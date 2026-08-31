@@ -290,18 +290,22 @@ old reports:
   scoring. PBM three-scorer outputs and Hall Mistral are reuse cells; the other
   101 model-by-dataset cells have not yet been scored on Mila. Do not describe
   the handoff as completed model output.
-- **Downstream caregiver-response utility, scoring in progress/partly
-  stopped**: `results/downstream_caregiver_response_handoff/` freezes 613,741
-  immediate next-caregiver targets from the strict-naturalistic 79 children,
-  with 413,084 primary caregiver-child-caregiver triads. The protocol is
-  `docs/downstream_caregiver_response_efficiency_protocol.md`. A three-scorer
-  Mila launch began on 2026-08-28. At the last user-provided status, all three
-  preparation/smoke/release gates passed; TinyDialogues and Mistral completed
-  their base-context score waves but their first CPU audits failed, while Qwen
-  base-context scoring was still running. No downstream score archive is
-  analysis-ready yet. Do not join, analyze, or describe results until the
-  compute failure is diagnosed and every returned archive passes relocation
-  audit locally.
+- **Downstream caregiver-response utility, complete and audited**:
+  `results/downstream_caregiver_response_analysis/` contains the three-scorer
+  analysis of 613,741 immediate caregiver-response targets and 413,084 primary
+  caregiver-child-caregiver triads. All 195 score contracts passed archive,
+  row-identity, and relocation audits; all 27 registered models, 27,000
+  whole-child bootstrap fits, and 1,656 leave-one-child/corpus refits passed.
+  The report is `docs/downstream_caregiver_response_efficiency_report.html`.
+  Child turns have positive downstream predictive gain and beat the shuffled
+  child control in PBM and the other-58 sample for every scorer. However, the
+  frozen positive developmental gate fails: the other-58 fixed-effort slope
+  is -0.0452 bits/month for Mistral (clustered 95% CI [-0.0806, -0.0097]),
+  -0.0556 for Qwen [-0.1002, -0.0110], and -0.0079 for TinyDialogues
+  [-0.0312, 0.0154]. Thus this operationalization establishes immediate
+  child-turn predictive utility, but not increasing downstream utility with
+  age. It remains a noncausal scorer-based proxy, not human comprehension or
+  communicative success.
 
 The full100 Qwen/Mistral handoff is complete, not pending. Its extension archive
 is 3,305,320,336 bytes with SHA-256
@@ -920,6 +924,11 @@ communicative_efficiency/
   generated-baseline handoff bundle for Mila rescoring.
 - `src/audit_hall_scored_archive.py`: relocation-aware integrity, product, and
   cross-context audit for the returned Hall Mistral archive.
+- `src/import_downstream_caregiver_response_scores.py`: archive, contract,
+  relocation, and immutable-link audit for the three downstream scorers.
+- `src/build_downstream_caregiver_response_analysis.py`: registered joined
+  utility tables, primary models, fast exact whole-child bootstrap, influence,
+  report, and final-audit workflow.
 - `src/build_hall_snapshot_analysis.py`: modular Hall dataset, model,
   bootstrap, influence, plot, report, and final-audit workflow.
 - `src/generate_lstm_utterances.py`: word-level LSTM model code.
