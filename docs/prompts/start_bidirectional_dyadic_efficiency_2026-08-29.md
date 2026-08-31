@@ -1,4 +1,4 @@
-# Start the Bidirectional Dyadic Efficiency Program
+# Continue the Bidirectional Dyadic Efficiency Program
 
 Use this prompt for a fresh coding agent. The scientific source of truth is
 `docs/bidirectional_dyadic_communicative_efficiency_protocol.md`; do not copy
@@ -6,16 +6,19 @@ or redesign its model registry in a new planning document.
 
 ## Objective
 
-Implement the staged local analysis of the ordered conversational triad:
+Continue the already completed core analysis of the ordered conversational
+triad without refitting it:
 
 ```text
 caregiver input A_t -> child output C_t -> caregiver response A_t+1
 ```
 
-Estimate adult-to-child and child-to-caregiver coupling and how both change
-with age. Reuse the project's completed marginal, effort, informativity, and
-Bayesian products. Do not claim downstream utility until complete scorer
-archives pass local relocation audit.
+The core adult-to-child and child-to-caregiver coupling analysis is complete
+and audited. The next useful work is either (a) intake and analysis of a
+complete downstream caregiver-response score archive after relocation audit,
+or (b) human completion and adjudication of the frozen 325-row
+response-function label sample. Do not claim downstream utility before its
+score gate passes, and do not infer manual labels automatically.
 
 ## Required reading, in order
 
@@ -30,38 +33,42 @@ archives pass local relocation audit.
 
 ## Current state
 
-- No new bidirectional coupling coefficient has been inspected.
-- The 413,084 strict triads and 613,741-row sensitivity handoff are ready.
-- Child/caregiver Mistral scores, effort, conversational flags, and Qwen-demand
-  products are local.
-- Caregiver-response word effort can be modeled without new neural scoring.
+- `results/bidirectional_dyadic_efficiency_20260829/` contains the completed,
+  hash-bound 413,084-triad core; do not rebuild it merely to resume work.
+- All 15 frequentist GAMMs and registered validation checks passed.
+- All 15 Bayesian fits passed with zero divergences and zero treedepth
+  saturation after targeted repair; total fitting cost was 0.799 CPU-hours.
+- The other-58 sample confirms developmental reversals for both directional
+  effort couplings, but not adult-input -> child `k3` coupling.
+- The verified-parent sensitivity covers 412,623 strict triads and closely
+  matches the caregiver-primary curves.
+- The human report is
+  `docs/bidirectional_dyadic_communicative_efficiency_report.html`, and the
+  bounded marker is `CORE_DYADIC_ANALYSIS_COMPLETE_AND_AUDITED`.
 - Five-condition downstream utility scores are not analysis-ready.
-- Candidate repair/clarification labels are not validated primary outcomes.
+- The 325-row response-function sample currently has zero completed manual
+  labels.
 - The broad 189-fit Bayesian program is stopped; do not revive it.
 
-## Implementation sequence
+## Continuation sequence
 
-Work in the isolated namespace frozen in the protocol and make every stage
-independently callable and hash-bound.
+First inspect the saved core report, final audit, gate files, and current Git
+state. Then take only the branch whose prerequisite has genuinely arrived.
 
-1. **Audit first:** verify the Git state and every authoritative input/marker.
-2. **Dataset:** build the exact `A_t`/`C_t`/`A_t+1` join. Require one-to-one
-   identities, text hashes, speaker sidecar provenance, exclusion reasons, and
-   unchanged sample counts.
-3. **Contract freeze:** write the machine-readable input/formula/prior/ROPE/
-   seed contract after support checks and before exposing model coefficients.
-4. **Frequentist F1-F3:** fit the unchanged discovery, confirmation, and
-   descriptive models plus registered decomposition and validation checks.
-5. **Bayesian smoke:** implement synthetic recovery, prior predictive checks,
-   and a representative real-data runtime projection for the bounded
-   measurement-error synthesis.
-6. **Bayesian fit:** continue only if the frozen compute gate passes; record
-   diagnostics, posterior predictive checks, prior sensitivity, and influence.
-7. **Utility gate:** if complete relocated score archives are absent, write
-   `WAITING_FOR_AUDITED_SCORES` and continue only with result layers that do
-   not require utility. Never insert placeholders.
-8. **Synthesis:** render saved results without refitting and pass an independent
-   final audit before writing a completion marker.
+1. **Audit first:** verify the core marker and unchanged input/output hashes.
+2. **Utility branch:** accept an archive only if all five frozen conditions are
+   complete and its relocation audit passes locally. Join by exact registered
+   identities, apply the frozen downstream predictive-gain estimand, extend
+   the Bayesian vector only as specified, and render an amended synthesis.
+3. **Manual-label branch:** present the frozen 325 rows for human coding,
+   preserve missingness and adjudication provenance, measure agreement, and
+   fit response-function models only after the protocol's validation gate.
+4. **If neither prerequisite exists:** retain the two WAITING markers and stop;
+   do not substitute more core refits, partial score waves, heuristically
+   generated labels, or unrelated corpus expansions.
+5. **Final synthesis:** only after a gated extension passes, render from saved
+   results, re-run the independent audit, and state exactly which claim layer
+   is now supported.
 
 ## Non-negotiable scientific rules
 
@@ -79,7 +86,7 @@ independently callable and hash-bound.
   alone as communicative efficiency or causality.
 - Do not run new language-model scoring in this repository.
 
-## Required handoff after each substantial stage
+## Required handoff after each substantial new stage
 
 Report:
 
@@ -91,6 +98,6 @@ Report:
 - blockers and the exact next safe stage;
 - clean/dirty working-tree status.
 
-Commit each reviewed substantial stage. Preserve unrelated user changes and
-never mark the program complete while the utility or validation gates required
-for the claimed result remain open.
+Commit each reviewed substantial new stage. Preserve unrelated user changes.
+The bounded core is complete; the stronger listener-utility and validated-
+response-function claims remain incomplete until their respective gates pass.

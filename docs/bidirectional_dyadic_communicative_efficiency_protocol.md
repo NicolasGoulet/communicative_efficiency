@@ -1,14 +1,37 @@
 # Bidirectional Dyadic Communicative-Efficiency Protocol
 
-Status: **pre-fit protocol and agent handoff**, 2026-08-29. No coefficient from
-the new turn-level adult-to-child or child-to-adult coupling models had been
-inspected when this document was written. Existing marginal child, caregiver,
-effort, and informativity results were already known, so this is not a pristine
-preregistration of the broader project.
+Status: **protocol frozen pre-fit on 2026-08-29; bounded core completed and
+audited on 2026-08-30**. No new turn-level coupling coefficient had been
+inspected when the contract was frozen. Existing marginal child, caregiver,
+effort, and informativity results were already known, so this was not a
+pristine preregistration of the broader project.
 
-This is the canonical plan for the next local scientific-analysis lane. Keep
-implementation details and decisions here; keep `AGENTS.md` concise and use
-`TODO.md` only for the active checklist.
+This is the canonical design and implementation record for the local
+scientific-analysis lane. Keep implementation details and decisions here;
+keep `AGENTS.md` concise and use `TODO.md` only for the active checklist.
+
+## Implementation outcome
+
+The exact 413,084-row strict triad join passed all identity, hash, score, and
+speaker-sidecar checks. Fifteen frequentist GAMMs and all registered
+whole-child bootstrap, leave-corpus, equalized-age, age-scrambling, and
+turn-shuffling validations passed. The other-58 confirmation sample supports
+the age reversal in adult-input -> child-effort and child-output -> next-
+caregiver-effort coupling, but not the adult-input -> child-`k3` coupling.
+
+The bounded 75-child Bayesian measurement-error synthesis passed all 15 fits
+after targeted diagnostic repair, with zero divergences and zero treedepth
+saturation. At 42 months it supports negative population effort couplings in
+both directions, no population adult-input -> child-`k3` effect, and a
+positive child-level reciprocal-effort correlation. These are observational
+accommodation results, not causal optimization or listener utility.
+
+All 2,697 CHAT files passed the participant-role audit. The 412,623 strict
+triads with a verified parent (`MOT`/`FAT`) at both adult positions give a
+close parent-only sensitivity. The core marker is
+`CORE_DYADIC_ANALYSIS_COMPLETE_AND_AUDITED`; downstream utility and manually
+validated response functions remain deliberately gated. The saved-result
+report is `docs/bidirectional_dyadic_communicative_efficiency_report.html`.
 
 ## Scientific object
 
@@ -301,16 +324,15 @@ are not scientific results and must not be joined prematurely.
 
 ### Work blocked on measurement validation
 
-1. Add caregiver speaker identity as an audited sidecar and verify parent
-   roles from CHAT metadata.
-2. Complete the frozen 325-row manual validation of repair, clarification,
+1. Complete the frozen 325-row manual validation of repair, clarification,
    acknowledgement, imitation, and routine candidates.
-3. Fit F4 and parent-only sensitivities only after their respective gates.
+2. Fit response-function models only after that gate. The caregiver speaker
+   sidecar, CHAT metadata audit, and parent-only sensitivities are complete.
 
 Semantic-cluster response entropy is a useful future measurement extension,
 but it is not required for the primary bidirectional analysis.
 
-## Planned implementation namespace
+## Implementation namespace
 
 Use an isolated, staged namespace:
 
@@ -322,23 +344,27 @@ docs/bidirectional_dyadic_communicative_efficiency_report.md
 docs/bidirectional_dyadic_communicative_efficiency_report.html
 src/build_bidirectional_dyadic_efficiency_20260829.py
 src/fit_bidirectional_dyadic_efficiency.R
+src/fit_bayesian_bidirectional_dyadic_efficiency.R
+src/validate_bidirectional_dyadic_efficiency_20260829.py
 ```
 
-Required stages:
+Implemented core stages:
 
 ```text
-contract-draft -> dataset -> contract-freeze -> support
-               -> frequentist -> frequentist-validation
-               -> bayesian-smoke -> bayesian-fit -> bayesian-diagnostics
-               -> utility-intake -> utility-models
-               -> synthesis -> plots -> report -> audit
+dataset -> support -> contract-freeze -> frequentist-input
+        -> frequentist-smoke -> frequentist -> frequentist-validation
+        -> bayesian-estimates -> bayesian-smoke -> bayesian-fit
+        -> bayesian-repair -> bayesian-diagnostics
+        -> parent-role -> parent-sensitivity -> gates
+        -> synthesis -> final-audit
 ```
 
 Stages blocked by absent utility scores must record `WAITING_FOR_AUDITED_SCORES`
 without inventing placeholder values or marking the whole local lane failed.
-Plot and report stages consume saved artifacts only. Final completion requires
-hash-valid predecessors, zero unregistered model substitutions, passing
-frequentist and Bayesian diagnostics, and an independent final audit marker.
+The manual gate analogously records `WAITING_FOR_VALIDATED_325_ROW_LABELS`.
+The core can carry its bounded completion marker while the stronger full
+utility-and-response-function completion marker remains absent. Plots and
+reports consume saved artifacts only.
 
 ## Interpretation contract for future agents
 

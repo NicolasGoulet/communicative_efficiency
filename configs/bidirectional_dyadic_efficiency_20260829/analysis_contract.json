@@ -1,0 +1,177 @@
+{
+  "program_id": "bidirectional_dyadic_efficiency_20260829",
+  "schema_version": "1.0.0",
+  "status": "frozen_pre_fit",
+  "created_at": "2026-08-29",
+  "outcome_blind_statement": "No coefficient from the new turn-coupling models had been inspected when this contract was drafted. Previously published project-level marginal results were known.",
+  "scientific_sequence": "caregiver_A_t -> child_C_t -> caregiver_A_t_plus_1",
+  "inputs": {
+    "handoff_directory": "results/downstream_caregiver_response_handoff/full_20260827",
+    "handoff_manifest": "results/downstream_caregiver_response_handoff/full_20260827/handoff_manifest.json",
+    "handoff_manifest_sha256": "6c1479def350bcbf101913a39e9a347dc6092dc49f76dddd322d642b760f5edc",
+    "conversational_flags": "results/conversational_eligibility/full79_child_conversational_flags.csv.gz",
+    "conversational_flags_sha256": "82fa51aab312d00e28367b296a5dcf9a506fea3a5b7ddc4723308da936cabe59",
+    "child_scores": "results/direct_surprisal_replication/mistral_full79/child_direct_surprisal_wide.csv.gz",
+    "child_scores_sha256": "4edf9194481e15a04bc23dd8be03a26c95c0a7c2baddbadd5b3d18011786adad",
+    "caregiver_scores": "results/direct_surprisal_replication/mistral_full79/caretaker_direct_surprisal_wide.csv.gz",
+    "caregiver_scores_sha256": "2aef4c1950826a9fbb80c062b78660cf8f0bcf6a5b940a14cad3ff20c8bbb90f"
+  },
+  "expected": {
+    "strict_rows": 413084,
+    "broad_rows": 613741,
+    "children": 79,
+    "corpora": 13,
+    "pbm_strict_rows": 174860,
+    "other58_strict_rows": 238224,
+    "response_word_measurement_disagreements": 3,
+    "exact_join_coverage": 1.0,
+    "exact_text_hash_coverage": 1.0
+  },
+  "sample_roles": {
+    "pbm_discovery": ["Brown", "Manchester", "Providence"],
+    "non_pbm_confirmation": "all other strict-naturalistic corpora",
+    "all79_descriptive": "pooled descriptive scope",
+    "primary_speaker_label": "caregiver",
+    "parent_only": "gated sensitivity after file-level participant-role validation"
+  },
+  "eligibility": {
+    "primary": "primary_eligible == 1 in the frozen downstream handoff",
+    "sensitivity": "sensitivity_eligible == 1 in the frozen downstream handoff",
+    "age_months_min": 6,
+    "age_months_max": 65,
+    "positive_word_counts_required": true,
+    "contextual_models_require_finite_k3": true,
+    "minimum_sessions_for_bayesian_child_summary": 6,
+    "minimum_rows_for_bayesian_child_summary": 30,
+    "expected_bayesian_children": 75,
+    "bayesian_exclusions_are_support_based": true
+  },
+  "decomposition": {
+    "primary_within_scope": "child_key x session_id",
+    "between_scope": "child_key",
+    "within_definition": "X - mean(X | child_key, session_id)",
+    "between_definition": "mean(X | child_key)",
+    "age_center_months": 42.0,
+    "age_unit_months": 6.0,
+    "word_effort_top_code": 12,
+    "frozen_scaling": {
+      "a0_k3_within_sd": 19.159453228823587,
+      "a0_k0_within_sd": 21.452608001270857,
+      "a0_context_support_within_sd": 9.77899576844128,
+      "c_k3_within_sd": 16.007680291192653,
+      "c_k0_within_sd": 17.09439047273253,
+      "c_context_support_within_sd": 7.435622548599055,
+      "log1p_child_words_sd": 0.49867450137039643,
+      "log1p_response_words_sd": 0.5850017486574723
+    },
+    "supported_age_percentiles": {
+      "pbm_discovery": [15.400000000000002, 53.733],
+      "non_pbm_confirmation": [21.033, 61.0],
+      "all79_descriptive": [16.867, 60.833]
+    }
+  },
+  "estimands": [
+    {
+      "id": "F1_adult_to_child_predictability",
+      "outcome": "child contextual total surprisal k3",
+      "primary_predictor": "preceding caregiver k3 within session",
+      "effort_control": "child exact/top-coded word count",
+      "direction": "two_sided",
+      "interpretation": "momentary caregiver-to-child predictability coupling at fixed child effort"
+    },
+    {
+      "id": "F2_adult_to_child_effort",
+      "outcome": "child lexical word count",
+      "primary_predictor": "preceding caregiver k3 within session",
+      "direction": "two_sided",
+      "interpretation": "momentary caregiver-to-child effort coupling"
+    },
+    {
+      "id": "F3_child_to_adult_effort",
+      "outcome": "next caregiver lexical word count",
+      "primary_predictor": "child k3 within session",
+      "direction": "two_sided",
+      "theory_tracked_direction": "positive",
+      "interpretation": "momentary child-to-caregiver response-effort coupling"
+    }
+  ],
+  "frequentist_inventory": {
+    "primary": "three k3 model families in PBM discovery, other-58 confirmation, and all-79 descriptive scopes",
+    "decomposition_sensitivities": "k0 and context-support variants of F1-F3 in the pooled all-79 scope only",
+    "continuous_family": "mgcv scaled-t BAM",
+    "count_family": "mgcv negative-binomial BAM",
+    "age_shape": "penalized smooth with k=8",
+    "coupling_shape": "penalized smooth plus tensor interaction with age",
+    "random_structure": ["child_key", "child_session_key", "dataset"],
+    "primary_decision": "two-sided simultaneous interval for the supported age-specific within-session coupling curve",
+    "unregistered_substitution_forbidden": true
+  },
+  "frequentist_formulas": {
+    "F1": "score_outcome ~ s(age_z,k=8,bs='cr') + s(predictor_within_z,k=6,bs='cr') + ti(age_z,predictor_within_z,k=c(6,6),bs=c('cr','cr')) + c_word_top12 + s(log1p_a0_words,k=6,bs='cr') + s(predictor_child_mean,k=6,bs='cr') + a0_question_type + exact_imitation_candidate + child_backchannel_candidate + session_reading_candidate + session_routine_candidate + s(dataset,bs='re') + s(child_key,bs='re') + s(child_session_key,bs='re')",
+    "F2": "c_words ~ s(age_z,k=8,bs='cr') + s(predictor_within_z,k=6,bs='cr') + ti(age_z,predictor_within_z,k=c(6,6),bs=c('cr','cr')) + s(log1p_a0_words,k=6,bs='cr') + s(predictor_child_mean,k=6,bs='cr') + a0_question_type + exact_imitation_candidate + child_backchannel_candidate + session_reading_candidate + session_routine_candidate + s(dataset,bs='re') + s(child_key,bs='re') + s(child_session_key,bs='re')",
+    "F3": "a1_words ~ s(age_z,k=8,bs='cr') + s(predictor_within_z,k=6,bs='cr') + ti(age_z,predictor_within_z,k=c(6,6),bs=c('cr','cr')) + s(log1p_c_words,k=6,bs='cr') + s(log1p_a0_words,k=6,bs='cr') + s(a0_control_within_z,k=6,bs='cr') + s(predictor_child_mean,k=6,bs='cr') + c_question_type + a0_question_type + exact_imitation_candidate + child_backchannel_candidate + session_reading_candidate + session_routine_candidate + s(dataset,bs='re') + s(child_key,bs='re') + s(child_session_key,bs='re')"
+  },
+  "registered_age_grids_months": {
+    "pbm_discovery": [18, 24, 30, 36, 42, 48],
+    "non_pbm_confirmation": [24, 30, 36, 42, 48, 54, 60],
+    "all79_descriptive": [18, 24, 30, 36, 42, 48, 54, 60]
+  },
+  "confirmation_rule": "For each F1-F3 k3 family, the other-58 simultaneous 95% coupling band must exclude zero at two adjacent registered ages; discovery sign agreement at overlapping ages is reported separately and is not used to replace the confirmation estimate.",
+  "validation": {
+    "whole_child_bootstrap_seed": 2026082901,
+    "whole_child_bootstrap_replicates": 200,
+    "age_scramble_seed": 2026082902,
+    "turn_shuffle_seed": 2026082903,
+    "equalized_age_seed": 2026082904,
+    "leave_one_corpus_out": true,
+    "minimum_successful_bootstrap_fraction": 0.95
+  },
+  "bayesian": {
+    "family": "trivariate_normal_measurement_error",
+    "coefficient_order": [
+      "adult_to_child_k3",
+      "adult_to_child_effort",
+      "child_to_adult_effort"
+    ],
+    "first_stage": "joint child-level linear summaries with shared session-clustered covariance; age centered at 42 months",
+    "first_stage_formulas": {
+      "adult_to_child_k3": "z(c_k3_bits) ~ age_z + a0_k3_within_z + age_z:a0_k3_within_z + log1p_c_words + log1p_a0_words + z(a0_k3_child_mean)",
+      "adult_to_child_effort": "z(log1p_c_words) ~ age_z + a0_k3_within_z + age_z:a0_k3_within_z + log1p_a0_words + z(a0_k3_child_mean)",
+      "child_to_adult_effort": "z(log1p_a1_words) ~ age_z + c_k3_within_z + age_z:c_k3_within_z + log1p_c_words + log1p_a0_words + a0_k3_within_z + z(c_k3_child_mean)"
+    },
+    "prior_source": "weakly regularizing standardized-scale priors; PBM estimates are not used as priors",
+    "primary_population_prior_sd": [0.5, 0.15, 0.15],
+    "wide_population_prior_sd": [1.0, 0.3, 0.3],
+    "lkj_eta": 2.0,
+    "child_sd_prior_scale": [0.5, 0.5, 0.5],
+    "corpus_sd_prior_scale": [0.25, 0.25, 0.25],
+    "wide_child_sd_prior_scale": [1.0, 1.0, 1.0],
+    "wide_corpus_sd_prior_scale": [0.5, 0.5, 0.5],
+    "rope_half_width": [0.05, 0.05, 0.05],
+    "sampler": {"seed": 2026082905, "chains": 4, "warmup": 750, "sampling": 1000, "adapt_delta": 0.99, "max_treedepth": 12},
+    "influence_sampler": {"chains": 4, "warmup": 300, "sampling": 500, "adapt_delta": 0.99, "max_treedepth": 12},
+    "maximum_total_cpu_hours": 2.0,
+    "require_synthetic_recovery": true,
+    "require_shared_covariance": true
+  },
+  "gates": {
+    "manual_response_function": "WAITING_FOR_VALIDATED_325_ROW_LABELS",
+    "downstream_utility": "WAITING_FOR_AUDITED_SCORES",
+    "semantic_response_entropy": "NOT_REQUIRED_FOR_PRIMARY_ANALYSIS"
+  },
+  "interpretation_guardrails": [
+    "Use caregiver unless participant metadata establish parent identity.",
+    "Coupling is observational prediction or accommodation, not a causal effect.",
+    "Lower surprisal is scorer predictability, not greater Shannon information.",
+    "Shorter speech is not efficiency without downstream value or validated function.",
+    "Never enter k0, k3, and k0-k3 together in one model.",
+    "Do not pool raw bits across tokenizers."
+  ],
+  "support_snapshot": {
+    "support_summary_sha256": "508a4d53dd6c4467f5d024354fb6aaa23ae24b0c5ee8ab5c316fa0c00965e7b8",
+    "strict_dataset_sha256": "309f2d7c1932925635e1db765d802d256b0acc2df0ba60bb4057767ba4ca7525",
+    "rows": 413084,
+    "children": 79,
+    "corpora": 13
+  }
+}

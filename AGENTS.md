@@ -119,8 +119,8 @@ as a causal SES effect, linguistic deficit, or inherent group efficiency.
 
 The authoritative longitudinal handoffs and local Route 1/Route 2 products
 below were rechecked on 2026-08-25; the Bayesian pilot state was verified on
-2026-08-28; the bidirectional dyadic pre-fit plan was reconciled on 2026-08-29;
-and the Hall snapshot state below was verified on 2026-08-17. When any later
+2026-08-28; the bidirectional dyadic core was verified on 2026-08-30; and the
+Hall snapshot state below was verified on 2026-08-17. When any later
 historical paragraph conflicts with the dated
 analysis-ready map in this section, use this section.
 
@@ -248,18 +248,24 @@ old reports:
   `docs/bayesian_joint_adaptive_efficiency_report.html`. This extension does
   not complete or override the stopped 189-fit program and is not listener
   utility.
-- **Bidirectional dyadic communicative efficiency, pre-fit plan**:
-  `docs/bidirectional_dyadic_communicative_efficiency_protocol.md` is the
-  canonical next-analysis handoff for the ordered sequence caregiver input
-  `A_t` -> child output `C_t` -> caregiver response `A_t+1`. The 413,084 strict
-  triads, broader 613,741 response sample, direct child/caregiver Mistral
-  scores, effort measures, and speaker-coded conversational flags support the
-  local adult-to-child and child-to-caregiver effort/predictability analyses
-  now. No new turn-coupling coefficient has been inspected. Downstream utility
-  and validated response-function models remain gated on complete relocated
-  score archives and manual label validation, respectively. Do not analyze
-  partial Mila waves, call every caregiver a parent, or interpret reciprocal
-  observational coupling as causal optimization.
+- **Bidirectional dyadic communicative efficiency, core complete and audited**:
+  `results/bidirectional_dyadic_efficiency_20260829/` owns the hash-bound
+  413,084-triad core analysis; the report is
+  `docs/bidirectional_dyadic_communicative_efficiency_report.html`. All 15
+  frequentist GAMMs and their whole-child bootstrap, leave-corpus,
+  equalized-age, age-scrambling, and turn-shuffling checks passed. The
+  other-58 sample confirms age reversals in adult-input -> child-effort and
+  child-output -> next-caregiver-effort coupling, but not adult-input -> child
+  `k3` coupling. The bounded 75-child Bayesian synthesis passed all 15 fits
+  with zero divergences and supports negative effort couplings at 42 months,
+  a positive reciprocal-effort correlation, and no population adult-to-child
+  `k3` effect. All 2,697 CHAT files passed speaker-role audits; the 412,623-row
+  parent-at-both-positions sensitivity closely matches the caregiver analysis.
+  `CORE_DYADIC_ANALYSIS_COMPLETE_AND_AUDITED` marks this bounded result.
+  Downstream utility remains gated on a complete relocated score archive and
+  response-function models remain gated on the still-unlabeled 325-row manual
+  sample. Do not interpret reciprocal observational coupling as causal
+  optimization or listener utility.
 - **Word-level information, PBM 21 only**: the owning repository is
   `/home/apaixonada/EvaPortelance/Projet_1/developmental_word_information`.
   Its three canonical input symlinks are under
@@ -776,11 +782,11 @@ Current priorities and genuine compute gaps as of 2026-08-29:
 9. Develop listener-relevant utility only with an actual downstream outcome,
    such as caregiver-response predictive gain or validated repair/clarification
    labels. Response predictability alone is not listener utility.
-10. Build the bidirectional dyadic lane from the frozen caregiver-child-
-    caregiver triads before expanding populations: fit adult-to-child and
-    child-to-caregiver coupling locally, separate within-dyad accommodation
-    from stable between-child differences, and preserve the downstream-score
-    and manual-label gates in the canonical protocol.
+10. Preserve the completed bidirectional dyadic core. When a complete
+    downstream score archive passes relocation audit, apply the frozen utility
+    estimand; independently complete the 325-row manual label validation before
+    any response-function model. Do not refit the core merely to bypass either
+    gate.
 11. Use SES, race/ethnicity, parental education, sex/gender, or nationality
     only with explicit metadata-level provenance. Keep Hall separate from the
     79-child longitudinal analysis.

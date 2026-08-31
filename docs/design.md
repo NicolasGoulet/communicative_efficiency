@@ -412,9 +412,9 @@ controller and backend are
 
 ## Bidirectional Dyadic Extension
 
-The next analysis changes the unit from separate child/caregiver age
+The completed core analysis changes the unit from separate child/caregiver age
 trajectories to the ordered conversational triad caregiver input `A_t`, child
-output `C_t`, and caregiver response `A_t+1`. It asks whether caregiver
+output `C_t`, and caregiver response `A_t+1`. It tests whether caregiver
 effort/predictability modulates the child's next production, whether child
 effort/predictability modulates the caregiver's next response, and whether both
 couplings change with age. Momentary within-child/session deviations are the
@@ -422,11 +422,15 @@ accommodation estimand; stable between-child/dyad differences are modeled
 separately.
 
 This extension reuses completed direct Mistral, informativity, Qwen-demand,
-and conversational-eligibility products. The strict 413,084 triads already
-contain caregiver-response word effort, so the adult-to-child and
-child-to-caregiver effort/predictability lanes require no new neural scoring.
-Downstream predictive utility remains gated on complete five-condition scorer
-archives; repair/clarification models remain gated on manual label validation.
+and conversational-eligibility products. Its exact 413,084-row strict join,
+15 frequentist GAMMs, registered validation suite, 75-child Bayesian
+measurement-error synthesis, and parent-speaker sensitivity all pass their
+frozen gates. The other-58 confirmation sample supports developmental
+reversals for adult-input -> child-effort and child-output -> next-caregiver-
+effort coupling, but not for adult-input -> child `k3` coupling. The Bayesian
+synthesis supports negative effort couplings at 42 months and correlated
+reciprocal effort accommodation; it does not support a population
+adult-to-child `k3` effect.
 
 Frequentist nonlinear mixed models own the detailed population age surfaces.
 A bounded Bayesian multivariate measurement-error synthesis then estimates
@@ -436,10 +440,15 @@ the repository: appropriate likelihoods, partial pooling, weakly regularizing
 priors not derived from PBM estimates, prior/synthetic/posterior checks,
 effect-scale ROPEs, and no Bayes-factor-first decision rule.
 
-The complete pre-fit design, compute map, execution gates, planned namespace,
-and interpretation contract are centralized in
-`docs/bidirectional_dyadic_communicative_efficiency_protocol.md`. Do not copy
-its detailed model registry into `AGENTS.md` or create a parallel dyadic plan.
+The frozen design and interpretation contract are centralized in
+`docs/bidirectional_dyadic_communicative_efficiency_protocol.md`; the
+saved-result report is
+`docs/bidirectional_dyadic_communicative_efficiency_report.html`. Downstream
+predictive utility still waits for complete relocated five-condition scorer
+archives, and repair/clarification models still wait for manual validation of
+the 325-row label sample. Do not copy the detailed model registry into
+`AGENTS.md`, create a parallel plan, or treat the completed core as listener
+utility.
 
 ## August Supervisor Reporting Architecture
 

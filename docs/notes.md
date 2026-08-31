@@ -3,6 +3,44 @@
 Living project memory: discoveries, decisions, bugs, commands that worked, and
 current state. Prefer dated notes.
 
+## 2026-08-30 - Bidirectional dyadic core analysis complete
+
+- Froze the hash-bound contract and built the exact 413,084-row ordered
+  caregiver-child-caregiver table over 79 children, 13 corpora, and 2,697
+  sessions. Every strict row has the conversational flags, child score,
+  preceding-caregiver score, next-caregiver score, and matching text identity;
+  the 613,741-row broad response sample remains a sensitivity resource.
+- All 15 registered frequentist GAMMs converged. Two other-58 confirmation
+  hypotheses passed: the within-session association between adult-input `k3`
+  and child word effort reverses from positive at younger ages to negative at
+  older ages, and the analogous child-`k3` -> next-caregiver-word-effort
+  association also reverses. Adult-input `k3` -> child `k3` coupling did not
+  meet its confirmation rule.
+- All registered validation layers passed: 200 corpus-stratified whole-child
+  bootstraps, leave-one-corpus fits, equalized-age analysis, and nine age-
+  scrambling/turn-shuffling permutation checks. The permutation p-values were
+  0.004975 for all nine primary checks.
+- The bounded Bayesian synthesis used shared session-clustered covariance for
+  75 eligible children. All 15 fits passed after targeted repair of the one
+  wide fit and four short influence fits, with zero divergences, zero
+  treedepth saturation, and 0.799 total CPU-hours. At 42 months, the population
+  adult-input -> child-`k3` effect is near zero, both directional effort
+  couplings are negative, and the child-level reciprocal-effort correlation is
+  positive. The latter is observational coordinated variation, not causality.
+- All 2,697 CHAT participant headers passed the role audit. A verified parent
+  (`MOT`/`FAT`) occupies both adult positions in 412,623 strict triads; three
+  parent-only sensitivity fits passed and differ from the caregiver-primary
+  curves by at most 0.001055 on the modeled link/effect scale.
+- Published `docs/bidirectional_dyadic_communicative_efficiency_report.html`
+  and the marker `CORE_DYADIC_ANALYSIS_COMPLETE_AND_AUDITED`. The final audit
+  status is `PASS_CORE_UTILITY_AND_MANUAL_GATED`.
+- Listener utility remains `WAITING_FOR_AUDITED_SCORES`: no complete relocated
+  downstream archive is locally available. Response-function analysis remains
+  `WAITING_FOR_VALIDATED_325_ROW_LABELS`: the sample exists, but none of its
+  325 rows currently has a completed manual label. Neither blocker invalidates
+  the bounded core, and neither can be replaced by inferred labels or partial
+  scoring waves.
+
 ## 2026-08-29 - Bidirectional dyadic analysis handoff
 
 - Consolidated the proposed caregiver input `A_t` -> child output `C_t` ->

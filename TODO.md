@@ -14,13 +14,13 @@ When a task is completed, move any useful result or decision into
 - Add commands that verify the task.
 - Link to files when the task concerns a specific script or output.
 
-## Current Focus — Reconciled 2026-08-29
+## Current Focus — Reconciled 2026-08-30
 
 This section is the authoritative active checklist. The longer dated sections
 below are retained as implementation/audit history; some of their unchecked
 items were superseded or completed by the later modular direct-score workflow.
 
-### Bidirectional dyadic communicative efficiency — planned 2026-08-29
+### Bidirectional dyadic communicative efficiency — core completed 2026-08-30
 
 - [x] Consolidate the adult-input -> child-output -> caregiver-response design,
       existing evidence, compute dependencies, interpretation rules, and
@@ -28,30 +28,43 @@ items were superseded or completed by the later modular direct-score workflow.
       `docs/bidirectional_dyadic_communicative_efficiency_protocol.md`; add the
       nonduplicative fresh-agent kickoff at
       `docs/prompts/start_bidirectional_dyadic_efficiency_2026-08-29.md`.
-- [ ] Build an immutable 413,084-row primary triad table joining the preceding
+- [x] Build an immutable 413,084-row primary triad table joining the preceding
       caregiver turn, child turn, and next caregiver response to exact Mistral
       scores, effort measures, speaker codes, and text hashes. Preserve the
-      613,741-row broader sample as a sensitivity.
-- [ ] Freeze the machine-readable contract after the join/support audit and
+      613,741-row broader sample as a sensitivity. All strict joins and hashes
+      passed; the table covers 79 children, 13 corpora, and 2,697 sessions.
+- [x] Freeze the machine-readable contract after the join/support audit and
       before inspecting new coupling coefficients. Separate `k0`, `k3`, and
       context support; freeze within/between decompositions, directions, ROPEs,
       priors, bootstrap seeds, and PBM/other-58/all-79 roles.
-- [ ] Fit the bounded frequentist F1-F3 lane: adult-to-child predictability,
+- [x] Fit the bounded frequentist F1-F3 lane: adult-to-child predictability,
       adult-to-child effort, and child-to-caregiver response effort. Run
       unchanged confirmation fits, whole-child bootstrap, influence,
-      equalized-age, age-scrambling, and turn-shuffling checks.
-- [ ] Fit the bounded three-coefficient Bayesian measurement-error synthesis
+      equalized-age, age-scrambling, and turn-shuffling checks. All 15 GAMMs
+      converged and all registered validation layers passed. The other-58
+      sample confirms the developmental reversal in both effort directions;
+      it does not confirm F1 adult-to-child `k3` coupling.
+- [x] Fit the bounded three-coefficient Bayesian measurement-error synthesis
       only after synthetic recovery, prior predictive checks, and a passing
-      real-data runtime projection. PBM is a sample label, never a prior.
-- [ ] Add caregiver speaker identity as an audited sidecar. Treat all allowed
+      real-data runtime projection. PBM is a sample label, never a prior. All
+      15 posterior fits passed after targeted diagnostic repair, using 0.799
+      CPU-hours in total, with zero divergences or treedepth saturation.
+- [x] Add caregiver speaker identity as an audited sidecar. Treat all allowed
       adults as caregivers in the primary analysis; run a parent-only
       sensitivity only after CHAT participant metadata verify `MOT`/`FAT`.
+      All 2,697 CHAT files passed the role audit; 412,623 strict triads have
+      parent speakers at both adult positions, and three parent-only fits pass.
+- [x] Publish the saved-result report and pass the independent core audit at
+      `docs/bidirectional_dyadic_communicative_efficiency_report.html`; preserve
+      `CORE_DYADIC_ANALYSIS_COMPLETE_AND_AUDITED` without claiming utility.
 - [ ] Complete manual validation of the 325-row response-function sample before
-      fitting repair/clarification/acknowledgement models.
+      fitting repair/clarification/acknowledgement models. The sample exists,
+      but currently contains zero completed manual labels.
 - [ ] After all five-condition downstream score archives pass local relocation
       audit, fit downstream utility, extend the Bayesian joint vector, and
       publish one audited dyadic synthesis. Do not analyze partial Mila waves
-      or the local PBM TinyDialogues prototype as scientific results.
+      or the local PBM TinyDialogues prototype as scientific results. No
+      analysis-ready downstream archive is currently present locally.
 
 ### Focused Bayesian joint adaptive-efficiency extension — completed 2026-08-28
 
