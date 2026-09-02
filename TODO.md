@@ -945,6 +945,10 @@ scope, not as an optional later extension.
 
 ### Modular Repositories And Cluster Work
 
+- [x] 2026-09-02: Audit and preserve all six project repositories, publish
+      missing branch tips and dated recovery refs, integrate the completed
+      cross-repository branches, and document the portable T7-data/local-code
+      layout in `docs/project_portability_and_git_recovery_2026-09-02.md`.
 - [x] Create a lightweight `generate_baselines_mila` repo for baseline
       generation only. It should generate CPU n-gram/random baselines and GPU
       LSTM/neural baselines from manifest inputs, then export scorer-ready CSVs.

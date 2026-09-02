@@ -3,6 +3,33 @@
 Living project memory: discoveries, decisions, bugs, commands that worked, and
 current state. Prefer dated notes.
 
+## 2026-09-02 - Cross-machine Git recovery and portable storage policy
+
+- Audited the six project repositories on the T7 with content-aware status,
+  complete ref/worktree inventories, live GitHub comparisons, and full Git
+  object checks. No working content or untracked files were present, and no
+  corrupt or missing objects were found.
+- Created and verified one exact six-repository `.git` archive plus one
+  all-ref bundle per repository under
+  `/home/alkan/Documents/EvaPortelance_git_safety_2026-09-02/`. The 3.9-GiB
+  recovery set preserves old worktree metadata, dangling objects, and the
+  data-heavy March 2026 compute stash without publishing that stash.
+- Pushed four previously unrepresented named branch tips, without force, and
+  created dated pre-integration main recovery refs. Preserved the obsolete
+  three-model relocation commit on its branch without merging its old-laptop
+  path into main.
+- Integrated completed work through isolated PC clones: PBM transformer
+  generation, matching Mistral scoring, the cross-population connection-window
+  correction, and the three-scorer word handoff activation. Published tested
+  integration refs before fast-forwarding the three affected mains.
+- Generator verification passed 23 tests with 2 skips; the 11 directly affected
+  compute tests passed. The complete compute suite retained the same 9 failures
+  and 2 errors as untouched pre-integration main, all due to existing
+  old-machine skill/environment paths or retired branch guards.
+- Added `docs/project_portability_and_git_recovery_2026-09-02.md` and the
+  portable-machine rules in `AGENTS.md`. Large scientific data and results
+  stayed on the T7 and were not copied or modified.
+
 ## 2026-08-30 - Bidirectional dyadic core analysis complete
 
 - Froze the hash-bound contract and built the exact 413,084-row ordered

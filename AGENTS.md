@@ -907,6 +907,35 @@ communicative_efficiency/
 `-- notebooks/
 ```
 
+## Portable Machine And Storage Policy (2026-09-02)
+
+Read `docs/project_portability_and_git_recovery_2026-09-02.md` before moving
+this project to another machine or changing any old absolute path.
+
+- The six-repository Git scope is `communicative_efficiency`,
+  `compute_surprisal_mila`, `developmental_word_information`,
+  `generate_baselines_mila`, `bayes_efficiency_mila`, and
+  `child_complexity_predictors`.
+- Keep fresh Git/code checkouts on the computer's native filesystem. Keep raw
+  data, large scored trees, model products, checkpoints, and historical result
+  archives on the T7 unless a specific size-audited transfer is approved.
+- The T7 project root currently mounts at
+  `/media/alkan/T7/EvaPortelance/Projet_1/`, but mount locations are
+  machine-specific. New code must accept configurable roots and must not embed
+  this path or the dead laptop's `/home/apaixonada/` path.
+- Treat old absolute paths in dated runbooks and provenance as historical
+  records. Resolve their current product by manifest, hash, and repository role
+  before creating a new symlink or configuration.
+- Do Git integration and testing in an isolated native-filesystem clone. Do not
+  prune, garbage-collect, reset, clean, or repair the copied T7 Git metadata as
+  part of normal re-entry.
+- Before any local data copy or new environment, check free space and estimate
+  the complete transfer/cache/output footprint. The initial PC budget is
+  10–15 GiB, with at least 50 GiB kept free.
+- The verified pre-remote Git bundles and exact metadata archive are under
+  `/home/alkan/Documents/EvaPortelance_git_safety_2026-09-02/`. Preserve them
+  until a second independent backup exists.
+
 ## Important Source Files
 
 - `src/prepare_datasets.py`: Stage 0 CHAT / CHILDES preprocessing.
