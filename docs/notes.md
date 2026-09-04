@@ -3,6 +3,39 @@
 Living project memory: discoveries, decisions, bugs, commands that worked, and
 current state. Prefer dated notes.
 
+## 2026-09-04 - WSL/T7 wiring and conversational gate adjudication
+
+- Kept the active Git checkout, Python environment, tests, and code execution
+  on the WSL ext4 filesystem. The T7 is an immutable-input/large-output store,
+  currently visible in WSL at `/mnt/d/EvaPortelance/Projet_1`; this mount is
+  configurable and is not embedded as a source-code default.
+- Added `configs/portable_storage_products.json` and
+  `src/audit_portable_project_storage.py`. The audit passed all eight declared
+  input products, including exact hashes for the full-79 child/caregiver direct
+  tables, conversational flags, three downstream-utility tables, and the
+  full-79 LSTM score table. It created non-destructive input symlinks under
+  `results/external/portable_t7/` and did not write to the T7.
+- Adjudicated all 18,172 historical `context_k1` mismatches. Every immediately
+  preceding allowed-caregiver main tier cleans to empty (examples include
+  `xxx` and nonverbal laughter), and every saved `context_k1` exactly matches
+  the nearest earlier non-empty allowed-caregiver tier—the rule used by the
+  scorer-context builder. There are zero unexpected context mismatches.
+- The 18,172 rows already fail the existing context-match gate and therefore
+  are absent from the completed 413,084-row strict dyadic analysis and its
+  downstream primary sample. This adjudication changes no scientific estimate.
+- Added a stable, hash-bound manual response-function review workflow at
+  `src/build_conversational_response_validation.py`. Its CSV, Excel workbook,
+  codebook, and label validator are ready for the existing 325-row stratified
+  sample. No manual label was inferred: all 325 rows remain genuinely pending
+  human review before response-function models may be fit.
+- The 2.3 MB validation bundle is saved both in the active ignored results
+  directory and at
+  `/mnt/d/EvaPortelance/Projet_1/communicative_efficiency/results/conversational_response_validation_20260904/`.
+  A checksum dry run found no difference between the two copies. Human-edited
+  CSV/XLSX labels can be checked without overwriting them using the codebook's
+  `--stage validate-labels` command; the validator also checks all 325 stable
+  identities and source-row hashes.
+
 ## 2026-09-02 - Cross-machine Git recovery and portable storage policy
 
 - Audited the six project repositories on the T7 with content-aware status,

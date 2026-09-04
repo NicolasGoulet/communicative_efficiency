@@ -262,10 +262,13 @@ old reports:
   `k3` effect. All 2,697 CHAT files passed speaker-role audits; the 412,623-row
   parent-at-both-positions sensitivity closely matches the caregiver analysis.
   `CORE_DYADIC_ANALYSIS_COMPLETE_AND_AUDITED` marks this bounded result.
-  Downstream utility remains gated on a complete relocated score archive and
-  response-function models remain gated on the still-unlabeled 325-row manual
-  sample. Do not interpret reciprocal observational coupling as causal
-  optimization or listener utility.
+  The later three-scorer downstream predictive-utility analysis is now complete
+  and audited as described below; it does not turn the reciprocal coupling into
+  a causal result. Response-function models remain gated on the still-unlabeled
+  325-row manual sample. The earlier 18,172 `context_k1` mismatches were fully
+  adjudicated on 2026-09-04 as expected skips over empty caregiver tiers, with
+  zero unexpected context errors; those rows were already excluded from this
+  strict core by its context-match gate.
 - **Word-level information, PBM 21 only**: the owning repository is
   `/home/apaixonada/EvaPortelance/Projet_1/developmental_word_information`.
   Its three canonical input symlinks are under
@@ -919,10 +922,15 @@ this project to another machine or changing any old absolute path.
 - Keep fresh Git/code checkouts on the computer's native filesystem. Keep raw
   data, large scored trees, model products, checkpoints, and historical result
   archives on the T7 unless a specific size-audited transfer is approved.
-- The T7 project root currently mounts at
-  `/media/alkan/T7/EvaPortelance/Projet_1/`, but mount locations are
+- The T7 project root was verified in the current WSL setup at
+  `/mnt/d/EvaPortelance/Projet_1/` on 2026-09-04 (and previously appeared at
+  `/media/alkan/T7/EvaPortelance/Projet_1/`). Mount locations are
   machine-specific. New code must accept configurable roots and must not embed
-  this path or the dead laptop's `/home/apaixonada/` path.
+  either mount or the dead laptop's `/home/apaixonada/` path.
+- Validate and expose the current eight-product storage view with
+  `src/audit_portable_project_storage.py --storage-root <mounted-project-root>
+  --create-links`. This creates only local links under
+  `results/external/portable_t7/`; it never modifies the storage tree.
 - Treat old absolute paths in dated runbooks and provenance as historical
   records. Resolve their current product by manifest, hash, and repository role
   before creating a new symlink or configuration.

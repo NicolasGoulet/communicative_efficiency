@@ -1,0 +1,124 @@
+{
+  "schema_version": "1.0.0",
+  "description": "Relocation-safe inventory of immutable T7 inputs used by the current communicative-efficiency analyses.",
+  "products": [
+    {
+      "name": "strict_naturalistic_bundle",
+      "repository": "communicative_efficiency",
+      "relative_path": "data/big_cleaned_dataset/default_naturalistic_merged_006_023",
+      "required_files": [
+        {"path": "manifest.csv"}
+      ]
+    },
+    {
+      "name": "raw_chat",
+      "repository": "communicative_efficiency",
+      "relative_path": "data/raw_data",
+      "required_files": []
+    },
+    {
+      "name": "conversational_eligibility",
+      "repository": "communicative_efficiency",
+      "relative_path": "results/conversational_eligibility",
+      "required_files": [
+        {
+          "path": "full79_child_conversational_flags.csv.gz",
+          "bytes": 66913273,
+          "sha256": "82fa51aab312d00e28367b296a5dcf9a506fea3a5b7ddc4723308da936cabe59"
+        },
+        {"path": "full79_child_conversational_flags.audit.json"},
+        {"path": "full79_conversational_manual_validation_sample.csv", "bytes": 168887}
+      ],
+      "json_checks": [
+        {"path": "full79_child_conversational_flags.audit.json", "key": "counts.rows", "expected": 1140218},
+        {"path": "full79_child_conversational_flags.audit.json", "key": "manual_sample_rows", "expected": 325},
+        {"path": "full79_child_conversational_flags.audit.json", "key": "status", "expected": "REVIEW"}
+      ]
+    },
+    {
+      "name": "bidirectional_dyadic_core",
+      "repository": "communicative_efficiency",
+      "relative_path": "results/bidirectional_dyadic_efficiency_20260829",
+      "required_files": [
+        {"path": "CORE_DYADIC_ANALYSIS_COMPLETE_AND_AUDITED"},
+        {"path": "final_audit.json"},
+        {"path": "datasets/dyadic_triads_strict.parquet", "bytes": 90101623}
+      ],
+      "json_checks": [
+        {"path": "final_audit.json", "key": "status", "expected": "PASS_CORE_UTILITY_AND_MANUAL_GATED"},
+        {"path": "final_audit.json", "key": "core_complete", "expected": true}
+      ]
+    },
+    {
+      "name": "downstream_caregiver_response",
+      "repository": "communicative_efficiency",
+      "relative_path": "results/downstream_caregiver_response_analysis",
+      "required_files": [
+        {"path": "DOWNSTREAM_RESPONSE_EFFICIENCY_COMPLETE_AND_AUDITED"},
+        {"path": "final_audit.json"},
+        {
+          "path": "datasets/mistral-7b-v0.3.response_utility.csv.gz",
+          "sha256": "29036b4cc0c94e00675efdb0ef0d87e2e45c26c65f8d203029bd6a4778c18bcd"
+        },
+        {
+          "path": "datasets/qwen3-14b.response_utility.csv.gz",
+          "sha256": "f20e78c3e62c2615c628a1ae55945952182922e5e62660b0410bdc3ac2232c51"
+        },
+        {
+          "path": "datasets/tinydialogues.response_utility.csv.gz",
+          "sha256": "0434dcd289608943c56e387de3db6a94b8e400666d3d73b14d70540fb7e266b3"
+        }
+      ],
+      "json_checks": [
+        {"path": "final_audit.json", "key": "status", "expected": "PASS"},
+        {"path": "final_audit.json", "key": "models", "expected": 27}
+      ]
+    },
+    {
+      "name": "direct_mistral_full79",
+      "repository": "communicative_efficiency",
+      "relative_path": "results/direct_surprisal_replication/mistral_full79",
+      "required_files": [
+        {
+          "path": "child_direct_surprisal_wide.csv.gz",
+          "bytes": 1060647432,
+          "sha256": "4edf9194481e15a04bc23dd8be03a26c95c0a7c2baddbadd5b3d18011786adad"
+        },
+        {
+          "path": "caretaker_direct_surprisal_wide.csv.gz",
+          "bytes": 399868198,
+          "sha256": "2aef4c1950826a9fbb80c062b78660cf8f0bcf6a5b940a14cad3ff20c8bbb90f"
+        },
+        {"path": "manifest.json"}
+      ]
+    },
+    {
+      "name": "full79_lstm_mistral",
+      "repository": "compute_surprisal_mila",
+      "relative_path": "mila_results/lstm_full79_mistral_scoring/20260825_lstm_full79_mistral_boundary_repair_7298e22_v1/immutable_handoff",
+      "required_files": [
+        {"path": "markers/COMPLETE_AND_AUDITED"},
+        {
+          "path": "products/lstm_additive_k3_same_length_full79_mistral_utterance_scores.csv.gz",
+          "bytes": 139327705,
+          "sha256": "03af2bc6abbca362eb9c7529b921e84048d65f68f6c950b841384e187271345e"
+        },
+        {"path": "reports/audit_report.json"}
+      ],
+      "json_checks": [
+        {"path": "reports/audit_report.json", "key": "status", "expected": "PASS"}
+      ]
+    },
+    {
+      "name": "qwen_response_mistral_full100",
+      "repository": "compute_surprisal_mila",
+      "relative_path": "mila_results/qwen_response_mistral_full_scoring/20260817_qwen_response_mistral_full75_smoke_f5dd5aa_v1/extracted_run",
+      "required_files": [
+        {"path": "CORE75_COMPLETE"},
+        {"path": "EXTENSION25_COMPLETE"},
+        {"path": "FULL100_AVAILABLE"},
+        {"path": "prepared/tasks.tsv", "bytes": 641701}
+      ]
+    }
+  ]
+}

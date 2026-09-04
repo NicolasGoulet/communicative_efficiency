@@ -18,7 +18,7 @@ analysis contract or completion marker.
   59 GB scored-archive layer to the PC by default. Read needed inputs from the
   mounted T7 and size-check every proposed local transfer first.
 
-The current T7 sibling-repository root is:
+The T7 sibling-repository root during the original 2026-09-02 audit was:
 
 ```text
 /media/alkan/T7/EvaPortelance/Projet_1/
@@ -27,6 +27,22 @@ The current T7 sibling-repository root is:
 That mount path is machine-specific. Discover it on each machine instead of
 embedding it in new code. Paths under `/home/apaixonada/` in historical notes
 record the previous laptop and are not current portable defaults.
+
+On 2026-09-04, the same storage tree was verified in WSL at
+`/mnt/d/EvaPortelance/Projet_1`. The relocatable eight-product audit passed and
+the local input link farm was created with:
+
+```bash
+.venv/bin/python src/audit_portable_project_storage.py \
+  --storage-root /mnt/d/EvaPortelance/Projet_1 \
+  --create-links
+```
+
+The declared paths and expected hashes live in
+`configs/portable_storage_products.json`. The command only writes the ignored
+local link farm and audit record under `results/external/portable_t7/`; it does
+not modify the T7. On another machine, change only `--storage-root` (or set
+`EFF_COMM_STORAGE_ROOT`) after mounting the same audited product tree.
 
 ## Six-repository Git scope
 
