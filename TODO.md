@@ -1892,3 +1892,10 @@ Use this for short notes after finishing tasks.
   session-ID predictors/grouping/random intercepts and uses row-level or
   child-age-word-cell estimators only. All 20 fits completed; focused test
   passed; image audit found 0 missing links.
+- 2026-09-04 - Completed the bounded three-scorer predictive-performance side
+  analysis for Mistral-7B-v0.3, Qwen3-14B, and TinyDialogues-135M. The audited
+  report is `docs/scorer_performance_comparison_2026-09-04.md`; its frozen
+  protocol, exact-paired BPC tables, 10 figures, source/revision audits,
+  deterministic whole-child intervals, and manifest are complete. No follow-up
+  computation is required unless the scorer set, target corpus, or scientific
+  ranking question changes.

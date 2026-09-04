@@ -7913,3 +7913,41 @@ CUDA_VISIBLE_DEVICES='' MPLCONFIGDIR=/tmp/mpl-cache \
   for TinyDialogues [-0.0312, 0.0154]. This supports immediate scorer-based
   child-turn utility, not increasing downstream utility with age or a causal
   child-to-caregiver effect.
+
+## 2026-09-04 - Three-scorer predictive-performance side analysis
+
+- Recovered the historical T7 model-by-utterance-length and model-by-age
+  analysis scripts and reused their stratification logic with Unicode bits per
+  character (BPC), rather than cross-tokenizer bits per model token, as the
+  ranking metric.
+- Ran an exact-paired comparison of Mistral-7B-v0.3, Qwen3-14B, and
+  TinyDialogues-135M on 446,508 PBM21 child utterances across `k0`--`k3`
+  (1,778,052 paired scored context rows; 21 children; three corpora). The
+  contextual `k3` child-balanced BPC ordering is Mistral 2.1367, Qwen 2.2818,
+  TinyDialogues 2.9300. Paired candidate-minus-Mistral differences are +0.1451
+  [0.1342, 0.1566] for Qwen and +0.7933 [0.7480, 0.8434] for TinyDialogues.
+- Confirmed the crossover that matters for interpretation: without context,
+  TinyDialogues is least surprised (2.8946 BPC versus Mistral 3.2793 and Qwen
+  4.1336), but it has slightly negative child-speech context support (-0.0347
+  BPC), while Mistral and Qwen gain 1.1436 and 1.8528 BPC. Mistral is best in
+  all 13 `k3` length cells, all eight observed age bins, all three corpora, and
+  every leave-one-corpus-out comparison.
+- Repeated the comparison as a 413,084-pair, 79-child, 13-corpus caregiver
+  response stress test. Mistral is again best with matched-child context
+  (1.3739 BPC), followed by Qwen (1.4819) and TinyDialogues (2.3364), whereas
+  TinyDialogues is best unconditionally.
+- Audited source markers, exact identities, hashes, model/tokenizer/code
+  revisions, scorer-specific dtype/engine/prefix profiles, stored-versus-
+  reconstructed BPC/BPW, and context truncation. Reconstruction error and
+  truncated-context counts are zero. The Qwen `logits_to_keep` equivalence
+  tests pass, and the `e890ec1..c82d219` scorer diff changes batching/loading,
+  not the target-log-softmax derivation.
+- Deliverables: `src/build_scorer_performance_comparison.py`,
+  `tests/test_build_scorer_performance_comparison.py`,
+  `docs/scorer_performance_comparison_protocol_2026-09-04.md`, and
+  `docs/scorer_performance_comparison_2026-09-04.{md,html}`. Ignored results
+  and figures live under `results/scorer_performance_comparison_20260904/` and
+  `figs/scorer_performance_comparison_20260904/`; their manifest and completion
+  audit pass. Verification: two focused analysis tests, two compute-scorer
+  equivalence tests, all 575 repository tests, and every manifest artifact hash
+  pass.
