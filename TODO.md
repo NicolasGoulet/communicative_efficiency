@@ -1899,3 +1899,11 @@ Use this for short notes after finishing tasks.
   deterministic whole-child intervals, and manifest are complete. No follow-up
   computation is required unless the scorer set, target corpus, or scientific
   ranking question changes.
+- 2026-09-04 - Completed the cross-machine handoff for the scorer comparison.
+  Registered all three PBM21 scorer roots, the historical plotting sources,
+  and the completed analysis/figure products in the portable-storage manifest;
+  added a mount-independent run/restore entry point with collision and
+  write-through protection; regenerated successfully under a 2 GB DuckDB cap;
+  and documented the fresh-clone re-entry commands. The approximately 983 MiB
+  ignored result/figure bundle is archived on the T7 and Git retains only code,
+  tests, configuration, reports, and lightweight provenance.

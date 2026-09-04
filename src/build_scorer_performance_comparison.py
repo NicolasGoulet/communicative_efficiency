@@ -72,7 +72,29 @@ def parse_scorer(value: str) -> ScorerInput:
     label = label.strip()
     if not label:
         raise argparse.ArgumentTypeError("scorer label cannot be empty")
-    return ScorerInput(label, Path(raw_path).expanduser().resolve())
+    # Preserve the caller's logical path in provenance.  The filesystem APIs
+    # still follow symlinks, while a portable link-farm path remains meaningful
+    # after the external drive is mounted somewhere else.
+    return ScorerInput(label, Path(raw_path).expanduser())
+
+
+def portable_provenance_path(path: Path) -> str:
+    """Return a stable display identifier without recording a host mount path."""
+
+    project_root = Path(__file__).resolve().parents[1]
+    try:
+        return str(path.relative_to(project_root))
+    except ValueError:
+        pass
+    for repository in (
+        "communicative_efficiency",
+        "compute_surprisal_mila",
+        "surprisal_computing",
+    ):
+        if repository in path.parts:
+            start = path.parts.index(repository)
+            return str(Path(*path.parts[start:]))
+    return path.name
 
 
 def sha256_file(path: Path) -> str:
@@ -1088,7 +1110,10 @@ def build_report(
         + " < ".join(child_k3.model.tolist())
         + "."
     )
-    historical_lines = "\n".join(f"- `{path}` (SHA-256 `{sha256_file(path)}`)" for path in historical_sources)
+    historical_lines = "\n".join(
+        f"- `{portable_provenance_path(path)}` (SHA-256 `{sha256_file(path)}`)"
+        for path in historical_sources
+    )
     figure_lines = "\n\n".join(
         f"![{path.stem.replace('_', ' ').title()}]({os.path.relpath(path, report_md.parent)})" for path in figures
     )
@@ -1241,11 +1266,17 @@ def run_analysis(
     historical_sources: Sequence[Path],
     bootstrap_reps: int = 10_000,
     seed: int = 20260904,
+    duckdb_memory_limit: str = "2GB",
+    duckdb_threads: int = 4,
 ) -> dict[str, object]:
     if len(child_scorers) != 3 or len({item.label for item in child_scorers}) != 3:
         raise RuntimeError("exactly three uniquely labelled child scorers are required")
     if caregiver_scorers and [item.label for item in caregiver_scorers] != [item.label for item in child_scorers]:
         raise RuntimeError("caregiver scorer labels/order must match child scorer labels/order")
+    if not re.fullmatch(r"[1-9][0-9]*(?:MB|GB)", duckdb_memory_limit):
+        raise RuntimeError("DuckDB memory limit must look like 512MB or 2GB")
+    if duckdb_threads < 1:
+        raise RuntimeError("DuckDB threads must be positive")
     if not protocol.is_file():
         raise RuntimeError(f"missing frozen protocol: {protocol}")
     for path in historical_sources:
@@ -1262,7 +1293,9 @@ def run_analysis(
     final_db = output_dir / "analysis.duckdb"
     temporary_db.unlink(missing_ok=True)
     connection = duckdb.connect(str(temporary_db))
-    connection.execute("PRAGMA threads=8")
+    connection.execute(f"SET memory_limit='{duckdb_memory_limit}'")
+    connection.execute(f"SET threads={duckdb_threads}")
+    connection.execute("SET preserve_insertion_order=false")
     connection.execute(f"SET temp_directory='{str(temporary_directory.resolve()).replace(chr(39), chr(39) * 2)}'")
     try:
         source_rows = []
@@ -1367,7 +1400,11 @@ def run_analysis(
             protocol,
             historical_sources,
         )
-    finally:
+    except BaseException:
+        connection.close()
+        temporary_db.unlink(missing_ok=True)
+        raise
+    else:
         connection.close()
     os.replace(temporary_db, final_db)
 
@@ -1394,9 +1431,14 @@ def run_analysis(
         "metric": "unicode_bits_per_character",
         "bootstrap_reps": bootstrap_reps,
         "bootstrap_seed": seed,
+        "duckdb_memory_limit": duckdb_memory_limit,
+        "duckdb_threads": duckdb_threads,
         "scorers": [item.label for item in child_scorers],
         "paired_audit": paired_audit,
-        "historical_sources": [{"path": str(path), "sha256": sha256_file(path)} for path in historical_sources],
+        "historical_sources": [
+            {"path": portable_provenance_path(path), "sha256": sha256_file(path)}
+            for path in historical_sources
+        ],
         "scoring_revision_compatibility": {
             "status": "PASS",
             "mistral_tiny_revision": "e890ec1bbe34204c9388bbf53aba8121a685d89b",
@@ -1426,8 +1468,23 @@ def main(argv: Sequence[str] | None = None) -> int:
     parser.add_argument("--historical-source", action="append", type=Path, required=True)
     parser.add_argument("--bootstrap-reps", type=int, default=10_000)
     parser.add_argument("--seed", type=int, default=20260904)
+    parser.add_argument("--duckdb-memory-limit", default="2GB")
+    parser.add_argument("--duckdb-threads", type=int, default=4)
     args = parser.parse_args(argv)
-    report = run_analysis(args.child_scorer, args.caregiver_scorer, args.output_dir, args.fig_dir, args.report_md, args.report_html, args.protocol, args.historical_source, args.bootstrap_reps, args.seed)
+    report = run_analysis(
+        args.child_scorer,
+        args.caregiver_scorer,
+        args.output_dir,
+        args.fig_dir,
+        args.report_md,
+        args.report_html,
+        args.protocol,
+        args.historical_source,
+        args.bootstrap_reps,
+        args.seed,
+        args.duckdb_memory_limit,
+        args.duckdb_threads,
+    )
     print(json.dumps(report, indent=2))
     return 0
 

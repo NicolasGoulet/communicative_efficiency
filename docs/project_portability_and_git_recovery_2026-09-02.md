@@ -29,7 +29,7 @@ embedding it in new code. Paths under `/home/apaixonada/` in historical notes
 record the previous laptop and are not current portable defaults.
 
 On 2026-09-04, the same storage tree was verified in WSL at
-`/mnt/d/EvaPortelance/Projet_1`. The relocatable eight-product audit passed and
+`/mnt/d/EvaPortelance/Projet_1`. The relocatable fourteen-product audit passed and
 the local input link farm was created with:
 
 ```bash
@@ -43,6 +43,43 @@ The declared paths and expected hashes live in
 local link farm and audit record under `results/external/portable_t7/`; it does
 not modify the T7. On another machine, change only `--storage-root` (or set
 `EFF_COMM_STORAGE_ROOT`) after mounting the same audited product tree.
+
+The fourteen registered products now include the exact Mistral, Qwen, and
+TinyDialogues PBM21 word-surprisal inputs, the two historical plotting sources,
+and the completed scorer-comparison results and figures. The scorer comparison
+keeps model identities and scoring revisions frozen as a scientific contract;
+only storage location and bounded execution resources are configurable.
+
+### Scorer-comparison re-entry
+
+From a fresh `communicative_efficiency` clone with its environment installed:
+
+```bash
+export EFF_COMM_STORAGE_ROOT=/path/to/EvaPortelance/Projet_1
+.venv/bin/python src/audit_portable_project_storage.py --create-links
+.venv/bin/python src/run_scorer_performance_comparison_portable.py restore
+```
+
+`restore` creates relative, clone-local links for the approximately 981 MiB
+completed analysis and its figures. It is idempotent and refuses to replace an
+existing directory or a different link. It never writes to the T7. The tracked
+Markdown/HTML reports then resolve the restored figures normally.
+
+To recompute from the same audited inputs rather than restoring the completed
+product, use a new native output directory:
+
+```bash
+.venv/bin/python src/run_scorer_performance_comparison_portable.py run \
+  --output-dir results/scorer_performance_comparison_20260904_rerun \
+  --fig-dir figs/scorer_performance_comparison_20260904_rerun \
+  --report-md docs/scorer_performance_comparison_20260904_rerun.md \
+  --report-html docs/scorer_performance_comparison_20260904_rerun.html
+```
+
+The portable runner defaults to a 2 GB DuckDB memory limit, four threads, and
+disk spill so it is safe on a modest machine. Both limits have command-line
+overrides. It refuses to run through a restored output symlink, preventing an
+accidental rewrite of the archived T7 product.
 
 ## Six-repository Git scope
 

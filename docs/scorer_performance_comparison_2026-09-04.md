@@ -120,8 +120,8 @@ Positive support means context reduced target surprisal.
 The new length and age analyses reuse the aggregation structure of these two
 historical T7 scripts:
 
-- `/mnt/d/EvaPortelance/Projet_1/surprisal_computing/proj_1/src/plot_surprisal_vs_length.py` (SHA-256 `2779ea0e644dfdfa6e6146b0b77e3d06be78ed3d4e566d0ffd975558b2d1684a`)
-- `/mnt/d/EvaPortelance/Projet_1/surprisal_computing/proj_1/src/plot_surprisal_vs_length_by_model_age_schemes.py` (SHA-256 `48190975733d5e25cc93d2fb5b7a0002e47c1118eca12585a982cb97283e1f8f`)
+- `surprisal_computing/proj_1/src/plot_surprisal_vs_length.py` (SHA-256 `2779ea0e644dfdfa6e6146b0b77e3d06be78ed3d4e566d0ffd975558b2d1684a`)
+- `surprisal_computing/proj_1/src/plot_surprisal_vs_length_by_model_age_schemes.py` (SHA-256 `48190975733d5e25cc93d2fb5b7a0002e47c1118eca12585a982cb97283e1f8f`)
 
 The historical plots ranked models with token-weighted bits per token. That
 quantity remains in the tokenization diagnostic, but the new ranking uses BPC

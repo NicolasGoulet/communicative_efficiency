@@ -7951,3 +7951,32 @@ CUDA_VISIBLE_DEVICES='' MPLCONFIGDIR=/tmp/mpl-cache \
   audit pass. Verification: two focused analysis tests, two compute-scorer
   equivalence tests, all 575 repository tests, and every manifest artifact hash
   pass.
+
+## 2026-09-04 - Portable scorer-comparison handoff
+
+- Added `src/run_scorer_performance_comparison_portable.py`. It resolves stable
+  product names under `results/external/portable_t7/`, so the analysis does not
+  know or record a drive letter/mount directory. `restore` creates relative
+  local links and refuses collisions; `run` refuses output symlinks so it cannot
+  accidentally replace the archived product through a link.
+- Expanded `configs/portable_storage_products.json` from eight to fourteen
+  products: three frozen PBM21 scorer inputs, two hashed historical scripts as
+  one source product, and the completed comparison results and figures. Input
+  audit reports, completion markers, output manifest, DuckDB database, paired
+  Parquet files, and all ten figures have pinned hashes.
+- A first regeneration exposed an out-of-memory failure on the 6.7 GiB WSL
+  host before any PASS marker could be written. The builder now defaults to a
+  configurable 2 GB DuckDB cap, four threads, disabled insertion-order
+  preservation, and local disk spill. The clean retry completed `PASS` with
+  446,508 paired child targets, 413,084 caregiver pairs, and zero audit
+  problems; those execution settings are recorded in the manifest.
+- The completed ignored result directory is approximately 981 MiB and the ten
+  figures approximately 2 MiB. Both were copied to new, explicitly named T7
+  directories, then re-audited through the same relocation-safe manifest. The
+  T7 inputs remained read-only throughout analysis and were not modified.
+- Final verification: 10 focused scorer/portability/storage tests passed;
+  `py_compile` and `git diff --check` passed; all 26 artifacts named by the
+  scorer manifest re-hashed successfully; the source-to-T7 checksum dry run had
+  no byte-content differences; the fourteen-product T7 audit returned `PASS`
+  with zero problems; and the full repository suite passed 580 tests in
+  635.109 seconds.
