@@ -1,0 +1,261 @@
+{
+  "schema_version": "1.0.0",
+  "description": "Relocation-safe inventory of immutable T7 inputs and completed analysis products used by the current communicative-efficiency analyses.",
+  "products": [
+    {
+      "name": "strict_naturalistic_bundle",
+      "repository": "communicative_efficiency",
+      "relative_path": "data/big_cleaned_dataset/default_naturalistic_merged_006_023",
+      "required_files": [
+        {"path": "manifest.csv"}
+      ]
+    },
+    {
+      "name": "raw_chat",
+      "repository": "communicative_efficiency",
+      "relative_path": "data/raw_data",
+      "required_files": []
+    },
+    {
+      "name": "conversational_eligibility",
+      "repository": "communicative_efficiency",
+      "relative_path": "results/conversational_eligibility",
+      "required_files": [
+        {
+          "path": "full79_child_conversational_flags.csv.gz",
+          "bytes": 66913273,
+          "sha256": "82fa51aab312d00e28367b296a5dcf9a506fea3a5b7ddc4723308da936cabe59"
+        },
+        {"path": "full79_child_conversational_flags.audit.json"},
+        {"path": "full79_conversational_manual_validation_sample.csv", "bytes": 168887}
+      ],
+      "json_checks": [
+        {"path": "full79_child_conversational_flags.audit.json", "key": "counts.rows", "expected": 1140218},
+        {"path": "full79_child_conversational_flags.audit.json", "key": "manual_sample_rows", "expected": 325},
+        {"path": "full79_child_conversational_flags.audit.json", "key": "status", "expected": "REVIEW"}
+      ]
+    },
+    {
+      "name": "bidirectional_dyadic_core",
+      "repository": "communicative_efficiency",
+      "relative_path": "results/bidirectional_dyadic_efficiency_20260829",
+      "required_files": [
+        {"path": "CORE_DYADIC_ANALYSIS_COMPLETE_AND_AUDITED"},
+        {"path": "final_audit.json"},
+        {"path": "datasets/dyadic_triads_strict.parquet", "bytes": 90101623}
+      ],
+      "json_checks": [
+        {"path": "final_audit.json", "key": "status", "expected": "PASS_CORE_UTILITY_AND_MANUAL_GATED"},
+        {"path": "final_audit.json", "key": "core_complete", "expected": true}
+      ]
+    },
+    {
+      "name": "downstream_caregiver_response",
+      "repository": "communicative_efficiency",
+      "relative_path": "results/downstream_caregiver_response_analysis",
+      "required_files": [
+        {"path": "DOWNSTREAM_RESPONSE_EFFICIENCY_COMPLETE_AND_AUDITED"},
+        {"path": "final_audit.json"},
+        {
+          "path": "datasets/mistral-7b-v0.3.response_utility.csv.gz",
+          "sha256": "29036b4cc0c94e00675efdb0ef0d87e2e45c26c65f8d203029bd6a4778c18bcd"
+        },
+        {
+          "path": "datasets/qwen3-14b.response_utility.csv.gz",
+          "sha256": "f20e78c3e62c2615c628a1ae55945952182922e5e62660b0410bdc3ac2232c51"
+        },
+        {
+          "path": "datasets/tinydialogues.response_utility.csv.gz",
+          "sha256": "0434dcd289608943c56e387de3db6a94b8e400666d3d73b14d70540fb7e266b3"
+        }
+      ],
+      "json_checks": [
+        {"path": "final_audit.json", "key": "status", "expected": "PASS"},
+        {"path": "final_audit.json", "key": "models", "expected": 27}
+      ]
+    },
+    {
+      "name": "direct_mistral_full79",
+      "repository": "communicative_efficiency",
+      "relative_path": "results/direct_surprisal_replication/mistral_full79",
+      "required_files": [
+        {
+          "path": "child_direct_surprisal_wide.csv.gz",
+          "bytes": 1060647432,
+          "sha256": "4edf9194481e15a04bc23dd8be03a26c95c0a7c2baddbadd5b3d18011786adad"
+        },
+        {
+          "path": "caretaker_direct_surprisal_wide.csv.gz",
+          "bytes": 399868198,
+          "sha256": "2aef4c1950826a9fbb80c062b78660cf8f0bcf6a5b940a14cad3ff20c8bbb90f"
+        },
+        {"path": "manifest.json"}
+      ]
+    },
+    {
+      "name": "full79_lstm_mistral",
+      "repository": "compute_surprisal_mila",
+      "relative_path": "mila_results/lstm_full79_mistral_scoring/20260825_lstm_full79_mistral_boundary_repair_7298e22_v1/immutable_handoff",
+      "required_files": [
+        {"path": "markers/COMPLETE_AND_AUDITED"},
+        {
+          "path": "products/lstm_additive_k3_same_length_full79_mistral_utterance_scores.csv.gz",
+          "bytes": 139327705,
+          "sha256": "03af2bc6abbca362eb9c7529b921e84048d65f68f6c950b841384e187271345e"
+        },
+        {"path": "reports/audit_report.json"}
+      ],
+      "json_checks": [
+        {"path": "reports/audit_report.json", "key": "status", "expected": "PASS"}
+      ]
+    },
+    {
+      "name": "qwen_response_mistral_full100",
+      "repository": "compute_surprisal_mila",
+      "relative_path": "mila_results/qwen_response_mistral_full_scoring/20260817_qwen_response_mistral_full75_smoke_f5dd5aa_v1/extracted_run",
+      "required_files": [
+        {"path": "CORE75_COMPLETE"},
+        {"path": "EXTENSION25_COMPLETE"},
+        {"path": "FULL100_AVAILABLE"},
+        {"path": "prepared/tasks.tsv", "bytes": 641701}
+      ]
+    },
+    {
+      "name": "mistral_pbm21_word_surprisal",
+      "repository": "compute_surprisal_mila",
+      "relative_path": "mila_results/crossmodel_word_surprisal/20260731_mistral_pbm21_production_e890ec1_v1/extracted_run",
+      "required_files": [
+        {
+          "path": "WORD_SURPRISAL_COMPLETE",
+          "sha256": "a799f29cfcfe365731573d567a5d06427be3869cbee3344d9ce0b880cb2dd538"
+        },
+        {
+          "path": "LOCAL_RETRIEVAL_AUDIT_PASSED",
+          "sha256": "2189be7d0256b163f3dffc127da7df8474f42cdec494f8da81b9545cebeeabd8"
+        },
+        {
+          "path": "reports/local_retrieval_audit/audit_report.json",
+          "sha256": "2ceb6a4daee74abebdcb3cf805afd285e17e294e338f0093a3465057a928788f"
+        }
+      ],
+      "json_checks": [
+        {"path": "reports/local_retrieval_audit/audit_report.json", "key": "status", "expected": "PASS"}
+      ]
+    },
+    {
+      "name": "qwen3_14b_pbm21_word_surprisal",
+      "repository": "compute_surprisal_mila",
+      "relative_path": "mila_results/crossmodel_word_surprisal/20260803_qwen3_14b_pbm21_batch16_persistent_production_c82d219_v1/extracted_run",
+      "required_files": [
+        {
+          "path": "WORD_SURPRISAL_COMPLETE",
+          "sha256": "a799f29cfcfe365731573d567a5d06427be3869cbee3344d9ce0b880cb2dd538"
+        },
+        {
+          "path": "LOCAL_RETRIEVAL_AUDIT_PASSED",
+          "sha256": "2189be7d0256b163f3dffc127da7df8474f42cdec494f8da81b9545cebeeabd8"
+        },
+        {
+          "path": "reports/local_retrieval_audit/audit_report.json",
+          "sha256": "08272424cb5eb6c63322a97462ef8fb0945d87abbd2f528fad8b2ebc78d349cf"
+        }
+      ],
+      "json_checks": [
+        {"path": "reports/local_retrieval_audit/audit_report.json", "key": "status", "expected": "PASS"}
+      ]
+    },
+    {
+      "name": "tinydialogues_pbm21_word_surprisal",
+      "repository": "compute_surprisal_mila",
+      "relative_path": "mila_results/crossmodel_word_surprisal/20260730_tinydialogues_pbm21_production_e890ec1_v1/extracted_run",
+      "required_files": [
+        {
+          "path": "WORD_SURPRISAL_COMPLETE",
+          "sha256": "a799f29cfcfe365731573d567a5d06427be3869cbee3344d9ce0b880cb2dd538"
+        },
+        {
+          "path": "LOCAL_RETRIEVAL_AUDIT_PASSED",
+          "sha256": "2189be7d0256b163f3dffc127da7df8474f42cdec494f8da81b9545cebeeabd8"
+        },
+        {
+          "path": "reports/local_retrieval_audit/audit_report.json",
+          "sha256": "46162cd69238e22b4a069975e041dd09218e68caa659fc1b3deb967d22867432"
+        }
+      ],
+      "json_checks": [
+        {"path": "reports/local_retrieval_audit/audit_report.json", "key": "status", "expected": "PASS"}
+      ]
+    },
+    {
+      "name": "scorer_performance_historical_sources",
+      "repository": "surprisal_computing",
+      "relative_path": "proj_1/src",
+      "required_files": [
+        {
+          "path": "plot_surprisal_vs_length.py",
+          "sha256": "2779ea0e644dfdfa6e6146b0b77e3d06be78ed3d4e566d0ffd975558b2d1684a"
+        },
+        {
+          "path": "plot_surprisal_vs_length_by_model_age_schemes.py",
+          "sha256": "48190975733d5e25cc93d2fb5b7a0002e47c1118eca12585a982cb97283e1f8f"
+        }
+      ]
+    },
+    {
+      "name": "scorer_performance_comparison",
+      "repository": "communicative_efficiency",
+      "relative_path": "results/scorer_performance_comparison_20260904",
+      "required_files": [
+        {
+          "path": "SCORER_PERFORMANCE_COMPARISON_COMPLETE_AND_AUDITED",
+          "bytes": 12,
+          "sha256": "3f46ea84fd46dcf96234f2d9e71f878657aa4959c71a29d38c99f1a9a6e64abe"
+        },
+        {
+          "path": "manifest.json",
+          "sha256": "aeda26b33a4ee16503f6ba99b85861008aeb68f32c6d522702f25974000d8be6"
+        },
+        {
+          "path": "analysis.duckdb",
+          "bytes": 875835392,
+          "sha256": "bbbfd572d7dcbbe5772d2ddf0ebdaa70d30395b9c01231f00d5ec791d5751a83"
+        },
+        {
+          "path": "paired_child_utterance_scores.parquet",
+          "bytes": 120565824,
+          "sha256": "fc0889e641ffe84d60e137218d52d04ea80e4e2bf328b694dac5ef6b6ad9a92a"
+        },
+        {
+          "path": "paired_caregiver_response_scores.parquet",
+          "bytes": 31519586,
+          "sha256": "b067fa34f38cf38852f85c265e37b7b09957bf2ce1ef728fa5a14f6ec4ce4056"
+        }
+      ],
+      "json_checks": [
+        {"path": "manifest.json", "key": "status", "expected": "PASS"},
+        {"path": "manifest.json", "key": "problem_count", "expected": 0},
+        {"path": "manifest.json", "key": "duckdb_memory_limit", "expected": "2GB"},
+        {"path": "manifest.json", "key": "duckdb_threads", "expected": 4},
+        {"path": "manifest.json", "key": "paired_audit.child_targets", "expected": 446508},
+        {"path": "manifest.json", "key": "paired_audit.caregiver_pairs", "expected": 413084}
+      ]
+    },
+    {
+      "name": "scorer_performance_figures",
+      "repository": "communicative_efficiency",
+      "relative_path": "figs/scorer_performance_comparison_20260904",
+      "required_files": [
+        {"path": "overall_bpc_forest.png", "bytes": 197071, "sha256": "648964f19137cafcff8b6de4bc24b784c36080dff565e7211a07b77fe97c5cb8"},
+        {"path": "historical_style_by_length.png", "bytes": 211569, "sha256": "042dc6658e9b7fdb9f42b3903458cf5c38fd8c810a6d73114452560609524027"},
+        {"path": "historical_style_by_age.png", "bytes": 201881, "sha256": "febb9faaf7de9af4d085f8350e1b1d87582a3a7034cdf63e458acd6f200fc112"},
+        {"path": "paired_difference_forest.png", "bytes": 175542, "sha256": "af52488bd5ec830f8b9892b6f0730ea537b71409716b7130b19886f09543c965"},
+        {"path": "winner_shares.png", "bytes": 134184, "sha256": "c0ab01daf37bbfb5d9d8f1569620807343fc489ed253d5b55f8188d7a9d02f94"},
+        {"path": "context_support.png", "bytes": 98235, "sha256": "374531a0c45a58ac9ef92b0816d925d0ac6542e00483e82e4ec334789fc61667"},
+        {"path": "corpus_robustness.png", "bytes": 129159, "sha256": "7e4ad8bd5c89a3585a224262e8b2b9b9ecf896daf331a456cbeac8ea1e48c821"},
+        {"path": "tokenization_diagnostic.png", "bytes": 118337, "sha256": "4272754056eb29d7cfee0bd2686326cf5f85379a0cb8756027970a6f6e97f8c1"},
+        {"path": "model_size_vs_bpc.png", "bytes": 168217, "sha256": "2b7035e9314f7d63f96d238ae31ceadc259e9dcf30f1ef4b9bba87ef08b26f0a"},
+        {"path": "paired_score_hexbin.png", "bytes": 567871, "sha256": "0a04380071fcffe06cc74b252cf4295b73bde4e50ccbc3ef9621e17625732aac"}
+      ]
+    }
+  ]
+}

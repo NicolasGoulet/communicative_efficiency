@@ -57,14 +57,17 @@ items were superseded or completed by the later modular direct-score workflow.
 - [x] Publish the saved-result report and pass the independent core audit at
       `docs/bidirectional_dyadic_communicative_efficiency_report.html`; preserve
       `CORE_DYADIC_ANALYSIS_COMPLETE_AND_AUDITED` without claiming utility.
-- [ ] Complete manual validation of the 325-row response-function sample before
-      fitting repair/clarification/acknowledgement models. The sample exists,
-      but currently contains zero completed manual labels.
-- [ ] After all five-condition downstream score archives pass local relocation
-      audit, fit downstream utility, extend the Bayesian joint vector, and
-      publish one audited dyadic synthesis. Do not analyze partial Mila waves
-      or the local PBM TinyDialogues prototype as scientific results. No
-      analysis-ready downstream archive is currently present locally.
+- [ ] Complete human validation of the 325-row response-function sample before
+      fitting repair/clarification/acknowledgement models. A hash-bound CSV,
+      validated-label gate, codebook, and Excel review workbook are ready under
+      `results/conversational_response_validation_20260904/`, but no human
+      labels have been entered.
+- [x] After all downstream score archives passed local relocation audit, fit
+      downstream caregiver-response utility and publish its audited synthesis.
+      The three-scorer 27-model analysis is complete under
+      `results/downstream_caregiver_response_analysis/`; it establishes an
+      immediate predictive-utility proxy but not a positive developmental
+      slope or human communicative success.
 
 ### Focused Bayesian joint adaptive-efficiency extension — completed 2026-08-28
 
@@ -353,10 +356,15 @@ items were superseded or completed by the later modular direct-score workflow.
       completed full-79 structural output. The 2026-07-23 run aligned all
       1,140,218 source rows with zero unresolved files or text mismatches and
       selected 629,334 structurally eligible child turns.
-- [ ] Resolve or adjudicate the 18,172 eligible `context_k1` mismatches that
-      keep the conversational audit at `REVIEW`, and complete the 325-row
-      stratified manual validation sample before treating structural
-      eligibility as a validated conversational analysis sample.
+- [x] Adjudicate the 18,172 structurally eligible `context_k1` mismatches. All
+      have an immediately preceding allowed-caregiver main tier that cleans to
+      empty, and all `context_k1` values exactly match the nearest earlier
+      non-empty allowed-caregiver tier, as required by scorer construction.
+      These rows were already excluded from the strict dyadic/downstream sample
+      by the context-match gate; no completed result changes.
+- [ ] Complete human labeling of the 325-row stratified response-function
+      validation sample before treating heuristic repair, clarification,
+      acknowledgement, imitation, routine, or contingency labels as outcomes.
 - [x] Reauthenticate the GitHub CLI and publish the reviewed closeout plus the
       complete analysis controller. Draft PR #2 is open from
       `agent/project-status-closeout`.
@@ -1884,3 +1892,18 @@ Use this for short notes after finishing tasks.
   session-ID predictors/grouping/random intercepts and uses row-level or
   child-age-word-cell estimators only. All 20 fits completed; focused test
   passed; image audit found 0 missing links.
+- 2026-09-04 - Completed the bounded three-scorer predictive-performance side
+  analysis for Mistral-7B-v0.3, Qwen3-14B, and TinyDialogues-135M. The audited
+  report is `docs/scorer_performance_comparison_2026-09-04.md`; its frozen
+  protocol, exact-paired BPC tables, 10 figures, source/revision audits,
+  deterministic whole-child intervals, and manifest are complete. No follow-up
+  computation is required unless the scorer set, target corpus, or scientific
+  ranking question changes.
+- 2026-09-04 - Completed the cross-machine handoff for the scorer comparison.
+  Registered all three PBM21 scorer roots, the historical plotting sources,
+  and the completed analysis/figure products in the portable-storage manifest;
+  added a mount-independent run/restore entry point with collision and
+  write-through protection; regenerated successfully under a 2 GB DuckDB cap;
+  and documented the fresh-clone re-entry commands. The approximately 983 MiB
+  ignored result/figure bundle is archived on the T7 and Git retains only code,
+  tests, configuration, reports, and lightweight provenance.

@@ -3,6 +3,39 @@
 Living project memory: discoveries, decisions, bugs, commands that worked, and
 current state. Prefer dated notes.
 
+## 2026-09-04 - WSL/T7 wiring and conversational gate adjudication
+
+- Kept the active Git checkout, Python environment, tests, and code execution
+  on the WSL ext4 filesystem. The T7 is an immutable-input/large-output store,
+  currently visible in WSL at `/mnt/d/EvaPortelance/Projet_1`; this mount is
+  configurable and is not embedded as a source-code default.
+- Added `configs/portable_storage_products.json` and
+  `src/audit_portable_project_storage.py`. The audit passed all eight declared
+  input products, including exact hashes for the full-79 child/caregiver direct
+  tables, conversational flags, three downstream-utility tables, and the
+  full-79 LSTM score table. It created non-destructive input symlinks under
+  `results/external/portable_t7/` and did not write to the T7.
+- Adjudicated all 18,172 historical `context_k1` mismatches. Every immediately
+  preceding allowed-caregiver main tier cleans to empty (examples include
+  `xxx` and nonverbal laughter), and every saved `context_k1` exactly matches
+  the nearest earlier non-empty allowed-caregiver tier—the rule used by the
+  scorer-context builder. There are zero unexpected context mismatches.
+- The 18,172 rows already fail the existing context-match gate and therefore
+  are absent from the completed 413,084-row strict dyadic analysis and its
+  downstream primary sample. This adjudication changes no scientific estimate.
+- Added a stable, hash-bound manual response-function review workflow at
+  `src/build_conversational_response_validation.py`. Its CSV, Excel workbook,
+  codebook, and label validator are ready for the existing 325-row stratified
+  sample. No manual label was inferred: all 325 rows remain genuinely pending
+  human review before response-function models may be fit.
+- The 2.3 MB validation bundle is saved both in the active ignored results
+  directory and at
+  `/mnt/d/EvaPortelance/Projet_1/communicative_efficiency/results/conversational_response_validation_20260904/`.
+  A checksum dry run found no difference between the two copies. Human-edited
+  CSV/XLSX labels can be checked without overwriting them using the codebook's
+  `--stage validate-labels` command; the validator also checks all 325 stable
+  identities and source-row hashes.
+
 ## 2026-09-02 - Cross-machine Git recovery and portable storage policy
 
 - Audited the six project repositories on the T7 with content-aware status,
@@ -7880,3 +7913,70 @@ CUDA_VISIBLE_DEVICES='' MPLCONFIGDIR=/tmp/mpl-cache \
   for TinyDialogues [-0.0312, 0.0154]. This supports immediate scorer-based
   child-turn utility, not increasing downstream utility with age or a causal
   child-to-caregiver effect.
+
+## 2026-09-04 - Three-scorer predictive-performance side analysis
+
+- Recovered the historical T7 model-by-utterance-length and model-by-age
+  analysis scripts and reused their stratification logic with Unicode bits per
+  character (BPC), rather than cross-tokenizer bits per model token, as the
+  ranking metric.
+- Ran an exact-paired comparison of Mistral-7B-v0.3, Qwen3-14B, and
+  TinyDialogues-135M on 446,508 PBM21 child utterances across `k0`--`k3`
+  (1,778,052 paired scored context rows; 21 children; three corpora). The
+  contextual `k3` child-balanced BPC ordering is Mistral 2.1367, Qwen 2.2818,
+  TinyDialogues 2.9300. Paired candidate-minus-Mistral differences are +0.1451
+  [0.1342, 0.1566] for Qwen and +0.7933 [0.7480, 0.8434] for TinyDialogues.
+- Confirmed the crossover that matters for interpretation: without context,
+  TinyDialogues is least surprised (2.8946 BPC versus Mistral 3.2793 and Qwen
+  4.1336), but it has slightly negative child-speech context support (-0.0347
+  BPC), while Mistral and Qwen gain 1.1436 and 1.8528 BPC. Mistral is best in
+  all 13 `k3` length cells, all eight observed age bins, all three corpora, and
+  every leave-one-corpus-out comparison.
+- Repeated the comparison as a 413,084-pair, 79-child, 13-corpus caregiver
+  response stress test. Mistral is again best with matched-child context
+  (1.3739 BPC), followed by Qwen (1.4819) and TinyDialogues (2.3364), whereas
+  TinyDialogues is best unconditionally.
+- Audited source markers, exact identities, hashes, model/tokenizer/code
+  revisions, scorer-specific dtype/engine/prefix profiles, stored-versus-
+  reconstructed BPC/BPW, and context truncation. Reconstruction error and
+  truncated-context counts are zero. The Qwen `logits_to_keep` equivalence
+  tests pass, and the `e890ec1..c82d219` scorer diff changes batching/loading,
+  not the target-log-softmax derivation.
+- Deliverables: `src/build_scorer_performance_comparison.py`,
+  `tests/test_build_scorer_performance_comparison.py`,
+  `docs/scorer_performance_comparison_protocol_2026-09-04.md`, and
+  `docs/scorer_performance_comparison_2026-09-04.{md,html}`. Ignored results
+  and figures live under `results/scorer_performance_comparison_20260904/` and
+  `figs/scorer_performance_comparison_20260904/`; their manifest and completion
+  audit pass. Verification: two focused analysis tests, two compute-scorer
+  equivalence tests, all 575 repository tests, and every manifest artifact hash
+  pass.
+
+## 2026-09-04 - Portable scorer-comparison handoff
+
+- Added `src/run_scorer_performance_comparison_portable.py`. It resolves stable
+  product names under `results/external/portable_t7/`, so the analysis does not
+  know or record a drive letter/mount directory. `restore` creates relative
+  local links and refuses collisions; `run` refuses output symlinks so it cannot
+  accidentally replace the archived product through a link.
+- Expanded `configs/portable_storage_products.json` from eight to fourteen
+  products: three frozen PBM21 scorer inputs, two hashed historical scripts as
+  one source product, and the completed comparison results and figures. Input
+  audit reports, completion markers, output manifest, DuckDB database, paired
+  Parquet files, and all ten figures have pinned hashes.
+- A first regeneration exposed an out-of-memory failure on the 6.7 GiB WSL
+  host before any PASS marker could be written. The builder now defaults to a
+  configurable 2 GB DuckDB cap, four threads, disabled insertion-order
+  preservation, and local disk spill. The clean retry completed `PASS` with
+  446,508 paired child targets, 413,084 caregiver pairs, and zero audit
+  problems; those execution settings are recorded in the manifest.
+- The completed ignored result directory is approximately 981 MiB and the ten
+  figures approximately 2 MiB. Both were copied to new, explicitly named T7
+  directories, then re-audited through the same relocation-safe manifest. The
+  T7 inputs remained read-only throughout analysis and were not modified.
+- Final verification: 10 focused scorer/portability/storage tests passed;
+  `py_compile` and `git diff --check` passed; all 26 artifacts named by the
+  scorer manifest re-hashed successfully; the source-to-T7 checksum dry run had
+  no byte-content differences; the fourteen-product T7 audit returned `PASS`
+  with zero problems; and the full repository suite passed 580 tests in
+  635.109 seconds.
