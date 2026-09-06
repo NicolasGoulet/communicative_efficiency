@@ -5,6 +5,11 @@ external drive and continuing work on a machine with limited local storage. It
 supplements the scientific data map in `AGENTS.md`; it does not replace any
 analysis contract or completion marker.
 
+The [2026-09-06 live Git synchronization audit](project_git_sync_2026-09-06.md)
+records the current native checkouts, published recovery refs, and the limits
+of verification while the T7 is unmounted. Earlier external inventory notes
+are preserved under [portability history](portability_history/README.md).
+
 ## Verified storage and operating decision
 
 - The PC initially had 78,778,703,872 bytes free (about 73.4 GiB).

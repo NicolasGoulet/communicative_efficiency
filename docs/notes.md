@@ -7980,3 +7980,29 @@ CUDA_VISIBLE_DEVICES='' MPLCONFIGDIR=/tmp/mpl-cache \
   no byte-content differences; the fourteen-product T7 audit returned `PASS`
   with zero problems; and the full repository suite passed 580 tests in
   635.109 seconds.
+
+
+## 2026-09-06 - Portelance Git synchronization
+
+- Compared live GitHub branches/tags for all six current repositories plus the
+  legacy `surprisal_computing` repository. The analysis checkout was already
+  current; scoring was 139 commits behind and legacy was six behind despite
+  stale cached upstream refs initially appearing synchronized. Both native
+  checkouts were fast-forwarded without conflicts.
+- Every local branch tip listed in the saved pre/post-integration recovery
+  bundles is present at an identical SHA on a live GitHub branch. All 12 text
+  files in the analysis autostash are already preserved in main or its history;
+  the stash and original recovery artifacts remain untouched.
+- Configured the three native checkouts to use their existing GitHub remotes
+  over HTTPS with the verified existing GitHub CLI login. Committed and pushed
+  legacy `e51004e7` to ignore LibreOffice locks while preserving the local lock.
+- Added two previously unpublished recovery documents from `Documents` under
+  `docs/portability_history/`, with exact-byte SHA-256 verification and clear
+  historical-status labeling. The third external note was already in Git.
+- Verification used live remote refs, ancestry and ahead/behind checks, clean
+  worktree checks, bundle-ref comparisons, historical blob identity, ignore-rule
+  verification, document hashes, and whitespace checks. No source behavior
+  changed and no unit suite or scientific computation was run.
+- Scope and limits: `docs/project_git_sync_2026-09-06.md`. The T7 is unmounted;
+  ignored data, outputs, evidence ZIP, environments, and backup figures remain
+  outside Git. The synchronization is not a data-archive backup.

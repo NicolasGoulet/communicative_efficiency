@@ -20,6 +20,15 @@ This section is the authoritative active checklist. The longer dated sections
 below are retained as implementation/audit history; some of their unchecked
 items were superseded or completed by the later modular direct-score workflow.
 
+### Project Git synchronization — 2026-09-06
+
+- [x] Check live GitHub refs for the six current repositories and the legacy
+      `surprisal_computing` repository; update the two stale native checkouts,
+      verify preservation of saved branch tips and the analysis autostash's
+      text changes, and add the two unpublished external recovery notes to
+      Git. See `docs/project_git_sync_2026-09-06.md` for exact scope and the
+      unmounted-T7 limitation.
+
 ### Bidirectional dyadic communicative efficiency — core completed 2026-08-30
 
 - [x] Consolidate the adult-input -> child-output -> caregiver-response design,
